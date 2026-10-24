@@ -1,0 +1,25 @@
+# 系统与编辑器
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+.idea/
+.vscode/
+
+# 构建产物：由 node tools/build-standalone.js 生成，不入库
+# （每次改源码都会产生 1MB 的无意义 diff，需要时一条命令重建）
+astrum-standalone.html
+
+# 本地临时/调试产物（截图、诊断脚本）
+dev/
+__*.html
+
+# 依赖与构建缓存（本项目零依赖，仅防御）
+node_modules/
+.cache/
+
+# 本地环境变量与私钥（勿提交任何 key）
+.env
+.env.*
+*.pem
+*.key

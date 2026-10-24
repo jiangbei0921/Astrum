@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#f6f4ef" />
+<meta name="referrer" content="no-referrer" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-74ZW8U/HrCTFxJpm8T2AC8xbpQkSWPus7gJNd4yFteU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' http://localhost:* http://127.0.0.1:* https://localhost:* https://127.0.0.1:* https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com https://api.deepseek.com https://api.moonshot.cn https://open.bigmodel.cn https://dashscope.aliyuncs.com https://api.mistral.ai https://api.groq.com https://api.x.ai https://images-api.nasa.gov https://api.openalex.org https://api.semanticscholar.org https://api.wikimedia.org https://zh.wikipedia.org https://ipapi.co https://ipwho.is https://ipinfo.io https://api.ipapi.is https://geocoding-api.open-meteo.com https://photon.komoot.io https://timeapi.io; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'" />
+<title>ASTRUM · 天文多智能体工作台</title>
+<meta name="description" content="天文问答工作台：星历本地复算，事实带来源与核验日期，联网检索多源取证并标注证据强弱。纯静态、可离线。" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="ASTRUM · 天文多智能体工作台" />
+<meta property="og:description" content="星历本地复算 · 事实可追溯 · 证据分级 · 支持 FITS 头解析。纯静态网页，无需安装。" />
+<meta name="twitter:card" content="summary" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%233b3bd6'/%3E%3Ccircle cx='16' cy='16' r='6.5' fill='none' stroke='%23f6f4ef' stroke-width='1.6'/%3E%3Ccircle cx='16' cy='16' r='2.2' fill='%23f6f4ef'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="assets/app.css" />
+</head>
+<body>
+<div class="app">
+
+  <!-- ================= 顶栏 ================= -->
+  <header class="topbar">
+    <div class="tb-left">
+      <button class="icon-btn" id="btnExpandSide" aria-label="展开侧栏" title="展开侧栏">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+      <button class="icon-btn only-mobile" id="btnSidebar" aria-label="打开侧栏">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M3.5 7h17M3.5 12h17M3.5 17h11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <div class="brand">
+        <span class="logo" aria-hidden="true">✦</span>
+        <span class="brand-name">ASTRUM</span>
+      </div>
+      <span class="brand-sub">天文多智能体</span>
+    </div>
+
+    <div class="tb-center">
+      <button class="source-chip" id="sourceChip" aria-haspopup="dialog">
+        <span class="dot" id="chipDot"></span>
+        <span id="chipName">ASTRUM 内核</span>
+        <span class="chip-tag" id="chipTag">本地</span>
+        <svg class="chev" viewBox="0 0 24 24" width="12" height="12"><path d="M6 9.5l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <div class="tb-right">
+      <button class="icon-btn with-label" id="btnObs" aria-label="观测台">
+        <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="8.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 3.6v2.2M12 18.2v2.2M3.6 12h2.2M18.2 12h2.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span>观测台</span>
+      </button>
+      <button class="icon-btn with-label" id="btnSettings" aria-label="设置">
+        <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 2.9v2.3M12 18.8v2.3M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.9 12h2.3M18.8 12h2.3M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span>设置</span>
+      </button>
+      <button class="btn-dark" id="btnNew">新对话</button>
+    </div>
+  </header>
+
+  <!-- ================= 工作区 ================= -->
+  <div class="workspace">
+
+    <!-- 侧栏 -->
+    <aside class="sidebar" id="sidebar">
+      <div class="side-handle">
+        <button class="icon-btn" id="btnCollapseSide" aria-label="收起侧栏" title="收起侧栏">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="side-scroll">
+        <section class="side-block">
+          <div class="side-head"><h3>回答来源</h3><button class="link-btn" id="btnManageSources">管理</button></div>
+          <div class="src-list" id="sideSources"></div>
+        </section>
+
+        <section class="side-block">
+          <div class="side-head"><h3>智能体</h3><span class="side-hint">点击配置</span></div>
+          <div class="agent-list" id="agentList"></div>
+          <button class="add-btn" id="btnAddAgent"><span>+</span> 新建智能体</button>
+        </section>
+
+        <section class="side-block">
+          <div class="side-head"><h3>试试这样问</h3></div>
+          <div class="scene-list" id="sceneList">
+            <button data-q="今晚在北京能看到什么？">今晚看什么</button>
+            <button data-q="M42 怎么找？">目标怎么找</button>
+            <button data-q="黑洞是怎么形成的？">黑洞与宇宙</button>
+            <button data-q="暗能量到底是什么？">前沿争议</button>
+            <button data-q="英仙座流星雨什么时候看最好？">天象科普</button>
+          </div>
+        </section>
+      </div>
+      <div class="side-foot">
+        <div class="foot-row"><span class="dot ok"></span>本地星历 · 离线可用</div>
+        <div class="foot-row"><span class="dot warn"></span>知识库 · 已核验 2026-10</div>
+      </div>
+    </aside>
+
+    <!-- 主区 -->
+    <main class="main" id="main">
+      <div class="scroll" id="scroll">
+        <div class="hero" id="hero">
+          <p class="eyebrow">Facts first · 事实优先</p>
+          <h1>让每一次抬头，<br />都有据可依。</h1>
+          <p class="lede">星历与文献给出可核验的事实，来源决定它被如何讲述。换一个来源，数字一个都不会变。</p>
+          <div class="hero-slot" id="heroSlot"></div>
+          <div class="hero-cards">
+            <div class="hcard"><span class="n">01</span><b>观测与星图</b><p>方位、高度、升落与最佳窗口</p></div>
+            <div class="hcard"><span class="n">02</span><b>天体知识</b><p>距离、性质、演化，附来源与时效</p></div>
+            <div class="hcard"><span class="n">03</span><b>宇宙学与前沿</b><p>黑洞、暗能量，标注共识等级</p></div>
+            <div class="hcard"><span class="n">04</span><b>自建智能体</b><p>定义角色、参数与专家注记</p></div>
+          </div>
+        </div>
+        <div class="thread" id="thread"></div>
+      </div>
+
+      <div class="dock" id="dock">
+        <div class="composer" id="composer">
+          <div class="attach-tray" id="attachTray" hidden></div>
+          <textarea id="input" rows="1" placeholder="问一个天文问题，例如：今晚在上海能看到什么？（可拖入图片、FITS、文本）"></textarea>
+          <div class="comp-bar">
+            <button class="btn-attach" id="btnAttach" aria-label="添加文件或图片" title="添加文件或图片（也可拖拽或粘贴）">
+              <svg viewBox="0 0 24 24" width="15" height="15"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+            </button>
+            <button class="src-pill" id="srcPill" aria-haspopup="dialog">
+              <span class="dot" id="pillDot"></span>
+              <span id="pillName">ASTRUM 内核</span>
+              <svg class="chev" viewBox="0 0 24 24" width="12" height="12"><path d="M6 9.5l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </button>
+            <div class="seg" id="modeSeg" role="tablist">
+              <button data-mode="single" class="on" role="tab">单一来源</button>
+              <button data-mode="compare" role="tab">并行对比</button>
+            </div>
+            <span class="comp-hint" id="compHint">事实层由本地核验</span>
+            <button class="btn-send" id="send" aria-label="发送">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M4 11.6L20 4l-6.4 16-1.9-6.6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+        <p class="dock-note">结论可追溯到星历计算或文献；不确定处会明确标注，不编造。附件只在本机解析。</p>
+      </div>
+    </main>
+
+    <input type="file" id="fileInput" multiple hidden aria-hidden="true">
+
+    <!-- 观测台 -->
+    <aside class="obspanel" id="obsPanel">
+      <div class="obs-head">
+        <h3>观测台</h3>
+        <button class="icon-btn" id="btnObsClose" aria-label="收起">×</button>
+      </div>
+      <div class="obs-scroll">
+        <section class="card">
+          <div class="card-head"><h4>观测上下文</h4><span class="mini" id="ctxBadge">实时</span></div>
+          <div class="ctx-grid">
+            <label class="field"><span>日期</span><input type="date" id="ctxDate" /></label>
+            <label class="field"><span>时刻</span><input type="time" id="ctxTime" /></label>
+            <div class="field wide">
+              <span>地点</span>
+              <div class="place-row">
+                <input id="ctxPlace" autocomplete="off" placeholder="搜索全球任意地名，或输入 39.9,116.4" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="placePanel" />
+                <button class="mini-btn" id="btnLocate" title="按 IP 定位" aria-label="按 IP 定位">
+                  <svg viewBox="0 0 24 24" width="13" height="13"><path d="M12 21s7-6.1 7-11a7 7 0 10-14 0c0 4.9 7 11 7 11z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="10" r="2.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+                </button>
+              </div>
+              <div class="place-panel" id="placePanel" role="listbox" aria-label="地点搜索结果" hidden></div>
+              <div class="place-sub"><span id="ctxPlaceSub">—</span><button class="link-btn" id="btnManualCoord">坐标</button></div>
+            </div>
+            <label class="field wide"><span>器材</span>
+              <select id="ctxGear">
+                <option value="naked">肉眼</option>
+                <option value="binocular">双筒望远镜</option>
+                <option value="telescope">天文望远镜</option>
+                <option value="photo">天文摄影</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section class="card viewport">
+          <div class="card-head"><h4>实时星图</h4>
+            <div class="card-tools"><span class="mini" id="skyMeta">—</span>
+              <button class="mini-btn" id="btnSolar" title="打开太阳系观测视图" aria-label="打开太阳系观测视图">
+                <svg viewBox="0 0 24 24" width="13" height="13"><circle cx="12" cy="12" r="3.1" fill="none" stroke="currentColor" stroke-width="1.5"/><ellipse cx="12" cy="12" rx="9.2" ry="4" fill="none" stroke="currentColor" stroke-width="1.4" transform="rotate(-22 12 12)"/></svg>
+              </button>
+              <button class="mini-btn" id="skyExpand" title="全屏查看星图" aria-label="全屏查看星图">
+                <svg viewBox="0 0 24 24" width="13" height="13"><path d="M9 4H5.6A1.6 1.6 0 004 5.6V9M15 4h3.4A1.6 1.6 0 0120 5.6V9M9 20H5.6A1.6 1.6 0 014 18.4V15M15 20h3.4A1.6 1.6 0 0020 18.4V15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="sky-wrap"><canvas id="sky" width="760" height="540"></canvas></div>
+          <div class="legend">
+            <span><i class="lg-star"></i>恒星</span>
+            <span><i class="lg-planet"></i>行星</span>
+            <span><i class="lg-line"></i>星座</span>
+            <span class="dim">地面视角 · 点击放大</span>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><h4>目标目录</h4><span class="mini" id="catMeta">—</span></div>
+          <div class="cat-tabs" id="catTabs" role="tablist" aria-label="目标分类">
+            <button data-g="messier" class="on" role="tab">梅西耶</button>
+            <button data-g="dso" role="tab">深空</button>
+            <button data-g="con" role="tab">星座</button>
+            <button data-g="planet" role="tab">行星</button>
+          </div>
+          <div class="cat-list" id="catList" role="listbox" aria-label="目标列表"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><h4>观测清单</h4><span class="mini" id="planMeta">0 项</span></div>
+          <div class="mini-list" id="planList"></div>
+          <div class="ed-actions">
+            <button class="btn-ghost" id="btnPlanExport">导出计划单</button>
+            <button class="btn-ghost" id="btnPlanClear">清空</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><h4>今晚优先</h4><span class="mini" id="tonightMeta"></span></div>
+          <div class="mini-list" id="tonightList"></div>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><h4>月相与暗夜</h4></div>
+          <div class="moon-row">
+            <div class="moon-wrap"><canvas id="moonCanvas" width="160" height="160"></canvas></div>
+            <div class="moon-info" id="moonInfo"></div>
+          </div>
+        </section>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ================= 浮层 ================= -->
+<div class="scrim" id="scrim"></div>
+
+<!-- ================= 太阳系观测视图 ================= -->
+<div class="viewer solar-view" id="solar" aria-hidden="true" role="dialog" aria-label="太阳系观测视图">
+  <div class="viewer-head">
+    <div class="viewer-title">
+      <strong>太阳系观测</strong>
+      <span id="solarMeta">—</span>
+    </div>
+    <div class="viewer-tools">
+      <div class="seg-mini" id="solarLevels" role="tablist" aria-label="缩放层级">
+        <button data-lv="system" class="on" role="tab">全系</button>
+        <button data-lv="planet" role="tab">近景</button>
+        <button data-lv="close" role="tab">特写</button>
+      </div>
+      <button class="mini-btn wide-btn" id="solarLabels" aria-pressed="true">标签</button>
+      <button class="mini-btn wide-btn" id="solarOrbits" aria-pressed="true">轨道</button>
+      <button class="mini-btn wide-btn" id="solarLayout" aria-pressed="false">真实等比</button>
+      <label class="solar-boost" title="统一缩放系数：所有天体共用，直径比例恒真">
+        <span>放大</span>
+        <input type="range" id="solarBoost" min="0" max="100" value="50" aria-label="天体统一缩放系数" />
+      </label>
+      <button class="mini-btn wide-btn" id="solarPause" aria-pressed="false">暂停</button>
+      <select id="solarSpeed" class="mini-select" aria-label="时间流速">
+        <option value="1">实时</option>
+        <option value="86400" selected>1 天/秒</option>
+        <option value="864000">10 天/秒</option>
+        <option value="31536000">1 年/秒</option>
+      </select>
+      <button class="mini-btn" id="solarReset" aria-label="重置视角" title="重置视角">⟲</button>
+      <button class="mini-btn" id="solarClose" aria-label="关闭">×</button>
+    </div>
+  </div>
+  <div class="viewer-stage" id="solarStage">
+    <canvas id="solarCanvas" width="1600" height="900" role="img" aria-label="太阳系三维观测场景"></canvas>
+    <div class="solar-loading" id="solarLoading">正在生成天体贴图与轨道…</div>
+  </div>
+  <div class="body-rail solar-rail" id="solarRail" role="listbox" aria-label="天体列表"></div>
+  <div class="viewer-foot">
+    <span>拖动旋转 · 滚轮缩放 · 滑杆调天体放大 · 双击进入近景 · 1/2/3 切层级 · Tab 切换天体 · Esc 关闭</span>
+    <span id="solarScale">—</span>
+  </div>
+  <div class="sky-tip" id="solarTip"></div>
+  <div class="obj-info solar-info" id="solarInfo" aria-live="polite"></div>
+</div>
+
+<div class="viewer" id="viewer" aria-hidden="true">
+  <div class="viewer-head">
+    <div class="viewer-title">
+      <strong>星空全图</strong>
+      <span id="viewerMeta">—</span>
+    </div>
+    <div class="viewer-tools">
+      <div class="seg-mini" id="viewerLabels">
+        <button data-lv="labeled" class="on">标准标注</button>
+        <button data-lv="full">全部标注</button>
+      </div>
+      <button class="mini-btn" id="vwOut" aria-label="缩小">−</button>
+      <span class="zoom-val" id="vwVal">100%</span>
+      <button class="mini-btn" id="vwIn" aria-label="放大">+</button>
+      <button class="mini-btn" id="vwReset" aria-label="复位">⟲</button>
+      <button class="mini-btn" id="vwClose" aria-label="关闭">×</button>
+    </div>
+  </div>
+  <div class="viewer-stage" id="viewerStage">
+    <canvas id="viewerCanvas" width="1600" height="900"></canvas>
+  </div>
+  <div class="body-rail" id="bodyRail" aria-label="天体导航"></div>
+  <div class="viewer-foot">
+    <span>拖动环顾天空 · 滚轮缩放 · 悬停看名称 · 点击天体查看资料 · 上方天体条可直接定位 · Esc 关闭</span>
+    <span id="viewerLegend">点=恒星　菱形=深空天体　球体=行星　淡点=银河星场（示意）　虚线圈=地平线下　右下=你所在的地球</span>
+  </div>
+  <div class="sky-tip" id="skyTip"></div>
+  <div class="obj-info" id="viewerInfo" aria-live="polite"></div>
+</div>
+
+<div class="sheet narrow" id="coord" aria-hidden="true">
+  <div class="sheet-head">
+    <div class="sheet-id"><span class="sigil plain">◎</span><div><h3>手动坐标</h3><p>任意经纬度，全球可用</p></div></div>
+    <button class="icon-btn" id="coordClose" aria-label="关闭">×</button>
+  </div>
+  <div class="sheet-body">
+    <div class="ed-pair">
+      <div class="ed-field"><label>纬度</label><input type="text" id="coordLat" placeholder="39.9042" inputmode="decimal" /></div>
+      <div class="ed-field"><label>经度</label><input type="text" id="coordLon" placeholder="116.4074" inputmode="decimal" /></div>
+    </div>
+    <div class="ed-field"><label>名称（可选）</label><input type="text" id="coordName" placeholder="我的观测点" maxlength="24" /></div>
+    <div class="ed-field"><label>时区（UTC 偏移）</label>
+      <select id="coordTz"></select>
+      <div class="hintline">默认按经度估算，跨时区或使用夏令时的地区请手动指定。</div>
+    </div>
+    <div class="ed-actions">
+      <button class="btn-primary" id="coordOk">使用该坐标</button>
+      <button class="btn-ghost" id="coordCancel">取消</button>
+    </div>
+    <div class="note-box">南纬为负、西经为负。例如：南半球 −33.87, 151.21；西经 −74.0。</div>
+  </div>
+</div>
+
+<div class="popover" id="sourcePop" role="dialog" aria-label="选择回答来源">
+  <div class="pop-head">
+    <div>
+      <strong>回答来源</strong>
+      <p>事实层始终由本地星历与知识库核验</p>
+    </div>
+    <button class="icon-btn" id="popClose" aria-label="关闭">×</button>
+  </div>
+  <div class="pop-body" id="popBody"></div>
+  <div class="pop-foot">
+    <span id="popHint">切换来源不会改变任何数值</span>
+    <button class="link-btn" id="popManage">配置密钥</button>
+  </div>
+</div>
+
+<aside class="sheet" id="drawer" aria-hidden="true">
+  <div class="sheet-head">
+    <div class="sheet-id">
+      <span class="sigil" id="dwSigil">M</span>
+      <div><h3 id="dwName">Muse</h3><p id="dwRole">总控</p></div>
+    </div>
+    <button class="icon-btn" id="dwClose" aria-label="关闭">×</button>
+  </div>
+  <div class="sheet-body" id="drawerBody"></div>
+</aside>
+
+<aside class="sheet wide" id="settings" aria-hidden="true">
+  <div class="sheet-head">
+    <div class="sheet-id">
+      <span class="sigil plain">⚙</span>
+      <div><h3>设置</h3><p>来源、显示与数据核验</p></div>
+    </div>
+    <button class="icon-btn" id="settingsClose" aria-label="关闭">×</button>
+  </div>
+  <div class="sheet-body" id="settingsBody"></div>
+</aside>
+
+<script src="data/catalog.js"></script>
+<script src="data/knowledge.js"></script>
+<script src="data/places.js"></script>
+<script src="data/bodies.js"></script>
+<script src="data/solarsystem.js"></script>
+<script src="data/obsplan.js"></script>
+<script src="core/astro.js"></script>
+<script src="core/agents.js"></script>
+<script src="core/sources.js"></script>
+<script src="core/solarsystem.js"></script>
+<script src="core/geosearch.js"></script>
+<script src="core/research.js"></script>
+<script src="core/attachments.js"></script>
+<script src="core/app.js"></script>
+
+<!-- 启动守卫：核心模块未加载时给出明确修复指引（避免退化成无样式裸页面） -->
+<script>
+(function () {
+  'use strict';
+  var MISSING = ['Astro', 'CATALOG', 'KNOWLEDGE', 'AgentCore', 'Sources', 'SolarView']
+    .filter(function (k) { return typeof window[k] === 'undefined'; });
+  if (!MISSING.length) return;
+
+  var d = document.createElement('div');
+  d.setAttribute('id', 'bootFail');
+  d.setAttribute('style', [
+    'position:fixed', 'inset:0', 'z-index:99999',
+    'background:#f6f4ef', 'color:#151512',
+    'font:15px/1.7 "PingFang SC","Microsoft YaHei",system-ui,sans-serif',
+    'display:flex', 'align-items:center', 'justify-content:center', 'padding:24px'
+  ].join(';'));
+  d.innerHTML =
+    '<div style="max-width:620px;background:#fff;border:1px solid #e3e0d8;border-radius:14px;padding:28px 30px;box-shadow:0 18px 48px rgba(0,0,0,.08)">' +
+      '<h1 style="margin:0 0 10px;font-size:19px">资源未加载，页面无法启动</h1>' +
+      '<p style="margin:0 0 14px;color:#5c574c">缺失的模块：<code>' + MISSING.join('</code>, <code>') + '</code></p>' +
+      '<p style="margin:0 0 14px;color:#5c574c">原因：<code>index.html</code> 依赖同级的 <code>assets/</code>、<code>core/</code>、<code>data/</code> 三个目录。' +
+        '当前文件与这些目录分离（常见于单独拷贝文件、在预览沙箱中单文件打开、或目录被拆散），导致全部外部子资源 404。</p>' +
+      '<ol style="margin:0 0 16px;padding-left:20px;color:#5c574c">' +
+        '<li><b>最简方案</b>：打开同目录下的 <code>astrum-standalone.html</code>（单文件自包含版，所有 CSS/JS 已内联，放到任何位置都能正常运行）。</li>' +
+        '<li><b>多文件方案</b>：保持 <code>index.html</code> 与 <code>assets/ core/ data/</code> 在同一文件夹内，整体拷贝或整体解压。</li>' +
+      '</ol>' +
+      '<p style="margin:0;font-size:13px;color:#8a8477">若你使用的是单文件版却仍看到此提示，请改用 Chrome / Edge 打开。</p>' +
+    '</div>';
+  document.body.appendChild(d);
+})();
+</script>
+</body>
+</html>
