@@ -86,8 +86,8 @@
     },
     {
       id: 'deepseek', name: 'DeepSeek', vendor: 'DeepSeek 系列', type: 'cloud',
-      desc: '中文表达自然，OpenAI 兼容接口，可填自建代理。',
-      caps: ['需联网', '需密钥', '不可复算星历'],
+      desc: '中文表达自然，OpenAI 兼容接口，支持浏览器直连。',
+      caps: ['需联网', '需密钥', '浏览器直连', '不可复算星历'],
       endpoint: 'https://api.deepseek.com/v1/chat/completions',
       model: 'deepseek-chat', shape: 'openai', dot: '#4d6bfe',
       models: ['deepseek-chat', 'deepseek-reasoner'],
@@ -97,8 +97,8 @@
     },
     {
       id: 'moonshot', name: 'Moonshot', vendor: 'Kimi 系列', type: 'cloud',
-      desc: '中文长文本与联网检索见长，OpenAI 兼容接口。',
-      caps: ['需联网', '需密钥', '不可复算星历'],
+      desc: '中文长文本与联网检索见长，OpenAI 兼容接口，支持浏览器直连。',
+      caps: ['需联网', '需密钥', '浏览器直连', '不可复算星历'],
       endpoint: 'https://api.moonshot.cn/v1/chat/completions',
       model: 'moonshot-v1-8k', shape: 'openai', dot: '#6f5cff',
       models: ['moonshot-v1-8k', 'moonshot-v1-32k', 'moonshot-v1-128k', 'kimi-latest', 'kimi-k2-0711-preview'],
@@ -108,8 +108,8 @@
     },
     {
       id: 'zhipu', name: '智谱', vendor: 'GLM 系列', type: 'cloud',
-      desc: '中文语义与工具调用成熟，OpenAI 兼容接口。',
-      caps: ['需联网', '需密钥', '不可复算星历'],
+      desc: '中文语义与工具调用成熟，OpenAI 兼容接口。注意：其 CORS 预检不放行浏览器直连，必须走代理。',
+      caps: ['需联网', '需密钥', '需自建代理', '不可复算星历'],
       endpoint: 'https://open.bigmodel.cn/api/paas/v4/chat/completions',
       model: 'glm-4-flash', shape: 'openai', dot: '#3859ff',
       models: ['glm-4-flash', 'glm-4-air', 'glm-4-airx', 'glm-4-plus', 'glm-4-long', 'glm-4.5'],
@@ -119,8 +119,8 @@
     },
     {
       id: 'qwen', name: '通义千问', vendor: 'Qwen 系列', type: 'cloud',
-      desc: '阿里云百炼平台，中文推理与多模态，OpenAI 兼容接口。',
-      caps: ['需联网', '需密钥', '不可复算星历'],
+      desc: '阿里云百炼平台，中文推理与多模态，OpenAI 兼容接口，浏览器直连最宽松。',
+      caps: ['需联网', '需密钥', '浏览器直连', '不可复算星历'],
       endpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
       model: 'qwen-plus', shape: 'openai', dot: '#615ced',
       models: ['qwen-turbo', 'qwen-plus', 'qwen-max', 'qwen2.5-72b-instruct', 'qwen3-235b-a22b'],
