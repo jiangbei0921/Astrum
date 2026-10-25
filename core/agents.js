@@ -1899,6 +1899,11 @@
   var CAM_ID = '';
   function setGear(gearId, camId) { GEAR_ID = gearId || ''; CAM_ID = camId || ''; }
 
+  /* 技能解析器由 app 层注入：agents 不持有 state，
+   * 但需要知道「同类问题上次用的是什么器材」。返回 null 表示没有历史。 */
+  var skillResolver = null;
+  function setSkillResolver(fn) { skillResolver = fn; }
+
   function defaultGearFor(cfg) {
     var g = cfg && cfg.horizon && cfg.horizon.gear;
     if (g === 'naked') return 'naked';
@@ -2020,8 +2025,6 @@
   }
 
   function composeGearFit(answer, ctx, cfg, t) {
-    var asked = gearFromText(answer.query);
-    var gearId = asked || GEAR_ID || defaultGearFor(cfg);
     var camId = CAM_ID || '';
     var cam = null;
     if (camId && root.OBSPLAN) {
@@ -2029,6 +2032,13 @@
     }
     var geo = geoOf(t);
     var name = geo ? geo.name : (nameOf(t) || '该目标');
+
+    /* 器材取值优先级：问句里明说 > 用户档案 > 同类问题的历史技能 > 默认。
+     * 技能只「补空缺」——档案一旦设过就永远压过历史，避免换器材后仍沿用旧参数。 */
+    var asked = gearFromText(answer.query);
+    var sk = (!asked && !GEAR_ID && skillResolver) ? skillResolver('gear-fit', name) : null;
+    var gearId = asked || GEAR_ID || (sk && sk.gear) || defaultGearFor(cfg);
+    var reused = !asked && !GEAR_ID && !!(sk && sk.gear);
     var gearObj = root.GEAR.byId(gearId);
 
     if (!geo) {
@@ -2057,7 +2067,12 @@
       { tool: 'gear-fit', check: RT.check(failed ? failed.name : '视场与采样', !failed, failed ? failed.detail : '通过') }));
 
     answer.sections.push({ kind: 'verdict', head: fitHead(name, r), sub: r.reason || '' });
-    answer.sections.push({ kind: 'gearfit', fit: r, targetName: name });
+    answer.sections.push({ kind: 'gearfit', fit: r, targetName: name,
+      reused: reused ? { gear: gearId, n: sk.n } : null });
+    if (reused) {
+      answer.trace.push(step('horizon', '沿用上次器材', gearObj.name + ' · 第 ' + sk.n + ' 次',
+        { tool: 'skill-recall', check: RT.check('档案为空时复用历史', true, '档案优先，仅在未设置时生效') }));
+    }
 
     /* 方案 B：可复跑查询 */
     if (root.QUERY) {
@@ -2193,6 +2208,7 @@
     AGENTS: AGENTS, ATTRS: ATTRS, CITIES: CITIES, AGENT_BY_ID: AGENT_BY_ID,
     setGear: setGear,
     settleVerdict: settleVerdict,
+    setSkillResolver: setSkillResolver,
     defaultConfig: defaultConfig, buildAnswer: buildAnswer, resolveTargets: resolveTargets, preview: preview,
     setCustomAgents: setCustomAgents, ATTR_TARGET: ATTR_TARGET, statusLabel: statusLabel,
     findCity: findCity, searchPlaces: searchPlaces, nearestPlace: nearestPlace, ianaOffset: ianaOffset,

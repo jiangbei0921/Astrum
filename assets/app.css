@@ -1905,3 +1905,13 @@ sup.fn {
 .msg.user.edited .u-acts::before {
   content: '已重新编辑'; font-size: 10px; color: var(--muted-2); margin-right: auto;
 }
+
+/* ================= 技能承接与复用 ================= */
+.recall {
+  display: flex; align-items: baseline; gap: 6px;
+  margin-top: 14px; padding: 7px 11px;
+  font-size: 10.5px; line-height: 1.65; color: var(--muted-2);
+  background: var(--surface-2); border-radius: 6px;
+  border: 1px solid var(--line-soft);
+}
+.recall .ic { color: var(--accent); font-size: 10px; }

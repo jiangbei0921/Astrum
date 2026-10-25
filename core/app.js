@@ -2074,6 +2074,13 @@
           '<span class="k">' + esc(c.name) + '</span><span class="v">' + esc(c.detail) + '</span>';
         wrap.appendChild(line);
       });
+      /* 技能复用提示：让「这次沿用了上次的器材」可见，而不是偷偷用 */
+      if (s.reused) {
+        var rr = el('div', 'gf-check');
+        rr.innerHTML = '<span class="ic">↺</span><span class="k">沿用</span><span class="v">上次用的 ' +
+          esc(f.gear.name) + '（第 ' + s.reused.n + ' 次）</span>';
+        wrap.appendChild(rr);
+      }
     } else if (s.kind === 'query') {
       /* 方案 B：可复现查询。不联网执行，只交付可复制复跑的语句与直达链接 */
       wrap.className = 'sec sec-query';
@@ -2545,21 +2552,53 @@
     return det;
   }
 
-  /* 方案 C · L3 技能沉淀：把跑通的「意图 + 目标 + 器材」记成可复用条目。
-   * 不做花哨的技能卡，只做真实的复用计数——它能证明系统在积累，而不是每次从零开始。 */
+  /* 方案 C · L3 技能沉淀。按「意图 + 目标」聚合，记录次数、时间、上次结论与器材。
+   * 不做花哨的技能卡，只做真实的复用——它能证明系统在积累，而不是每次从零开始。
+   * 注意：技能只「补空缺」，用户档案永远优先，避免换了器材还沿用旧参数。 */
+  function skillKey(intent, target) { return intent + '|' + (target || ''); }
+
+  function skillFor(intent, target) {
+    var list = state.skills || [];
+    var k = skillKey(intent, target);
+    for (var i = 0; i < list.length; i++) { if (list[i].key === k) return list[i]; }
+    return null;
+  }
+
   function recordSkill(ans) {
     if (!ans || !ans.intent || ans.intent === 'smalltalk') return;
-    var hasFit = ans.sections.some(function (x) { return x.kind === 'gearfit'; });
-    var key = ans.intent + '|' + ((ans.meta && ans.meta.target) || '') +
-      (hasFit ? ('|' + (state.settings.gearId || 'auto')) : '');
+    var target = (ans.meta && ans.meta.target) || '';
+    var fit = null, head = '';
+    ans.sections.forEach(function (x) {
+      if (!fit && x.kind === 'gearfit') fit = x;
+      if (!head && x.kind === 'verdict') head = x.head || '';
+    });
     if (!state.skills) state.skills = [];
-    var hit = null;
-    for (var i = 0; i < state.skills.length; i++) { if (state.skills[i].key === key) { hit = state.skills[i]; break; } }
-    if (hit) { hit.n += 1; hit.at = Date.now(); }
-    else state.skills.push({ key: key, intent: ans.intent, target: (ans.meta && ans.meta.target) || '',
-      gear: hasFit ? (state.settings.gearId || 'auto') : '', n: 1, at: Date.now() });
+    var hit = skillFor(ans.intent, target);
+    if (hit) {
+      hit.n += 1;
+      hit.at = Date.now();
+      if (head) hit.last = String(head).slice(0, 60);
+      if (fit) hit.gear = fit.fit.gear.id;
+    } else {
+      state.skills.push({
+        key: skillKey(ans.intent, target), intent: ans.intent, target: target,
+        n: 1, at: Date.now(),
+        last: head ? String(head).slice(0, 60) : '',
+        gear: fit ? fit.fit.gear.id : ''
+      });
+    }
     if (state.skills.length > 40) state.skills.splice(0, state.skills.length - 40);
     persist();
+  }
+
+  /* 承接提示：只说「问过、上次结论是什么、多久前」，不把旧结论当依据 */
+  function recallLine(r) {
+    var d = el('div', 'recall');
+    var days = Math.max(0, Math.round((Date.now() - (r.at || Date.now())) / 86400000));
+    var when = days === 0 ? '今天较早时候' : days === 1 ? '昨天' : days + ' 天前';
+    d.innerHTML = '<span class="ic">↺</span>你' + when + '问过同类问题（共 ' + r.n +
+      ' 次），上次结论：' + esc(r.last);
+    return d;
   }
 
   function renderAnswer(ans, extra) {
@@ -2601,6 +2640,7 @@
       var vstrip = renderVerifyStrip(verifyList);
       if (vstrip) card.appendChild(vstrip);
     }
+    if (ans.meta && ans.meta.recall) card.appendChild(recallLine(ans.meta.recall));
     card.appendChild(metaBar(ans));
     msg.appendChild(card);
     $('#thread').appendChild(msg);
@@ -3544,6 +3584,11 @@
         var qForAns = hints.length ? (q + ' ' + hints.join(' ')) : q;
         AC.setGear(state.settings.gearId, state.settings.camId);
         ans = AC.buildAnswer(qForAns, ctx, cfgRun);
+        /* 承接历史：同意图同目标问过，就把上次结论挂上供渲染层提示（不作为依据） */
+        var prevSkill = skillFor(ans.intent, (ans.meta && ans.meta.target) || '');
+        if (prevSkill && prevSkill.n && prevSkill.last) {
+          ans.meta.recall = { n: prevSkill.n, at: prevSkill.at, last: prevSkill.last };
+        }
         ans.query = q;   /* 对外保持原问题 */
         taskEnd(tAgent);
       } catch (e) {
@@ -5495,6 +5540,7 @@
   }
 
   function boot() {
+    AC.setSkillResolver(skillFor);
     initContext();
     applySettings();
     watchViewport();
