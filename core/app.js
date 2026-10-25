@@ -1839,7 +1839,8 @@
       compute: '本地计算 · 可复算',
       fetch: '外部数据 · 附出处',
       infer: '本地知识库 · 有出处',
-      unknown: '无可靠依据'
+      unknown: '无可靠依据',
+      chat: '无需检索'
     }[tierKey] || '本地星历 + 知识库';
     head.innerHTML =
       '<span class="lbl">依据</span><span class="srcbadge t-' + esc(tierKey) + '" title="' + esc(tier.hint) + '">' +
@@ -2251,9 +2252,13 @@
     var card = el('div', 'answer');
     rememberTurn(ans);
     card.appendChild(answerHead(ans, extra));
-    if (state.settings.showTrace && ans.trace && ans.trace.length) card.appendChild(renderTrace(ans.trace));
+    if (state.settings.showTrace && ans.trace && ans.trace.length && ans.intent !== 'smalltalk') {
+      card.appendChild(renderTrace(ans.trace));
+    }
     var pending = [];
     ans.sections.forEach(function (s) {
+      /* 问候类输入没有事实可评审，跳过评审章节，避免出现「存在缺口」的噪音 */
+      if (ans.intent === 'smalltalk' && s.kind === 'review') return;
       var n = sectionNode(s);
       if (n._canvas) pending.push(n._canvas);
       card.appendChild(n);
@@ -2775,26 +2780,40 @@
      *    注意 composeFallback 只生成 boundary，没有 verdict，因此这里要补一个。
      *    改写只陈述「资料覆盖了什么」与「本地未收录」，不替用户下科学结论，
      *    具体内容由下方证据章节按子问题给出并附出处。 */
+    /* 检索结果的相关性门槛：只有存在「可溯源」证据才允许改口说有资料。
+     * 否则会出现用户实测的矛盾——大标题声称「已检索到 4 条相关资料」，
+     * 正文却说「跟天文无关，不能拿来当观测依据」。 */
+    var dropResearch = false;
     if (ans.intent === 'unknown' && rec.evidence && rec.evidence.length) {
       var syn0 = Research.synthesize(rec);
-      var headTxt = '本地知识库未收录这个问题；已检索到 ' + syn0.counts.evidence + ' 条相关资料。';
-      /* 统计与时间范围由「证据概览」统一呈现，结论副标题不再重复一遍。
-       * 结论头已写明「已检索到 N 条相关资料」，读者不会丢失这个信息。 */
-      var subTxt = (syn0.gaps.length ? '未覆盖：' + syn0.gaps.join('、') + '。' : '') +
-        '以下按方面列出原文摘录与出处，未作改写。';
-      var v = ans.sections.filter(function (s) { return s.kind === 'verdict'; })[0];
-      if (v) {
-        v.head = headTxt;
-        v.sub = subTxt;
+      var usableN = syn0.counts.supported || 0;
+      if (usableN > 0) {
+        var headTxt = '本地知识库未收录这个问题；已检索到 ' + usableN + ' 条可用资料。';
+        /* 统计与时间范围由「证据概览」统一呈现，结论副标题不再重复 */
+        var subTxt = (syn0.gaps.length ? '未覆盖：' + syn0.gaps.join('、') + '。' : '') +
+          '以下按方面列出原文摘录与出处，未作改写。';
+        var v = ans.sections.filter(function (s) { return s.kind === 'verdict'; })[0];
+        if (v) {
+          v.head = headTxt;
+          v.sub = subTxt;
+        } else {
+          ans.sections.unshift({ kind: 'verdict', head: headTxt, sub: subTxt, chips: [] });
+        }
+        /* 原先的「我可以回答的方向」边界声明与新结论重复，移除 */
+        ans.sections = ans.sections.filter(function (s) {
+          return !(s.kind === 'boundary' && /可确证的范围/.test(s.text || ''));
+        });
+        ans.meta.confidence = Math.min(0.55, 0.25 + usableN * 0.05);
+        ans.meta.freshness = 'live';
       } else {
-        ans.sections.unshift({ kind: 'verdict', head: headTxt, sub: subTxt, chips: [] });
+        /* 检到了东西但一条都不可用：不改口、不堆砌，只如实说明一句 */
+        dropResearch = true;
+        ans.sections.push({
+          kind: 'boundary', mode: 'uncertain',
+          text: '本轮检索到 ' + (syn0.counts.evidence || 0) + ' 条结果，但都缺少出处或与问题无关，未采用。'
+        });
+        ans.meta.freshness = 'static';
       }
-      /* 原先的「我可以回答的方向」边界声明与新结论重复，移除 */
-      ans.sections = ans.sections.filter(function (s) {
-        return !(s.kind === 'boundary' && /可确证的范围/.test(s.text || ''));
-      });
-      ans.meta.confidence = Math.min(0.55, 0.25 + syn0.counts.supported * 0.05);
-      ans.meta.freshness = 'live';
     }
 
     /* 结论层骨架：结论 → 依据（关键数据）→ 证据 → 观测 → 边界。
@@ -2836,9 +2855,9 @@
     });
     rec.citations = verify;
 
-    /* 3) 组装并插入：综合/证据 → 冲突 → 引用核验 */
-    var block = secs.slice();
-    block.push({
+    /* 3) 组装并插入：综合/证据 → 冲突 → 引用核验（结果全不可用时整体不插入） */
+    var block = dropResearch ? [] : secs.slice();
+    if (!dropResearch) block.push({
       kind: 'citation', title: '引用核验',
       verdict: verify.verdict,
       total: verify.total, withUrl: verify.withUrl, withDate: verify.withDate,
@@ -3212,6 +3231,12 @@
         });
       }
 
+      /* 问候类输入到此为止：不检索、不调模型，直接给短回答 */
+      if (ans.intent === 'smalltalk') {
+        think.remove(); busy(false); renderAnswer(ans, {});
+        return;
+      }
+
       if (src.type === 'web') {
         busy(true, '规划检索 · 多源取证');
         var tWeb = taskStart('search', '检索 · ' + q.slice(0, 18));
@@ -3257,6 +3282,16 @@
           intent: ans.intent, entityName: ent2.name, entityEn: ent2.en
         }).then(function (rec) {
           applyResearch(ans, rec, q, cfgRun);
+          /* 契约：没有任何可核实事实时不外发模型。
+           * 模型手上只有「缺口说明」时，只会把它改写成一段貌似结论的话，
+           * 于是大标题与正文互相矛盾（用户实测：标题说「检索到 4 条相关资料」，
+           * 正文说「跟天文无关」）。 */
+          if (window.AstroRuntime && window.AstroRuntime.classify(ans).key === 'unknown') {
+            ans.sections.splice(sectionIndexAfterEvidence(ans), 0, noteFor(src,
+              '本轮没有可核实的事实，未调用模型——避免它在无依据时生成看起来像结论的表述。', 0, true));
+            think.remove(); busy(false); renderAnswer(ans, {});
+            return;
+          }
           var ev = evidenceForPrompt(ans);
           var pay2 = factsFromAnswer(ans);
           return S.generate(src.id, {

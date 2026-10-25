@@ -404,8 +404,16 @@
     photo: /拍摄参数|曝光时间|快门|焦距|像素比例|采样率|感光度|ISO|直焦率|怎么拍|如何拍|拍这张|能拍吗|参数怎么设|叠加|出图/
   };
 
+  /* 问候 / 自我介绍 / 测试性输入：完全锚定，避免「你好，今晚能看什么」被误判 */
+  var SMALLTALK = /^(你好|您好|hi|hello|嗨|哈喽|在吗|在不在|谢谢|多谢|感谢|再见|拜拜|早上好|晚上好|下午好|你是谁|你是什么|你能做什么|你会什么|怎么用|使用说明|你叫什么|介绍一下你自己|测试|test)$/i;
+
   function detectIntent(text, targets) {
     var hasTarget = targets.length > 0;
+    /* 问候优先于一切天文判定：这类输入不该启动检索、也不该调模型。
+     * 旧行为下「你好」会跑完 6 步检索、搜出无关文献、再让模型编一段话，
+     * 结果大标题声称「已检索到相关资料」而正文说「跟天文无关」，自相矛盾。 */
+    var plain = String(text || '').trim().replace(/[!！。.~～?？,，、\s]+$/g, '');
+    if (SMALLTALK.test(plain)) return 'smalltalk';
     /* 太阳系视图指令：需要出现「太阳系」主题词，或明确的视角控制动词 */
     if (KW.solar.test(text) && (/太阳系|行星视图|天体导航/.test(text) ||
       /打开|进入|切换|聚焦|切到|全系|近景|特写|隐藏|显示|放大|缩小|重置|暂停|继续/.test(text))) {
@@ -639,7 +647,8 @@
     answer.trace.push(step('muse', '解析意图', intentLabel(intent) + (t0 ? ' · 实体「' + nameOf(t0) + '」' : '') + (mem.ref ? ' · 指代还原为「' + mem.ref + '」' : '')));
 
     var out;
-    if (intent === 'tonight') out = composeTonight(answer, ctx, cfg);
+    if (intent === 'smalltalk') out = composeSmalltalk(answer, ctx, cfg);
+    else if (intent === 'tonight') out = composeTonight(answer, ctx, cfg);
     else if (intent === 'cosmos') out = composeCosmos(answer, ctx, cfg, t0, q);
     else if (intent === 'nova') out = composeNova(answer, ctx, cfg, t0, q);
     else if (intent === 'helios') out = composeHelios(answer, ctx, cfg, t0, q);
@@ -1848,6 +1857,41 @@
       where: '换一个更具体的问法（给出天体名、时间、地点或坐标）通常就能命中；涉及专业结论时需要外部文献库。',
       alt: '告诉我你想解决的具体问题（比如「想拍什么」「想核对哪个数值」），我按可算/可查的路径拆一遍。'
     };
+  }
+
+  /* 问候 / 自我介绍：一句话回应 + 三个可点的起点。不检索、不调模型。 */
+  function composeSmalltalk(answer, ctx, cfg) {
+    var q = String(answer.query || '').trim();
+    var head, sub;
+    if (/谢谢|多谢|感谢/.test(q)) {
+      head = '不客气。';
+      sub = '还想看什么，随时说。';
+    } else if (/再见|拜拜/.test(q)) {
+      head = '回见。';
+      sub = '今晚天气好的话，记得抬头。';
+    } else if (/你是谁|你是什么|你能做什么|你会什么|怎么用|使用说明|你叫什么|介绍一下你自己/i.test(q)) {
+      head = '我是 ASTRUM，一个天文方向的助手。';
+      sub = '能算的直接算（星历、可见性），能查的给数据和出处，只能解释的会标清楚来源，真不知道就告诉你缺什么、去哪拿。';
+    } else if (/测试|test/i.test(q)) {
+      head = '收到，链路正常。';
+      sub = '问一个具体的天文问题试试，比如「今晚能看到什么」。';
+    } else {
+      head = '你好。我是 ASTRUM，一个天文方向的助手。';
+      sub = '告诉我你想看什么、想核对什么，我按可算或可查的路径拆给你。';
+    }
+    answer.trace.push(step('muse', '识别为问候', '不启动检索，也不调用模型', {
+      tool: 'intent-router', check: RT.check('天文意图', false, '问候类输入，交由对话直接处理')
+    }));
+    answer.sections.push({ kind: 'verdict', head: head, sub: sub });
+    answer.sections.push({
+      kind: 'followup',
+      items: ['今晚在北京能看到什么', '猎户座大星云适合用什么器材拍', '参宿四有多远，为什么各家测得不一样']
+    });
+    answer.meta = {
+      agents: ['muse'], confidence: 1, freshness: 'static',
+      register: 'pop', computed: false, tier: 'chat'
+    };
+    return answer;
   }
 
   function composeFallback(answer, ctx, cfg) {

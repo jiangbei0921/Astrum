@@ -17,7 +17,8 @@
     compute: { key: 'compute', label: '可算', hint: '本地计算，可复算' },
     fetch:   { key: 'fetch',   label: '可查', hint: '外部真实数据，附出处' },
     infer:   { key: 'infer',   label: '可释', hint: '基于知识库的解释' },
-    unknown: { key: 'unknown', label: '未知', hint: '无可靠依据' }
+    unknown: { key: 'unknown', label: '未知', hint: '无可靠依据' },
+    chat:    { key: 'chat',    label: '对话', hint: '无需检索' }
   };
 
   function tierOf(key) { return TIER[key] || TIER.unknown; }
