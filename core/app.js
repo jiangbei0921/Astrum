@@ -1805,6 +1805,19 @@
     return html;
   }
 
+  /* 复制文本：优先 clipboard API，失败时提示手动选中 */
+  function copyText(txt, btn) {
+    function done(ok) {
+      if (!btn) return;
+      var old = btn.textContent;
+      btn.textContent = ok ? '已复制' : '请手动选中';
+      setTimeout(function () { btn.textContent = old; }, 1400);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(function () { done(true); }, function () { done(false); });
+    } else { done(false); }
+  }
+
   function renderTrace(trace) {
     /* 检索过程属细节层：默认折叠，不占首屏 */
     var box = el('details', 'trace-fold');
@@ -1926,6 +1939,67 @@
         gbox.appendChild(row);
       });
       wrap.appendChild(gbox);
+    } else if (s.kind === 'gearfit') {
+      /* 方案 A：器材匹配。四个可复算的量 + 逐项自检 */
+      wrap.className = 'sec sec-gearfit';
+      var f = s.fit;
+      var tone = f.verdict ? f.verdict.tone : 'warn';
+      wrap.innerHTML = '<div class="sec-title">器材匹配<span class="gf-st gf-' + tone + '">' +
+        esc(f.verdict ? f.verdict.label : '仅参数') + '</span></div>';
+      var rows = [['器材', f.gear.name]];
+      if (f.fov) rows.push(['视场', f.fov.w + '° × ' + f.fov.h + '°']);
+      if (f.targetSizeArcmin) rows.push(['目标角径', f.targetSizeArcmin + '′']);
+      if (f.ratio != null) rows.push(['占视场', '长边 ' + f.ratio + '%' + (f.ratioShort != null ? ' · 短边 ' + f.ratioShort + '%' : '')]);
+      if (f.pixelScale) rows.push(['像元比例', f.pixelScale + '″/px']);
+      if (f.sampleIdeal && f.sampleVerdict) rows.push(['像元采样', f.sampleVerdict + ' · 建议 ' + f.sampleIdeal + '″/px']);
+      rows.push(['极限星等', f.limitingMag + ' 等']);
+      rows.push(['单张上限', f.exposure + ' 秒（Bortle ' + f.bortle + '）']);
+      var gtab = el('div', 'gf-table');
+      rows.forEach(function (r) {
+        var row = el('div', 'gfr');
+        row.innerHTML = '<span class="gk">' + esc(r[0]) + '</span><span class="gv">' + esc(String(r[1])) + '</span>';
+        gtab.appendChild(row);
+      });
+      wrap.appendChild(gtab);
+      (f.checks || []).forEach(function (c) {
+        var line = el('div', 'gf-check' + (c.ok ? '' : ' bad'));
+        line.innerHTML = '<span class="ic">' + (c.ok ? '✓' : '!') + '</span>' +
+          '<span class="k">' + esc(c.name) + '</span><span class="v">' + esc(c.detail) + '</span>';
+        wrap.appendChild(line);
+      });
+    } else if (s.kind === 'query') {
+      /* 方案 B：可复现查询。不联网执行，只交付可复制复跑的语句与直达链接 */
+      wrap.className = 'sec sec-query';
+      var q = s.query;
+      wrap.innerHTML = '<div class="sec-title">可复现查询<span class="st st-established">' +
+        esc(q.coord.epoch) + '</span></div>';
+      wrap.appendChild(el('div', 'q-coord', 'RA ' + esc(q.coord.ra) + '　Dec ' + esc(q.coord.dec)));
+      (q.queries || []).forEach(function (qq) {
+        var d = el('details', 'q-block');
+        d.appendChild(el('summary', '', esc(qq.title) + ' · ' + esc(qq.endpoint.name)));
+        var pre = el('pre', 'q-sql');
+        pre.textContent = qq.sql;
+        d.appendChild(pre);
+        var bar = el('div', 'q-bar');
+        var btn = el('button', 'mini-btn', '复制查询');
+        btn.addEventListener('click', function () {
+          copyText(qq.sql, btn);
+        });
+        bar.appendChild(btn);
+        var a = el('a', 'q-link', '打开 ' + esc(qq.endpoint.name) + ' ↗');
+        a.href = qq.endpoint.url; a.target = '_blank'; a.rel = 'noopener';
+        bar.appendChild(a);
+        d.appendChild(bar);
+        d.appendChild(el('div', 'q-hint', esc(qq.endpoint.hint)));
+        wrap.appendChild(d);
+      });
+      var links = el('div', 'q-links');
+      (q.links || []).forEach(function (l) {
+        var a2 = el('a', 'q-link', esc(l.label) + ' ↗');
+        a2.href = l.url; a2.target = '_blank'; a2.rel = 'noopener';
+        links.appendChild(a2);
+      });
+      wrap.appendChild(links);
     } else if (s.kind === 'system') {
       wrap.innerHTML = '<div class="sec-title">' + esc(s.title || '视图指令') +
         '<span class="st st-established">已解析</span></div>';
@@ -2364,6 +2438,23 @@
     return det;
   }
 
+  /* 方案 C · L3 技能沉淀：把跑通的「意图 + 目标 + 器材」记成可复用条目。
+   * 不做花哨的技能卡，只做真实的复用计数——它能证明系统在积累，而不是每次从零开始。 */
+  function recordSkill(ans) {
+    if (!ans || !ans.intent || ans.intent === 'smalltalk') return;
+    var hasFit = ans.sections.some(function (x) { return x.kind === 'gearfit'; });
+    var key = ans.intent + '|' + ((ans.meta && ans.meta.target) || '') +
+      (hasFit ? ('|' + (state.settings.gearId || 'auto')) : '');
+    if (!state.skills) state.skills = [];
+    var hit = null;
+    for (var i = 0; i < state.skills.length; i++) { if (state.skills[i].key === key) { hit = state.skills[i]; break; } }
+    if (hit) { hit.n += 1; hit.at = Date.now(); }
+    else state.skills.push({ key: key, intent: ans.intent, target: (ans.meta && ans.meta.target) || '',
+      gear: hasFit ? (state.settings.gearId || 'auto') : '', n: 1, at: Date.now() });
+    if (state.skills.length > 40) state.skills.splice(0, state.skills.length - 40);
+    persist();
+  }
+
   function renderAnswer(ans, extra) {
     /* 术语双轨按「本条答案实际使用的语体」决定，而不是全局设置 */
     CURRENT_REG = (ans.meta && ans.meta.register === 'pro') ? 'pro' : 'pop';
@@ -2422,6 +2513,7 @@
         }
       } catch (e) { console.warn('viz failed', e); }
     });
+    try { recordSkill(ans); } catch (e) { console.warn('skill record failed', e); }
     if (state.settings.autoScroll) {
       var sc = $('#scroll');
       sc.scrollTo({ top: Math.max(0, msg.offsetTop - 12), behavior: 'smooth' });
@@ -3323,6 +3415,7 @@
            展示给用户的仍是原问题（q），只有解析用合并后的串 */
         var hints = attachHints(atts);
         var qForAns = hints.length ? (q + ' ' + hints.join(' ')) : q;
+        AC.setGear(state.settings.gearId, state.settings.camId);
         ans = AC.buildAnswer(qForAns, ctx, cfgRun);
         ans.query = q;   /* 对外保持原问题 */
         taskEnd(tAgent);
@@ -4691,6 +4784,18 @@
         });
       });
     });
+
+    group('我的器材', [
+      selectRow('主镜', (window.GEAR ? window.GEAR.LIST : []).map(function (g) { return [g.id, g.name]; }),
+        s.gearId || 'new150', function (v) { s.gearId = v; AC.setGear(v, s.camId); persist(); }),
+      selectRow('相机', (window.OBSPLAN ? window.OBSPLAN.CAMERAS : []).map(function (c) { return [c.id, c.name]; }),
+        s.camId || 'asi', function (v) { s.camId = v; AC.setGear(s.gearId, v); persist(); }),
+      (function () {
+        var k = (state.skills || []).length;
+        return el('div', 'skill-row',
+          '已沉淀 ' + k + ' 条技能 · ' + (k ? '同类问题会更快命中' : '多问几次后自动积累'));
+      })()
+    ]);
 
     group('对话与表述', [
       selectRow('默认语体', [['auto', '自适应'], ['pro', '专业'], ['pop', '科普']], s.register, function (v) {

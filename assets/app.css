@@ -1798,3 +1798,55 @@ sup.fn {
   letter-spacing: 0.03em;
 }
 .gap-row .gv { font-size: 12.5px; color: var(--ink-2); line-height: 1.78; }
+
+/* ================= 方案 A：器材匹配 ================= */
+.gf-st {
+  font-size: 10px; padding: 1px 7px; border-radius: 999px; margin-left: 8px;
+  border: 1px solid var(--line-soft);
+}
+.gf-st.gf-good { color: #2f7d4f; border-color: rgba(47,125,79,.32); background: rgba(47,125,79,.06); }
+.gf-st.gf-warn { color: #a86212; border-color: rgba(168,98,18,.32); background: rgba(168,98,18,.06); }
+.gf-st.gf-bad  { color: #b5352b; border-color: rgba(181,53,43,.32); background: rgba(181,53,43,.06); }
+
+.gf-table { display: flex; flex-direction: column; gap: 6px; margin-top: 9px; }
+.gfr { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 12px; }
+.gfr .gk { font-size: 10.5px; color: var(--muted); padding-top: 1px; }
+.gfr .gv {
+  font-size: 12.5px; color: var(--ink-2); line-height: 1.7;
+  font-variant-numeric: tabular-nums;
+}
+.gf-check {
+  display: flex; align-items: baseline; gap: 8px;
+  font-size: 11px; color: var(--muted-2); margin-top: 7px; line-height: 1.65;
+}
+.gf-check.bad { color: #a86212; }
+.gf-check .ic { width: 10px; font-weight: 700; }
+.gf-check .k { color: var(--muted); }
+
+/* ================= 方案 B：可复现查询 ================= */
+.q-coord {
+  font-family: var(--mono); font-size: 11.5px; color: var(--muted);
+  margin: 5px 0 9px; letter-spacing: 0.01em;
+}
+.q-block { margin-top: 8px; }
+.q-block > summary {
+  font-size: 10.5px; color: var(--muted-2); cursor: pointer;
+  list-style: none; display: inline-flex; align-items: center; gap: 5px;
+}
+.q-block > summary::-webkit-details-marker { display: none; }
+.q-block > summary::before { content: '▸'; font-size: 9px; display: inline-block; transition: transform .15s ease; }
+.q-block[open] > summary::before { transform: rotate(90deg); }
+.q-sql {
+  font-family: var(--mono); font-size: 10.5px; line-height: 1.72;
+  background: var(--surface-2); border: 1px solid var(--line-soft);
+  border-radius: 6px; padding: 10px 12px; overflow-x: auto;
+  margin: 7px 0; color: var(--ink-2); white-space: pre;
+}
+.q-bar { display: flex; gap: 12px; align-items: center; }
+.q-link { font-size: 10.5px; color: var(--accent); text-decoration: none; }
+.q-link:hover { text-decoration: underline; }
+.q-links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
+.q-hint { font-size: 10px; color: var(--muted-2); margin-top: 5px; }
+
+/* 技能沉淀计数 */
+.skill-row { font-size: 11px; color: var(--muted-2); padding: 5px 0 1px; }

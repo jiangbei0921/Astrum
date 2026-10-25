@@ -439,6 +439,8 @@
     if (KW.cosmos.test(text) && !/怎么找|几点|升起|落下|方位|高度|能看到|看得到|在哪|哪儿/.test(text)) return 'cosmos';
     if (KW.tonight.test(text) && (!hasTarget || /看什么|推荐|有什么/.test(text))) return 'tonight';
     if (KW.gear.test(text)) return 'gear';
+    /* 方案 A：有目标 + 问能不能拍/装不装得下 → 走器材匹配（可算） */
+    if (hasTarget && /视场|能拍|拍得|装得|装不下|够不够|够吗|合适吗|拍不到|看不到|多大倍率/.test(text)) return 'gear-fit';
     if (KW.chart.test(text) && !hasTarget) return 'chart';
     if (KW.photo.test(text) && hasTarget) return 'photo-target';
     if (hasTarget) {
@@ -656,6 +658,7 @@
     else if (intent === 'system-view') out = composeSystemView(answer, ctx, cfg, t0, q);
     else if (intent === 'photo-target') out = composePhoto(answer, ctx, cfg, t0, q);
     else if (intent === 'gear') out = composeGear(answer, ctx, cfg);
+    else if (intent === 'gear-fit') out = composeGearFit(answer, ctx, cfg, t0);
     else if (intent === 'chart') out = composeChart(answer, ctx, cfg, t0);
     else if (intent === 'unknown') out = composeFallback(answer, ctx, cfg);
     else out = composeTarget(answer, ctx, cfg, t0, intent);
@@ -1859,6 +1862,189 @@
     };
   }
 
+  /* ================= 器材匹配（方案 A） =================
+   * 用户器材档案由设置面板写入，这里只负责取用与计算。 */
+  var GEAR_ID = '';
+  var CAM_ID = '';
+  function setGear(gearId, camId) { GEAR_ID = gearId || ''; CAM_ID = camId || ''; }
+
+  function defaultGearFor(cfg) {
+    var g = cfg && cfg.horizon && cfg.horizon.gear;
+    if (g === 'naked') return 'naked';
+    if (g === 'binocular') return 'bino1050';
+    if (g === 'photo') return 'lens135';
+    return 'new150';
+  }
+
+  /* 目标名 → OBSPLAN.SIZE 的键（M42 / NGC224 / IC434） */
+  function sizeKeyOf(t) {
+    if (!t) return null;
+    var n = String(t.name || t.cn || t.en || '').toUpperCase().replace(/\s+/g, '');
+    var m = n.match(/^M(\d+)/); if (m) return 'M' + m[1];
+    var ngc = n.match(/^NGC(\d+)/); if (ngc) return 'NGC' + ngc[1];
+    var ic = n.match(/^IC(\d+)/); if (ic) return 'IC' + ic[1];
+    if (t.type === 'planet' || t.type === 'moon' || t.type === 'sun') {
+      var k = String(t.key || '').toLowerCase();
+      if (root.OBSPLAN && root.OBSPLAN.PSIZE[k]) return 'PSIZE:' + k;
+    }
+    return null;
+  }
+
+  /* 目标较长边角径（角分） */
+  function sizeArcminOf(t) {
+    var key = sizeKeyOf(t);
+    if (!key || !root.OBSPLAN) return null;
+    if (key.indexOf('PSIZE:') === 0) {
+      var as = root.OBSPLAN.PSIZE[key.slice(6)];
+      return as ? as / 60 : null;
+    }
+    return root.OBSPLAN.SIZE[key] || null;
+  }
+
+  function magOf(t) {
+    if (!t) return 6;
+    return (t.mag == null ? 6 : t.mag);
+  }
+
+  /* 器材匹配的结论句 */
+  function fitHead(name, r) {
+    if (!r.verdict) return name + ' 的器材匹配：缺少角径数据，只给参数。';
+    var v = r.verdict.key;
+    if (v === 'too-big') return name + ' 装不下——视场不够。';
+    if (v === 'tight') return name + ' 能装下，但很紧。';
+    if (v === 'too-small') return name + ' 拍得到，但会很小。';
+    if (v === 'naked-ok') return name + ' 肉眼可见。';
+    if (v === 'invisible') return name + ' 用这个器材看不到。';
+    return name + ' 能拍。';
+  }
+
+  /* 问句里提到的器材优先于档案设置。
+   * 用户问「用 80mm 能拍吗」，答案必须按 80mm 算，而不是按他档案里的双筒。 */
+  function gearFromText(text) {
+    var s = String(text || '').toLowerCase();
+    if (/肉眼|裸眼/.test(s)) return 'naked';
+    var m;
+    m = s.match(/(\d{1,2})\s*[x×]\s*(\d{2})/);
+    if (m) {
+      var b = GEAR.LIST.filter(function (g) {
+        return g.kind === 'bino' && g.name.indexOf(m[1] + '×' + m[2]) === 0;
+      })[0];
+      if (b) return b.id;
+    }
+    m = s.match(/(\d{2,3})\s*\/\s*(\d{3,4})/);
+    if (m) {
+      var ap = +m[1], fl = +m[2];
+      var cand = GEAR.LIST.filter(function (g) { return g.ap && Math.abs(g.ap - ap) <= 10; });
+      if (cand.length) {
+        cand.sort(function (a, b2) { return Math.abs(a.fl - fl) - Math.abs(b2.fl - fl); });
+        return cand[0].id;
+      }
+    }
+    m = s.match(/(\d{2,3})\s*(?:mm|毫米)/);
+    if (m) {
+      var c2 = GEAR.LIST.filter(function (g) {
+        return g.ap && g.kind !== 'bino' && Math.abs(g.ap - (+m[1])) <= 6;
+      });
+      if (c2.length) return c2[0].id;
+    }
+    if (/双筒/.test(s)) return 'bino1050';
+    if (/折射/.test(s)) return 'ref80';
+    if (/施卡|c8/.test(s)) return 'sct8';
+    if (/马卡/.test(s)) return 'mak90';
+    if (/牛顿/.test(s)) return 'new150';
+    if (/镜头/.test(s)) return 'lens135';
+    return null;
+  }
+
+  /* 目标 → 带坐标与角径键的实体（与 composeTarget 的解析口径一致） */
+  function geoOf(t) {
+    if (!t) return null;
+    var entry = t.kind === 'kb' ? t.entry : null;
+    if (entry && entry.visual) {
+      var dso = CAT.dso.filter(function (d) { return d.k === entry.visual; })[0];
+      if (dso) {
+        return { name: entry.cn, ra: dso.ra, dec: dso.dec, mag: dso.mag,
+          type: 'dso', sizeKey: entry.visual };
+      }
+      if (entry.visual === 'moon') {
+        var mp = A.moonPhase(jdOfCtx({ y: 2026, mo: 1, d: 1, h: 12, mi: 0, tz: 8 }));
+        return { name: '月球', ra: mp.ra, dec: mp.dec, mag: -12.7, type: 'moon', sizeKey: 'PSIZE:moon' };
+      }
+    }
+    if (t.ra != null) {
+      return { name: nameOf(t) || t.name || '该目标', ra: t.ra, dec: t.dec,
+        mag: t.mag, type: t.type, sizeKey: sizeKeyOf(t) };
+    }
+    return null;
+  }
+
+  /* 由 sizeKey 取角径（角分）。星表键是小写 m31，角径表用大写 M31，这里统一。 */
+  function sizeFromKey(key) {
+    if (!key || !root.OBSPLAN) return null;
+    if (key.indexOf('PSIZE:') === 0) {
+      var as = root.OBSPLAN.PSIZE[key.slice(6)];
+      return as ? as / 60 : null;
+    }
+    return root.OBSPLAN.SIZE[key] || root.OBSPLAN.SIZE[String(key).toUpperCase()] || null;
+  }
+
+  function composeGearFit(answer, ctx, cfg, t) {
+    var asked = gearFromText(answer.query);
+    var gearId = asked || GEAR_ID || defaultGearFor(cfg);
+    var camId = CAM_ID || '';
+    var cam = null;
+    if (camId && root.OBSPLAN) {
+      cam = root.OBSPLAN.CAMERAS.filter(function (c) { return c.id === camId; })[0] || null;
+    }
+    var geo = geoOf(t);
+    var name = geo ? geo.name : (nameOf(t) || '该目标');
+    var gearObj = root.GEAR.byId(gearId);
+
+    if (!geo) {
+      answer.trace.push(step('horizon', '匹配器材与视场', '缺少坐标，无法计算',
+        { tool: 'gear-fit', ok: false, check: RT.check('目标坐标', false, '未解析到该天体的坐标') }));
+      answer.sections.push({
+        kind: 'verdict',
+        head: '我没有「' + name + '」的坐标，算不出视场匹配。',
+        sub: '给我一个星表编号（M31 / NGC7000）或坐标，我就能算出装不装得下。'
+      });
+      answer.meta = { agents: ['horizon'], confidence: 0.3, freshness: 'static', register: 'pop', computed: false, tier: 'unknown' };
+      return answer;
+    }
+
+    var r = root.FIT.evaluate({
+      gear: gearObj, camera: cam || root.OBSPLAN.CAMERAS[0],
+      bortle: ctx.bortle || 6,
+      sizeArcmin: sizeFromKey(geo.sizeKey), mag: geo.mag == null ? 6 : geo.mag
+    });
+
+    var checks = r.checks || [];
+    var failed = checks.filter(function (c) { return !c.ok; })[0];
+
+    answer.trace.push(step('horizon', '匹配器材与视场',
+      gearObj.name + ' · ' + (r.verdict ? r.verdict.label : '仅参数'),
+      { tool: 'gear-fit', check: RT.check(failed ? failed.name : '视场与采样', !failed, failed ? failed.detail : '通过') }));
+
+    answer.sections.push({ kind: 'verdict', head: fitHead(name, r), sub: r.reason || '' });
+    answer.sections.push({ kind: 'gearfit', fit: r, targetName: name });
+
+    /* 方案 B：可复跑查询 */
+    if (root.QUERY) {
+      var q = root.QUERY.forTarget({ name: name, ra: geo.ra, dec: geo.dec, radiusArcmin: 5 });
+      if (q) answer.sections.push({ kind: 'query', query: q });
+    }
+
+    answer.sections.push({
+      kind: 'followup',
+      items: ['换成 200/1000 拍得下吗？', name + ' 今晚什么时候最高？', name + ' 单张曝光多久合适？']
+    });
+    answer.meta = {
+      agents: ['horizon', 'vega'], confidence: r.verdict ? 0.82 : 0.5,
+      freshness: 'static', register: 'pop', computed: true, target: name
+    };
+    return answer;
+  }
+
   /* 问候 / 自我介绍：一句话回应 + 三个可点的起点。不检索、不调模型。 */
   function composeSmalltalk(answer, ctx, cfg) {
     var q = String(answer.query || '').trim();
@@ -1974,6 +2160,7 @@
 
   root.AgentCore = {
     AGENTS: AGENTS, ATTRS: ATTRS, CITIES: CITIES, AGENT_BY_ID: AGENT_BY_ID,
+    setGear: setGear,
     defaultConfig: defaultConfig, buildAnswer: buildAnswer, resolveTargets: resolveTargets, preview: preview,
     setCustomAgents: setCustomAgents, ATTR_TARGET: ATTR_TARGET, statusLabel: statusLabel,
     findCity: findCity, searchPlaces: searchPlaces, nearestPlace: nearestPlace, ianaOffset: ianaOffset,
