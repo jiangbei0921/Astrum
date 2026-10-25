@@ -902,8 +902,16 @@
     }
 
     if (intent === 'knowledge-target' && !entry) {
-      head = '关于「' + (target ? target.name : answer.query) + '」的这一具体问题，本地知识库没有可引用的条目；我只列出可确证的观测事实，不做成因推测。';
-      sub = posLine;
+      /* 知识库没有对应成因条目，但目标的位置/月相/星等是本地算得出来的。
+       * 结论必须先用算出来的事实开头，「知识库没有条目」只能作为补充说明——
+       * 否则一个能算的问题会被读成「系统查不到」。 */
+      if (posLine) {
+        head = posLine;
+        sub = '你问的是成因，本地没有对应条目；以上是当前可确证的观测状态。';
+      } else {
+        head = '关于「' + (target ? target.name : answer.query) + '」的成因，本地没有可引用的条目。';
+        sub = '我能确证的是它的位置与亮度；成因这类问题需要外部文献，我可以给你可复跑的检索。';
+      }
     } else if (entry && intent === 'intro-target' && /怎么|如何|怎样|指|辨认|认星/.test(answer.query)) {
       head = entry.summary;
       sub = posLine;
