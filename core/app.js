@@ -1746,6 +1746,7 @@
      这是本项目「可追溯」契约的一部分。
      ============================================================ */
   var CURRENT_REG = 'pop';   /* 由 renderAnswer 设置，供各渲染函数取用 */
+  var CURRENT_TIER = 'infer'; /* 同理：失败态与正常态用不同版式 */
 
   var TERM_PAIRS = [
     [/可溯源/g, '已核对'],
@@ -1875,7 +1876,7 @@
   function sectionNode(s) {
     var wrap = el('div', 'sec');
     if (s.kind === 'verdict') {
-      wrap.className = 'sec sec-verdict';
+      wrap.className = 'sec sec-verdict' + (CURRENT_TIER === 'unknown' ? ' quiet' : '');
       wrap.innerHTML = '<p class="head">' + esc(s.head) + '</p>' + (s.sub ? '<p class="sub">' + esc(s.sub) + '</p>' : '');
     } else if (s.kind === 'evidence') {
       wrap.innerHTML = '<div class="sec-title">' + esc(s.title || '依据') +
@@ -1913,6 +1914,18 @@
       if (s.sources && s.sources.length) {
         wrap.appendChild(el('div', 'sec-note', '来源：' + s.sources.map(function (x) { return esc(x.n); }).join(' · ')));
       }
+    } else if (s.kind === 'gap') {
+      /* 失败态专用：三行说明，不用标题、不用卡片、不用科普表述框。
+       * 只为说清「缺什么 / 去哪拿 / 我能做」，排版越轻越好。 */
+      wrap.className = 'sec sec-gap';
+      var gbox = el('div', 'gap-list');
+      (s.items || []).forEach(function (it) {
+        var row = el('div', 'gap-row');
+        row.innerHTML = '<span class="gk">' + esc(it.k) + '</span>' +
+          '<span class="gv">' + esc(it.v) + '</span>';
+        gbox.appendChild(row);
+      });
+      wrap.appendChild(gbox);
     } else if (s.kind === 'system') {
       wrap.innerHTML = '<div class="sec-title">' + esc(s.title || '视图指令') +
         '<span class="st st-established">已解析</span></div>';
@@ -2325,6 +2338,15 @@
   /* 核对层：证据概览 / 检索证据 / 引用核验 / 冲突 收进同一个折叠条 */
   var VERIFY_KINDS = { synthesis: 1, web: 1, citation: 1, conflict: 1 };
   function renderVerifyStrip(list) {
+    /* 空章节不生成折叠条：失败态里出现一个光秃秃的「核对」只会添乱 */
+    list = (list || []).filter(function (s) {
+      if (s.kind === 'synthesis') return (s.groups || []).some(function (g) { return (g.points || []).length; });
+      if (s.kind === 'web') return (s.items || []).length > 0;
+      if (s.kind === 'citation') return (s.total || 0) > 0;
+      if (s.kind === 'conflict') return (s.items || []).length > 0;
+      return true;
+    });
+    if (!list.length) return null;
     var det = el('details', 'verify-fold');
     var n = 0;
     list.forEach(function (s) {
@@ -2349,6 +2371,7 @@
     if (window.AstroRuntime) {
       ans.meta = ans.meta || {};
       ans.meta.tier = window.AstroRuntime.classify(ans).key;
+      CURRENT_TIER = ans.meta.tier;
     }
     var msg = el('div', 'msg bot');
     var card = el('div', 'answer');
@@ -2369,14 +2392,17 @@
     ans.sections.forEach(function (s, i) {
       if (consumed[i]) return;
       /* 问候类输入没有事实可评审，跳过评审章节，避免出现「存在缺口」的噪音 */
-      if (ans.intent === 'smalltalk' && s.kind === 'review') return;
+      if ((ans.intent === 'smalltalk' || CURRENT_TIER === 'unknown') && s.kind === 'review') return;
       /* 核对类章节统一收进一个折叠条，不再各自占一块 */
       if (VERIFY_KINDS[s.kind]) { verifyList.push(s); return; }
       var n = sectionNode(s);
       if (n._canvas) pending.push(n._canvas);
       card.appendChild(n);
     });
-    if (verifyList.length) card.appendChild(renderVerifyStrip(verifyList));
+    if (verifyList.length) {
+      var vstrip = renderVerifyStrip(verifyList);
+      if (vstrip) card.appendChild(vstrip);
+    }
     card.appendChild(metaBar(ans));
     msg.appendChild(card);
     $('#thread').appendChild(msg);
@@ -2919,13 +2945,19 @@
         });
         ans.meta.confidence = Math.min(0.55, 0.25 + usableN * 0.05);
         ans.meta.freshness = 'live';
+        /* 已经查到可用资料，就不再是「未知」：
+         * 清掉生产者预设的档位，让 classify 按实际内容重新判定（→ fetch）；
+         * 同时撤掉「缺口」章节，否则结论说「查到 1 条」、下面却说「本地没有依据」。 */
+        delete ans.meta.tier;
+        ans.sections = ans.sections.filter(function (s) { return s.kind !== 'gap'; });
       } else {
-        /* 检到了东西但一条都不可用：不改口、不堆砌，只如实说明一句 */
+        /* 检到了东西但一条都不可用：不改口、不堆砌。
+         * 用一句小字挂在结论下面，不用大号 BOUNDARY 卡片——失败态不值得那么多版面。 */
         dropResearch = true;
-        ans.sections.push({
-          kind: 'boundary', mode: 'uncertain',
-          text: '本轮检索到 ' + (syn0.counts.evidence || 0) + ' 条结果，但都缺少出处或与问题无关，未采用。'
-        });
+        var vv = ans.sections.filter(function (s) { return s.kind === 'verdict'; })[0];
+        var noteTxt = '已检索 ' + (syn0.counts.evidence || 0) + ' 条，均与问题无关，未采用。';
+        if (vv) { vv.sub = vv.sub ? (vv.sub + ' ' + noteTxt) : noteTxt; }
+        else { ans.sections.unshift({ kind: 'verdict', head: '本地没有这个问题的依据。', sub: noteTxt }); }
         ans.meta.freshness = 'static';
       }
     }

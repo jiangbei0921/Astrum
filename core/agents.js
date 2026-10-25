@@ -1901,17 +1901,18 @@
     }));
     answer.sections.push({
       kind: 'verdict',
-      head: '这个问题我暂时给不出可靠答案。',
-      sub: '下面写清楚缺什么、从哪里能拿到，以及我能先给的次优答案。'
+      head: '本地没有这个问题的依据。',
+      sub: ''
     });
+    /* 缺口用紧凑的三行结构，不套科普表述卡片——
+     * 失败态不需要排版，只需要把话说清楚。 */
     answer.sections.push({
-      kind: 'evidence', title: '缺口与获取路径', register: 'pop',
+      kind: 'gap',
       items: [
-        { label: '缺什么', value: g.gap },
-        { label: '去哪拿', value: g.where },
-        { label: '次优方案', value: g.alt }
-      ],
-      para: '我宁可把缺口说清楚，也不拼一个听起来合理、却无法核实来源的答案。'
+        { k: '缺什么', v: g.gap },
+        { k: '去哪拿', v: g.where },
+        { k: '我能做', v: g.alt }
+      ]
     });
     answer.sections.push({ kind: 'followup', items: ['今晚适合看什么？', '猎户座大星云怎么找？', '为什么会有月相变化？'] });
     answer.meta = { agents: ['muse', 'vega'], confidence: 0.3, freshness: 'static', register: 'pop', computed: false, tier: 'unknown' };
