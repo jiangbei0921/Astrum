@@ -2564,6 +2564,80 @@
     return null;
   }
 
+  function removeSkill(key) {
+    if (!state.skills) return;
+    var before = state.skills.length;
+    state.skills = state.skills.filter(function (x) { return x.key !== key; });
+    persist();
+    if (state.skills.length < before) toast('已删除该条技能记录');
+  }
+
+  function clearSkills() {
+    state.skills = [];
+    persist();
+    toast('已清空全部技能记录');
+  }
+
+  /* 意图的中文标签，仅供技能面板展示 */
+  function intentCn(i) {
+    var m = {
+      'gear-fit': '器材匹配', 'tonight': '今晚规划', 'knowledge-target': '知识问答',
+      'intro-target': '天体介绍', 'observe-target': '观测时机', 'cosmos': '宇宙学',
+      'nova': '爆发天体', 'event': '天象事件', 'gear': '器材选型', 'chart': '星图',
+      'photo-target': '拍摄方案', 'system-view': '太阳系', 'helios': '太阳活动'
+    };
+    return m[i] || i || '其他';
+  }
+
+  /* 技能管理面板：用户必须能看到系统记了什么，并能否定它 —— 否则记忆是黑箱 */
+  function skillPanel() {
+    var box = el('div', 'skill-panel');
+    var list = (state.skills || []).slice().sort(function (a, b) { return (b.at || 0) - (a.at || 0); });
+
+    var head = el('div', 'skill-head');
+    head.innerHTML = '<span class="k">技能记录</span><span class="n">' + list.length + ' 条</span>';
+    box.appendChild(head);
+
+    if (!list.length) {
+      box.appendChild(el('div', 'skill-empty', '多问几次同类问题后会自动积累，用于复用器材与承接结论。'));
+      return box;
+    }
+
+    list.slice(0, 8).forEach(function (it) {
+      var row = el('div', 'skill-item');
+      var days = Math.max(0, Math.round((Date.now() - (it.at || Date.now())) / 86400000));
+      var when = days === 0 ? '今天' : days === 1 ? '昨天' : days + ' 天前';
+      row.innerHTML =
+        '<span class="t" title="' + esc(it.key) + '">' + esc(it.target || '（通用）') + '</span>' +
+        '<span class="i">' + esc(intentCn(it.intent)) + '</span>' +
+        '<span class="cn">' + (it.n || 1) + ' 次</span>' +
+        '<span class="w">' + when + '</span>';
+      var del = el('button', 'skill-del', '删除');
+      del.type = 'button';
+      del.title = '删除这条记录';
+      del.addEventListener('click', function () {
+        removeSkill(it.key);
+        renderSettings();
+      });
+      row.appendChild(del);
+      box.appendChild(row);
+    });
+
+    if (list.length > 8) {
+      box.appendChild(el('div', 'skill-more', '还有 ' + (list.length - 8) + ' 条未显示'));
+    }
+
+    var clear = el('button', 'skill-clear', '清空全部技能记录');
+    clear.type = 'button';
+    clear.addEventListener('click', function () {
+      if (!window.confirm('确定清空全部技能记录？此操作不可撤销。')) return;
+      clearSkills();
+      renderSettings();
+    });
+    box.appendChild(clear);
+    return box;
+  }
+
   function recordSkill(ans) {
     if (!ans || !ans.intent || ans.intent === 'smalltalk') return;
     var target = (ans.meta && ans.meta.target) || '';
@@ -4962,11 +5036,7 @@
         s.gearId || 'new150', function (v) { s.gearId = v; AC.setGear(v, s.camId); persist(); }),
       selectRow('相机', (window.OBSPLAN ? window.OBSPLAN.CAMERAS : []).map(function (c) { return [c.id, c.name]; }),
         s.camId || 'asi', function (v) { s.camId = v; AC.setGear(s.gearId, v); persist(); }),
-      (function () {
-        var k = (state.skills || []).length;
-        return el('div', 'skill-row',
-          '已沉淀 ' + k + ' 条技能 · ' + (k ? '同类问题会更快命中' : '多问几次后自动积累'));
-      })()
+      (function () { return skillPanel(); })()
     ]);
 
     group('对话与表述', [
@@ -5561,6 +5631,15 @@
 
     window.__astrum = {
       ask: ask, selectSource: selectSource, openSheet: openSheet, openAgent: openAgent,
+      /* 档案的程序化入口：与设置面板的 selectRow 等效。
+       * 注意：ask() 每次都会用 state.settings 覆盖 AC.setGear，
+       * 所以外部只调 AC.setGear 是无效的，必须改 state 再同步。 */
+      setGearProfile: function (gearId, camId) {
+        state.settings.gearId = gearId || '';
+        if (camId) state.settings.camId = camId;
+        AC.setGear(state.settings.gearId, state.settings.camId);
+        persist();
+      },
       /* 附件接口：供界面/测试调用 */
       addFiles: addFiles, removeAttach: removeAttach, clearAttach: clearAttach,
       attachments: function () { return (state.attachments || []).slice(); },
