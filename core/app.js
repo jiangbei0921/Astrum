@@ -62,7 +62,7 @@
     if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
     return 'rgba(' + parseInt(h.substring(0, 2), 16) + ',' + parseInt(h.substring(2, 4), 16) + ',' + parseInt(h.substring(4, 6), 16) + ',' + a + ')';
   }
-  function statusLabel(s) { return { established: '已成共识', emerging: '前沿研究', speculative: '未定论' }[s] || '已成共识'; }
+  function statusLabel(s) { return tn({ established: '已成共识', emerging: '前沿研究', speculative: '未定论' }[s] || '已成共识'); }
   function sourceById(id) {
     var all = S.list();
     for (var i = 0; i < all.length; i++) if (all[i].id === id) return all[i];
@@ -1740,17 +1740,85 @@
   }
 
   /* ================= 对话渲染 ================= */
+  /* ============================================================
+     术语双轨：科普模式用白话，专业模式保留研究术语。
+     「可溯源 / 待核验」这套词不废弃 —— 研究模式下原样呈现，
+     这是本项目「可追溯」契约的一部分。
+     ============================================================ */
+  var CURRENT_REG = 'pop';   /* 由 renderAnswer 设置，供各渲染函数取用 */
+
+  var TERM_PAIRS = [
+    [/可溯源/g, '已核对'],
+    [/待核验/g, '待复核'],
+    [/俯仰/g, '检索'],
+    [/子问题已覆盖/g, '已获得足够资料'],
+    [/达到轮数上限/g, '检索轮数已达上限'],
+    [/达到调用上限/g, '检索次数已达上限'],
+    [/超出时间预算/g, '检索用时已达上限'],
+    [/无新增结果/g, '没有新的结果'],
+    [/无可提取锚点/g, '没有可用的关键词'],
+    [/无待补子问题/g, '没有需要补充的方向'],
+    [/无可用检索词/g, '没有可用的检索词'],
+    [/证据架构/g, '如何核对'],
+    [/证据规约/g, '核对方法'],
+    [/证据摘要/g, '核对结果'],
+    [/已成共识/g, '公认'],
+    [/前沿研究/g, '有新证据'],
+    [/未定论/g, '尚存争议'],
+    [/严格证据门槛下/g, '按严格标准筛过后']
+  ];
+
+  /* 只用于「我们自己写的结构性文字」——
+   * 原文引用、事实数值一律不经过这里，避免改写来源原话。 */
+  function tn(s, reg) {
+    var txt = String(s == null ? '' : s);
+    if ((reg || CURRENT_REG) === 'pro') return txt;
+    TERM_PAIRS.forEach(function (p) { txt = txt.replace(p[0], p[1]); });
+    return txt;
+  }
+
+  /* 长引用拆句：不改编原文，只按句切分成要点行；超出的部分折叠，不丢内容 */
+  function splitQuote(txt) {
+    var s = String(txt || '').trim();
+    if (!s) return { lines: [], rest: '' };
+    var parts = s.split(/(?<=[。！？；])/).map(function (x) { return x.trim(); }).filter(Boolean);
+    if (parts.length <= 1 && s.length > 60) {
+      parts = s.split(/[，,]/).map(function (x) { return x.trim(); }).filter(Boolean);
+    }
+    return { lines: parts.slice(0, 3), rest: parts.length > 3 ? parts.slice(3).join('') : '' };
+  }
+
+  function quoteBlock(txt) {
+    var q = splitQuote(txt);
+    if (!q.lines.length) return '';
+    if (q.lines.length === 1 && !q.rest) {
+      return '<div class="sp-quote">' + esc(q.lines[0]) + '</div>';
+    }
+    var html = '<ul class="sp-qs">';
+    q.lines.forEach(function (l) { html += '<li>' + esc(l) + '</li>'; });
+    html += '</ul>';
+    if (q.rest) {
+      html += '<details class="sp-rest"><summary>余下原文（' + q.rest.length + ' 字）</summary>' +
+        '<div>' + esc(q.rest) + '</div></details>';
+    }
+    return html;
+  }
+
   function renderTrace(trace) {
+    /* 检索过程属细节层：默认折叠，不占首屏 */
+    var box = el('details', 'trace-fold');
+    box.appendChild(el('summary', '', '检索过程 · ' + trace.length + ' 步'));
     var t = el('div', 'trace');
     trace.forEach(function (s, i) {
       var a = AC.AGENT_BY_ID[s.agent] || AC.AGENTS[0];
       var chip = el('span', 't');
       chip.style.animationDelay = (i * 0.05).toFixed(2) + 's';
       chip.innerHTML = '<span class="s" style="color:' + esc(a.color) + '">' + esc(a.sigil) + '</span>' +
-        '<span class="a">' + esc(a.name) + '</span><span class="d">' + esc(s.action) + '</span>';
+        '<span class="a">' + esc(a.name) + '</span><span class="d">' + esc(tn(s.action)) + '</span>';
       t.appendChild(chip);
     });
-    return t;
+    box.appendChild(t);
+    return box;
   }
 
   function answerHead(ans, info) {
@@ -1794,12 +1862,31 @@
     } else if (s.kind === 'evidence') {
       wrap.innerHTML = '<div class="sec-title">' + esc(s.title || '依据') +
         (s.status ? '<span class="st st-' + s.status + '">' + statusLabel(s.status) + '</span>' : '') + '</div>';
-      var dl = el('dl', 'kv');
+      /* 数据分级：含数值的进「关键数据」表并突出显示，
+       * 纯文字说明（类型、成因等）下沉为小字元信息，不再与数值争夺注意力。 */
+      var dataItems = [], metaItems = [];
       (s.items || []).forEach(function (it) {
-        dl.appendChild(el('dt', '', esc(it.label)));
-        dl.appendChild(el('dd', '', esc(it.value)));
+        (/[0-9]/.test(String(it.value)) ? dataItems : metaItems).push(it);
       });
-      wrap.appendChild(dl);
+      function fillKv(box, list) {
+        list.forEach(function (it) {
+          box.appendChild(el('div', 'k', esc(it.label)));
+          box.appendChild(el('div', 'v', esc(it.value)));
+        });
+        return box;
+      }
+      if (dataItems.length) {
+        wrap.appendChild(fillKv(el('div', 'kv kv-data'), dataItems.slice(0, 5)));
+        if (dataItems.length > 5) {
+          var moreD = el('details', 'kv-more');
+          moreD.appendChild(el('summary', '', '另外 ' + (dataItems.length - 5) + ' 项数据'));
+          moreD.appendChild(fillKv(el('div', 'kv kv-data'), dataItems.slice(5)));
+          wrap.appendChild(moreD);
+        }
+      }
+      if (metaItems.length) {
+        wrap.appendChild(fillKv(el('div', 'kv kv-meta'), metaItems));
+      }
       if (s.para) {
         var p = el('div', 'para');
         p.innerHTML = '<span class="tag">' + (s.register === 'pro' ? 'pro · 专业表述' : 'pop · 科普表述') + '</span>' + esc(s.para);
@@ -1823,17 +1910,20 @@
       wrap.appendChild(tbl);
       if (s.done) wrap.appendChild(el('div', 'sec-note', esc(s.done)));
     } else if (s.kind === 'review') {
-      wrap.innerHTML = '<div class="sec-title">' + esc(s.title || '评审结论') +
+      /* 评审属流程元数据：默认折叠，只留「通过 / 有缺口」的结论 */
+      wrap.innerHTML = '<details class="review-fold"><summary>' +
+        esc(tn(s.title || '评审结论')) +
         '<span class="st ' + (s.passed ? 'st-established' : 'st-emerging') + '">' +
-        (s.passed ? '证据自洽' : '存在缺口') + '</span></div>';
+        (s.passed ? '证据自洽' : '存在缺口') + '</span></summary></details>';
+      var rvd = wrap.querySelector('.review-fold');
       var rv = el('div', 'review');
       (s.checks || []).forEach(function (c) {
         var row = el('div', 'rv-row' + (c.ok ? '' : ' bad'));
         row.innerHTML = '<span class="ic">' + (c.ok ? '✓' : '!') + '</span><span class="k">' + esc(c.k) + '</span><span class="v">' + esc(c.v) + '</span>';
         rv.appendChild(row);
       });
-      wrap.appendChild(rv);
-      if (s.note) wrap.appendChild(el('div', 'sec-note', esc(s.note)));
+      rvd.appendChild(rv);
+      if (s.note) rvd.appendChild(el('div', 'sec-note', esc(tn(s.note))));
     } else if (s.kind === 'model') {
       var src = s.source;
       var card = el('div', 'model-note' + (s.fallback ? ' fallback' : ''));
@@ -1877,9 +1967,9 @@
       });
       wrap.appendChild(box);
       if (s.provider) {
-        wrap.appendChild(el('div', 'sec-note', '来源：' + esc(s.provider) + ' · 耗时 ' + (s.ms || 0) + ' ms · 点击条目查看原文'));
+        wrap.appendChild(el('div', 'sec-note', tn('来源：' + s.provider + ' · 耗时 ' + (s.ms || 0) + ' ms · 点击条目查看原文')));
       }
-      if (s.note) wrap.appendChild(el('div', 'sec-note', esc(s.note)));
+      if (s.note) wrap.appendChild(el('div', 'sec-note', esc(tn(s.note))));
     } else if (s.kind === 'rank') {
       wrap.innerHTML = '<div class="sec-title">' + esc(s.title || '排序') + '</div>';
       var rk = el('div', 'rank');
@@ -1900,7 +1990,7 @@
         rows.appendChild(row);
       });
       wrap.appendChild(rows);
-      if (s.note) wrap.appendChild(el('div', 'sec-note', esc(s.note)));
+      if (s.note) wrap.appendChild(el('div', 'sec-note', esc(tn(s.note))));
     } else if (s.kind === 'custom') {
       var cn = el('div', 'custom-note');
       cn.innerHTML = '<div class="who"><span class="sg" style="color:' + esc(s.agent.color) + '">' + esc(s.agent.sigil) +
@@ -1933,7 +2023,7 @@
       wrap.innerHTML = '<div class="sec-title">证据概览' +
         (s.available ? '<span class="st st-established">已组织</span>'
           : '<span class="st st-emerging">无证据</span>') + '</div>';
-      wrap.appendChild(el('div', 'syn-lead', esc(s.lead || '')));
+      wrap.appendChild(el('div', 'syn-lead', esc(tn(s.lead || ''))));
 
       /* 时间跨度：按发表/发布/编辑分别列出，不混为一谈 */
       if (s.timeSpan && s.timeSpan.kinds) {
@@ -1952,10 +2042,10 @@
       (s.groups || []).forEach(function (g) {
         var box = el('div', 'syn-group');
         box.appendChild(el('div', 'syn-ghead',
-          g.label + ' · ' + g.count + ' 条' + (g.supported ? ' · ' + g.supported + ' 条可溯源' : '')));
+          tn(g.label + ' · ' + g.count + ' 条' + (g.supported ? ' · ' + g.supported + ' 条可溯源' : ''))));
         if (g.strictEmpty) {
           box.appendChild(el('div', 'syn-strict-empty',
-            '严格证据门槛下，该方面只有待核验证据，未纳入关键摘录（可在「Scholar · 研读」中放宽门槛）。'));
+            tn('严格证据门槛下，该方面只有待核验证据，未纳入关键摘录（可在「Scholar · 研读」中放宽门槛）。')));
         }
         (g.points || []).forEach(function (p) {
           var row = el('div', 'syn-point');
@@ -1965,12 +2055,12 @@
           if (p.date) bits.push((p.dateKind === 'released' ? '发布 ' : p.dateKind === 'edited' ? '编辑 ' : '发表 ') + String(p.date).slice(0, 10));
           if (p.version === 'preprint') bits.push('预印本');
           row.innerHTML =
-            '<div class="sp-head"><span class="ev-id">' + esc(p.id) + '</span>' +
+            '<div class="sp-head"><span class="ev-id">' + esc(p.id) + '</span> ' +
             esc(String(p.title || '').slice(0, 90)) + '</div>' +
             (bits.length ? '<div class="sp-meta">' + esc(bits.join(' · ')) + '</div>' : '') +
-            '<div class="sp-quote">' + esc(p.quote) + '</div>' +
+            quoteBlock(p.quote) +
             (p.uncertainty ? '<div class="sp-unc">误差表述：' + esc(p.uncertainty) + '</div>' : '') +
-            (p.status === 'pending' ? '<span class="ev-badge pending">待核验</span>' : '');
+            (p.status === 'pending' ? '<span class="ev-badge pending">' + esc(tn('待核验')) + '</span>' : '');
           if (p.url) {
             row.style.cursor = 'pointer';
             row.addEventListener('click', function () { window.open(p.url, '_blank', 'noopener'); });
@@ -1987,7 +2077,7 @@
       /* 限制说明 */
       if (s.limits && s.limits.length) {
         var ul = el('div', 'syn-limits');
-        s.limits.forEach(function (t) { ul.appendChild(el('div', 'syn-limit', '· ' + t)); });
+        s.limits.forEach(function (t) { ul.appendChild(el('div', 'syn-limit', '· ' + tn(t))); });
         wrap.appendChild(ul);
       }
     } else if (s.kind === 'web') {
@@ -2000,14 +2090,14 @@
       if (s.research && s.research.rounds) metaBits.push(s.research.rounds + ' 轮');
       if (s.research && s.research.stopReason) metaBits.push('停止：' + stopReasonLabel(s.research.stopReason));
       if (s.ms) metaBits.push(s.ms + ' ms');
-      if (metaBits.length) wrap.appendChild(el('div', 'sec-note', esc(metaBits.join(' · '))));
-      if (s.note) wrap.appendChild(el('div', 'sec-note', esc(s.note)));
+      if (metaBits.length) wrap.appendChild(el('div', 'sec-note', esc(tn(metaBits.join(' · ')))));
+      if (s.note) wrap.appendChild(el('div', 'sec-note', esc(tn(s.note))));
 
       var list = el('div', 'web-list');
       (s.items || []).forEach(function (it) {
         var row = el('div', 'web-item');
         /* 标题行：证据编号 + 标题 */
-        var head = '<div class="wt">' + (it.id ? '<span class="ev-id">' + esc(it.id) + '</span>' : '') +
+        var head = '<div class="wt">' + (it.id ? '<span class="ev-id">' + esc(it.id) + '</span> ' : '') +
           esc(it.title) + '</div>';
         /* 元信息：来源类型 · 机构 · 发表时间 · 状态 */
         var meta2 = [];
@@ -2017,8 +2107,8 @@
         var metaHtml = meta2.length ? '<div class="wm">' + esc(meta2.join(' · ')) + '</div>' : '';
         /* 状态徽标：待核验必须显式标出 */
         var badge = '';
-        if (it.status === 'pending') badge = '<span class="ev-badge pending">待核验</span>';
-        else if (it.status === 'supported') badge = '<span class="ev-badge ok">可溯源</span>';
+        if (it.status === 'pending') badge = '<span class="ev-badge pending">' + esc(tn('待核验')) + '</span>';
+        else if (it.status === 'supported') badge = '<span class="ev-badge ok">' + esc(tn('可溯源')) + '</span>';
         if (it.flags && it.flags.length) {
           var fmap = { 'no-url': '无链接', 'no-date': '无时间', 'abstract-only': '仅摘要' };
           var ftxt = it.flags.map(function (f) { return fmap[f] || f; }).join('/');
@@ -2038,7 +2128,7 @@
       wrap.className = 'sec sec-conflict';
       wrap.innerHTML = '<div class="sec-title">' + esc(s.title || '来源之间的数值差异') +
         '<span class="st st-emerging">存在分歧</span></div>';
-      if (s.note) wrap.appendChild(el('div', 'sec-note', esc(s.note)));
+      if (s.note) wrap.appendChild(el('div', 'sec-note', esc(tn(s.note))));
       (s.items || []).forEach(function (c) {
         var box = el('div', 'conflict-box');
         box.appendChild(el('div', 'cf-head',
@@ -2061,32 +2151,39 @@
     } else if (s.kind === 'citation') {
       wrap.className = 'sec sec-citation';
       var vlabel = { 'verified': '可溯源', 'partially-verified': '部分待核验', 'no-source-url': '缺少原文链接', 'no-evidence': '无检索证据' };
-      wrap.innerHTML = '<div class="sec-title">' + esc(s.title || '引用核验') +
+      wrap.innerHTML = '<div class="sec-title">' + esc(tn(s.title || '引用核验')) +
         '<span class="st ' + (s.verdict === 'verified' ? 'st-established' : 'st-emerging') + '">' +
-        esc(vlabel[s.verdict] || s.verdict) + '</span></div>';
+        esc(tn(vlabel[s.verdict] || s.verdict)) + '</span></div>';
+      /* 明细属细节层：首屏只留一行结论，逐项数据折叠起来 */
+      wrap.appendChild(el('div', 'cit-line',
+        '共 ' + (s.total || 0) + ' 条证据 · ' + tn('可溯源') + ' ' + (s.supported || 0) +
+        ' · ' + tn('待核验') + ' ' + (s.pending || 0)));
+      var cdet = el('details', 'cit-det');
+      cdet.appendChild(el('summary', '', '核验明细'));
       var grid = el('div', 'kv');
       [['证据总数', s.total], ['含原文链接', s.withUrl], ['含发表时间', s.withDate],
        ['可溯源', s.supported], ['待核验', s.pending]].forEach(function (p) {
-        grid.appendChild(el('div', 'k', esc(p[0])));
+        grid.appendChild(el('div', 'k', esc(tn(p[0]))));
         grid.appendChild(el('div', 'v', String(p[1] == null ? 0 : p[1])));
       });
-      wrap.appendChild(grid);
-      if (s.note) wrap.appendChild(el('div', 'sec-note', esc(s.note)));
+      cdet.appendChild(grid);
+      if (s.note) cdet.appendChild(el('div', 'sec-note', esc(tn(s.note))));
       if (s.unattested && s.unattested.length) {
-        wrap.appendChild(el('div', 'sec-note',
+        cdet.appendChild(el('div', 'sec-note',
           '本地知识库声明来源中，以下 ' + s.unattested.length + ' 项未在本轮检索出现（属正常：检索未覆盖不等于来源无效）：' +
           s.unattested.map(function (x) { return x.name; }).join('、')));
       }
       if (s.corroborated && s.corroborated.length) {
-        wrap.appendChild(el('div', 'sec-note',
+        cdet.appendChild(el('div', 'sec-note',
           '本轮检索印证了 ' + s.corroborated.length + ' 项本地来源：' +
           s.corroborated.map(function (x) { return x.name; }).join('、')));
       }
+      wrap.appendChild(cdet);
     } else if (s.kind === 'attach') {
       wrap.className = 'sec sec-attach';
       wrap.innerHTML = '<div class="sec-title">附件<span class="st st-established">' +
         (s.items || []).length + ' 个</span></div>';
-      if (s.note) wrap.appendChild(el('div', 'sec-note', esc(s.note)));
+      if (s.note) wrap.appendChild(el('div', 'sec-note', esc(tn(s.note))));
       var alist = el('div', 'atch-list');
       (s.items || []).forEach(function (it) {
         var row = el('div', 'atch-row');
@@ -2126,6 +2223,8 @@
   }
 
   function renderAnswer(ans, extra) {
+    /* 术语双轨按「本条答案实际使用的语体」决定，而不是全局设置 */
+    CURRENT_REG = (ans.meta && ans.meta.register === 'pro') ? 'pro' : 'pop';
     var msg = el('div', 'msg bot');
     var card = el('div', 'answer');
     rememberTurn(ans);
@@ -2605,7 +2704,7 @@
     noGap: '无待补子问题', noQuery: '无可用检索词', skip: '本地计算',
     empty: '无结果', done: '完成'
   };
-  function stopReasonLabel(r) { return STOP_REASON_LABEL[r] || r; }
+  function stopReasonLabel(r) { return tn(STOP_REASON_LABEL[r] || r); }
 
   /* ============================================================
      检索结果 → 答案的组装（阶段 A2 / D）
@@ -2657,9 +2756,10 @@
     if (ans.intent === 'unknown' && rec.evidence && rec.evidence.length) {
       var syn0 = Research.synthesize(rec);
       var headTxt = '本地知识库未收录这个问题；已检索到 ' + syn0.counts.evidence + ' 条相关资料。';
-      var subTxt = syn0.lead +
-        (syn0.gaps.length ? ' 未覆盖：' + syn0.gaps.join('、') + '。' : '') +
-        ' 以下按方面列出原文摘录与出处，未作改写。';
+      /* 统计与时间范围由「证据概览」统一呈现，结论副标题不再重复一遍。
+       * 结论头已写明「已检索到 N 条相关资料」，读者不会丢失这个信息。 */
+      var subTxt = (syn0.gaps.length ? '未覆盖：' + syn0.gaps.join('、') + '。' : '') +
+        '以下按方面列出原文摘录与出处，未作改写。';
       var v = ans.sections.filter(function (s) { return s.kind === 'verdict'; })[0];
       if (v) {
         v.head = headTxt;
@@ -2675,7 +2775,9 @@
       ans.meta.freshness = 'live';
     }
 
-    var at = sectionIndexAfterVerdict(ans);
+    /* 结论层骨架：结论 → 依据（关键数据）→ 证据 → 观测 → 边界。
+     * 检索证据插在「依据」之后，而不是紧贴结论，避免细节层压住结论层。 */
+    var at = sectionIndexAfterEvidence(ans);
 
     /* 1) 证据章节（综合 → 按子问题分组的原始证据 → 冲突） */
     /* Scholar 的证据门槛与深度在这里注入，让设置真的生效 */
@@ -2683,6 +2785,28 @@
       rec.scholar = { evidence: runCfg.scholar.evidence, depth: runCfg.scholar.depth };
     }
     var secs = Research.toSections(rec);
+
+    /* 1b) 去重：已被「证据概览」摘录过的条目，不再在下方列表里重复整段原文。
+     *     概览里的要点本身带链接、可点开，因此丢弃重复项不会丢出处。 */
+    var shownIds = {};
+    secs.forEach(function (s) {
+      if (s.kind === 'synthesis') {
+        (s.groups || []).forEach(function (g) {
+          (g.points || []).forEach(function (p) { if (p.id) shownIds[p.id] = 1; });
+        });
+      }
+    });
+    if (Object.keys(shownIds).length) {
+      secs = secs.reduce(function (acc, s) {
+        if (s.kind !== 'web' || !s.items || !s.items.length) { acc.push(s); return acc; }
+        var rest = s.items.filter(function (it) { return !shownIds[it.id]; });
+        if (rest.length === s.items.length) { acc.push(s); return acc; }
+        /* 全部重复 → 该章节没有增量信息，整节去掉 */
+        if (!rest.length) return acc;
+        acc.push(Object.assign({}, s, { items: rest, note: (s.note ? s.note + ' · ' : '') + '其余条目已在上方摘录' }));
+        return acc;
+      }, []);
+    }
 
     /* 2) 引用核验 */
     var verify = Research.verifyCitations(ans, rec.evidence || [], {

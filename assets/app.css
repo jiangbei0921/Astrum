@@ -475,14 +475,14 @@ body.sidebar-collapsed .sidebar { opacity: 0; pointer-events: none; border-right
 .model-note .who .nm2 { font-size: 11.5px; color: var(--ink); font-weight: 500; }
 .model-note .who .vd { font-size: 9.5px; color: var(--muted-2); }
 .model-note .who .lat { margin-left: auto; font-family: var(--mono); font-size: 9px; color: var(--muted-2); }
-.model-note .bd { font-size: 13px; line-height: 1.9; color: var(--ink-2); }
+.model-note .bd { font-size: 13px; line-height: 1.9; color: var(--ink-2); white-space: pre-wrap; }
 .model-note.fallback { border-style: dashed; background: var(--surface-2); }
 .model-note.fallback .bd { color: var(--muted); font-size: 12px; }
 
 /* 对比 */
 .compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
 .compare .model-note { height: 100%; }
-.compare .model-note .bd { font-size: 12px; }
+.compare .model-note .bd { font-size: 12px; white-space: pre-wrap; }
 
 /* 追问 */
 .followup { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -1627,3 +1627,87 @@ details.tip .body b { color: var(--ink-2); }
 .ar-meta { font-family: var(--mono); font-size: 9px; color: var(--muted-2); }
 .ar-kv { margin-top: 6px; }
 .ar-note { margin-top: 5px; font-size: 9.5px; color: #a86212; line-height: 1.6; }
+
+/* ================= 输出可读性：数据分级与折叠 ================= */
+
+/* kv 现在用 div 子元素（k/v），补齐样式 */
+.kv .k { font-size: 11px; color: var(--muted); padding-top: 1px; }
+.kv .v { font-size: 12.5px; color: var(--ink-2); line-height: 1.7; }
+
+/* 关键数据：等宽、加深、独立成块，与元信息拉开层级 */
+.kv-data {
+  gap: 8px 14px; padding: 11px 13px; border-radius: var(--r-sm);
+  background: var(--surface-2); border: 1px solid var(--line-soft);
+}
+.kv-data .k { font-size: 10.5px; color: var(--muted); letter-spacing: 0.01em; }
+.kv-data .v {
+  font-family: var(--mono); font-size: 13px; color: var(--ink);
+  font-weight: 600; letter-spacing: -0.01em; line-height: 1.6;
+}
+/* 元信息：小字、灰、不抢注意力 */
+.kv-meta { margin-top: 9px; grid-template-columns: 88px minmax(0, 1fr); gap: 5px 12px; }
+.kv-meta .k { font-size: 9.5px; color: var(--muted-2); }
+.kv-meta .v { font-size: 10.5px; color: var(--muted-2); line-height: 1.6; }
+
+.kv-more { margin-top: 9px; }
+.kv-more > summary {
+  font-size: 10.5px; color: var(--muted-2); cursor: pointer;
+  list-style: none; display: inline-flex; align-items: center; gap: 4px;
+}
+.kv-more > summary::-webkit-details-marker { display: none; }
+.kv-more > summary::before { content: '▸'; font-size: 9px; }
+.kv-more[open] > summary::before { content: '▾'; }
+.kv-more .kv-data { margin-top: 8px; }
+
+/* 折叠容器：检索过程、核验明细 —— 默认收起 */
+.trace-fold, .cit-det { margin-bottom: 14px; }
+.trace-fold > summary, .cit-det > summary {
+  font-size: 10.5px; color: var(--muted-2); cursor: pointer;
+  list-style: none; display: inline-flex; align-items: center; gap: 5px; padding: 2px 0;
+}
+.trace-fold > summary::-webkit-details-marker,
+.cit-det > summary::-webkit-details-marker { display: none; }
+.trace-fold > summary::before, .cit-det > summary::before {
+  content: '▸'; font-size: 9px; transition: transform 0.15s ease; display: inline-block;
+}
+.trace-fold[open] > summary::before,
+.cit-det[open] > summary::before { transform: rotate(90deg); }
+.trace-fold > summary:hover, .cit-det > summary:hover { color: var(--accent); }
+.trace-fold .trace { margin: 8px 0 0; }
+
+.cit-line { font-size: 11.5px; color: var(--ink-2); margin: 3px 0 7px; }
+.cit-det .kv { margin-top: 8px; }
+
+/* 长引用拆句：要点行 + 余文折叠 */
+.sp-qs { margin: 5px 0 0; padding-left: 0; list-style: none; }
+.sp-qs li {
+  position: relative; padding-left: 11px; margin: 3px 0;
+  font-size: 12px; line-height: 1.75; color: var(--ink-2);
+}
+.sp-qs li::before {
+  content: '·'; position: absolute; left: 0; color: var(--muted-2); font-weight: 700;
+}
+.sp-rest { margin-top: 5px; }
+.sp-rest > summary {
+  font-size: 10px; color: var(--muted-2); cursor: pointer;
+  list-style: none; display: inline-flex; gap: 4px; align-items: center;
+}
+.sp-rest > summary::-webkit-details-marker { display: none; }
+.sp-rest > summary::before { content: '▸'; font-size: 9px; }
+.sp-rest[open] > summary::before { content: '▾'; }
+.sp-rest > div {
+  margin-top: 5px; font-size: 11.5px; line-height: 1.75;
+  color: var(--muted); padding: 7px 9px; border-radius: 6px;
+  background: var(--surface); border: 1px solid var(--line-soft);
+}
+
+/* 评审结论：折叠为一行 */
+.review-fold { margin-bottom: 12px; }
+.review-fold > summary {
+  font-size: 10.5px; color: var(--muted-2); cursor: pointer;
+  list-style: none; display: inline-flex; align-items: center; gap: 6px;
+}
+.review-fold > summary::-webkit-details-marker { display: none; }
+.review-fold > summary::before { content: '▸'; font-size: 9px; display: inline-block; transition: transform .15s ease; }
+.review-fold[open] > summary::before { transform: rotate(90deg); }
+.review-fold .review { margin-top: 8px; }

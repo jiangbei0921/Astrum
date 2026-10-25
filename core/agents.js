@@ -910,8 +910,10 @@
       answer.trace.push(step('vega', '星表查询', '未收录详解条目 · 降级为星表级事实'));
     }
     if (ep && target && intent !== 'knowledge-target') {
-      items.push({ label: '升 / 落', value: A.fmtHM(ep.track.rise, tz) + ' / ' + A.fmtHM(ep.track.set, tz) + (ep.track.alwaysUp ? '（拱极，不落）' : '') });
-      items.push({ label: '中天时刻', value: A.fmtHM(ep.track.transit, tz) + ' · 高度 ' + deg(ep.track.maxAlt, cfg) });
+      /* 时刻必须带时区，否则数值无法复算 */
+      var tzLab = 'UTC' + (tz >= 0 ? '+' : '') + tz;
+      items.push({ label: '升 / 落（' + tzLab + '）', value: A.fmtHM(ep.track.rise, tz) + ' / ' + A.fmtHM(ep.track.set, tz) + (ep.track.alwaysUp ? '（拱极，不落）' : '') });
+      items.push({ label: '中天（' + tzLab + '）', value: A.fmtHM(ep.track.transit, tz) + ' · 高度 ' + deg(ep.track.maxAlt, cfg) });
     }
     if (target && target.type === 'moon' && ep) {
       items.push({ label: '月相', value: ep.moon.name + ' · 照亮 ' + (ep.moon.illum * 100).toFixed(0) + '% · 月龄 ' + ep.moon.age.toFixed(1) + ' 天' });
