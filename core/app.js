@@ -1903,9 +1903,9 @@
 
     function submit() {
       if (fired) return;
-      var v = ta.value.replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
-      if (!v || !/[\w一-龥]/.test(v)) { tip.textContent = '请输入包含文字或数字的内容'; return; }
-      if (v.length > MAX_Q) { tip.textContent = '超过 ' + MAX_Q + ' 字，请缩短'; return; }
+      var norm = normalizeQuery(ta.value, { overflow: 'reject' });
+      if (!norm.ok) { tip.textContent = norm.msg; return; }
+      var v = norm.text;
       if (v === text) { tip.textContent = '内容没有变化'; return; }
       if (state.busy) { tip.textContent = '正在生成，请稍后再试'; return; }
       fired = true;
@@ -3456,21 +3456,36 @@
     return out.slice(0, 2);
   }
 
-  function ask(text) {
-    var q = String(text || $('#input').value || '').trim();
-    /* 输入校验：去控制字符、限长、拒绝纯符号 */
-    q = q.replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
-    if (q.length > MAX_Q) {
-      q = q.slice(0, MAX_Q);
-      toast('提问已截断到 ' + MAX_Q + ' 字');
+  /* 输入归一与校验的唯一入口。
+   * 主输入框超长时截断并提示；编辑框超长时拒绝——用户应自己决定删哪句，
+   * 静默截断会让人以为发出的是原文。两个入口共用同一套清理与「必须含文字/数字」规则。 */
+  function normalizeQuery(raw, opt) {
+    opt = opt || {};
+    var max = opt.maxLen || MAX_Q;
+    var s = String(raw == null ? '' : raw)
+      .replace(/[\u0000-\u001f\u007f]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (!s) return { ok: false, code: 'empty', text: '', msg: '请输入包含文字或数字的内容' };
+    if (!/[\w一-龥]/.test(s)) return { ok: false, code: 'symbol', text: s, msg: '请输入包含文字或数字的内容' };
+    if (s.length > max) {
+      return opt.overflow === 'truncate'
+        ? { ok: true, code: 'truncated', text: s.slice(0, max), msg: '提问已截断到 ' + max + ' 字' }
+        : { ok: false, code: 'toolong', text: s, msg: '超过 ' + max + ' 字，请缩短' };
     }
+    return { ok: true, code: 'ok', text: s, msg: '' };
+  }
+
+  function ask(text) {
+    /* 只有附件、没有文字时用中性默认问题，而不是直接拒绝 */
     var atts = (state.attachments || []).slice();
-    /* 只有附件、没有文字时，用一个中性的默认问题，而不是直接拒绝 */
-    if (!q && atts.length) q = '请根据我上传的附件给出说明';
-    if (!q || !/[\w一-龥]/.test(q)) {
-      toast('请输入包含文字或数字的问题');
+    var norm = normalizeQuery(text || $('#input').value, { overflow: 'truncate' });
+    if (!norm.ok && !(atts.length && norm.code === 'empty')) {
+      toast(norm.msg);
       return;
     }
+    var q = norm.ok ? norm.text : '请根据我上传的附件给出说明';
+    if (norm.code === 'truncated') toast(norm.msg);
     if (state.busy) return;
     $('#input').value = '';
     $('#input').style.height = 'auto';

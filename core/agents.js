@@ -840,6 +840,23 @@
   }
 
   /* ---------- 目标类问答 ---------- */
+  /* 结论句统一收口：保证「先给能确证的，再给不确定的」。
+   * 各分支可以自由写 head/sub；但如果把「知识库没有」写成结论首句、
+   * 把算出来的事实写成副标题，这里会换回来——顺序不会被写反。
+   * 这类问题已经出现过三次（未收录+罗列能力 / 未知档改写 / 结论首句），
+   * 与其每处各修一遍，不如在出口拦一次。 */
+  var KB_GAP = /(?:本地)?知识库(?:没有|未收录)|没有可引用的条目|查不到|无法确证/;
+  function settleVerdict(head, sub) {
+    var h = String(head == null ? '' : head).trim();
+    var s = String(sub == null ? '' : sub).trim();
+    if (!h && !s) return { head: '', sub: '', swapped: false };
+    if (!h) return { head: s, sub: '', swapped: true };
+    if (KB_GAP.test(h) && s && !KB_GAP.test(s)) {
+      return { head: s, sub: h, swapped: true };
+    }
+    return { head: h, sub: s, swapped: false };
+  }
+
   function composeTarget(answer, ctx, cfg, t, intent) {
     var tz = ctx.tz, P = prec(cfg);
     var entry = t && t.kind === 'kb' ? t.entry : null;
@@ -925,7 +942,13 @@
       head = posLine || (entry ? entry.summary : (target ? target.name : '该目标'));
       sub = entry ? clamp(entry.summary, 78) : '';
     }
-    answer.sections.push({ kind: 'verdict', head: head, sub: sub, chips: [] });
+    /* 统一收口：顺序写反的在这里被纠正，并留下可观测的执行记录 */
+    var sv = settleVerdict(head, sub);
+    if (sv.swapped) {
+      answer.trace.push(step('critic', '校正结论顺序', '把可确证事实提到首句',
+        { tool: 'verdict-gate', check: RT.check('结论顺序', true, '缺口说明降为副标题') }));
+    }
+    answer.sections.push({ kind: 'verdict', head: sv.head, sub: sv.sub, chips: [] });
 
     /* ---- 依据 ---- */
     var items = [];
@@ -2169,6 +2192,7 @@
   root.AgentCore = {
     AGENTS: AGENTS, ATTRS: ATTRS, CITIES: CITIES, AGENT_BY_ID: AGENT_BY_ID,
     setGear: setGear,
+    settleVerdict: settleVerdict,
     defaultConfig: defaultConfig, buildAnswer: buildAnswer, resolveTargets: resolveTargets, preview: preview,
     setCustomAgents: setCustomAgents, ATTR_TARGET: ATTR_TARGET, statusLabel: statusLabel,
     findCity: findCity, searchPlaces: searchPlaces, nearestPlace: nearestPlace, ianaOffset: ianaOffset,
