@@ -1805,17 +1805,124 @@
     return html;
   }
 
-  /* 复制文本：优先 clipboard API，失败时提示手动选中 */
+  /* 复制文本。顺序刻意如此：
+   * 1) 先试同步的 execCommand —— 不受安全上下文与用户激活限制，反馈是即时的
+   * 2) 失败再走 clipboard API，并加 800ms 超时兜底（无用户激活时它可能永远不 settle）
+   * 3) 都失败才提示手动选中
+   * 按钮短暂改为「已复制」并禁用，避免连点。 */
   function copyText(txt, btn) {
+    var settled = false;
     function done(ok) {
+      if (settled) return;
+      settled = true;
       if (!btn) return;
       var old = btn.textContent;
       btn.textContent = ok ? '已复制' : '请手动选中';
-      setTimeout(function () { btn.textContent = old; }, 1400);
+      btn.disabled = true;
+      setTimeout(function () { btn.textContent = old; btn.disabled = false; }, 1400);
     }
+    /* 1) 同步路径 */
+    var ok = false;
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = txt;
+      ta.style.position = 'fixed';
+      ta.style.top = '-1000px';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+    } catch (e) { ok = false; }
+    if (ok) { done(true); return; }
+
+    /* 2) 异步路径 + 超时兜底 */
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(txt).then(function () { done(true); }, function () { done(false); });
-    } else { done(false); }
+      navigator.clipboard.writeText(txt).then(
+        function () { done(true); },
+        function () { done(false); }
+      );
+      setTimeout(function () { done(false); }, 800);
+    } else {
+      done(false);
+    }
+  }
+
+  /* 用户消息的操作条：复制 / 重新编辑 */
+  function userActions(text, msgEl, bubbleEl) {
+    var bar = el('div', 'u-acts');
+    var cp = el('button', 'u-act', '复制');
+    cp.type = 'button';
+    cp.title = '复制这条提问';
+    cp.addEventListener('click', function () { copyText(text, cp); });
+    var ed = el('button', 'u-act', '重新编辑');
+    ed.type = 'button';
+    ed.title = '修改后重新发送';
+    ed.addEventListener('click', function () { startEdit(text, msgEl, bubbleEl); });
+    bar.appendChild(cp);
+    bar.appendChild(ed);
+    return bar;
+  }
+
+  /* 就地编辑：回车重发、Esc 取消。
+   * 守卫：空内容 / 纯符号 / 超长 / 生成中 / 内容未变 —— 每种都给明确提示，不静默失败。 */
+  function startEdit(text, msgEl, bubbleEl) {
+    if (msgEl.querySelector('.u-edit')) return;      /* 已在编辑态，避免重复打开 */
+    var box = el('div', 'u-edit');
+    var ta = el('textarea', 'u-ta');
+    ta.value = text;
+    ta.rows = Math.min(7, Math.max(2, Math.ceil(text.length / 26)));
+    box.appendChild(ta);
+
+    var ops = el('div', 'u-edit-ops');
+    var ok = el('button', 'u-btn primary', '重新发送');
+    ok.type = 'button';
+    var cancel = el('button', 'u-btn', '取消');
+    cancel.type = 'button';
+    var tip = el('span', 'u-tip', '');
+    ops.appendChild(ok);
+    ops.appendChild(cancel);
+    ops.appendChild(tip);
+    /* 原消息带附件时必须提醒：重发只发文字，附件不会跟着走 */
+    if (msgEl.querySelector('.ubble-atts')) {
+      ops.appendChild(el('span', 'u-tip note', '原附件不会随重发一起发送'));
+    }
+    box.appendChild(ops);
+
+    bubbleEl.style.display = 'none';
+    msgEl.querySelector('.u-wrap').appendChild(box);
+    ta.focus();
+    ta.select();
+
+    function close() {
+      box.remove();
+      bubbleEl.style.display = '';
+    }
+
+    var fired = false;   /* 幂等：同一次编辑只提交一次，避免回车与点击叠加导致重复发送 */
+
+    function submit() {
+      if (fired) return;
+      var v = ta.value.replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim();
+      if (!v || !/[\w一-龥]/.test(v)) { tip.textContent = '请输入包含文字或数字的内容'; return; }
+      if (v.length > MAX_Q) { tip.textContent = '超过 ' + MAX_Q + ' 字，请缩短'; return; }
+      if (v === text) { tip.textContent = '内容没有变化'; return; }
+      if (state.busy) { tip.textContent = '正在生成，请稍后再试'; return; }
+      fired = true;
+      msgEl.classList.add('edited');   /* 旧消息留痕：已重新编辑 */
+      close();
+      ask(v);                          /* 修改后直接重发 */
+    }
+
+    ok.addEventListener('click', submit);
+    cancel.addEventListener('click', close);
+    ta.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(); }
+      else if (e.key === 'Escape') { e.preventDefault(); close(); }
+    });
+    ta.addEventListener('input', function () {
+      if (tip.textContent) tip.textContent = '';
+    });
   }
 
   function renderTrace(trace) {
@@ -3376,7 +3483,10 @@
     }
 
     var u = el('div', 'msg user');
-    u.appendChild(el('div', 'bubble', esc(q)));
+    /* 用一层纵向容器包住气泡、附件条与操作条，保证三者右对齐且不互相挤占 */
+    var uWrap = el('div', 'u-wrap');
+    var bubble = el('div', 'bubble', esc(q));
+    uWrap.appendChild(bubble);
     /* 用户消息里带上附件缩略，便于回看这一问挂了什么 */
     if (atts.length) {
       var strip = el('div', 'ubble-atts');
@@ -3388,8 +3498,10 @@
         c.appendChild(el('span', 'nmx', esc(it.name)));
         strip.appendChild(c);
       });
-      u.appendChild(strip);
+      uWrap.appendChild(strip);
     }
+    uWrap.appendChild(userActions(q, u, bubble));
+    u.appendChild(uWrap);
     $('#thread').appendChild(u);
     $('#scroll').scrollTop = $('#scroll').scrollHeight;
     /* 附件已随消息发出，清空待发送区 */
