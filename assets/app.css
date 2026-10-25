@@ -1729,3 +1729,52 @@ details.tip .body b { color: var(--ink-2); }
 .srcbadge.t-unknown { color: #a86212; border-color: rgba(168, 98, 18, 0.32); }
 .srcbadge.t-fetch { color: var(--accent); }
 .dot.warn { background: #d08b2c; }
+
+/* ================= 叙述层：一段连贯的话 + 脚注 ================= */
+.narr { padding: 2px 0 4px; }
+.narr-lead {
+  font-size: 15px; line-height: 1.78; color: var(--ink);
+  margin: 0 0 10px; font-weight: 500; letter-spacing: -0.005em;
+}
+.narr-body { font-size: 13px; line-height: 1.95; color: var(--ink-2); margin: 0 0 9px; }
+.narr-body:last-of-type { margin-bottom: 0; }
+.narr-body .nv {
+  font-family: var(--mono); font-weight: 600; font-size: 12.5px;
+  color: var(--ink); letter-spacing: -0.01em;
+}
+sup.fn {
+  font-size: 9px; color: var(--accent); cursor: help;
+  padding-left: 1px; vertical-align: super; line-height: 0; font-weight: 600;
+}
+.narr-caveat {
+  font-size: 12px; line-height: 1.75; color: #a86212;
+  background: rgba(168, 98, 18, 0.06);
+  border-left: 2px solid rgba(168, 98, 18, 0.42);
+  padding: 7px 11px; border-radius: 4px; margin: 11px 0 4px;
+}
+.narr-fns {
+  margin-top: 11px; padding-top: 8px;
+  border-top: 1px dashed var(--line-soft);
+}
+.narr-fn {
+  display: flex; align-items: baseline; gap: 7px;
+  font-size: 10.5px; color: var(--muted-2); line-height: 1.75; margin: 2px 0;
+}
+.narr-fn .n { width: 12px; text-align: right; color: var(--accent); font-family: var(--mono); font-weight: 600; }
+.narr-fn .lab { color: var(--muted); }
+.narr-fn a { margin-left: auto; color: var(--accent); text-decoration: none; white-space: nowrap; }
+.narr-fn a:hover { text-decoration: underline; }
+
+/* 核对层：一个折叠条容纳所有证据与核验 */
+.verify-fold { margin-top: 15px; }
+.verify-fold > summary {
+  font-size: 10.5px; color: var(--muted-2); cursor: pointer;
+  list-style: none; display: inline-flex; align-items: center; gap: 5px; padding: 2px 0;
+}
+.verify-fold > summary::-webkit-details-marker { display: none; }
+.verify-fold > summary::before {
+  content: '▸'; font-size: 9px; display: inline-block; transition: transform .15s ease;
+}
+.verify-fold[open] > summary::before { transform: rotate(90deg); }
+.verify-fold > summary:hover { color: var(--accent); }
+.verify-fold > .sec { margin-top: 10px; }

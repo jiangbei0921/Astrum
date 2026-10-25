@@ -2240,6 +2240,108 @@
     return wrap;
   }
 
+  /* ============================================================
+     叙述层：把「结论 + 依据 + 边界」合成一段连贯的话，出处以脚注角标挂载。
+     只处理以事实为主的本地答案；含结构化章节（rank/observe/visual…）
+     或走检索的答案仍交给原渲染，避免把列表硬编成散文。
+     ============================================================ */
+  function renderNarrative(ans) {
+    if (!ans.meta || ans.meta.tier === 'unknown' || ans.meta.tier === 'chat') return null;
+    if (ans.intent === 'smalltalk') return null;
+
+    var vIdx = -1, eIdx = -1, bIdx = -1, hasWeb = false;
+    ans.sections.forEach(function (s, i) {
+      if (s.kind === 'synthesis' || s.kind === 'web') hasWeb = true;
+      if (vIdx < 0 && s.kind === 'verdict') vIdx = i;
+      if (eIdx < 0 && s.kind === 'evidence' && (s.items || []).length) eIdx = i;
+      if (bIdx < 0 && s.kind === 'boundary') bIdx = i;
+    });
+    /* 走检索的答案证据以引文为主，硬编成散文会丢原文，交给原渲染 */
+    if (hasWeb) return null;
+    if (vIdx < 0 || eIdx < 0) return null;
+
+    /* 说明：观测建议 / 排序 / 星图这类结构化章节不参与叙述，仍各自成块——
+     * 它们本身是表格或画布，硬编成句子只会更难读。
+     * 叙述层只接管「结论 + 依据 + 边界」这部分散文。 */
+    var v = ans.sections[vIdx], ev = ans.sections[eIdx];
+    var bd = bIdx >= 0 ? ans.sections[bIdx] : null;
+    var box = el('div', 'narr');
+
+    /* 脚注池 */
+    var notes = [];
+    function addNote(label, detail, url) {
+      notes.push({ i: notes.length + 1, label: label, detail: detail, url: url || '' });
+      return notes.length;
+    }
+    var srcNote = 0;
+    if (ev.sources && ev.sources.length) {
+      srcNote = addNote(ev.sources[0].n, '本地知识库条目', ev.sources[0].u || '');
+    }
+
+    /* 第一句：结论 */
+    box.appendChild(el('p', 'narr-lead', esc(v.head)));
+
+    /* 数值句与属性句 */
+    var dataItems = [], metaItems = [];
+    (ev.items || []).forEach(function (it) {
+      if (/[0-9]/.test(String(it.value))) dataItems.push(it); else metaItems.push(it);
+    });
+    if (dataItems.length) {
+      var dh = dataItems.map(function (x) {
+        return esc(x.label) + ' <b class="nv">' + esc(x.value) + '</b>';
+      }).join('、') + '。';
+      if (srcNote) dh += '<sup class="fn">' + srcNote + '</sup>';
+      box.appendChild(el('p', 'narr-body', dh));
+    }
+    if (metaItems.length) {
+      box.appendChild(el('p', 'narr-body', metaItems.map(function (x) {
+        return esc(x.label) + '为 ' + esc(x.value);
+      }).join('；') + '。'));
+    }
+    if (ev.para) {
+      box.appendChild(el('p', 'narr-body', esc(ev.para) + (srcNote ? '<sup class="fn">' + srcNote + '</sup>' : '')));
+    }
+    if (bd && bd.text) {
+      box.appendChild(el('p', 'narr-caveat', '⚠ ' + esc(tn(bd.text))));
+    }
+
+    /* 脚注行 */
+    if (notes.length) {
+      var fnBox = el('div', 'narr-fns');
+      notes.forEach(function (n) {
+        var line = el('div', 'narr-fn');
+        line.innerHTML = '<span class="n">' + n.i + '</span>' +
+          '<span class="lab">' + esc(n.label) + '</span>' +
+          '<span class="det">' + esc(n.detail) + '</span>' +
+          (n.url ? '<a href="' + esc(n.url) + '" target="_blank" rel="noopener">原文</a>' : '');
+        fnBox.appendChild(line);
+      });
+      box.appendChild(fnBox);
+    }
+
+    return { el: box, consumed: [vIdx, eIdx].concat(bd ? [bIdx] : []) };
+  }
+
+  /* 核对层：证据概览 / 检索证据 / 引用核验 / 冲突 收进同一个折叠条 */
+  var VERIFY_KINDS = { synthesis: 1, web: 1, citation: 1, conflict: 1 };
+  function renderVerifyStrip(list) {
+    var det = el('details', 'verify-fold');
+    var n = 0;
+    list.forEach(function (s) {
+      if (s.kind === 'synthesis') {
+        (s.groups || []).forEach(function (g) { n += (g.points || []).length; });
+      } else if (s.kind === 'web' && s.items) {
+        n += s.items.length;
+      }
+    });
+    det.appendChild(el('summary', '', '核对' + (n ? ' · ' + n + ' 条证据' : '')));
+    list.forEach(function (s) {
+      var node = sectionNode(s);
+      det.appendChild(node);
+    });
+    return det;
+  }
+
   function renderAnswer(ans, extra) {
     /* 术语双轨按「本条答案实际使用的语体」决定，而不是全局设置 */
     CURRENT_REG = (ans.meta && ans.meta.register === 'pro') ? 'pro' : 'pop';
@@ -2256,13 +2358,25 @@
       card.appendChild(renderTrace(ans.trace));
     }
     var pending = [];
-    ans.sections.forEach(function (s) {
+    var consumed = {};
+    /* 叙述层：能合成一段话的就合成，读者看到的是「一个回答」而不是一叠卡片 */
+    var narr = renderNarrative(ans);
+    if (narr) {
+      card.appendChild(narr.el);
+      narr.consumed.forEach(function (i) { consumed[i] = 1; });
+    }
+    var verifyList = [];
+    ans.sections.forEach(function (s, i) {
+      if (consumed[i]) return;
       /* 问候类输入没有事实可评审，跳过评审章节，避免出现「存在缺口」的噪音 */
       if (ans.intent === 'smalltalk' && s.kind === 'review') return;
+      /* 核对类章节统一收进一个折叠条，不再各自占一块 */
+      if (VERIFY_KINDS[s.kind]) { verifyList.push(s); return; }
       var n = sectionNode(s);
       if (n._canvas) pending.push(n._canvas);
       card.appendChild(n);
     });
+    if (verifyList.length) card.appendChild(renderVerifyStrip(verifyList));
     card.appendChild(metaBar(ans));
     msg.appendChild(card);
     $('#thread').appendChild(msg);
