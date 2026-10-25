@@ -7,7 +7,7 @@
  */
 (function (root) {
   'use strict';
-  var A = root.Astro, CAT = root.CATALOG, KB = root.KNOWLEDGE;
+  var A = root.Astro, CAT = root.CATALOG, KB = root.KNOWLEDGE, RT = root.AstroRuntime;
 
   /* ================= 城市与观测地 ================= */
   var CITIES = [
@@ -438,7 +438,10 @@
       if (KW.knowledge.test(text)) return 'knowledge-target';
       return 'intro-target';
     }
-    if (KW.observe.test(text) || KW.tonight.test(text)) return 'tonight';
+    /* 兜底：没有实体时，只有明确在问「能看什么」才走 tonight。
+     * 旧实现把 KW.observe（含「在哪」「观测」）也算进来，导致任何不认识的问题
+     * 都被答成「今晚最值得看的是…」——这是「答非所问」的主要来源。 */
+    if (/能看到|看得到|看什么|有什么可看|值得看|今晚|今夜/.test(text)) return 'tonight';
     return 'unknown';
   }
 
@@ -543,8 +546,17 @@
     return base;
   }
 
-  function step(agent, action, detail) {
-    return { agent: agent, action: action, detail: detail || '' };
+  /* 执行记录（契约二）。extra 可携带 tool / ok / check，
+   * 让 trace 反映真实执行而非流程标签。旧的三参数调用保持兼容。 */
+  function step(agent, action, detail, extra) {
+    var r = { agent: agent, action: action, detail: detail || '' };
+    if (extra) {
+      if (extra.tool) r.tool = extra.tool;
+      if (extra.ok === false) r.ok = false;
+      if (extra.check) r.check = extra.check;
+      if (extra.ms) r.ms = extra.ms;
+    }
+    return r;
   }
 
   function chipsFor(target, ctx, isConcept) {
@@ -900,14 +912,16 @@
     if (entry) {
       var limit = depth === 'brief' ? 2 : depth === 'deep' ? facts.length : 4;
       items = facts.slice(0, limit).map(function (f) { return { label: f[0], value: f[1] }; });
-      answer.trace.push(step('vega', '检索知识库', '命中「' + entry.id + '」· 置信度 ' + entry.confidence.toFixed(2) + ' · ' + freshnessLabel(entry.freshness)));
+      answer.trace.push(step('vega', '检索知识库', '命中「' + entry.id + '」· 置信度 ' + entry.confidence.toFixed(2) + ' · ' + freshnessLabel(entry.freshness),
+        { tool: 'kb-index', check: RT.check('知识库命中', true, entry.id + ' · ' + entry.facts.length + ' 条事实') }));
     } else if (target) {
       items = [
         { label: '坐标 (J2000)', value: 'RA ' + A.fmtRA(target.ra) + ' / Dec ' + A.fmtDec(target.dec) },
         { label: '视星等', value: String(target.mag) },
         { label: '类型', value: t.kind === 'star' ? '恒星' : t.kind === 'planet' ? '行星' : t.kind === 'moon' ? '天然卫星' : '深空天体' }
       ];
-      answer.trace.push(step('vega', '星表查询', '未收录详解条目 · 降级为星表级事实'));
+      answer.trace.push(step('vega', '星表查询', '未收录详解条目 · 降级为星表级事实',
+        { tool: 'catalog', check: RT.check('详解条目', false, '只有星表级事实，无解释性内容') }));
     }
     if (ep && target && intent !== 'knowledge-target') {
       /* 时刻必须带时区，否则数值无法复算 */
@@ -1797,24 +1811,66 @@
     return answer;
   }
 
+  /* 未知档：按问题线索给出「缺什么 / 去哪拿 / 次优方案」。
+   * 契约要求不能只列「我能回答的方向」——那是把责任推回给用户。 */
+  function gapFor(q) {
+    var s = String(q || '');
+    if (/论文|文献|研究|最新|测量|发现|期刊|doi/i.test(s)) {
+      return {
+        gap: '本地知识库只有 160 条通用条目，没有收录具体论文的最新测量值。',
+        where: 'NASA ADS（ui.adsabs.harvard.edu）按关键词检索，或 arXiv astro-ph 预印本；拿到 DOI 后可回来核对数值与单位。',
+        alt: '贴一段论文摘要或数据表给我，我可以按已有事实做比对，并标出与本地数据的差异。'
+      };
+    }
+    if (/图像|照片|拍摄|观测数据|光谱|光变|拟合/i.test(s)) {
+      return {
+        gap: '本地没有原始观测数据，也不做图像处理与拟合。',
+        where: 'MAST / IRSA / ZTF 归档按坐标检索；星表级别的问题走 SIMBAD 或 VizieR。',
+        alt: '如果你有 FITS 文件，直接拖进来——我能读出目标、坐标、曝光与滤镜，并定位到星图。'
+      };
+    }
+    if (/实时|云量|天气|seeing|Kp|极光|光污染/i.test(s)) {
+      return {
+        gap: '本地是离线快照，没有实时气象与空间天气数据。',
+        where: '云量与 seeing 看 Open-Meteo 或天文台站预报；地磁活动看 NOAA SWPC 的 Kp 指数。',
+        alt: '我可以先按你的地点和时间算出目标的可观测窗口与月亮干扰，天气那一项你对照一下即可。'
+      };
+    }
+    if (/坐标|星表|自行|视差|光谱型|距离|星等/i.test(s)) {
+      return {
+        gap: '本地星表是 J2000 快照，未覆盖全部源，也没有测光与分光数据。',
+        where: 'SIMBAD（名称解析）、VizieR（星表）、Gaia 归档（TAP/ADQL）都能按坐标或名称查到权威值。',
+        alt: '把天体名或坐标给我，我先用本地星表给退化值，并明确标出哪些字段缺失。'
+      };
+    }
+    return {
+      gap: '本地知识库与星表都没有命中这个问法。',
+      where: '换一个更具体的问法（给出天体名、时间、地点或坐标）通常就能命中；涉及专业结论时需要外部文献库。',
+      alt: '告诉我你想解决的具体问题（比如「想拍什么」「想核对哪个数值」），我按可算/可查的路径拆一遍。'
+    };
+  }
+
   function composeFallback(answer, ctx, cfg) {
-    answer.trace.push(step('muse', '边界判定', '无匹配实体 · 无匹配意图'));
+    var g = gapFor(answer.query);
+    answer.trace.push(step('muse', '边界判定', '无匹配实体 · 无匹配意图', {
+      tool: 'intent-router', check: RT.check('知识库与星表命中', false, '零命中')
+    }));
     answer.sections.push({
-      kind: 'boundary', mode: 'uncertain',
-      text: '这个问题不在我当前可确证的范围内。我的处理方式是：先检索知识库与星表，若无命中就明确告知，而不是拼凑一个听起来合理的答案。'
+      kind: 'verdict',
+      head: '这个问题我暂时给不出可靠答案。',
+      sub: '下面写清楚缺什么、从哪里能拿到，以及我能先给的次优答案。'
     });
     answer.sections.push({
-      kind: 'evidence', title: '我可以可靠回答的方向', register: 'pop',
+      kind: 'evidence', title: '缺口与获取路径', register: 'pop',
       items: [
-        { label: '知识问答', value: '天体距离、性质、恒星演化、观测史（有出处的事实）' },
-        { label: '观测建议', value: '按日期与地点计算方位、高度、升落与最佳窗口' },
-        { label: '天象科普', value: '日月食、流星雨、极光、合相的成因与观看方式' },
-        { label: '星图查询', value: '星座识别、连星形状、目标的定位路径' }
+        { label: '缺什么', value: g.gap },
+        { label: '去哪拿', value: g.where },
+        { label: '次优方案', value: g.alt }
       ],
-      para: '若你问的是专业研究结论（如某篇论文的最新测量值）或实时天象（如今晚云量、当前 Kp 指数），本地离线数据无法保证时效，应接入对应的在线数据源。'
+      para: '我宁可把缺口说清楚，也不拼一个听起来合理、却无法核实来源的答案。'
     });
     answer.sections.push({ kind: 'followup', items: ['今晚适合看什么？', '猎户座大星云怎么找？', '为什么会有月相变化？'] });
-    answer.meta = { agents: ['muse', 'vega'], confidence: 0.3, freshness: 'static', register: 'pop', computed: false };
+    answer.meta = { agents: ['muse', 'vega'], confidence: 0.3, freshness: 'static', register: 'pop', computed: false, tier: 'unknown' };
     return answer;
   }
 

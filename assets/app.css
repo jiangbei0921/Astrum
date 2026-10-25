@@ -1711,3 +1711,21 @@ details.tip .body b { color: var(--ink-2); }
 .review-fold > summary::before { content: '▸'; font-size: 9px; display: inline-block; transition: transform .15s ease; }
 .review-fold[open] > summary::before { transform: rotate(90deg); }
 .review-fold .review { margin-top: 8px; }
+
+/* ================= 契约层：执行记录与档位徽标 ================= */
+
+/* 执行结果标记：✓ 自检通过 / ! 有缺陷 / × 失败 */
+.trace .tmark { font-size: 9px; font-weight: 700; line-height: 1; }
+.trace .tmark.ok { color: #2f7d4f; }
+.trace .tmark.warn { color: #a86212; }
+.trace .tmark.bad { color: #c0392b; }
+.trace .tool {
+  font-family: var(--mono); font-size: 8px; color: var(--muted-2);
+  padding: 1px 4px; border-radius: 3px; background: var(--surface);
+  border: 1px solid var(--line-soft); letter-spacing: 0.01em;
+}
+
+/* 依据徽标按应答档位着色 */
+.srcbadge.t-unknown { color: #a86212; border-color: rgba(168, 98, 18, 0.32); }
+.srcbadge.t-fetch { color: var(--accent); }
+.dot.warn { background: #d08b2c; }

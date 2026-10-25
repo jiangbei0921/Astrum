@@ -1813,8 +1813,15 @@
       var a = AC.AGENT_BY_ID[s.agent] || AC.AGENTS[0];
       var chip = el('span', 't');
       chip.style.animationDelay = (i * 0.05).toFixed(2) + 's';
-      chip.innerHTML = '<span class="s" style="color:' + esc(a.color) + '">' + esc(a.sigil) + '</span>' +
-        '<span class="a">' + esc(a.name) + '</span><span class="d">' + esc(tn(s.action)) + '</span>';
+      /* 契约二：执行结果必须可见，不允许静默降级 */
+      var mark = '';
+      if (s.ok === false) mark = '<span class="tmark bad">×</span>';
+      else if (s.check && s.check.passed === false) mark = '<span class="tmark warn">!</span>';
+      else if (s.check && s.check.passed === true) mark = '<span class="tmark ok">✓</span>';
+      if (s.check && s.check.detail) chip.title = s.check.name + '：' + s.check.detail;
+      chip.innerHTML = mark + '<span class="s" style="color:' + esc(a.color) + '">' + esc(a.sigil) + '</span>' +
+        '<span class="a">' + esc(a.name) + '</span><span class="d">' + esc(tn(s.action)) + '</span>' +
+        (s.tool ? '<span class="tool">' + esc(s.tool) + '</span>' : '');
       t.appendChild(chip);
     });
     box.appendChild(t);
@@ -1825,8 +1832,18 @@
     var head = el('div', 'answer-head');
     var src = sourceById(state.settings.sourceId);
     var mem = ans.meta && ans.meta.memory;
+    /* 契约一：档位徽标让读者一眼知道「这个答案是算出来的、查来的、还是解释」 */
+    var tierKey = (ans.meta && ans.meta.tier) || 'infer';
+    var tier = window.AstroRuntime ? window.AstroRuntime.tierOf(tierKey) : { label: '', hint: '' };
+    var factText = {
+      compute: '本地计算 · 可复算',
+      fetch: '外部数据 · 附出处',
+      infer: '本地知识库 · 有出处',
+      unknown: '无可靠依据'
+    }[tierKey] || '本地星历 + 知识库';
     head.innerHTML =
-      '<span class="lbl">事实</span><span class="srcbadge"><span class="dot ok"></span>本地星历 + 知识库</span>' +
+      '<span class="lbl">依据</span><span class="srcbadge t-' + esc(tierKey) + '" title="' + esc(tier.hint) + '">' +
+      '<span class="dot ' + (tierKey === 'unknown' ? 'warn' : 'ok') + '"></span>' + esc(factText) + '</span>' +
       '<span class="lbl">表述</span><span class="srcbadge' + ((src.type === 'cloud' || src.type === 'device') ? ' model' : '') + '"><span class="dot ' +
       ((src.type === 'cloud' || src.type === 'device') ? 'accent' : 'ok') + '"></span>' +
       (state.settings.mode === 'compare' ? '并行对比' : esc(src.name)) + '</span>' +
@@ -2225,6 +2242,11 @@
   function renderAnswer(ans, extra) {
     /* 术语双轨按「本条答案实际使用的语体」决定，而不是全局设置 */
     CURRENT_REG = (ans.meta && ans.meta.register === 'pro') ? 'pro' : 'pop';
+    /* 契约一：档位由答案自身构成判定，渲染前统一标注 */
+    if (window.AstroRuntime) {
+      ans.meta = ans.meta || {};
+      ans.meta.tier = window.AstroRuntime.classify(ans).key;
+    }
     var msg = el('div', 'msg bot');
     var card = el('div', 'answer');
     rememberTurn(ans);
