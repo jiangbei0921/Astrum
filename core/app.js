@@ -5118,7 +5118,15 @@
           P.switchTo(p.id);
           location.reload();
         });
+        var rn = el('button', 'hist-btn', '重命名当前档案');
+        rn.type = 'button';
+        rn.addEventListener('click', function () {
+          var v = window.prompt('档案名称', cur.name);
+          if (!v) return;
+          if (P.rename(P.currentId(), v)) { renderSettings(); toast('已重命名'); }
+        });
         bar.appendChild(b1);
+        bar.appendChild(rn);
         P.list().forEach(function (p) {
           if (p.id === P.currentId()) return;
           var sw = el('button', 'hist-btn', '切到 ' + p.name);
