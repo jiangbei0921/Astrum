@@ -2759,8 +2759,9 @@
     try { recordSkill(ans); } catch (e) { console.warn('skill record failed', e); }
     /* 持久化：恢复历史时不重复落库、不自动滚动、不播动画 */
     var isRestore = !!(extra && extra.restore);
-    if (isRestore) { msg.classList.add('restored'); }
-    else if (window.Thread) {
+    if (isRestore) {
+      msg.classList.add('restored');
+    } else if (window.Thread) {
       try {
         var pB = window.Thread.appendBot(ans);
         if (pB && pB.catch) pB.catch(onSaveFail);
