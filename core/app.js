@@ -6094,6 +6094,26 @@
     return (clone.textContent || '').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
   }
 
+  /* 云量块：与 SIMBAD 并列，同样标注实时与来源 */
+  function weatherBox(r) {
+    var d = r.data || {};
+    var v = window.Weather.verdict(d);
+    var box = el('div', 'simbad-box wbox');
+    var rows = [['地点', r.city || '']];
+    if (d.cloud != null) rows.push(['云量', d.cloud + '%' + (d.cloudMax != null && d.cloudMax !== d.cloud ? '（峰值 ' + d.cloudMax + '%）' : '')]);
+    if (d.temp != null) rows.push(['气温', d.temp + '°C']);
+    if (d.wind != null) rows.push(['风速', d.wind + ' km/h']);
+    if (d.precip != null) rows.push(['降水', d.precip + '%']);
+    var html = '<div class="sb-head">天气 · 今晚' + (r.from === 'cache' ? '（30 分钟内缓存）' : '（实时）') + '</div>';
+    rows.forEach(function (kv) {
+      html += '<div class="sb-row"><span class="k">' + esc(kv[0]) + '</span><span class="v">' + esc(kv[1]) + '</span></div>';
+    });
+    html += '<div class="wb-verdict v-' + v.level + '">' + esc(v.text) + '</div>';
+    html += '<div class="sb-foot">来源 open-meteo.com · 只发送城市名与城市中心坐标 · 不参与推理</div>';
+    box.innerHTML = html;
+    return box;
+  }
+
   /* 从问句里认出星表编号（M42 / NGC 7331 / IC 10）。认不出就不提供查询入口。 */
   function guessIdent(q) {
     var m = String(q || '').match(/\b(M|NGC|IC)\s?(\d{1,4})\b/i);
@@ -6186,6 +6206,29 @@
         }).catch(function () { sb.textContent = 'SIMBAD'; sb.disabled = false; });
       });
       bar.appendChild(sb);
+    }
+
+    /* 只在「观测类」答案上提供云量：其它问题加天气是噪音 */
+    var obsLike = ans.meta && (ans.meta.freshness === 'ephemeris' ||
+      /今晚|可见|出摊|拍摄|能看|窗口/.test(String(ans.query || '')));
+    if (obsLike && window.Weather) {
+      var wb = el('button', 'ans-act', '云量');
+      wb.type = 'button';
+      wb.title = '查询' + (state.settings.city || '北京') + '的云量（会发送城市名与城市中心坐标）';
+      wb.addEventListener('click', function () {
+        wb.disabled = true;
+        wb.textContent = '查询中…';
+        window.Weather.lookup(state.settings.city || '北京').then(function (r) {
+          wb.textContent = '云量';
+          wb.disabled = false;
+          if (!r || !r.ok) {
+            toast(r && r.reason === 'timeout' ? '天气服务超时' : '未取到' + (state.settings.city || '北京') + '的天气');
+            return;
+          }
+          card.insertBefore(weatherBox(r), bar);
+        }).catch(function () { wb.textContent = '云量'; wb.disabled = false; });
+      });
+      bar.appendChild(wb);
     }
 
     return bar;
