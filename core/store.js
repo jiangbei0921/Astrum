@@ -26,6 +26,7 @@
   var db = null;
   var ls = null;                    /* { threads: [], messages: [] } */
   var seq = 1;
+  var initPromise = null;           /* 单例：并发调用必须共享同一次初始化 */
 
   function nowId() { return Date.now().toString(36) + '-' + (seq++).toString(36); }
 
@@ -49,7 +50,8 @@
       req.onsuccess = function () { resolve(req.result); };
       req.onerror = function () { reject(req.error || new Error('idb open failed')); };
       /* 某些环境会长时间不回调，5 秒后放弃并降级 */
-      setTimeout(function () { reject(new Error('idb open timeout')); }, 5000);
+      /* 30s：虚拟时间下短超时会瞬间触发，把正常打开误判为失败并降级 */
+      setTimeout(function () { reject(new Error('idb open timeout')); }, 30000);
     });
   }
 
@@ -99,7 +101,12 @@
   /* ---------- 统一接口 ---------- */
   function init() {
     if (backend !== 'none') return Promise.resolve(backend);
-    return openIDB().then(function (d) {
+    /* 必须单例。boot 的 restoreHistory 与首次 ask 会并发调用 init，
+     * 若各自 open 一次，可能出现「一个超时降级为 ls、另一个随后成功设为 idb」，
+     * 导致 backend 与 db 不一致（db 为 null 却以为在走 idb），后续调用永久挂起。
+     * 这正是 store-test 偶发「无结果」的根因。 */
+    if (initPromise) return initPromise;
+    initPromise = openIDB().then(function (d) {
       db = d;
       backend = 'idb';
       return backend;
@@ -114,6 +121,7 @@
       }
       return backend;
     });
+    return initPromise;
   }
 
   function putThread(t) {

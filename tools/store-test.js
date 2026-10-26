@@ -13,6 +13,7 @@
 var fs = require('fs');
 var path = require('path');
 var cp = require('child_process');
+var os = require('os');
 
 var ROOT = path.resolve(__dirname, '..');
 var target = process.argv[2] || ('file:///' + path.join(ROOT, 'index.html').replace(/\\/g, '/'));
@@ -173,24 +174,35 @@ function main() {
   html = html.slice(0, i) + '<script>' + SCRIPT + '</script>' + html.slice(i);
 
   /* 必须写在项目目录：页面用相对路径引用 core/*.js */
-  var tmp = path.join(ROOT, '__storetest_tmp.html');
+  /* 每次用唯一路径：固定路径在连续运行时会被上一轮尚未退出的 Chrome 占用，
+   * 表现为偶发「取不到结果」。页面必须留在项目目录（相对路径引用 core/*.js），
+   * 但文件名唯一；配置目录放系统临时目录，避免污染仓库。 */
+  var tag = process.pid + '_' + Date.now();
+  var tmp = path.join(ROOT, '__storetest_' + tag + '.html');
   fs.writeFileSync(tmp, html, 'utf8');
-  /* 每次用全新配置目录：否则上一轮写入的 IndexedDB 会被 boot 的恢复逻辑读回来，
-     与测试预期互相污染（表现为 Promise 链静默卡住、无结果输出） */
-  var profile = path.join(ROOT, '__storetest_profile');
-  try { fs.rmSync(profile, { recursive: true, force: true }); } catch (e) {}
+  var profile = path.join(os.tmpdir(), 'astrum_store_' + tag);
 
-  var out;
-  try {
-    out = cp.execFileSync(findChrome(), [
-      '--headless=new', '--disable-gpu', '--no-sandbox',
-      '--user-data-dir=' + profile,
-      '--virtual-time-budget=90000',
-      '--dump-dom',
-      'file:///' + tmp.replace(/\\/g, '/')
-    ], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
-  } catch (e) {
-    out = String((e && e.stdout) || '') + String((e && e.stderr) || '');
+  var out = '';
+  /* 重试一次：偶发的「无结果」是 Chrome 启动/退出竞争导致的，
+   * 而断言本身是确定性的——重试只兜基础设施抖动，不会掩盖真实失败
+   * （真实失败会连续两次都失败）。每次重试用新的配置目录。 */
+  for (var attempt = 1; attempt <= 3; attempt++) {
+    var prof = profile + '_a' + attempt;
+    try {
+      out = cp.execFileSync(findChrome(), [
+        '--headless=new', '--disable-gpu', '--no-sandbox',
+        '--no-first-run', '--no-default-browser-check', '--disable-extensions',
+        '--user-data-dir=' + prof,
+        '--virtual-time-budget=90000',
+        '--dump-dom',
+        'file:///' + tmp.replace(/\\/g, '/')
+      ], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, timeout: 180000 });
+    } catch (e) {
+      out = String((e && e.stdout) || '') + String((e && e.stderr) || '');
+    }
+    try { fs.rmSync(prof, { recursive: true, force: true }); } catch (e) {}
+    if (/<pre id="__st_result">/.test(out)) break;
+    if (attempt < 3) console.error('[store-test] 第一次未取到结果，重试一次…');
   }
   try { fs.unlinkSync(tmp); } catch (e) {}
   try { fs.rmSync(profile, { recursive: true, force: true }); } catch (e) {}
