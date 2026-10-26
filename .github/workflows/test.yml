@@ -48,6 +48,9 @@ jobs:
       - name: 安全策略 csptest
         run: node tools/csptest.js
 
+      - name: Worker 语法检查
+        run: node --input-type=module --check < worker/cors-proxy.js
+
       - name: 构建产物与工作区一致
         run: |
           if [ -n "$(git status --porcelain)" ]; then
