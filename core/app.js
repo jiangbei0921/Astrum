@@ -1848,6 +1848,28 @@
     }
   }
 
+  /* 用户气泡的唯一构造入口：实时发送与历史恢复共用，避免两条路径长得不一样 */
+  function userBubble(text, atts) {
+    var u = el('div', 'msg user');
+    var uWrap = el('div', 'u-wrap');
+    var bubble = el('div', 'bubble', esc(text));
+    uWrap.appendChild(bubble);
+    if (atts && atts.length) {
+      var strip = el('div', 'ubble-atts');
+      atts.forEach(function (it) {
+        var c = el('span', 'ubble-att');
+        c.innerHTML = (it.kind === 'image' && it.thumb)
+          ? '<img alt="" src="' + esc(it.thumb) + '">'
+          : '<span class="at">' + esc((it.ext || it.kind || '').replace('.', '').slice(0, 4).toUpperCase()) + '</span>';
+        c.appendChild(el('span', 'nmx', esc(it.name || '')));
+        strip.appendChild(c);
+      });
+      uWrap.appendChild(strip);
+    }
+    uWrap.appendChild(userActions(text, u, bubble));
+    u.appendChild(uWrap);
+    return u;
+  }
   /* 用户消息的操作条：复制 / 重新编辑 */
   function userActions(text, msgEl, bubbleEl) {
     var bar = el('div', 'u-acts');
@@ -2735,7 +2757,11 @@
       } catch (e) { console.warn('viz failed', e); }
     });
     try { recordSkill(ans); } catch (e) { console.warn('skill record failed', e); }
-    if (state.settings.autoScroll) {
+    /* 持久化：恢复历史时不重复落库、不自动滚动、不播动画 */
+    var isRestore = !!(extra && extra.restore);
+    if (isRestore) { msg.classList.add('restored'); }
+    else { try { if (window.Thread) window.Thread.appendBot(ans); } catch (e) {} }
+    if (!isRestore && state.settings.autoScroll) {
       var sc = $('#scroll');
       sc.scrollTo({ top: Math.max(0, msg.offsetTop - 12), behavior: 'smooth' });
     }
@@ -3611,27 +3637,8 @@
       setPlace(city);
     }
 
-    var u = el('div', 'msg user');
-    /* 用一层纵向容器包住气泡、附件条与操作条，保证三者右对齐且不互相挤占 */
-    var uWrap = el('div', 'u-wrap');
-    var bubble = el('div', 'bubble', esc(q));
-    uWrap.appendChild(bubble);
-    /* 用户消息里带上附件缩略，便于回看这一问挂了什么 */
-    if (atts.length) {
-      var strip = el('div', 'ubble-atts');
-      atts.forEach(function (it) {
-        var c = el('span', 'ubble-att');
-        c.innerHTML = (it.kind === 'image' && it.thumb)
-          ? '<img alt="" src="' + esc(it.thumb) + '">'
-          : '<span class="at">' + esc((it.ext || it.kind).replace('.', '').slice(0, 4).toUpperCase()) + '</span>';
-        c.appendChild(el('span', 'nmx', esc(it.name)));
-        strip.appendChild(c);
-      });
-      uWrap.appendChild(strip);
-    }
-    uWrap.appendChild(userActions(q, u, bubble));
-    u.appendChild(uWrap);
-    $('#thread').appendChild(u);
+    $('#thread').appendChild(userBubble(q, atts));
+    try { if (window.Thread) window.Thread.appendUser(q, atts); } catch (e) {}
     $('#scroll').scrollTop = $('#scroll').scrollHeight;
     /* 附件已随消息发出，清空待发送区 */
     if (atts.length) clearAttach();
@@ -5039,6 +5046,31 @@
       (function () { return skillPanel(); })()
     ]);
 
+    group('历史记录', [
+      (function () {
+        var box = el('div', 'hist-panel');
+        var b = (window.Thread && window.Thread.backend && window.Thread.backend()) || '';
+        var label = b === 'idb' ? 'IndexedDB' : b === 'ls' ? 'localStorage（降级）' : '不可用';
+        var turns = document.querySelectorAll('.msg.user').length;
+        box.appendChild(el('div', 'hist-meta',
+          '本机已保存 ' + turns + ' 轮 · 存储：' + label));
+        var b1 = el('button', 'hist-btn', '清空当前对话');
+        b1.type = 'button';
+        b1.addEventListener('click', function () {
+          if (window.confirm('清空当前对话？此操作不可撤销。')) clearHistory('current');
+        });
+        var b2 = el('button', 'hist-btn danger', '清空全部历史');
+        b2.type = 'button';
+        b2.addEventListener('click', function () {
+          if (window.confirm('清空全部历史对话？此操作不可撤销。')) clearHistory('all');
+        });
+        var bar = el('div', 'hist-bar');
+        bar.appendChild(b1); bar.appendChild(b2);
+        box.appendChild(bar);
+        return box;
+      })()
+    ]);
+
     group('对话与表述', [
       selectRow('默认语体', [['auto', '自适应'], ['pro', '专业'], ['pop', '科普']], s.register, function (v) {
         s.register = v; cfg.vega.scope = v; persist();
@@ -5609,6 +5641,44 @@
     });
   }
 
+  /* ================= 历史对话的恢复与清理 =================
+   * 恢复走「重放 ans」而不是存 DOM：DOM 会随渲染逻辑变化而过期，ans 不会。
+   * 恢复态强制关闭动画与自动滚动，避免刷新后整屏闪现。 */
+  function restoreHistory() {
+    if (!window.Thread) return;
+    window.Thread.init().then(function () {
+      return window.Thread.loadMessages();
+    }).then(function (msgs) {
+      if (!msgs || !msgs.length) return;
+      var thread = $('#thread');
+      thread.innerHTML = '';
+      state.asked = true;
+      mountComposer('dock');
+      msgs.forEach(function (m) {
+        if (m.role === 'user') {
+          thread.appendChild(userBubble(m.text, m.atts || []));
+        } else if (m.ans) {
+          try { renderAnswer(m.ans, { restore: true }); } catch (e) { console.warn('restore failed', e); }
+        }
+      });
+      var sc = $('#scroll');
+      if (sc) sc.scrollTop = sc.scrollHeight;
+    }).catch(function (e) { console.warn('history restore failed', e); });
+  }
+
+  function clearHistory(scope) {
+    if (!window.Thread) return;
+    var p = scope === 'all' ? window.Thread.clearAll() : window.Thread.clearCurrent();
+    return p.then(function () {
+      $('#thread').innerHTML = '';
+      state.asked = false;
+      state.memory = [];
+      AC.setMemory([]);
+      mountComposer('hero');
+      toast(scope === 'all' ? '已清空全部历史对话' : '已清空当前对话');
+      renderSettings();
+    }).catch(function (e) { toast('清空失败：' + String(e && e.message || e)); });
+  }
   function boot() {
     AC.setSkillResolver(skillFor);
     initContext();
@@ -5622,6 +5692,7 @@
     renderAgents();
     renderSources();
     bind();
+    restoreHistory();
     refreshPanels();
     mountComposer('hero');
     $$('#modeSeg button').forEach(function (b) {
@@ -5631,6 +5702,7 @@
 
     window.__astrum = {
       ask: ask, selectSource: selectSource, openSheet: openSheet, openAgent: openAgent,
+      restoreHistory: restoreHistory, clearHistory: clearHistory,
       /* 档案的程序化入口：与设置面板的 selectRow 等效。
        * 注意：ask() 每次都会用 state.settings 覆盖 AC.setGear，
        * 所以外部只调 AC.setGear 是无效的，必须改 state 再同步。 */

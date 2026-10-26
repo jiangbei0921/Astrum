@@ -1946,3 +1946,19 @@ sup.fn {
   color: var(--muted); cursor: pointer; font-family: inherit;
 }
 .skill-clear:hover { color: #b5352b; border-color: rgba(181,53,43,.4); }
+
+/* ================= 历史记录面板 ================= */
+.hist-panel { margin-top: 8px; }
+.hist-meta { font-size: 11px; color: var(--muted-2); padding-bottom: 8px; line-height: 1.6; }
+.hist-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+.hist-btn {
+  flex: 1 1 120px; font-size: 11px; padding: 6px 0;
+  border: 1px solid var(--line); border-radius: 6px;
+  background: var(--surface); color: var(--muted);
+  cursor: pointer; font-family: inherit;
+}
+.hist-btn:hover { color: #b5352b; border-color: rgba(181, 53, 43, 0.4); }
+.hist-btn.danger:hover { background: rgba(181, 53, 43, 0.06); }
+
+/* 恢复态：刷新后不重播入场动画、不做过渡 */
+.msg.restored, .msg.restored * { animation: none !important; transition: none !important; }
