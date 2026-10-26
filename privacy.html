@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#f6f4ef" />
+<meta name="referrer" content="no-referrer" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'" />
+<title>数据与隐私 · ASTRUM</title>
+<meta name="description" content="ASTRUM 的数据存放位置、外发范围与删除方式说明。" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%233b3bd6'/%3E%3Ccircle cx='16' cy='16' r='6.5' fill='none' stroke='%23f6f4ef' stroke-width='1.6'/%3E%3Ccircle cx='16' cy='16' r='2.2' fill='%23f6f4ef'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="assets/app.css" />
+<style>
+  .doc { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
+  .doc h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -0.01em; }
+  .doc .sub { color: #6b6a66; font-size: 13px; margin-bottom: 34px; }
+  .doc h2 { font-size: 15px; margin: 34px 0 10px; padding-top: 18px; border-top: 1px solid #e6e3dc; }
+  .doc p, .doc li { font-size: 13.5px; line-height: 1.85; color: #33322f; }
+  .doc ul { padding-left: 20px; }
+  .doc strong { font-weight: 600; }
+  .doc table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12.5px; }
+  .doc th, .doc td { text-align: left; padding: 7px 10px; border-bottom: 1px solid #eeece6; vertical-align: top; }
+  .doc th { color: #6b6a66; font-weight: 500; background: #faf9f6; }
+  .doc .note { background: #f6f4ef; border-left: 2px solid #3b3bd6; padding: 10px 14px; margin: 14px 0; font-size: 12.5px; }
+  .doc a { color: #3b3bd6; }
+  .doc .back { display: inline-block; margin-bottom: 26px; font-size: 12.5px; color: #6b6a66; text-decoration: none; }
+  .doc .back:hover { color: #3b3bd6; }
+</style>
+</head>
+<body>
+<div class="doc">
+  <a class="back" href="./">← 返回 ASTRUM</a>
+
+  <h1>数据与隐私</h1>
+  <p class="sub">最后更新：2026-10-26 · 本文只描述当前代码的实际行为，不承诺未来功能。</p>
+
+  <h2>一句话总结</h2>
+  <p><strong>ASTRUM 没有服务器，也不收集任何数据。</strong>你的设置与对话只存在你自己的浏览器里。除了你主动触发的联网查询，没有任何内容会离开这台设备。</p>
+
+  <h2>存放位置</h2>
+  <table>
+    <tr><th>数据</th><th>存在哪里</th><th>谁能看到</th></tr>
+    <tr><td>设置、技能记录、观测计划</td><td>你的浏览器 localStorage</td><td>只有你</td></tr>
+    <tr><td>对话与消息</td><td>你的浏览器 IndexedDB</td><td>只有你</td></tr>
+    <tr><td>多档案数据</td><td>同上，按档案分别存放</td><td>只有你</td></tr>
+    <tr><td>API 密钥（如填写）</td><td>你的浏览器 localStorage</td><td>只有你</td></tr>
+  </table>
+  <div class="note">我们无法读取、备份或恢复你的任何数据——没有这个通道，代码里就不存在。</div>
+
+  <h2>什么时候会有内容离开你的设备</h2>
+  <p>只有以下三种情况，且都由你的操作触发：</p>
+  <table>
+    <tr><th>操作</th><th>发送内容</th><th>接收方</th></tr>
+    <tr><td>点击答案下方的「SIMBAD」按钮</td><td>天体名称（如 M42）</td><td>simbad.u-strasbg.fr</td></tr>
+    <tr><td>使用联网检索来源</td><td>检索关键词</td><td>NASA / Wikipedia / OpenAlex / Semantic Scholar 等</td></tr>
+    <tr><td>填写自己的 API 密钥并选用云端模型</td><td><strong>对话内容</strong></td><td>OpenAI / Anthropic / DeepSeek 等对应厂商</td></tr>
+  </table>
+  <div class="note"><strong>关于云端模型：</strong>一旦选用，你发给 ASTRUM 的问题会作为请求发送给该厂商，并受其隐私政策约束。若不希望如此，请保持默认的本地来源（离线可用），不要配置密钥。</div>
+
+  <h2>我们不做什么</h2>
+  <ul>
+    <li>不做访问统计，不埋点，不写 cookie（本应用不使用任何第三方脚本）。</li>
+    <li>不读取你的定位。天气类功能若将来启用，会改为手动选择城市，而非定位。</li>
+    <li>不上传你的对话、设置或设备信息。</li>
+    <li>不向第三方转售或共享任何数据——因为没有可转售的数据。</li>
+  </ul>
+
+  <h2>如何删除你的数据</h2>
+  <ul>
+    <li><strong>清空对话</strong>：设置 → 历史记录 → 清空当前对话 / 清空全部历史。</li>
+    <li><strong>清空技能记录</strong>：设置 → 我的器材 → 清空全部技能记录。</li>
+    <li><strong>删除某个档案</strong>：设置 → 档案 → 删除档案（会连同该档案的全部数据）。</li>
+    <li><strong>彻底清除</strong>：在浏览器设置中清除本站点的数据（Cookie 与站点数据）。</li>
+  </ul>
+  <p>删除即不可恢复，因为不存在备份。</p>
+
+  <h2>导出带走</h2>
+  <p>设置 → 数据 → 导出全部数据，会生成一个 JSON 文件，包含设置、技能与全部对话。该文件保存在你的设备上，不经由任何服务器。导入时会作为一个新档案加入，不会覆盖现有数据。</p>
+
+  <h2>安全边界</h2>
+  <ul>
+    <li>数据安全取决于你设备与浏览器的安全，ASTRUM 无法提供超出此范围的保护。</li>
+    <li>若在共用设备上使用，请为不同使用者建立不同档案；档案之间的数据互不可见。</li>
+    <li>API 密钥以明文形式存放于浏览器本地存储，请勿在公共设备上填写。</li>
+  </ul>
+
+  <h2>变更</h2>
+  <p>若上述行为发生变化（例如引入账号系统或云端同步），本页会先行更新，并在应用内提示。当前版本不包含任何账号或云端存储功能。</p>
+
+  <p class="sub" style="margin-top:40px">如有疑问，请通过项目仓库提交 issue。</p>
+</div>
+</body>
+</html>
