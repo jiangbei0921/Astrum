@@ -17,9 +17,10 @@
 (function (root) {
   'use strict';
 
-  var DB_NAME = 'astrum';
+  /* 每个档案一个独立数据库：隔离由「连哪个库」保证，不靠查询过滤 */
+  var DB_NAME = (typeof window !== 'undefined' && window.Profile) ? window.Profile.ns('astrum') : 'astrum';
   var DB_VER = 1;
-  var LS_KEY = 'astrum.thread.v1';
+  var LS_KEY = (typeof window !== 'undefined' && window.Profile) ? window.Profile.ns('astrum.thread.v1') : 'astrum.thread.v1';
   var LS_LIMIT = 2 * 1024 * 1024;   /* localStorage 兜底时的自限容量 */
 
   var backend = 'none';

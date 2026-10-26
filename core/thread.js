@@ -12,7 +12,7 @@
   'use strict';
 
   var S = root.Store;
-  var CUR_KEY = 'astrum.thread.current';
+  var CUR_KEY = (typeof window !== 'undefined' && window.Profile) ? window.Profile.ns('astrum.thread.current') : 'astrum.thread.current';
   var SCHEMA = 1;
 
   var cur = null;        /* 当前线程对象 */

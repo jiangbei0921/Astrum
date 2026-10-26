@@ -5,7 +5,8 @@
   var A_ATT = window.Attachments;
 
   /* ================= 存储 ================= */
-  var KEY = 'astrum.v2';
+  /* 键名按档案命名空间生成；切换档案会整页重载，因此加载期计算即可 */
+  var KEY = window.Profile ? Profile.ns('astrum.v2') : 'astrum.v2';
   function load() {
     try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; }
   }
@@ -2898,7 +2899,7 @@
 
   /* ================= 目标目录与观测清单 =================
    * 对应论坛高频诉求：按类别浏览目标、只看在当前条件下找得到的、攒一份可导出的当晚清单。 */
-  var PLAN_KEY = 'astrum.plan.v1';
+  var PLAN_KEY = window.Profile ? Profile.ns('astrum.plan.v1') : 'astrum.plan.v1';
   var plan = [];
   var catGroup = 'messier';
 
@@ -5094,6 +5095,51 @@
       selectRow('相机', (window.OBSPLAN ? window.OBSPLAN.CAMERAS : []).map(function (c) { return [c.id, c.name]; }),
         s.camId || 'asi', function (v) { s.camId = v; AC.setGear(s.gearId, v); persist(); }),
       (function () { return skillPanel(); })()
+    ]);
+
+    group('档案', [
+      (function () {
+        var box = el('div', 'hist-panel');
+        var P = window.Profile;
+        if (!P) { box.appendChild(el('div', 'hist-meta', '档案未启用')); return box; }
+        var cur = P.current();
+        box.appendChild(el('div', 'hist-meta',
+          '当前：' + cur.name + (cur.id === P.DEFAULT ? '（默认档案，沿用原有数据，无需迁移）' : '（独立数据，与他人互不可见）')));
+        var bar = el('div', 'hist-bar');
+        var b1 = el('button', 'hist-btn', '新建档案');
+        b1.type = 'button';
+        b1.addEventListener('click', function () {
+          var n = window.prompt('档案名称', '');
+          if (!n) return;
+          var p = P.create(n);
+          if (!p) { toast('名称无效'); return; }
+          P.switchTo(p.id);
+          location.reload();
+        });
+        bar.appendChild(b1);
+        P.list().forEach(function (p) {
+          if (p.id === P.currentId()) return;
+          var sw = el('button', 'hist-btn', '切到 ' + p.name);
+          sw.type = 'button';
+          sw.addEventListener('click', function () { P.switchTo(p.id); location.reload(); });
+          bar.appendChild(sw);
+        });
+        box.appendChild(bar);
+        P.list().forEach(function (p) {
+          if (p.id === P.DEFAULT || p.id === P.currentId()) return;
+          var del = el('button', 'hist-btn danger', '删除档案 ' + p.name);
+          del.type = 'button';
+          del.addEventListener('click', function () {
+            if (!window.confirm('删除档案「' + p.name + '」及其本机数据？此操作不可撤销。')) return;
+            P.remove(p.id);
+            P.purgeKeys(p.id);
+            renderSettings();
+            toast('已删除档案');
+          });
+          box.appendChild(del);
+        });
+        return box;
+      })()
     ]);
 
     group('历史记录', [

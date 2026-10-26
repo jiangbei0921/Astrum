@@ -8,7 +8,7 @@
 (function (root) {
   'use strict';
 
-  var STORE_KEY = 'astrum.sources.v1';
+  var STORE_KEY = (typeof window !== 'undefined' && window.Profile) ? window.Profile.ns('astrum.sources.v1') : 'astrum.sources.v1';
 
   /* 内置来源。type: local（本地策略） | cloud（需配置） */
   var REGISTRY = [
@@ -1024,7 +1024,7 @@
   /* 版本号必须随 item 结构变更一起升级：
    * v1 → v2 增加了 dateKind / version / uncertainty，
    * 若不升版，10 分钟内的旧缓存会让新字段全部缺失（时间语义消失）。 */
-  var CACHE_KEY = 'astrum.search.cache.v2';
+  var CACHE_KEY = (typeof window !== 'undefined' && window.Profile) ? window.Profile.ns('astrum.search.cache.v2') : 'astrum.search.cache.v2';
   var CACHE_TTL = 10 * 60 * 1000;
   var searchCache = null;
 
