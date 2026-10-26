@@ -6094,6 +6094,38 @@
     return (clone.textContent || '').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
   }
 
+  /* 从问句里认出星表编号（M42 / NGC 7331 / IC 10）。认不出就不提供查询入口。 */
+  function guessIdent(q) {
+    var m = String(q || '').match(/\b(M|NGC|IC)\s?(\d{1,4})\b/i);
+    return m ? (m[1].toUpperCase() + m[2]) : '';
+  }
+
+  /* SIMBAD 结果单独成块：标注 realtime 与查询时间，与本地证据并列而不混入 */
+  function simbadBox(r, ident) {
+    var info = r.info || {};
+    var box = el('div', 'simbad-box');
+    var rows = [];
+    rows.push(['名称', info.id || ident]);
+    if (info.otype) rows.push(['类型', info.otype]);
+    if (info.ra != null && info.dec != null) {
+      rows.push(['赤经', Number(info.ra).toFixed(4) + '°']);
+      rows.push(['赤纬', Number(info.dec).toFixed(4) + '°']);
+    }
+    if (info.plx != null) {
+      var ly = window.Simbad.distanceLy(info);
+      rows.push(['视差', info.plx + ' mas' + (ly ? ' · 约 ' + ly + ' 光年' : '')]);
+    }
+    if (info.vmag != null) rows.push(['V 星等', String(info.vmag)]);
+    var html = '<div class="sb-head">SIMBAD · 实时查询</div>';
+    rows.forEach(function (kv) {
+      html += '<div class="sb-row"><span class="k">' + esc(kv[0]) + '</span><span class="v">' + esc(kv[1]) + '</span></div>';
+    });
+    html += '<div class="sb-foot">' + (r.from === 'cache' ? '本机缓存（24h 内）' : '刚刚查询') +
+      ' · 来源 simbad.u-strasbg.fr · 与本地证据并列，不参与推理</div>';
+    box.innerHTML = html;
+    return box;
+  }
+
   function answerActions(card, ans) {
     var bar = el('div', 'ans-acts');
 
@@ -6134,6 +6166,28 @@
     bar.appendChild(cp);
     bar.appendChild(sh);
     bar.appendChild(fb);
+    /* 只有问句里出现星表编号时才提供 SIMBAD 查询：没有明确天体就不该发请求 */
+    var ident = guessIdent(ans.query);
+    if (ident && window.Simbad) {
+      var sb = el('button', 'ans-act', 'SIMBAD');
+      sb.type = 'button';
+      sb.title = '向 SIMBAD 查询 ' + ident + ' 的权威数据（会发送该天体名称）';
+      sb.addEventListener('click', function () {
+        sb.disabled = true;
+        sb.textContent = '查询中…';
+        window.Simbad.lookup(ident).then(function (r) {
+          sb.textContent = 'SIMBAD';
+          sb.disabled = false;
+          if (!r || !r.ok) {
+            toast(r && r.reason === 'timeout' ? 'SIMBAD 超时，未取到实时值' : 'SIMBAD 未找到该天体');
+            return;
+          }
+          card.insertBefore(simbadBox(r, ident), bar);
+        }).catch(function () { sb.textContent = 'SIMBAD'; sb.disabled = false; });
+      });
+      bar.appendChild(sb);
+    }
+
     return bar;
   }
 
