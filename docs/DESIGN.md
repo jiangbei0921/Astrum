@@ -2559,3 +2559,46 @@ boot 的 `restoreHistory` 与首次 `ask` 会并发调用 `init()`。原实现�
 
 `selftest` 99/99、`store-test` 17/17（三次重试内）、`skill-test` 10/10、
 `consistency-test` 7/7、`a11y-test` 9/9、`research-test` 77/77、`csptest` 6/6。
+
+---
+
+## 四十四、store-test 抖动：两个真实缺陷（v4.9）
+
+### 44.1 找到的真问题
+
+**① `Store.init()` 不是单例**
+
+boot 的 `restoreHistory` 与首次 `ask` 会并发调用 `init()`。原实现各自 `openIDB()` 一次，
+可能出现「一个 5s 超时降级为 ls、另一个随后成功设为 idb」——于是 `backend` 与 `db` 不一致
+（以为在走 idb，实际 `db` 为 null），后续调用永久挂起。
+
+修复：`initPromise` 单例，并发调用共享同一次初始化。
+
+**② IDB 打开超时 5s，在虚拟时间下必然误判**
+
+`--virtual-time-budget` 会快进定时器，5s 超时在真实几十毫秒内就触发，
+把正常的打开误判为失败并降级。放宽到 30s。
+
+### 44.2 测试驱动的三项加固
+
+| 项 | 改动 |
+| --- | --- |
+| 临时页面 | 固定名 → 每次唯一（`__storetest_<pid>_<ts>.html`） |
+| 配置目录 | 项目目录内固定名 → 系统临时目录 + 唯一名 |
+| 失败重试 | 无 → 最多 3 次，仅当「取不到结果」时重试 |
+
+**为什么允许重试**：断言本身是确定性的，重试只兜基础设施抖动；
+真实失败会连续三次都失败，不会因重试而变绿。
+
+### 44.3 没做到的
+
+**没有彻底解决。** 三次重试后连续三次 17/17，但单次成功率仍有约 1/3 的失败概率，
+根因定位到「虚拟时间与 IndexedDB 异步 I/O 的交互」——定时器被快进，而真实 I/O 不会。
+
+要根治得换测试机制：改用真实等待（Playwright/Puppeteer 的 `waitForSelector`），
+代价是引入依赖，与本项目「零依赖」的约定冲突。**这是一个明确的取舍，不是遗漏。**
+
+### 44.4 验证
+
+`selftest` 99/99、`store-test` 17/17（三次重试内）、`skill-test` 10/10、
+`consistency-test` 7/7、`a11y-test` 9/9、`research-test` 77/77、`csptest` 6/6。
