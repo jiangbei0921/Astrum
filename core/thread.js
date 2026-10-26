@@ -58,9 +58,14 @@
 
   function ensure(firstText) {
     if (cur) return Promise.resolve(cur);
-    cur = makeThread(titleFrom(firstText));
-    writeCur(cur.id);
-    return S.putThread(cur).then(function () { return cur; });
+    /* 必须等存储就绪：boot 的 init 是异步的，若此时用户已开口，
+     * 直接写会得到「store not ready」。 */
+    return S.init().then(function () {
+      if (cur) return cur;
+      cur = makeThread(titleFrom(firstText));
+      writeCur(cur.id);
+      return S.putThread(cur).then(function () { return cur; });
+    });
   }
 
   function touch(patch) {

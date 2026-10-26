@@ -1987,3 +1987,79 @@ sup.fn {
   border: none; cursor: pointer; font-family: inherit; padding: 4px 6px;
 }
 .pc-skip:hover { color: var(--accent); }
+
+/* ================= 加载态：历史恢复骨架 ================= */
+.skel { display: flex; flex-direction: column; gap: 10px; padding: 20px 0 8px; }
+.sk {
+  height: 12px; border-radius: 6px;
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--line-soft) 37%, var(--surface-2) 63%);
+  background-size: 400% 100%;
+  animation: skShimmer 1.4s ease infinite;
+}
+.sk.w70 { width: 70%; }
+.sk.w40 { width: 40%; }
+.sk.w85 { width: 85%; }
+@keyframes skShimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
+
+/* ================= 移动端适配 ================= */
+@media (max-width: 560px) {
+  /* 新加的三个面板在窄屏上需要让位 */
+  .persona-card { margin: 12px 0 6px; padding: 14px 14px 12px; }
+  .pc-item { padding: 9px 11px; }
+  .pc-l { font-size: 12.5px; }
+
+  /* 技能行：窄屏隐藏意图与时间，保留目标 / 次数 / 删除 */
+  .skill-item { grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px; }
+  .skill-item .i,
+  .skill-item .w { display: none; }
+
+  /* 器材参数表：标签列收窄 */
+  .gfr { grid-template-columns: 62px minmax(0, 1fr); gap: 9px; }
+  .gfr .gv { font-size: 12px; }
+
+  /* 历史按钮竖排，避免挤压 */
+  .hist-bar { flex-direction: column; }
+  .hist-btn { flex: 1 1 auto; }
+
+  /* 叙述层首段略降，避免窄屏一行只剩几个字 */
+  .narr-lead { font-size: 14px; line-height: 1.72; }
+}
+
+/* ================= 加载态：历史恢复骨架 ================= */
+.skel { display: flex; flex-direction: column; gap: 10px; padding: 20px 0 8px; }
+.sk {
+  height: 12px; border-radius: 6px;
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--line-soft) 37%, var(--surface-2) 63%);
+  background-size: 400% 100%;
+  animation: skShimmer 1.4s ease infinite;
+}
+.sk.w70 { width: 70%; }
+.sk.w40 { width: 40%; }
+.sk.w85 { width: 85%; }
+@keyframes skShimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .sk { animation: none; } }
+
+/* ================= 移动端适配 ================= */
+@media (max-width: 560px) {
+  /* 新加的三个面板在窄屏上需要让位 */
+  .persona-card { margin: 12px 0 6px; padding: 14px 14px 12px; }
+  .pc-item { padding: 9px 11px; }
+  .pc-l { font-size: 12.5px; }
+
+  /* 技能行：窄屏隐藏意图与时间，保留目标 / 次数 / 删除 */
+  .skill-item { grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px; }
+  .skill-item .i,
+  .skill-item .w { display: none; }
+
+  /* 器材参数表：标签列收窄 */
+  .gfr { grid-template-columns: 62px minmax(0, 1fr); gap: 9px; }
+  .gfr .gv { font-size: 12px; }
+
+  /* 历史按钮竖排，避免挤压 */
+  .hist-bar { flex-direction: column; }
+  .hist-btn { flex: 1 1 auto; }
+
+  /* 叙述层首段略降，避免窄屏一行只剩几个字 */
+  .narr-lead { font-size: 14px; line-height: 1.72; }
+}

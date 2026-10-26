@@ -2760,7 +2760,12 @@
     /* 持久化：恢复历史时不重复落库、不自动滚动、不播动画 */
     var isRestore = !!(extra && extra.restore);
     if (isRestore) { msg.classList.add('restored'); }
-    else { try { if (window.Thread) window.Thread.appendBot(ans); } catch (e) {} }
+    else if (window.Thread) {
+      try {
+        var pB = window.Thread.appendBot(ans);
+        if (pB && pB.catch) pB.catch(onSaveFail);
+      } catch (e) { onSaveFail(e); }
+    }
     if (!isRestore && state.settings.autoScroll) {
       var sc = $('#scroll');
       sc.scrollTo({ top: Math.max(0, msg.offsetTop - 12), behavior: 'smooth' });
@@ -3638,7 +3643,12 @@
     }
 
     $('#thread').appendChild(userBubble(q, atts));
-    try { if (window.Thread) window.Thread.appendUser(q, atts); } catch (e) {}
+    if (window.Thread) {
+      try {
+        var pU = window.Thread.appendUser(q, atts);
+        if (pU && pU.catch) pU.catch(onSaveFail);
+      } catch (e) { onSaveFail(e); }
+    }
     $('#scroll').scrollTop = $('#scroll').scrollHeight;
     /* 附件已随消息发出，清空待发送区 */
     if (atts.length) clearAttach();
@@ -5708,27 +5718,55 @@
   /* ================= 历史对话的恢复与清理 =================
    * 恢复走「重放 ans」而不是存 DOM：DOM 会随渲染逻辑变化而过期，ans 不会。
    * 恢复态强制关闭动画与自动滚动，避免刷新后整屏闪现。 */
+  /* 失败只提醒一次：同一会话里反复弹窗会盖住答案 */
+  var restoreFailedOnce = false;
+  var saveFailedOnce = false;
+
+  function onSaveFail(e) {
+    console.warn('persist failed', e);
+    if (saveFailedOnce) return;
+    saveFailedOnce = true;
+    toast('本机存储写入失败，刷新后这条对话可能丢失');
+  }
+
   function restoreHistory() {
     if (!window.Thread) return;
+    var threadEl = $('#thread');
+    /* 读取是异步的（IndexedDB），先给骨架，避免首屏空白一片、看不出在加载 */
+    threadEl.innerHTML = '<div class="skel" id="restoreSkel">' +
+      '<div class="sk w70"></div><div class="sk w40"></div><div class="sk w85"></div></div>';
     window.Thread.init().then(function () {
       return window.Thread.loadMessages();
     }).then(function (msgs) {
-      if (!msgs || !msgs.length) return;
-      var thread = $('#thread');
-      thread.innerHTML = '';
+      /* 用户可能已经抢先提问：此时不能清空线程去还原历史，
+       * 否则会把刚渲染的消息抹掉（表现为消息消失、测试取到 undefined）。 */
+      if (document.querySelector('#thread .msg')) return;
+      if (!msgs || !msgs.length) { threadEl.innerHTML = ''; return; }
+      threadEl.innerHTML = '';
       state.asked = true;
       mountComposer('dock');
       msgs.forEach(function (m) {
         if (m.role === 'user') {
-          thread.appendChild(userBubble(m.text, m.atts || []));
+          threadEl.appendChild(userBubble(m.text, m.atts || []));
         } else if (m.ans) {
           try { renderAnswer(m.ans, { restore: true }); } catch (e) { console.warn('restore failed', e); }
         }
       });
       var sc = $('#scroll');
       if (sc) sc.scrollTop = sc.scrollHeight;
-    }).catch(function (e) { console.warn('history restore failed', e); })
-      .then(function () { maybeShowPersona(); });
+    }).catch(function (e) {
+      console.warn('history restore failed', e);
+      threadEl.innerHTML = '';
+      /* 恢复失败不能静默：用户会以为历史丢了 */
+      if (!restoreFailedOnce) {
+        restoreFailedOnce = true;
+        toast('历史记录读取失败，本次以空白对话开始');
+      }
+    }).then(function () {
+      var sk = document.getElementById('restoreSkel');
+      if (sk) sk.remove();
+      maybeShowPersona();
+    });
   }
 
   function clearHistory(scope) {
