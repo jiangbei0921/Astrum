@@ -13,7 +13,8 @@
   function persist() {
     try {
       localStorage.setItem(KEY, JSON.stringify({
-        settings: state.settings, custom: state.custom, cfg: cfg
+        settings: state.settings, custom: state.custom, cfg: cfg,
+        skills: state.skills || []
       }));
     } catch (e) { /* 隐私模式降级 */ }
   }
@@ -31,6 +32,7 @@
     ctx: null, busy: false, cacheKey: '', preview: null, counter: 0,
     settings: Object.assign({}, DEFAULTS, store.settings || {}),
     custom: Array.isArray(store.custom) ? store.custom : [],
+    skills: Array.isArray(store.skills) ? store.skills : [],
     draft: null, editing: null, composerAt: 'hero', asked: false,
     attachments: [],  /* 待发送的附件：{id,name,sizeText,kind,status,text,thumb,fits} */
     memory: []   /* 跨轮记忆：{q, a, target, at} */
@@ -5178,7 +5180,12 @@
         var b1 = el('button', 'hist-btn', '导出全部数据');
         b1.type = 'button';
         b1.addEventListener('click', exportData);
+        var b2 = el('button', 'hist-btn', '导入备份');
+        b2.type = 'button';
+        b2.title = '导入会新增一个档案，不覆盖当前数据';
+        b2.addEventListener('click', function () { if (fileInput) fileInput.click(); });
         bar.appendChild(b1);
+        bar.appendChild(b2);
         box.appendChild(bar);
         return box;
       })()
@@ -5847,6 +5854,7 @@
    * 恢复走「重放 ans」而不是存 DOM：DOM 会随渲染逻辑变化而过期，ans 不会。
    * 恢复态强制关闭动画与自动滚动，避免刷新后整屏闪现。 */
   /* 失败只提醒一次：同一会话里反复弹窗会盖住答案 */
+  var fileInput = null;
   var restoreFailedOnce = false;
   var saveFailedOnce = false;
 
@@ -5989,6 +5997,38 @@
     });
   }
 
+  /* 导入 = 新增一个档案。绝不覆盖当前数据：
+   * 覆盖式恢复是最危险的语义（选错文件即毁全部），而多写一个档案的代价只是多一条记录。 */
+  function importData(file) {
+    if (!file || !window.Profile || !window.Store) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      var data;
+      try { data = JSON.parse(String(reader.result)); } catch (e) { toast('文件不是合法 JSON'); return; }
+      if (!data || data.app !== 'astrum' || !Array.isArray(data.threads)) { toast('这不是 ASTRUM 的备份文件'); return; }
+      var stamp = String(data.exportedAt || '').slice(0, 10);
+      var p = window.Profile.create('导入 ' + (stamp || new Date().toISOString().slice(0, 10)));
+      if (!p) { toast('创建档案失败'); return; }
+      try {
+        localStorage.setItem('p.' + p.id + '.astrum.v2', JSON.stringify({
+          settings: data.settings || {},
+          custom: Array.isArray(data.custom) ? data.custom : [],
+          cfg: data.cfg || {},
+          skills: Array.isArray(data.skills) ? data.skills : []
+        }));
+      } catch (e) { toast('写入设置失败'); }
+      window.Store.importInto(p.id, data.threads, data.messages || []).then(function () {
+        window.Profile.switchTo(p.id);
+        toast('已导入为档案「' + p.name + '」，正在切换');
+        setTimeout(function () { location.reload(); }, 800);
+      }).catch(function (e) {
+        window.Profile.remove(p.id);
+        window.Profile.purgeKeys(p.id);
+        toast('导入失败：' + String(e && e.message || e));
+      });
+    };
+    reader.readAsText(file);
+  }
   function exportData() {
     if (!window.Thread || !window.Store) { toast('存储未就绪'); return; }
     buildExportPayload().then(function (payload) {
@@ -6125,6 +6165,15 @@
     renderAgents();
     renderSources();
     bind();
+    fileInput = el('input', 'hidden-file');
+    fileInput.type = 'file';
+    fileInput.accept = 'application/json,.json';
+    fileInput.addEventListener('change', function () {
+      var f = fileInput.files && fileInput.files[0];
+      fileInput.value = '';
+      if (f) importData(f);
+    });
+    document.body.appendChild(fileInput);
 
     restoreHistory();
     refreshPanels();

@@ -32,11 +32,12 @@
   function nowId() { return Date.now().toString(36) + '-' + (seq++).toString(36); }
 
   /* ---------- IndexedDB 后端 ---------- */
-  function openIDB() {
+  function openIDB(name) {
+    var nm = name || DB_NAME;
     return new Promise(function (resolve, reject) {
       if (!root.indexedDB) { reject(new Error('no indexedDB')); return; }
       var req;
-      try { req = root.indexedDB.open(DB_NAME, DB_VER); } catch (e) { reject(e); return; }
+      try { req = root.indexedDB.open(nm, DB_VER); } catch (e) { reject(e); return; }
       req.onupgradeneeded = function (ev) {
         var d = ev.target.result;
         if (!d.objectStoreNames.contains('threads')) {
@@ -271,11 +272,35 @@
     return Promise.resolve({ backend: backend, bytes: 0, limit: 0 });
   }
 
+  /* 往「指定档案」的库写数据，用于导入。
+   * 不切当前档案、不碰当前数据——导入的语义是「新增一个档案」，
+   * 而不是「覆盖我正在用的这份」。 */
+  function importInto(profileId, threads, messages) {
+    var def = (root.Profile && root.Profile.DEFAULT) || 'default';
+    var nm = (profileId === def) ? 'astrum' : ('p.' + profileId + '.astrum');
+    return openIDB(nm).then(function (d) {
+      return new Promise(function (resolve, reject) {
+        var tx;
+        try {
+          tx = d.transaction(['threads', 'messages'], 'readwrite');
+        } catch (e) { try { d.close(); } catch (e2) {} reject(e); return; }
+        var ts = tx.objectStore('threads');
+        var ms = tx.objectStore('messages');
+        (threads || []).forEach(function (t) { if (t && t.id) ts.put(t); });
+        (messages || []).forEach(function (m) { if (m && m.id) ms.put(m); });
+        tx.oncomplete = function () { try { d.close(); } catch (e) {} resolve(true); };
+        tx.onerror = function () { try { d.close(); } catch (e) {} reject(tx.error); };
+        tx.onabort = function () { try { d.close(); } catch (e) {} reject(tx.error || new Error('aborted')); };
+      });
+    });
+  }
+
   root.Store = {
     init: init, backend: function () { return backend; },
     putThread: putThread, getThread: getThread, listThreads: listThreads,
     appendMessage: appendMessage, listMessages: listMessages,
     removeMessage: removeMessage, removeThread: removeThread, clearAll: clearAll,
+    importInto: importInto,
     usage: usage, nowId: nowId
   };
 })(typeof window !== 'undefined' ? window : globalThis);

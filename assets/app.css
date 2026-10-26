@@ -2150,3 +2150,6 @@ sup.fn {
 }
 .ans-act:hover { color: var(--accent); border-color: var(--accent); }
 .ans-act:disabled { cursor: default; }
+
+/* 隐藏的文件选择器（导入备份用） */
+.hidden-file { display: none; }
