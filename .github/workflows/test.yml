@@ -1,0 +1,57 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  suites:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 确认 Chrome 可用
+        run: |
+          which google-chrome || which chromium || which chromium-browser
+          google-chrome --version || chromium --version || true
+
+      - name: 同步 CSP 哈希并构建单文件版
+        run: |
+          node tools/sync-csp-hash.js
+          node tools/build-standalone.js
+
+      # 每个套件单独成步：失败时能立刻看出是哪一层坏了
+      - name: 功能回归 selftest
+        run: node tools/selftest.js "file://$PWD/index.html"
+
+      - name: 持久化 store-test
+        run: node tools/store-test.js
+
+      - name: 技能 skill-test
+        run: node tools/skill-test.js
+
+      - name: 数值一致性 consistency-test
+        run: node tools/consistency-test.js
+
+      - name: 无障碍 a11y-test
+        run: node tools/a11y-test.js
+
+      - name: 检索 research-test
+        run: node tools/research-test.js
+
+      - name: 安全策略 csptest
+        run: node tools/csptest.js
+
+      - name: 构建产物与工作区一致
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::构建产生了未提交的改动，请本地重新构建后提交"
+            git status --porcelain
+            exit 1
+          fi

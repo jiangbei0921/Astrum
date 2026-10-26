@@ -2134,3 +2134,19 @@ sup.fn {
 
 /* 隐藏的文件选择器 */
 .hidden-file { display: none; }
+
+/* ================= 答案操作条 ================= */
+.ans-acts {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 10px; opacity: 0; transition: opacity 0.15s ease;
+}
+.msg.bot:hover .ans-acts,
+.msg.bot:focus-within .ans-acts { opacity: 1; }
+@media (hover: none) { .ans-acts { opacity: 1; } }
+.ans-act {
+  font-size: 10.5px; color: var(--muted-2); background: none;
+  border: 1px solid var(--line-soft); border-radius: 5px;
+  padding: 2px 8px; cursor: pointer; font-family: inherit; line-height: 1.5;
+}
+.ans-act:hover { color: var(--accent); border-color: var(--accent); }
+.ans-act:disabled { cursor: default; }

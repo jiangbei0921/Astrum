@@ -2745,6 +2745,7 @@
       card.appendChild(sw);
     }
     if (ans.meta && ans.meta.recall) card.appendChild(recallLine(ans.meta.recall));
+    if (!(extra && extra.restore)) card.appendChild(answerActions(card, ans));
     card.appendChild(metaBar(ans));
     msg.appendChild(card);
     $('#thread').appendChild(msg);
@@ -3697,6 +3698,7 @@
         }
         ans = AC.buildAnswer(qForAns, ctx, cfgRun);
         if (styleSwitch) ans.meta.styleSwitch = styleSwitch;
+        bumpStat('ask', ans.intent);
         /* 承接历史：同意图同目标问过，就把上次结论挂上供渲染层提示（不作为依据） */
         var prevSkill = skillFor(ans.intent, (ans.meta && ans.meta.target) || '');
         if (prevSkill && prevSkill.n && prevSkill.last) {
@@ -5122,6 +5124,9 @@
     group('数据', [
       (function () {
         var box = el('div', 'hist-panel');
+        var st = state.stats || { asks: 0, errors: 0 };
+        var tips = topIntents(3).map(function (x) { return intentCn(x.k) + ' ' + x.n; }).join(' · ');
+        box.appendChild(el('div', 'hist-meta', '本机统计：问过 ' + (st.asks || 0) + ' 次' + (st.errors ? (' · 失败 ' + st.errors + ' 次') : '') + (tips ? (' · ' + tips) : '') + '（仅存本地，不上传）'));
         box.appendChild(el('div', 'hist-meta', '导出为 JSON 备份，可在另一台设备导入还原。'));
         var bar = el('div', 'hist-bar');
         var b1 = el('button', 'hist-btn', '导出全部数据');
@@ -5806,13 +5811,17 @@
     toast('本机存储写入失败，刷新后这条对话可能丢失');
   }
 
+  var restorePromise = null;
+  /* 外部（含测试）可 await：恢复完成之前不要读写线程，否则会互相覆盖 */
+  function ready() { return restorePromise || Promise.resolve(); }
+
   function restoreHistory() {
-    if (!window.Thread) return;
+    if (!window.Thread) return Promise.resolve();
     var threadEl = $('#thread');
     /* 读取是异步的（IndexedDB），先给骨架，避免首屏空白一片、看不出在加载 */
     threadEl.innerHTML = '<div class="skel" id="restoreSkel">' +
       '<div class="sk w70"></div><div class="sk w40"></div><div class="sk w85"></div></div>';
-    window.Thread.init().then(function () {
+    restorePromise = window.Thread.init().then(function () {
       return window.Thread.loadMessages();
     }).then(function (msgs) {
       /* 用户可能已经抢先提问：此时不能清空线程去还原历史，
@@ -5838,7 +5847,9 @@
       if (sk) sk.remove();
       maybeShowPersona();
       renderThreadList();
+      return true;
     });
+    return restorePromise;
   }
 
   /* 消息重放：恢复历史与切换对话共用同一条路径 */
@@ -5947,6 +5958,99 @@
     }).catch(function (e) { toast('导出失败：' + String(e && e.message || e)); });
   }
 
+  /* ================= 版本 / 统计 / 答案操作 ================= */
+  var APP_VERSION = '4.8';
+
+  /* 更新提示：只在「之前来过且版本变了」时提示一次，首次访问不打扰 */
+  function checkVersion() {
+    var seen = '';
+    try { seen = localStorage.getItem('astrum.version') || ''; } catch (e) {}
+    if (seen && seen !== APP_VERSION) toast('已更新到 v' + APP_VERSION);
+    try { localStorage.setItem('astrum.version', APP_VERSION); } catch (e) {}
+  }
+
+  function loadStats() {
+    try {
+      var raw = localStorage.getItem('astrum.stats');
+      state.stats = raw ? JSON.parse(raw) : null;
+    } catch (e) { state.stats = null; }
+    if (!state.stats || typeof state.stats !== 'object') state.stats = { asks: 0, errors: 0, intents: {} };
+    if (!state.stats.intents) state.stats.intents = {};
+  }
+
+  /* 只存本地，不上传——这点写死在实现里，不靠设置约束 */
+  function bumpStat(kind, intent) {
+    var s = state.stats || { asks: 0, errors: 0, intents: {} };
+    if (kind === 'ask') {
+      s.asks = (s.asks || 0) + 1;
+      if (intent) s.intents[intent] = (s.intents[intent] || 0) + 1;
+    } else if (kind === 'error') {
+      s.errors = (s.errors || 0) + 1;
+    }
+    state.stats = s;
+    try { localStorage.setItem('astrum.stats', JSON.stringify(s)); } catch (e) {}
+  }
+
+  function topIntents(n) {
+    var list = (state.stats && state.stats.intents) || {};
+    return Object.keys(list)
+      .map(function (k) { return { k: k, n: list[k] }; })
+      .sort(function (a, b) { return b.n - a.n; })
+      .slice(0, n || 3);
+  }
+
+  /* 取答案正文：从已渲染的卡片里剥离元信息，保证与用户所见一致 */
+  function answerText(card) {
+    var clone = card.cloneNode(true);
+    ['.meta-bar', '.ans-acts', '.recall', '.trace-fold', '.verify-fold', '.model-note'].forEach(function (sel) {
+      clone.querySelectorAll(sel).forEach(function (x) { x.remove(); });
+    });
+    return (clone.textContent || '').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+  }
+
+  function answerActions(card, ans) {
+    var bar = el('div', 'ans-acts');
+
+    var cp = el('button', 'ans-act', '复制');
+    cp.type = 'button';
+    cp.title = '复制这条答案的正文';
+    cp.addEventListener('click', function () { copyText(answerText(card), cp); });
+
+    var sh = el('button', 'ans-act', '分享');
+    sh.type = 'button';
+    sh.title = '复制为可粘贴分享的纯文本';
+    sh.addEventListener('click', function () {
+      var m = ans.meta || {};
+      var head = 'ASTRUM · ' + (ans.query || '') + '\n' + '—'.repeat(24) + '\n';
+      var tail = '\n\n（依据：' + (m.status ? statusLabel(m.status) : '本地核验') +
+        (m.freshness ? ' · ' + ({ static: '长期稳定', annual: '年度表', ephemeris: '实时计算', realtime: '需在线' }[m.freshness] || '') : '') + '）';
+      copyText(head + answerText(card) + tail, sh);
+    });
+
+    var fb = el('button', 'ans-act', '反馈');
+    fb.type = 'button';
+    fb.title = '把这条答案的问题与诊断信息打包复制，便于反馈';
+    fb.addEventListener('click', function () {
+      var m = ans.meta || {};
+      var pack = [
+        '# ASTRUM 反馈包',
+        '版本: v' + APP_VERSION,
+        '时间: ' + new Date().toISOString(),
+        '提问: ' + (ans.query || ''),
+        '意图: ' + (ans.intent || '-') + ' · 档位: ' + (m.tier || '-') + ' · 状态: ' + (m.status || '-'),
+        '存储: ' + (window.Thread ? window.Thread.backend() : '-'),
+        '--- 回答正文 ---',
+        answerText(card)
+      ].join('\n');
+      copyText(pack, fb);
+    });
+
+    bar.appendChild(cp);
+    bar.appendChild(sh);
+    bar.appendChild(fb);
+    return bar;
+  }
+
   function clearHistory(scope) {
     if (!window.Thread) return;
     var p = scope === 'all' ? window.Thread.clearAll() : window.Thread.clearCurrent();
@@ -5962,6 +6066,8 @@
   }
   function boot() {
     AC.setSkillResolver(skillFor);
+    loadStats();
+    checkVersion();
     initContext();
     applySettings();
     watchViewport();
@@ -5989,6 +6095,7 @@
       setPersona: setPersona, applyPersona: applyPersona, PERSONAS: PERSONAS,
       detectStyle: detectStyle, newChat: newChat,
       buildExportPayload: buildExportPayload,
+      ready: ready, version: APP_VERSION,
       /* 档案的程序化入口：与设置面板的 selectRow 等效。
        * 注意：ask() 每次都会用 state.settings 覆盖 AC.setGear，
        * 所以外部只调 AC.setGear 是无效的，必须改 state 再同步。 */

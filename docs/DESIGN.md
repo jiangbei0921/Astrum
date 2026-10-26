@@ -2451,3 +2451,68 @@ if (autoStyle && persona 已设 && detected !== persona) {
 
 `selftest` 99/99、`store-test` 17/17（单独运行 ×3 稳定）、`skill-test` 10/10、
 `consistency-test` 7/7、`a11y-test` 9/9、`research-test` 77/77、`csptest` 6/6。
+
+---
+
+## 四十三、收尾一批：CI / 统计 / 答案操作 / 版本提示 / SEO（v4.8）
+
+### 43.1 CI（最关键）
+
+之前 225 条断言全靠手动跑——**没有提交门禁，测试的保护力取决于人是否记得跑**。
+
+新增 `.github/workflows/test.yml`：
+
+- 推送到 main 与 PR 时触发
+- 先 `sync-csp-hash` + `build-standalone`，再逐个套件独立成步（失败能立刻定位到层）
+- 最后一步校验「构建产物已提交」：若 `git status` 不干净则失败
+
+这条最后检查很重要——本项目 `astrum-standalone.html` 与 CSP 哈希是构建产物，
+忘记重新构建会让线上与源码不一致，肉眼看不出来。
+
+### 43.2 任务 30 本地统计
+
+`state.stats = { asks, errors, intents }`，存 localStorage `astrum.stats`。
+设置 → 数据显示「问过 N 次 · 意图 top3 ·（仅存本地，不上传）」。
+
+**「不上传」是写死在实现里的**，不是靠设置约束——代码里根本没有发送路径。
+
+### 43.3 任务 29 / 31 答案操作条
+
+每条答案底部三个动作（悬停/聚焦显示，触屏常驻）：
+
+| 动作 | 行为 |
+| --- | --- |
+| 复制 | 复制正文（剥离 meta/trace/recall 等元信息） |
+| 分享 | 复制为带抬头与依据说明的纯文本 |
+| 反馈 | 打包版本/时间/提问/意图/档位/存储后端 + 正文，复制便于反馈 |
+
+**没有「发送」按钮**：没有后端，任何「提交反馈」都是假的。
+复制到剪贴板是唯一诚实的做法。
+
+`answerText(card)` 从**已渲染的卡片**取文本再剥离元信息，
+保证复制内容与用户所见一致，而不是另起一套渲染逻辑。
+
+### 43.4 任务 33 版本更新提示
+
+`APP_VERSION = '4.8'`，boot 时与 `astrum.version` 比对，变化则 toast 一次。
+首次访问不提示（避免新人一进来就看到「已更新」）。
+
+### 43.5 任务 32 落地页 / SEO
+
+原有 meta 已较完整（description / og / twitter / favicon / lang）。
+本轮补：JSON-LD `WebApplication` 结构化数据 + `<noscript>` 说明段。
+
+### 43.6 顺带：`ready()` 就绪接口
+
+`restoreHistory()` 现在返回并保存 Promise，导出 `__astrum.ready()`。
+外部（尤其测试）可等待「历史恢复完成」再读写线程，
+从根上避免「测试刚清空、恢复又读回来」这类竞争。
+
+> 尝试把 store-test 改为 `ready()` 时把结构改坏了，已回退该文件；
+> `ready()` 接口本身保留（对应用有益，且不影响现有测试）。
+> store-test 的批跑偶发问题仍在，见 §42.3 遗留。
+
+### 43.7 验证
+
+`selftest` 99/99、`store-test` 17/17、`skill-test` 10/10、
+`consistency-test` 7/7、`a11y-test` 9/9、`research-test` 77/77、`csptest` 6/6。
