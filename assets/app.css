@@ -2131,3 +2131,6 @@ sup.fn {
 .th-item:hover .th-del, .th-item:focus-within .th-del { opacity: 1; }
 .th-del:hover { color: #b5352b; background: rgba(181, 53, 43, 0.08); }
 @media (hover: none) { .th-del { opacity: 1; } }
+
+/* 隐藏的文件选择器 */
+.hidden-file { display: none; }

@@ -32,12 +32,15 @@ var SCRIPT = `
 (function () {
   var R = [];
   var done = false;
-  function ok(name, pass, extra) { if (done) return; R.push({ n: name, p: !!pass, x: extra || '' }); }
-  setTimeout(function () {
+  /* 不设页面内看门狗。
+   * 原因：Chrome 的 --virtual-time-budget 会把定时器与时钟一起快进，
+   * 而 IndexedDB 的 I/O 不会跟着快进 —— 于是「20s 无进展」在真实几百毫秒内就成立，
+   * 造成随机误报。页面真的卡住时，Node 驱动会因为取不到 <pre> 而打印诊断并退出 1，
+   * 这条路径已经能覆盖「悬挂」这个故障。 */
+  function ok(name, pass, extra) {
     if (done) return;
-    ok('看门狗：流程未在 45s 内完成', false, '持久化调用可能悬挂');
-    finish();
-  }, 55000);
+    R.push({ n: name, p: !!pass, x: extra || '' });
+  }
   function finish() {
     if (done) return;
     done = true;
@@ -77,8 +80,14 @@ var SCRIPT = `
     R.push({ n: 'no uncaught error', p: false, x: String(e.message).slice(0, 60) });
   });
 
-  setTimeout(function () {
-    var S = window.Store, T = window.Thread;
+  /* 等启动恢复彻底结束再开始：restoreHistory 的骨架消失 = 它已完成。
+   * 否则会与 boot 的恢复并发，出现「测试刚清空、恢复又把数据读回来」的竞争。 */
+  function waitReady(n, cb) {
+    if ((!document.getElementById('restoreSkel') && !document.querySelector('.thinking')) || n <= 0) { cb(); return; }
+    setTimeout(function () { waitReady(n - 1, cb); }, 200);
+  }
+  waitReady(25, function () {
+  var S = window.Store, T = window.Thread;
     if (!S || !T) { ok('store/thread 已加载', false); finish(); return; }
 
     S.init().then(function (backend) {
@@ -147,7 +156,7 @@ var SCRIPT = `
       ok('流程异常', false, String(e && e.message));
       finish();
     });
-  }, 400);
+  });
 })();
 `;
 

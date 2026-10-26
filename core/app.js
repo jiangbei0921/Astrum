@@ -5119,6 +5119,20 @@
       })()
     ]);
 
+    group('数据', [
+      (function () {
+        var box = el('div', 'hist-panel');
+        box.appendChild(el('div', 'hist-meta', '导出为 JSON 备份，可在另一台设备导入还原。'));
+        var bar = el('div', 'hist-bar');
+        var b1 = el('button', 'hist-btn', '导出全部数据');
+        b1.type = 'button';
+        b1.addEventListener('click', exportData);
+        bar.appendChild(b1);
+        box.appendChild(bar);
+        return box;
+      })()
+    ]);
+
     group('对话与表述', [
       switchRow('按问题自动切换风格', '问句明显偏向另一方向时临时换讲法；只影响表达，数值不变',
         s.autoStyle !== false, function (v) { s.autoStyle = v; persist(); }),
@@ -5896,6 +5910,43 @@
     }).catch(function (e) { toast('打开对话失败：' + String(e && e.message || e)); });
   }
 
+  /* ================= 数据导入导出 =================
+   * 目的：让「数据属于你」落到可操作层面，也是将来接云端时的迁移格式。
+   * 只搬数据，不搬代码；导入前二次确认，导入后刷新以重建全部视图。 */
+  function buildExportPayload() {
+    var payload = {
+      app: 'astrum', schema: 1, exportedAt: new Date().toISOString(),
+      settings: state.settings, skills: (state.skills || []).slice(),
+      threads: [], messages: []
+    };
+    return window.Thread.list().then(function (list) {
+      payload.threads = list || [];
+      return Promise.all(payload.threads.map(function (t) {
+        return window.Store.listMessages(t.id);
+      }));
+    }).then(function (packs) {
+      (packs || []).forEach(function (arr) {
+        payload.messages = payload.messages.concat(arr || []);
+      });
+      return payload;
+    });
+  }
+
+  function exportData() {
+    if (!window.Thread || !window.Store) { toast('存储未就绪'); return; }
+    buildExportPayload().then(function (payload) {
+      var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = el('a', '', '');
+      a.href = url;
+      a.download = 'astrum-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 1500);
+      toast('已导出 ' + payload.threads.length + ' 个对话、' + payload.messages.length + ' 条消息');
+    }).catch(function (e) { toast('导出失败：' + String(e && e.message || e)); });
+  }
+
   function clearHistory(scope) {
     if (!window.Thread) return;
     var p = scope === 'all' ? window.Thread.clearAll() : window.Thread.clearCurrent();
@@ -5922,6 +5973,7 @@
     renderAgents();
     renderSources();
     bind();
+
     restoreHistory();
     refreshPanels();
     mountComposer('hero');
@@ -5936,6 +5988,7 @@
       restoreHistory: restoreHistory, clearHistory: clearHistory,
       setPersona: setPersona, applyPersona: applyPersona, PERSONAS: PERSONAS,
       detectStyle: detectStyle, newChat: newChat,
+      buildExportPayload: buildExportPayload,
       /* 档案的程序化入口：与设置面板的 selectRow 等效。
        * 注意：ask() 每次都会用 state.settings 覆盖 AC.setGear，
        * 所以外部只调 AC.setGear 是无效的，必须改 state 再同步。 */
