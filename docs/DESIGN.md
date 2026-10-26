@@ -2789,3 +2789,54 @@ var nm = (profileId === DEFAULT) ? 'astrum' : ('p.' + profileId + '.astrum');
 **导入流程本身没有自动化测试**——它依赖 `FileReader` + `location.reload()`，
 在 headless 单页里难以稳定复现。目前只有 `Store.importInto` 的代码路径是确定的，
 **不能声称“导入已验证”**。
+
+---
+
+## 四十六、安全导入（v5.1 · 任务 25 补齐）
+
+### 46.1 语义：导入 = 新增一个档案
+
+```
+读取 JSON → 校验 → Profile.create('导入 YYYY-MM-DD')
+                    ↓
+          写入 p.<新id>.astrum.v2（设置/技能）
+                    ↓
+          Store.importInto(新id, threads, messages)   ← 写进「那个档案的库」
+                    ↓
+          切到新档案 + reload
+```
+
+**绝不覆盖当前数据。** 覆盖式恢复是最危险的语义——选错文件就毁掉全部；多写一个档案的代价只是多一条记录。
+
+失败时回滚：`Profile.remove()` + `purgeKeys()`，不留半截档案。
+
+### 46.2 `Store.importInto` 为什么要参数化库名
+
+线程按「一个档案一个 IndexedDB 库」隔离，而 `DB_NAME` 是加载期常量。
+导入要写的是**另一个档案的库**，所以 `openIDB(name)` 支持传入库名：
+
+```js
+var nm = (profileId === DEFAULT) ? 'astrum' : ('p.' + profileId + '.astrum');
+```
+
+不切当前档案、不碰当前数据，写完后才切换并 reload。
+
+### 46.3 顺带修掉一个真 bug：技能记录从未被持久化
+
+`state.skills` 既不在 `persist()` 也不在 `load()` 里——**刷新页面后技能记录全部消失**。
+
+这意味着 v3.7 的「复用器材 / 承接结论」实际只在单次会话内有效，
+所谓“跨会话积累”是不成立的。
+
+修复：`persist()` 增加 `skills`，state 初始化时从 `store.skills` 读取。
+
+### 46.4 验证
+
+`selftest` 103/103、`store-test` 17/17、`skill-test` 10/10、
+`consistency-test` 7/7、`a11y-test` 9/9、`csptest` 6/6。
+
+### 46.5 未覆盖
+
+**导入流程本身没有自动化测试**——它依赖 `FileReader` + `location.reload()`，
+在 headless 单页里难以稳定复现。目前只有 `Store.importInto` 的代码路径是确定的，
+**不能声称“导入已验证”**。
