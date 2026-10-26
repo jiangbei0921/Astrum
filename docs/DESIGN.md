@@ -2236,3 +2236,58 @@ ask(q, function (bot) { var ms = performance.now() - t0; /* 断言 */ });
 
 `selftest` 93/93、`store-test` 17/17、`skill-test` 10/10、
 `consistency-test` 7/7、`research-test` 77/77、`csptest` 6/6。
+
+---
+
+## 三十九、无障碍（v4.4 · 任务 23）
+
+### 39.1 做了什么
+
+| 项 | 处理 |
+| --- | --- |
+| 跳转链接 | 首行加「跳到主内容」，键盘 Tab 第一下可跳过顶部导航 |
+| 对话区语义 | `role="log"` + `aria-live="polite"` + `aria-relevant="additions"` |
+| toast 播报 | `role="status"` + `aria-live="polite"`（它唯一的即时反馈通道） |
+| 模式切换 | `.on` 与 `aria-selected` 同步，读屏能知道当前模式 |
+| 焦点管理 | 打开面板记住触发元素并把焦点移入；关闭后焦点归还 |
+| 焦点可见 | `:focus-visible` 统一描边，鼠标点击不显示外框 |
+| 动效偏好 | `prefers-reduced-motion` 下关闭动画与平滑滚动 |
+
+### 39.2 踩到的坑：作用域
+
+把 `syncModeAria()` 定义在 `bind()` 内部，却在 `boot()` 里调用 —— 抛 ReferenceError，
+导致 `boot()` 在 `window.__astrum = {...}` **之前**中断。
+
+后果是整页看起来正常（UI 已渲染），但所有对外接口不存在。
+这类错误不会让页面白屏，只会让测试全挂，**反而更难定位**。
+
+修复：函数定义提到顶层，让 `bind()` 与 `boot()` 都能访问。
+
+### 39.3 专项测试 `tools/a11y-test.js`
+
+9 项，全部结构可查：
+
+```
+PASS 按钮都有可访问名称
+PASS 对话区带 role=log 与 aria-live
+PASS 存在跳转到主内容的链接
+PASS 主地标存在
+PASS 模式切换带 aria-selected
+PASS toast 是 live region
+PASS 打开设置后焦点进入面板
+PASS 关闭后焦点回到触发按钮
+PASS 折叠区是原生 details
+```
+
+其中「按钮都有可访问名称」会扫描**全部** `<button>`，
+以后新增图标按钮忘了写 `aria-label` 会立刻暴露。
+
+### 39.4 覆盖边界
+
+只做结构断言，不做真实读屏验证（需要屏幕阅读器手动测试）。
+对比度也**未**纳入——现有 muted 色在浅底上是否达标需要工具测量，不宜凭感觉改。
+
+### 39.5 验证
+
+`selftest` 93/93、`store-test` 17/17、`skill-test` 10/10、
+`consistency-test` 7/7、**`a11y-test` 9/9**、`research-test` 77/77、`csptest` 6/6。

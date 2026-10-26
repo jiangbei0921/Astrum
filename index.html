@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="assets/app.css" />
 </head>
 <body>
+<a class="skip-link" href="#main">跳到主内容</a>
 <div class="app">
 
   <!-- ================= 顶栏 ================= -->
@@ -110,7 +111,8 @@
             <div class="hcard"><span class="n">04</span><b>自建智能体</b><p>定义角色、参数与专家注记</p></div>
           </div>
         </div>
-        <div class="thread" id="thread"></div>
+        <div class="thread" id="thread" role="log" aria-live="polite"
+             aria-relevant="additions" aria-label="对话记录"></div>
       </div>
 
       <div class="dock" id="dock">

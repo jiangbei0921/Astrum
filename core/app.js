@@ -3901,6 +3901,9 @@
     if (!t) {
       t = el('div', 'toast');
       t.id = 'toast';
+      /* 读屏播报：toast 是唯一的即时反馈通道，必须有 live region */
+      t.setAttribute('role', 'status');
+      t.setAttribute('aria-live', 'polite');
       document.body.appendChild(t);
     }
     t.textContent = msg;
@@ -4482,13 +4485,26 @@
   }
 
   /* ================= 抽屉 / 设置 ================= */
+  var sheetReturnFocus = null;
   function openSheet(id) {
+    /* 记住触发点，关闭后把焦点还回去，否则键盘用户会掉到页面顶部 */
+    sheetReturnFocus = document.activeElement;
     $('#' + id).classList.add('on');
     $('#scrim').classList.add('on');
     if (id === 'settings') renderSettings();
+    setTimeout(function () {
+      var box = $('#' + id);
+      if (!box) return;
+      var f = box.querySelector('button:not([disabled]), input, select, textarea, [href]');
+      if (f) f.focus();
+    }, 30);
   }
   function closeSheet(id) {
     $('#' + id).classList.remove('on');
+    if (sheetReturnFocus && sheetReturnFocus.focus) {
+      try { sheetReturnFocus.focus(); } catch (e) {}
+      sheetReturnFocus = null;
+    }
     if (!$('#drawer').classList.contains('on') && !$('#settings').classList.contains('on')
       && !$('#sidebar').classList.contains('on') && !$('#obsPanel').classList.contains('on')
       && !$('#sourcePop').classList.contains('on')) {
@@ -5429,6 +5445,14 @@
     persist();
   }
 
+  /* 视觉上的 .on 与语义上的 aria-selected 必须同步，否则读屏用户不知道当前模式。
+   * 定义在顶层：bind() 与 boot() 都要调用，放在 bind 内部会导致 boot 里取不到。 */
+  function syncModeAria() {
+    $('#modeSeg button').forEach(function (b) {
+      b.setAttribute('aria-selected', b.classList.contains('on') ? 'true' : 'false');
+    });
+  }
+
   function bind() {
     $('#send').addEventListener('click', function () { ask(); });
     bindAttachments();
@@ -5461,7 +5485,7 @@
         if (b.disabled) { toast('需要至少一个已连通的云端来源才能对比'); return; }
         $$('#modeSeg button').forEach(function (x) { x.classList.remove('on'); });
         b.classList.add('on');
-        state.settings.mode = b.dataset.mode;
+            state.settings.mode = b.dataset.mode;
         persist(); renderSources();
       });
     });
@@ -5801,6 +5825,7 @@
     mountComposer('hero');
     $$('#modeSeg button').forEach(function (b) {
       b.classList.toggle('on', b.dataset.mode === state.settings.mode);
+      b.setAttribute('aria-selected', b.classList.contains('on') ? 'true' : 'false');
     });
     $('#input').focus();
 
