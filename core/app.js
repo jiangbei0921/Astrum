@@ -1672,6 +1672,8 @@
   }
 
   function newChat() {
+    /* 必须重置当前线程：否则下一问会继续写进上一个会话 */
+    if (window.Thread) window.Thread.setCurrent(null);
     $('#thread').innerHTML = '';
     state.asked = false;
     state.memory = [];
@@ -1681,6 +1683,7 @@
     $('#input').value = '';
     $('#input').focus();
     if (window.innerWidth <= 860) { $('#sidebar').classList.remove('on'); }
+    renderThreadList();
   }
 
   /* ================= 来源浮层 ================= */
@@ -2736,6 +2739,11 @@
       var vstrip = renderVerifyStrip(verifyList);
       if (vstrip) card.appendChild(vstrip);
     }
+    if (ans.meta && ans.meta.styleSwitch) {
+      var sw = el('div', 'recall');
+      sw.innerHTML = '<span class="ic">↳</span>这题按「' + esc(ans.meta.styleSwitch.label) + '」风格回答（你的默认是「' + esc(PERSONAS[ans.meta.styleSwitch.from] ? PERSONAS[ans.meta.styleSwitch.from].label : '未设置') + '」）';
+      card.appendChild(sw);
+    }
     if (ans.meta && ans.meta.recall) card.appendChild(recallLine(ans.meta.recall));
     card.appendChild(metaBar(ans));
     msg.appendChild(card);
@@ -2767,6 +2775,7 @@
         if (pB && pB.catch) pB.catch(onSaveFail);
       } catch (e) { onSaveFail(e); }
     }
+    if (!isRestore) renderThreadList();
     if (!isRestore && state.settings.autoScroll) {
       var sc = $('#scroll');
       sc.scrollTo({ top: Math.max(0, msg.offsetTop - 12), behavior: 'smooth' });
@@ -3675,7 +3684,19 @@
         var hints = attachHints(atts);
         var qForAns = hints.length ? (q + ' ' + hints.join(' ')) : q;
         AC.setGear(state.settings.gearId, state.settings.camId);
+        /* 单题适配：只在问句明显偏向另一方向时换讲法，且仅影响这一条 */
+        var styleSwitch = null;
+        if (state.settings.autoStyle !== false) {
+          var stDet = detectStyle(qForAns);
+          var stBase = state.settings.persona;
+          if (stDet && stBase && stBase !== 'none' && stDet !== stBase && PERSONAS[stDet]) {
+            cfgRun.vega.scope = PERSONAS[stDet].register;
+            cfgRun.muse.depth = PERSONAS[stDet].depth;
+            styleSwitch = { from: stBase, to: stDet, label: PERSONAS[stDet].label };
+          }
+        }
         ans = AC.buildAnswer(qForAns, ctx, cfgRun);
+        if (styleSwitch) ans.meta.styleSwitch = styleSwitch;
         /* 承接历史：同意图同目标问过，就把上次结论挂上供渲染层提示（不作为依据） */
         var prevSkill = skillFor(ans.intent, (ans.meta && ans.meta.target) || '');
         if (prevSkill && prevSkill.n && prevSkill.last) {
@@ -5099,6 +5120,8 @@
     ]);
 
     group('对话与表述', [
+      switchRow('按问题自动切换风格', '问句明显偏向另一方向时临时换讲法；只影响表达，数值不变',
+        s.autoStyle !== false, function (v) { s.autoStyle = v; persist(); }),
       selectRow('使用身份', [['observer', '看星 / 拍摄'], ['researcher', '查数据 / 读论文'], ['learner', '了解天文']],
         (s.persona && s.persona !== 'none') ? s.persona : 'observer', function (v) { applyPersona(v); }),
       selectRow('默认语体', [['auto', '自适应'], ['pro', '专业'], ['pop', '科普']], s.register, function (v) {
@@ -5700,6 +5723,21 @@
     return true;
   }
 
+  /* 单题风格：问句明显偏向另一个方向时，临时换一种讲法。
+   * 只改表达参数（register / depth），绝不动事实层——数值必须跨风格一致。 */
+  var STYLE_WORDS = {
+    researcher: /视差|自行|光度|金属丰度|星表|DOI|ADQL|误差|置信区间|拟合|样本|红移|测距|谱线/,
+    observer:   /能拍|拍得|视场|曝光|装得下|三脚架|赤道仪|目镜|倍率|出摊|今晚|高度角|口径/,
+    learner:    /为什么|是什么|怎么形成|原理|区别|通俗|举个例子|是什么意思|怎么理解/
+  };
+  function detectStyle(q) {
+    var s = String(q || '');
+    if (STYLE_WORDS.researcher.test(s)) return 'researcher';
+    if (STYLE_WORDS.observer.test(s)) return 'observer';
+    if (STYLE_WORDS.learner.test(s)) return 'learner';
+    return null;
+  }
+
   function closePersona() {
     var c = document.getElementById('personaCard');
     if (c) c.remove();
@@ -5770,13 +5808,7 @@
       threadEl.innerHTML = '';
       state.asked = true;
       mountComposer('dock');
-      msgs.forEach(function (m) {
-        if (m.role === 'user') {
-          threadEl.appendChild(userBubble(m.text, m.atts || []));
-        } else if (m.ans) {
-          try { renderAnswer(m.ans, { restore: true }); } catch (e) { console.warn('restore failed', e); }
-        }
-      });
+      renderMessages(msgs);
       var sc = $('#scroll');
       if (sc) sc.scrollTop = sc.scrollHeight;
     }).catch(function (e) {
@@ -5791,7 +5823,77 @@
       var sk = document.getElementById('restoreSkel');
       if (sk) sk.remove();
       maybeShowPersona();
+      renderThreadList();
     });
+  }
+
+  /* 消息重放：恢复历史与切换对话共用同一条路径 */
+  function renderMessages(msgs) {
+    var threadEl = $('#thread');
+    msgs.forEach(function (m) {
+      if (m.role === 'user') {
+        threadEl.appendChild(userBubble(m.text, m.atts || []));
+      } else if (m.ans) {
+        try { renderAnswer(m.ans, { restore: true }); } catch (e) { console.warn('restore failed', e); }
+      }
+    });
+  }
+
+  /* 侧栏会话列表 */
+  function renderThreadList() {
+    if (!window.Thread) return;
+    var box = $('#threadList');
+    if (!box) return;
+    window.Thread.list().then(function (list) {
+      box.innerHTML = '';
+      if (!list.length) { box.appendChild(el('div', 'th-empty', '还没有对话')); return; }
+      var cur = window.Thread.current();
+      list.slice(0, 12).forEach(function (t) {
+        var row = el('div', 'th-item' + (cur && cur.id === t.id ? ' on' : ''));
+        var name = el('span', 'th-t', esc(t.title || '未命名'));
+        name.title = '双击重命名';
+        name.addEventListener('dblclick', function (ev) {
+          ev.stopPropagation();
+          var v = window.prompt('重命名对话', t.title || '');
+          if (v == null) return;
+          window.Thread.rename(t.id, v).then(renderThreadList);
+        });
+        var cnt = el('span', 'th-n', String(t.count || 0));
+        var del = el('button', 'th-del', '×');
+        del.type = 'button';
+        del.title = '删除这个对话';
+        del.setAttribute('aria-label', '删除对话 ' + (t.title || '未命名'));
+        del.addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          if (!window.confirm('删除对话「' + (t.title || '未命名') + '」？')) return;
+          window.Thread.remove(t.id).then(function () {
+            renderThreadList();
+            if (!window.Thread.current()) newChat();
+          });
+        });
+        row.appendChild(name);
+        row.appendChild(cnt);
+        row.appendChild(del);
+        row.addEventListener('click', function () { openThread(t.id); });
+        box.appendChild(row);
+      });
+    });
+  }
+
+  function openThread(id) {
+    if (!window.Thread) return;
+    window.Thread.setCurrent(id).then(function () {
+      return window.Thread.loadMessages();
+    }).then(function (msgs) {
+      $('#thread').innerHTML = '';
+      state.asked = true;
+      mountComposer('dock');
+      renderMessages(msgs);
+      var sc = $('#scroll');
+      if (sc) sc.scrollTop = sc.scrollHeight;
+      renderThreadList();
+      if (window.innerWidth <= 860) $('#sidebar').classList.remove('on');
+    }).catch(function (e) { toast('打开对话失败：' + String(e && e.message || e)); });
   }
 
   function clearHistory(scope) {
@@ -5833,6 +5935,7 @@
       ask: ask, selectSource: selectSource, openSheet: openSheet, openAgent: openAgent,
       restoreHistory: restoreHistory, clearHistory: clearHistory,
       setPersona: setPersona, applyPersona: applyPersona, PERSONAS: PERSONAS,
+      detectStyle: detectStyle, newChat: newChat,
       /* 档案的程序化入口：与设置面板的 selectRow 等效。
        * 注意：ask() 每次都会用 state.settings 覆盖 AC.setGear，
        * 所以外部只调 AC.setGear 是无效的，必须改 state 再同步。 */

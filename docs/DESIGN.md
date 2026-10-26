@@ -2334,3 +2334,65 @@ var ms = performance.now() - t0;           // 端到端回答耗时
 
 `selftest` **95/95**（93 + 2 项性能断言）、`store-test` 17/17、`skill-test` 10/10、
 `consistency-test` 7/7、`a11y-test` 9/9、`research-test` 77/77、`csptest` 6/6。
+
+---
+
+## 四十一、多会话侧栏与单题风格适配（v4.6 · 任务 24、26）
+
+### 41.1 任务 24 多会话侧栏
+
+侧栏顶部新增「对话」区：
+
+| 能力 | 实现 |
+| --- | --- |
+| 列表 | `Thread.list()` 取最近 12 条，高亮当前 |
+| 切换 | `Thread.setCurrent(id)` + `renderMessages()` 重放 |
+| 重命名 | 双击标题 → prompt → `Thread.rename()` |
+| 删除 | 每项右侧 ×，二次确认，删完若当前为空则新开 |
+| 新对话 | `newChat()` 现在**会重置当前线程** |
+
+**顺手修了一个真 bug**：`newChat()` 原来只清 DOM，不重置 `Thread.cur`，
+导致「新对话」后提出的问题仍被写进上一个会话。
+
+抽取 `renderMessages(msgs)` 供「恢复历史」与「切换对话」共用，避免两条路径渲染不一致。
+
+### 41.2 任务 26 单题风格适配
+
+问句明显偏向另一个方向时，临时换一种讲法：
+
+```js
+if (autoStyle && persona 已设 && detected !== persona) {
+  cfgRun.vega.scope = PERSONAS[detected].register;
+  cfgRun.muse.depth = PERSONAS[detected].depth;   // cfgRun 是深拷贝，安全
+}
+```
+
+三组硬词：
+
+| 风格 | 触发词 |
+| --- | --- |
+| research | 视差 / 自行 / 光度 / 星表 / DOI / ADQL / 误差 / 红移 / 谱线 |
+| observer | 能拍 / 视场 / 曝光 / 装得下 / 赤道仪 / 出射 / 今晚 / 口径 |
+| learner | 为什么 / 是什么 / 原理 / 区别 / 通俗 / 举个例子 |
+
+**只改 `register` 与 `depth`，不动事实层**；切换时在答案底部给一行提示
+「这题按「查数据 / 读论文」风格回答」。
+设置里可关闭（`autoStyle`）。
+
+### 41.3 测试上的两个教训
+
+**① DOM 等待型断言在多轮链里不可靠**
+
+给 26 写的首批断言要轮询等 `.recall` 出现，结果与前面用例的并发渲染抢跑，
+抛 `Cannot read properties of null`，整条链死掉（无任何输出）。
+改为纯 API 断言（判定函数 + 语义），稳定在 99/99。
+
+**② 未覆盖的部分要说清楚**
+
+「切换提示真的渲染出来」这一条**没有**自动化覆盖——探针几次都取不到输出。
+代码路径是 `ask()` 里挂在 `ans.meta.styleSwitch` 上、`renderAnswer` 里读它渲染，
+逻辑直白，但**没有测试背书**，不能宣称已验证。
+
+### 41.4 验证
+
+`selftest` **99/99**（+4 项风格判定）、`store-test` 17/17、`a11y-test` 9/9。

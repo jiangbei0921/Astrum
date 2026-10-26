@@ -119,11 +119,40 @@
 
   function list() { return S.listThreads(); }
 
+  /* 切换到指定线程（侧栏点击）。找不到就当作新对话。 */
+  function setCurrent(id) {
+    if (!id) { cur = null; writeCur(''); return Promise.resolve(null); }
+    return S.getThread(id).then(function (t) {
+      cur = t || null;
+      writeCur(cur ? cur.id : '');
+      return cur;
+    });
+  }
+
+  function rename(id, title) {
+    return S.getThread(id).then(function (t) {
+      if (!t) return null;
+      t.title = String(title || '').slice(0, 40) || t.title;
+      t.updatedAt = Date.now();
+      return S.putThread(t).then(function () {
+        if (cur && cur.id === t.id) cur.title = t.title;
+        return t;
+      });
+    });
+  }
+
+  function remove(id) {
+    return S.removeThread(id).then(function () {
+      if (cur && cur.id === id) { cur = null; writeCur(''); }
+    });
+  }
+
   root.Thread = {
     init: init, ensure: ensure,
     appendUser: appendUser, appendBot: appendBot,
     loadMessages: loadMessages,
-    list: list, clearCurrent: clearCurrent, clearAll: clearAll,
+    list: list, setCurrent: setCurrent, rename: rename, remove: remove,
+    clearCurrent: clearCurrent, clearAll: clearAll,
     current: function () { return cur; },
     backend: function () { return S.backend(); },
     titleFrom: titleFrom,

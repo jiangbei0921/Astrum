@@ -2085,3 +2085,49 @@ sup.fn {
   * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
   * { transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
+
+/* ================= 侧栏会话列表 ================= */
+.thread-list { display: flex; flex-direction: column; gap: 1px; margin-top: 4px; }
+.th-empty { font-size: 10.5px; color: var(--muted-2); padding: 6px 8px; }
+.th-item {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center; gap: 6px;
+  padding: 6px 8px; border-radius: 6px; cursor: pointer;
+  font-size: 11.5px; color: var(--ink-2);
+  transition: background 0.12s ease;
+}
+.th-item:hover { background: var(--surface-2); }
+.th-item.on { background: var(--surface-2); color: var(--ink); box-shadow: inset 2px 0 0 var(--accent); }
+.th-item .th-t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.th-item .th-n { font-size: 9.5px; color: var(--muted-2); font-variant-numeric: tabular-nums; }
+.th-del {
+  font-size: 12px; line-height: 1; color: var(--muted-2);
+  background: none; border: none; cursor: pointer; padding: 2px 4px;
+  border-radius: 4px; opacity: 0; transition: opacity 0.12s ease;
+}
+.th-item:hover .th-del, .th-item:focus-within .th-del { opacity: 1; }
+.th-del:hover { color: #b5352b; background: rgba(181, 53, 43, 0.08); }
+@media (hover: none) { .th-del { opacity: 1; } }
+
+/* ================= 侧栏会话列表 ================= */
+.thread-list { display: flex; flex-direction: column; gap: 1px; margin-top: 4px; }
+.th-empty { font-size: 10.5px; color: var(--muted-2); padding: 6px 8px; }
+.th-item {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center; gap: 6px;
+  padding: 6px 8px; border-radius: 6px; cursor: pointer;
+  font-size: 11.5px; color: var(--ink-2);
+  transition: background 0.12s ease;
+}
+.th-item:hover { background: var(--surface-2); }
+.th-item.on { background: var(--surface-2); color: var(--ink); box-shadow: inset 2px 0 0 var(--accent); }
+.th-item .th-t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.th-item .th-n { font-size: 9.5px; color: var(--muted-2); font-variant-numeric: tabular-nums; }
+.th-del {
+  font-size: 12px; line-height: 1; color: var(--muted-2);
+  background: none; border: none; cursor: pointer; padding: 2px 4px;
+  border-radius: 4px; opacity: 0; transition: opacity 0.12s ease;
+}
+.th-item:hover .th-del, .th-item:focus-within .th-del { opacity: 1; }
+.th-del:hover { color: #b5352b; background: rgba(181, 53, 43, 0.08); }
+@media (hover: none) { .th-del { opacity: 1; } }
