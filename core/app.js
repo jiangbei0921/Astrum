@@ -5072,6 +5072,8 @@
     ]);
 
     group('对话与表述', [
+      selectRow('使用身份', [['observer', '看星 / 拍摄'], ['researcher', '查数据 / 读论文'], ['learner', '了解天文']],
+        (s.persona && s.persona !== 'none') ? s.persona : 'observer', function (v) { applyPersona(v); }),
       selectRow('默认语体', [['auto', '自适应'], ['pro', '专业'], ['pop', '科普']], s.register, function (v) {
         s.register = v; cfg.vega.scope = v; persist();
       }),
@@ -5641,6 +5643,68 @@
     });
   }
 
+  /* ================= 首访引导：三选一身份 =================
+   * 身份只影响「默认语体 + 默认深度 + 推荐问题」，不参与事实判定。
+   * 同一问题在任何身份下得到的数值必须一致——这是产品的底线。 */
+  var PERSONAS = {
+    observer:   { label: '看星 / 拍摄',   desc: '器材、视场、今晚窗口优先', register: 'pop', depth: 'standard' },
+    researcher: { label: '查数据 / 读论文', desc: '数值、出处、可跑查询优先', register: 'pro', depth: 'deep' },
+    learner:    { label: '了解天文',      desc: '概念、成因、通俗讲解优先', register: 'pop', depth: 'brief' }
+  };
+
+  function applyPersona(id) {
+    var p = PERSONAS[id];
+    if (!p) return false;
+    var st = state.settings;
+    st.persona = id;
+    st.register = p.register;
+    st.depth = p.depth;
+    cfg.vega.scope = p.register;
+    cfg.muse.depth = p.depth;
+    persist();
+    return true;
+  }
+
+  function closePersona() {
+    var c = document.getElementById('personaCard');
+    if (c) c.remove();
+  }
+
+  function setPersona(id) {
+    if (!applyPersona(id)) return;
+    closePersona();
+    toast('已切换为「' + PERSONAS[id].label + '」，可在设置里随时更改');
+  }
+
+  function maybeShowPersona() {
+    if (state.settings.persona) return;
+    if (document.querySelector('#thread .msg')) return;
+    if (document.getElementById('personaCard')) return;
+    var card = el('div', 'persona-card');
+    card.id = 'personaCard';
+    var html = '<div class="pc-title">先告诉我你主要想做什么</div>' +
+      '<div class="pc-sub">只影响默认的讲解方式与推荐，随时可改，也不影响任何数值。</div>';
+    card.innerHTML = html;
+    Object.keys(PERSONAS).forEach(function (k) {
+      var p = PERSONAS[k];
+      var b = el('button', 'pc-item');
+      b.type = 'button';
+      b.innerHTML = '<span class="pc-l">' + esc(p.label) + '</span>' +
+        '<span class="pc-d">' + esc(p.desc) + '</span>';
+      b.addEventListener('click', function () { setPersona(k); });
+      card.appendChild(b);
+    });
+    var skip = el('button', 'pc-skip', '先跳过');
+    skip.type = 'button';
+    skip.addEventListener('click', function () {
+      state.settings.persona = 'none';
+      persist();
+      closePersona();
+    });
+    card.appendChild(skip);
+    $('#thread').appendChild(card);
+  }
+
   /* ================= 历史对话的恢复与清理 =================
    * 恢复走「重放 ans」而不是存 DOM：DOM 会随渲染逻辑变化而过期，ans 不会。
    * 恢复态强制关闭动画与自动滚动，避免刷新后整屏闪现。 */
@@ -5663,7 +5727,8 @@
       });
       var sc = $('#scroll');
       if (sc) sc.scrollTop = sc.scrollHeight;
-    }).catch(function (e) { console.warn('history restore failed', e); });
+    }).catch(function (e) { console.warn('history restore failed', e); })
+      .then(function () { maybeShowPersona(); });
   }
 
   function clearHistory(scope) {
@@ -5703,6 +5768,7 @@
     window.__astrum = {
       ask: ask, selectSource: selectSource, openSheet: openSheet, openAgent: openAgent,
       restoreHistory: restoreHistory, clearHistory: clearHistory,
+      setPersona: setPersona, applyPersona: applyPersona, PERSONAS: PERSONAS,
       /* 档案的程序化入口：与设置面板的 selectRow 等效。
        * 注意：ask() 每次都会用 state.settings 覆盖 AC.setGear，
        * 所以外部只调 AC.setGear 是无效的，必须改 state 再同步。 */
