@@ -92,6 +92,7 @@
     '本机统计：问过 0 次（仅存本地，不上传）': 'Local stats: 0 questions (stored on this device, never uploaded)',
 
     /* ---------- 帮助 ---------- */
+    '入口详情': 'Overview',
     '能帮你做什么': 'What it can do',
     '使用技巧': 'Tips',
     '配套教程': 'Tutorials',

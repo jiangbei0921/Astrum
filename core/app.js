@@ -6592,6 +6592,94 @@
       });
   })();
 
+  /* ================= 首屏入口详情 =================
+   * 用 hash 承载标识：#/topic/observing
+   * 这样刷新、分享、前进后退都能回到同一页，标识本身写在 URL 里，不需要额外状态。
+   */
+  function topicFromHash() {
+    var m = String(location.hash || '').match(/^#\/topic\/([a-z]+)$/);
+    return m ? m[1] : '';
+  }
+
+  function clearTopicHash() {
+    if (!topicFromHash()) return;
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { location.hash = ''; }
+  }
+
+  function renderTopic(id) {
+    var body = $('#topicBody');
+    var t = window.Topics && window.Topics.get(id);
+    if (!body || !t) return false;
+    var c = window.Topics.copy(t);
+
+    $('#topicN').textContent = t.n;
+    $('#topicTitle').textContent = c.title;
+    $('#topicSub').textContent = L('入口详情');
+
+    body.innerHTML = '';
+    body.appendChild(el('p', 'tp-lede', c.lede));
+
+    var list = el('div', 'tp-rows');
+    c.rows.forEach(function (r) {
+      var row = el('div', 'tp-row');
+      row.appendChild(el('span', 'tp-k', r[0]));
+      row.appendChild(el('span', 'tp-v', r[1]));
+      list.appendChild(row);
+    });
+    body.appendChild(list);
+
+    var foot = el('div', 'tp-foot');
+    var act = el('button', 'tp-act', c.action.label);
+    act.type = 'button';
+    act.addEventListener('click', function () {
+      closeSheet('topic');
+      clearTopicHash();
+      if (c.action.act === 'obs') { toggleObs(true); return; }
+      if (c.action.act === 'agents') {
+        /* 智能体列表在侧栏，不另开面板：把焦点送过去，比再造一个入口可靠 */
+        var al = document.getElementById('agentList');
+        if (al) {
+          al.scrollIntoView({ block: 'nearest' });
+          var first = al.querySelector('.agent');
+          if (first) first.focus();
+        }
+        return;
+      }
+      frAsk(c.action.q);
+    });
+    foot.appendChild(act);
+    body.appendChild(foot);
+    return true;
+  }
+
+  function syncTopicFromHash() {
+    var id = topicFromHash();
+    if (id && window.Topics && window.Topics.get(id)) {
+      if (renderTopic(id)) openSheet('topic');
+      return;
+    }
+    var box = $('#topic');
+    if (box && box.classList.contains('on')) closeSheet('topic');
+  }
+
+  (function bindTopics() {
+    $$('.hcard[data-topic]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = b.getAttribute('data-topic');
+        if (!id) return;
+        if (topicFromHash() === id) syncTopicFromHash();
+        else location.hash = '#/topic/' + id;
+      });
+    });
+    var close = document.getElementById('topicClose');
+    if (close) close.addEventListener('click', function () { closeSheet('topic'); clearTopicHash(); });
+    window.addEventListener('hashchange', syncTopicFromHash);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && topicFromHash()) clearTopicHash();
+    });
+    syncTopicFromHash();
+  })();
+
   function clearHistory(scope) {
     if (!window.Thread) return;
     var p = scope === 'all' ? window.Thread.clearAll() : window.Thread.clearCurrent();

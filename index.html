@@ -122,10 +122,22 @@
           <h1 data-i18n="让每一次抬头，都有据可依。">Every glance upward, grounded in evidence.</h1>
           <div class="hero-slot" id="heroSlot"></div>
           <div class="hero-cards">
-            <div class="hcard"><span class="n">01</span><b>观测与星图</b><p>方位、高度、升落与最佳窗口</p></div>
-            <div class="hcard"><span class="n">02</span><b>天体知识</b><p>距离、性质、演化，附来源与时效</p></div>
-            <div class="hcard"><span class="n">03</span><b>宇宙学与前沿</b><p>黑洞、暗能量，标注共识等级</p></div>
-            <div class="hcard"><span class="n">04</span><b>自建智能体</b><p>定义角色、参数与专家注记</p></div>
+            <button class="hcard" type="button" data-topic="observing">
+              <span class="n">01</span><b>观测与星图</b><p>方位、高度、升落与最佳窗口</p>
+              <span class="go" aria-hidden="true">→</span>
+            </button>
+            <button class="hcard" type="button" data-topic="objects">
+              <span class="n">02</span><b>天体知识</b><p>距离、性质、演化，附来源与时效</p>
+              <span class="go" aria-hidden="true">→</span>
+            </button>
+            <button class="hcard" type="button" data-topic="cosmology">
+              <span class="n">03</span><b>宇宙学与前沿</b><p>黑洞、暗能量，标注共识等级</p>
+              <span class="go" aria-hidden="true">→</span>
+            </button>
+            <button class="hcard" type="button" data-topic="agents">
+              <span class="n">04</span><b>自建智能体</b><p>定义角色、参数与专家注记</p>
+              <span class="go" aria-hidden="true">→</span>
+            </button>
           </div>
         </div>
         <div class="thread" id="thread" role="log" aria-live="polite"
@@ -393,6 +405,17 @@
   <div class="sheet-body" id="drawerBody"></div>
 </aside>
 
+<aside class="sheet wide topic" id="topic" aria-hidden="true">
+  <div class="sheet-head">
+    <div class="sheet-id">
+      <span class="sigil plain" id="topicN">01</span>
+      <div><h3 id="topicTitle">观测与星图</h3><p id="topicSub">入口详情</p></div>
+    </div>
+    <button class="icon-btn" id="topicClose" aria-label="返回首页">×</button>
+  </div>
+  <div class="sheet-body" id="topicBody"></div>
+</aside>
+
 <aside class="sheet wide" id="frontier" aria-hidden="true">
   <div class="sheet-head">
     <div class="sheet-id">
@@ -442,6 +465,7 @@
 <script src="core/weather.js"></script>
 <script src="core/store.js"></script>
 <script src="core/thread.js"></script>
+<script src="core/topics.js"></script>
 <script src="core/app.js"></script>
 
 <!-- 启动守卫：核心模块未加载时给出明确修复指引（避免退化成无样式裸页面） -->
