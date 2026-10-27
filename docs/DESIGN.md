@@ -3692,3 +3692,61 @@ PASS 来源: 内核与联网检索仍在
 
 `selftest` **130/130**、`store-test` 17/17、`skill-test` 10/10、`consistency-test` 7/7、
 `a11y-test` 9/9、`research-test` 77/77、`csptest` 6/6。
+
+---
+
+## 五十四、删除与「身份」重复的两个伪来源（v6.4）
+
+### 54.1 确认：是真重复，不是看着像
+
+`local-pro` / `local-pop` 两个"来源"写的是：
+
+```js
+{ register: 'pro', depth: 'deep', tone: 'academic' }   // 研究视角
+{ register: 'pop', depth: 'brief', tone: 'warm' }      // 科普叙事
+```
+
+而「身份」写的是同一组字段：
+
+```js
+PERSONAS.researcher = { register: 'pro', depth: 'deep' }
+PERSONAS.learner    = { register: 'pop', depth: 'brief' }
+```
+
+在 `ask()` 里的执行顺序是 `sourceCfgPatch(cfgRun, src)` 先、身份覆盖在后。
+**结果：选「研究视角」这个来源，`register`/`depth` 立刻被身份覆盖，只剩 `tone` 生效。**
+
+也就是说，这两个条目名义上是"来源"，实际上是一个**会失效的语体预设**。
+
+### 54.2 带来的三个问题
+
+1. **职责混淆**：来源应当回答"数据从哪来"，这两个回答的是"话怎么说"
+2. **静默失效**：用户选了"研究视角"，实际没换语体——只有字体的语气轻微变化
+3. **二义性**：当来源与身份给出不同语体时，用户无法预期谁生效
+
+### 54.3 处理
+
+| 改动 | 内容 |
+| --- | --- |
+| `core/sources.js` | 删除 `local-pro` / `local-pop` 两个条目 |
+| `core/app.js` | 删除 `sourceCfgPatch()` 及其调用（唯一用途就是这两个条目） |
+| 迁移 | 启动时若 `sourceId` 指向已删条目，回落到 `local` |
+
+现在来源列表只剩真正的数据来源：**内核 / 联网检索 / 本机 Chrome 内置 / 10 家云端模型**。
+表述方式全部归「身份」管，一条路径。
+
+### 54.4 一个副作用
+
+`cfg.lyra.tone` 现在没有任何界面可以设置（原先只有这两个伪来源会写它）。
+字段保留在配置里、使用默认值，不再对外暴露。若将来要单独控制语气，应作为「身份」的第四种取值，
+而不是再造一个"来源"。
+
+### 54.5 验证
+
+```
+PASS 来源: 表述型伪来源已移除 | local,web,chrome-ai,openai,anthropic,gemini,deepseek,moonshot,...
+PASS 来源: 内核与联网检索仍在
+```
+
+`selftest` **130/130**、`store-test` 17/17、`skill-test` 10/10、`consistency-test` 7/7、
+`a11y-test` 9/9、`research-test` 77/77、`csptest` 6/6。
