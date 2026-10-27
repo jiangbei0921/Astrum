@@ -1604,21 +1604,22 @@
 
   /* ================= 侧栏 ================= */
   function renderSources() {
+    /* 侧栏来源列表已移除（顶栏 chip 与输入区 pill 已能切换与显示状态）；
+     * 这里保留可选渲染，元素不存在时直接跳过。 */
     var box = $('#sideSources');
-    box.innerHTML = '';
-    S.list().slice(0, 5).forEach(function (src) {
-      var b = el('button', 'src-item' + (src.id === state.settings.sourceId ? ' on' : ''));
-      b.innerHTML =
-        '<span class="dot ' + statusTone(src.status) + '" style="width:7px;height:7px"></span>' +
-        '<span class="meta"><span class="nm">' + esc(src.name) + '</span>' +
-        '<span class="sb">' + esc(src.type === 'local' ? '本地 · 离线' : src.status.msg) + '</span></span>' +
-        '<span class="st">' + (src.type === 'local' ? '' : src.status.state === 'ready' ? '已连' : '未连') + '</span>';
-      b.addEventListener('click', function () { selectSource(src.id); });
-      box.appendChild(b);
-    });
-    var more = el('button', 'src-more', '查看全部 ' + S.list().length + ' 个来源与能力差异');
-    more.addEventListener('click', function () { openPop($('#sourceChip')); });
-    box.appendChild(more);
+    if (box) {
+      box.innerHTML = '';
+      S.list().slice(0, 5).forEach(function (src) {
+        var b = el('button', 'src-item' + (src.id === state.settings.sourceId ? ' on' : ''));
+        b.innerHTML =
+          '<span class="dot ' + statusTone(src.status) + '" style="width:7px;height:7px"></span>' +
+          '<span class="meta"><span class="nm">' + esc(src.name) + '</span>' +
+          '<span class="sb">' + esc(src.type === 'local' ? '本地 · 离线' : src.status.msg) + '</span></span>' +
+          '<span class="st">' + (src.type === 'local' ? '' : src.status.state === 'ready' ? '已连' : '未连') + '</span>';
+        b.addEventListener('click', function () { selectSource(src.id); });
+        box.appendChild(b);
+      });
+    }
 
     var cur = sourceById(state.settings.sourceId);
     $('#chipName').textContent = cur.name;
@@ -5613,7 +5614,7 @@
     $('#sourceChip').addEventListener('click', function (e) { e.stopPropagation(); openPop($('#sourceChip')); });
     $('#popClose').addEventListener('click', closePop);
     $('#popManage').addEventListener('click', function () { closePop(); openSheet('settings'); });
-    $('#btnManageSources').addEventListener('click', function () { openSheet('settings'); });
+    if ($('#btnManageSources')) $('#btnManageSources').addEventListener('click', function () { openSheet('settings'); });
     $('#btnSettings').addEventListener('click', function () { openSheet('settings'); });
     $('#settingsClose').addEventListener('click', function () { closeSheet('settings'); });
     $('#dwClose').addEventListener('click', function () { closeSheet('drawer'); });
