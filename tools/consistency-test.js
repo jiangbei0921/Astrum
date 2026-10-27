@@ -172,7 +172,7 @@ function main() {
   var tmp = path.join(ROOT, '__consistency_tmp.html');
   fs.writeFileSync(tmp, html, 'utf8');
 
-  var profile = path.join(ROOT, '__consistency_profile');
+  var profile = path.join(require('os').tmpdir(), '__consistency_profile_' + process.pid + '_' + Date.now());
   try { fs.rmSync(profile, { recursive: true, force: true }); } catch (e) {}
 
   var out;

@@ -117,7 +117,7 @@ function main() {
 
   var tmp = path.join(ROOT, '__a11y_tmp.html');
   fs.writeFileSync(tmp, html, 'utf8');
-  var profile = path.join(ROOT, '__a11y_profile');
+  var profile = path.join(require('os').tmpdir(), '__a11y_profile_' + process.pid + '_' + Date.now());
   try { fs.rmSync(profile, { recursive: true, force: true }); } catch (e) {}
 
   var out;
