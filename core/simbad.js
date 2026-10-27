@@ -16,7 +16,7 @@
   'use strict';
 
   var TAP = 'https://simbad.u-strasbg.fr/simbad/sim-tap/sync';
-  var TIMEOUT = 3000;
+  var TIMEOUT = 8000;
   var CACHE_KEY = 'astrum.simbad.cache.v1';
   var CACHE_TTL = 24 * 3600 * 1000;
   var MAX_CACHE = 60;
@@ -42,7 +42,9 @@
 
   function buildAdql(ident) {
     var safe = norm(ident).replace(/'/g, "''");
-    return "SELECT TOP 1 main_id, ra, dec, otype, plx_value, V FROM basic " +
+    /* 只取 basic 表里确实存在的列。实测 V 不在 basic 中（返回 400 unresolved identifier），
+     * 取星等需要再 join allfluxes，为减少失败面先不做。 */
+    return "SELECT TOP 1 main_id, ra, dec, otype, plx_value FROM basic " +
       "JOIN ident ON ident.oidref = basic.oid " +
       "WHERE ident.id = '" + safe + "'";
   }

@@ -2748,7 +2748,9 @@
       card.appendChild(sw);
     }
     if (ans.meta && ans.meta.recall) card.appendChild(recallLine(ans.meta.recall));
-    if (!(extra && extra.restore)) card.appendChild(answerActions(card, ans));
+    /* 恢复态同样挂操作条：否则刷新后答案就没有复制/分享/SIMBAD/云量，
+     * 而这些动作不写存储，重复渲染没有副作用。 */
+    card.appendChild(answerActions(card, ans));
     card.appendChild(metaBar(ans));
     msg.appendChild(card);
     $('#thread').appendChild(msg);
@@ -6143,7 +6145,7 @@
       var ly = window.Simbad.distanceLy(info);
       rows.push(['视差', info.plx + ' mas' + (ly ? ' · 约 ' + ly + ' 光年' : '')]);
     }
-    if (info.vmag != null) rows.push(['V 星等', String(info.vmag)]);
+
     var html = '<div class="sb-head">SIMBAD · 实时查询</div>';
     rows.forEach(function (kv) {
       html += '<div class="sb-row"><span class="k">' + esc(kv[0]) + '</span><span class="v">' + esc(kv[1]) + '</span></div>';
@@ -6207,7 +6209,9 @@
           sb.textContent = 'SIMBAD';
           sb.disabled = false;
           if (!r || !r.ok) {
-            toast(r && r.reason === 'timeout' ? 'SIMBAD 超时，未取到实时值' : 'SIMBAD 未找到该天体');
+            toast(r && r.reason === 'timeout'
+              ? 'SIMBAD 响应超时（服务在境外，可能是网络不通，可稍后重试）'
+              : 'SIMBAD 未找到该天体');
             return;
           }
           card.insertBefore(simbadBox(r, ident), bar);
