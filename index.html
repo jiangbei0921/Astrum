@@ -59,7 +59,7 @@
         <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 2.9v2.3M12 18.8v2.3M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.9 12h2.3M18.8 12h2.3M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         <span>设置</span>
       </button>
-      <button class="btn-dark" id="btnNew">新对话</button>
+      <button class="btn-dark" id="btnNew" data-i18n="新对话">New chat</button>
     </div>
   </header>
 
@@ -83,24 +83,24 @@
         </div>
 
         <section class="side-block">
-          <div class="side-head"><h3>对话</h3><span class="side-hint" id="threadHint">最近 12 条</span></div>
+          <div class="side-head"><h3 data-i18n="对话">Chats</h3><span class="side-hint" id="threadHint" data-i18n="最近 12 条">Latest 12</span></div>
           <div class="thread-list" id="threadList"></div>
         </section>
 
         <section class="side-block">
-          <div class="side-head"><h3>智能体</h3><span class="side-hint">点击配置</span></div>
+          <div class="side-head"><h3 data-i18n="智能体">Agents</h3><span class="side-hint" data-i18n="点击配置">Click to configure</span></div>
           <div class="agent-list" id="agentList"></div>
-          <button class="add-btn" id="btnAddAgent"><span>+</span> 新建智能体</button>
+          <button class="add-btn" id="btnAddAgent"><span>+</span> <em style="font-style:normal" data-i18n="新建智能体">New agent</em></button>
         </section>
 
         <section class="side-block">
-          <div class="side-head"><h3>试试这样问</h3></div>
+          <div class="side-head"><h3 data-i18n="试试这样问">Try asking</h3></div>
           <div class="scene-list" id="sceneList">
-            <button data-q="今晚在北京能看到什么？">今晚看什么</button>
-            <button data-q="M42 怎么找？">目标怎么找</button>
-            <button data-q="黑洞是怎么形成的？">黑洞与宇宙</button>
-            <button data-q="暗能量到底是什么？">前沿争议</button>
-            <button data-q="英仙座流星雨什么时候看最好？">天象科普</button>
+            <button data-q="今晚在北京能看到什么？" data-i18n="今晚看什么">Tonight</button>
+            <button data-q="M42 怎么找？" data-i18n="目标怎么找">Find a target</button>
+            <button data-q="黑洞是怎么形成的？" data-i18n="黑洞与宇宙">Black holes</button>
+            <button data-q="暗能量到底是什么？" data-i18n="前沿争议">Frontier</button>
+            <button data-q="英仙座流星雨什么时候看最好？" data-i18n="天象科普">Sky events</button>
           </div>
         </section>
       </div>
@@ -115,7 +115,7 @@
     <main class="main" id="main">
       <div class="scroll" id="scroll">
         <div class="hero" id="hero">
-          <h1>让每一次抬头，都有据可依。</h1>
+          <h1 data-i18n="让每一次抬头，都有据可依。">Every glance upward, grounded in evidence.</h1>
           <div class="hero-slot" id="heroSlot"></div>
           <div class="hero-cards">
             <div class="hcard"><span class="n">01</span><b>观测与星图</b><p>方位、高度、升落与最佳窗口</p></div>
@@ -131,7 +131,7 @@
       <div class="dock" id="dock">
         <div class="composer" id="composer">
           <div class="attach-tray" id="attachTray" hidden></div>
-          <textarea id="input" rows="1" placeholder="问一个天文问题，例如：今晚在上海能看到什么？（可拖入图片、FITS、文本）"></textarea>
+          <textarea id="input" rows="1" data-i18n-ph="问一个天文问题，例如：今晚在上海能看到什么？（可拖入图片、FITS、文本）" placeholder="Ask an astronomy question…"></textarea>
           <div class="comp-bar">
             <button class="btn-attach" id="btnAttach" aria-label="添加文件或图片" title="添加文件或图片（也可拖拽或粘贴）">
               <svg viewBox="0 0 24 24" width="15" height="15"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
@@ -160,7 +160,7 @@
     <!-- 观测台 -->
     <aside class="obspanel" id="obsPanel">
       <div class="obs-head">
-        <h3>观测台</h3>
+        <h3 data-i18n="观测台">Observatory</h3>
         <button class="icon-btn" id="btnObsClose" aria-label="收起">×</button>
       </div>
       <div class="obs-scroll">
@@ -333,15 +333,15 @@
 
 <div class="sheet narrow" id="coord" aria-hidden="true">
   <div class="sheet-head">
-    <div class="sheet-id"><span class="sigil plain">◎</span><div><h3>手动坐标</h3><p>任意经纬度，全球可用</p></div></div>
+    <div class="sheet-id"><span class="sigil plain">◎</span><div><h3 data-i18n="手动坐标">Manual coordinates</h3><p data-i18n="任意经纬度，全球可用">Any latitude/longitude</p></div></div>
     <button class="icon-btn" id="coordClose" aria-label="关闭">×</button>
   </div>
   <div class="sheet-body">
     <div class="ed-pair">
-      <div class="ed-field"><label>纬度</label><input type="text" id="coordLat" placeholder="39.9042" inputmode="decimal" /></div>
-      <div class="ed-field"><label>经度</label><input type="text" id="coordLon" placeholder="116.4074" inputmode="decimal" /></div>
+      <div class="ed-field"><label data-i18n="纬度">Latitude</label><input type="text" id="coordLat" placeholder="39.9042" inputmode="decimal" /></div>
+      <div class="ed-field"><label data-i18n="经度">Longitude</label><input type="text" id="coordLon" placeholder="116.4074" inputmode="decimal" /></div>
     </div>
-    <div class="ed-field"><label>名称（可选）</label><input type="text" id="coordName" placeholder="我的观测点" maxlength="24" /></div>
+    <div class="ed-field"><label data-i18n="名称（可选）">Name (optional)</label><input type="text" id="coordName" placeholder="我的观测点" maxlength="24" /></div>
     <div class="ed-field"><label>时区（UTC 偏移）</label>
       <select id="coordTz"></select>
       <div class="hintline">默认按经度估算，跨时区或使用夏令时的地区请手动指定。</div>

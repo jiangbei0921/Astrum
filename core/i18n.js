@@ -98,6 +98,46 @@
     '云量': 'Cloud cover',
     '查询中…': 'Querying…',
 
+    /* 智能体角色 */
+    '总控 · 意图解析与协奏': 'Conductor · intent & orchestration',
+    '知识 · 事实与依据': 'Knowledge · facts & evidence',
+    '宇宙学 · 尺度、起源与演化': 'Cosmology · scale, origin, evolution',
+    '星历 · 位置与时间': 'Ephemeris · position & time',
+    '观测 · 条件与器材': 'Observing · conditions & gear',
+    '星图 · 空间定位': 'Sky map · spatial locating',
+    '表达 · 语体与叙事': 'Voice · register & narrative',
+    '爆发 · 变星、超新星与高能天体': 'Transients · variables, supernovae, high energy',
+
+    /* 首屏 */
+    '让每一次抬头，都有据可依。': 'Every glance upward, grounded in evidence.',
+    '问一个天文问题，例如：今晚在上海能看到什么？（可拖入图片、FITS、文本）':
+      'Ask an astronomy question — e.g. what can I see tonight in Shanghai? (drop images, FITS or text)',
+
+    /* 观测台 */
+    '观测台': 'Observatory',
+    '观测上下文': 'Observing context',
+    '实时': 'Live',
+    '日期': 'Date',
+    '时刻': 'Time',
+    '地点': 'Location',
+    '搜索全球任意地名，或输入 39.9,116.4': 'Search any place, or type 39.9,116.4',
+    '手动坐标': 'Manual coordinates',
+    '任意经纬度，全球可用': 'Any latitude/longitude',
+    '纬度': 'Latitude',
+    '经度': 'Longitude',
+    '名称（可选）': 'Name (optional)',
+
+    /* 侧栏补充 */
+    '最近 12 条': 'Latest 12',
+    '点击配置': 'Click to configure',
+    '新建智能体': 'New agent',
+    '今晚看什么': 'Tonight',
+    '目标怎么找': 'Find a target',
+    '黑洞与宇宙': 'Black holes',
+    '前沿争议': 'Frontier debates',
+    '天象科普': 'Sky events',
+    '新对话': 'New chat',
+
     /* 通用 */
     '切换档案': 'Switch profile',
     '新建': 'New',
@@ -134,8 +174,25 @@
     return lang;
   }
 
+  /* 扫描静态标记：[data-i18n] 改文本，[data-i18n-ph] 改 placeholder。
+   * 原文就写在 HTML 里（中文），翻译表以它为 key，缺失则保持原样。 */
+  function applyStatic() {
+    try {
+      document.querySelectorAll('[data-i18n]').forEach(function (el) {
+        var zh = el.getAttribute('data-i18n') || el.textContent.trim();
+        var out = t(zh);
+        if (out !== zh) el.textContent = out;
+      });
+      document.querySelectorAll('[data-i18n-ph]').forEach(function (el) {
+        var zh = el.getAttribute('data-i18n-ph');
+        el.setAttribute('placeholder', t(zh));
+      });
+    } catch (e) {}
+  }
+
   /* <html lang> 与字体：英文用系统字体栈更合适 */
   function apply() {
+    applyStatic();
     try {
       document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'zh-CN');
       document.body.classList.toggle('lang-en', lang === 'en');

@@ -1666,8 +1666,8 @@
     b.dataset.id = a.id;
     b.innerHTML =
       '<span class="sg" style="color:' + esc(a.color) + '">' + esc(a.sigil) + '</span>' +
-      '<span class="meta"><span class="nm">' + esc(a.name) + (a.cn ? ' · ' + esc(a.cn) : '') + '</span>' +
-      '<span class="rl">' + esc(a.role || '') + '</span></span>';
+      '<span class="meta"><span class="nm">' + esc(a.name) + (a.cn && (window.I18N ? window.I18N.current() === 'zh' : true) ? ' · ' + esc(a.cn) : '') + '</span>' +
+      '<span class="rl">' + esc(L(a.role || '')) + '</span></span>';
     b.addEventListener('click', function () { openAgent(a.id); });
     return b;
   }
@@ -6249,12 +6249,12 @@
   function answerActions(card, ans) {
     var bar = el('div', 'ans-acts');
 
-    var cp = el('button', 'ans-act', '复制');
+    var cp = el('button', 'ans-act', L('复制'));
     cp.type = 'button';
     cp.title = '复制这条答案的正文';
     cp.addEventListener('click', function () { copyText(answerText(card), cp); });
 
-    var sh = el('button', 'ans-act', '分享');
+    var sh = el('button', 'ans-act', L('分享'));
     sh.type = 'button';
     sh.title = '复制为可粘贴分享的纯文本';
     sh.addEventListener('click', function () {
@@ -6265,7 +6265,7 @@
       copyText(head + answerText(card) + tail, sh);
     });
 
-    var fb = el('button', 'ans-act', '反馈');
+    var fb = el('button', 'ans-act', L('反馈'));
     fb.type = 'button';
     fb.title = '把这条答案的问题与诊断信息打包复制，便于反馈';
     fb.addEventListener('click', function () {
@@ -6314,7 +6314,7 @@
     var obsLike = ans.meta && (ans.meta.freshness === 'ephemeris' ||
       /今晚|可见|出摊|拍摄|能看|窗口/.test(String(ans.query || '')));
     if (obsLike && window.Weather) {
-      var wb = el('button', 'ans-act', '云量');
+      var wb = el('button', 'ans-act', L('云量'));
       wb.type = 'button';
       wb.title = '查询' + (state.settings.city || '北京') + '的云量（会发送城市名与城市中心坐标）';
       wb.addEventListener('click', function () {
