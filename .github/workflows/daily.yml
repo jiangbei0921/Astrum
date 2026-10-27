@@ -44,7 +44,9 @@ jobs:
             echo "无变化，跳过提交"
             exit 0
           fi
-          git add data/daily.js astrum-standalone.html
+          # 只提交数据文件：astrum-standalone.html 是 gitignore 的构建产物，
+          # git add 一个被忽略的路径会直接报错，整步失败。
+          git add data/daily.js
           git commit -m "chore: 每日前沿同步 $(date -u +%Y-%m-%d)"
           # 期间可能有别人推送，先 rebase 再推，避免非快进失败
           git pull --rebase --autostash
