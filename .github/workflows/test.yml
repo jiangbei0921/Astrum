@@ -26,6 +26,10 @@ jobs:
           node tools/sync-csp-hash.js
           node tools/build-standalone.js
 
+      # 每日前沿的数据是自动生成并提交的，语法坏掉会让整页白屏
+      - name: 前沿数据语法检查
+        run: node --check data/daily.js
+
       # 每个套件单独成步：失败时能立刻看出是哪一层坏了
       - name: 功能回归 selftest
         run: node tools/selftest.js "file://$PWD/index.html"

@@ -103,6 +103,24 @@
     '答案呈现': 'In the answer',
     '视觉': 'Visual',
 
+    /* 每日前沿 */
+    '前沿': 'Frontier',
+    '每日前沿': 'Daily frontier',
+    '最新论文与机构报道': 'Latest papers and reports',
+    '尚未同步': 'Not synced yet',
+    '预印本': 'Preprints',
+    '机构报道': 'Reports',
+    '长期阵地': 'Standing sources',
+    '打开原文': 'Open source',
+    '围绕它提问': 'Ask about it',
+    '同步于 ': 'Synced ',
+    '。内容来自公开接口，未经本项目核验，因此不参与答案推理；引用前请打开原文核对。':
+      '. Pulled from public APIs and NOT verified by this project, so it does not take part in answer reasoning. Check the original before citing.',
+    '还没有本地数据。构建时运行 tools/sync-daily.js 可生成；GitHub Actions 每天自动执行一次。':
+      'No local data yet. Run tools/sync-daily.js at build time; GitHub Actions does it daily.',
+    '研究者的博客、机构精选与爱好者论坛。这些不做自动抓取：论坛内容未经筛选，混进列表反而降低信噪比。':
+      'Researcher blogs, institutional picks and amateur forums. These are not scraped: unfiltered forum content would only add noise.',
+
     /* 智能体角色 */
     '总控 · 意图解析与协奏': 'Conductor · intent & orchestration',
     '知识 · 事实与依据': 'Knowledge · facts & evidence',

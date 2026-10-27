@@ -51,6 +51,10 @@
     </div>
 
     <div class="tb-right">
+      <button class="icon-btn with-label" id="btnFrontier" aria-label="每日前沿">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 3.2l1.9 5.3 5.3 1.9-5.3 1.9L12 17.6l-1.9-5.3L4.8 10.4l5.3-1.9z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M18.4 16.2l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"/></svg>
+        <span data-i18n="前沿">Frontier</span>
+      </button>
       <button class="icon-btn with-label" id="btnObs" aria-label="观测台">
         <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="8.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12 3.6v2.2M12 18.2v2.2M3.6 12h2.2M18.2 12h2.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         <span>观测台</span>
@@ -380,6 +384,17 @@
   <div class="sheet-body" id="drawerBody"></div>
 </aside>
 
+<aside class="sheet wide" id="frontier" aria-hidden="true">
+  <div class="sheet-head">
+    <div class="sheet-id">
+      <span class="sigil plain">✦</span>
+      <div><h3 data-i18n="每日前沿">Daily frontier</h3><p id="frMeta">最新论文与机构报道</p></div>
+    </div>
+    <button class="icon-btn" id="frontierClose" aria-label="关闭">×</button>
+  </div>
+  <div class="sheet-body" id="frontierBody"></div>
+</aside>
+
 <aside class="sheet wide" id="settings" aria-hidden="true">
   <div class="sheet-head">
     <div class="sheet-id">
@@ -398,6 +413,7 @@
 <script src="data/solarsystem.js"></script>
 <script src="data/obsplan.js"></script>
 <script src="data/gear.js"></script>
+<script src="data/daily.js"></script>
 <script src="core/astro.js"></script>
 <script src="core/runtime.js"></script>
 <script src="core/fit.js"></script>

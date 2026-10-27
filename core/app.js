@@ -6347,6 +6347,159 @@
     return bar;
   }
 
+  /* ================= 每日前沿 =================
+   * 数据来自 data/daily.js（由 tools/sync-daily.js 每天生成，GitHub Actions 运行）。
+   * 它只作阅读入口与提问引子，**不参与答案推理**：
+   * 知识库的每个事实都带固定核验日期，而预印本标题与新闻摘要是未核验的二手内容，
+   * 混进证据链会让「可复算」这个承诺失效。
+   */
+  function frontierData() {
+    var d = window.ASTRUM_DAILY;
+    return (d && typeof d === 'object') ? d : null;
+  }
+
+  function frAsk(text) {
+    var ta = $('#input');
+    if (!ta) return;
+    ta.value = text;
+    /* 触发 input 让输入框自动增高（监听器在 bind 里注册） */
+    ta.dispatchEvent(new Event('input'));
+    closeSheet('frontier');
+    ta.focus();
+  }
+
+  function frPaper(it) {
+    var box = el('div', 'fr-item');
+    var a = el('a', 'fr-t');
+    a.href = it.url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.textContent = it.title;
+    box.appendChild(a);
+
+    var meta = el('div', 'fr-m');
+    if (it.cat) meta.appendChild(el('span', 'fr-cat', it.cat));
+    if (it.published) meta.appendChild(el('span', 'fr-d', it.published));
+    if (it.authors && it.authors.length) {
+      meta.appendChild(el('span', 'fr-au', it.authors.join('、') + (it.authors.length >= 3 ? ' 等' : '')));
+    }
+    box.appendChild(meta);
+
+    if (it.summary) box.appendChild(el('p', 'fr-s', it.summary));
+
+    var acts = el('div', 'fr-acts');
+    var open = el('a', 'fr-a', L('打开原文'));
+    open.href = it.url;
+    open.target = '_blank';
+    open.rel = 'noopener noreferrer';
+    acts.appendChild(open);
+
+    /* 提问只是把标题填进输入框，不承诺本地内核一定能回答这篇论文的内容——
+     * 答不了时会走既有的「未知档」边界响应，这比编造一段摘要诚实。 */
+    var ask = el('button', 'fr-a', L('围绕它提问'));
+    ask.type = 'button';
+    ask.addEventListener('click', function () {
+      frAsk('介绍一下「' + it.title + '」相关的研究背景');
+    });
+    acts.appendChild(ask);
+    box.appendChild(acts);
+    return box;
+  }
+
+  function frNews(it) {
+    var box = el('div', 'fr-item');
+    var a = el('a', 'fr-t');
+    a.href = it.url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.textContent = it.title;
+    box.appendChild(a);
+
+    var meta = el('div', 'fr-m');
+    if (it.source) meta.appendChild(el('span', 'fr-cat', it.source));
+    if (it.date) meta.appendChild(el('span', 'fr-d', it.date));
+    box.appendChild(meta);
+    if (it.summary) box.appendChild(el('p', 'fr-s', it.summary));
+
+    var acts = el('div', 'fr-acts');
+    var open = el('a', 'fr-a', L('打开原文'));
+    open.href = it.url;
+    open.target = '_blank';
+    open.rel = 'noopener noreferrer';
+    acts.appendChild(open);
+    box.appendChild(acts);
+    return box;
+  }
+
+  function renderFrontier() {
+    var body = $('#frontierBody');
+    if (!body) return;
+    body.innerHTML = '';
+
+    var d = frontierData();
+    var metaEl = $('#frMeta');
+    if (!d) {
+      if (metaEl) metaEl.textContent = L('尚未同步');
+      body.appendChild(el('div', 'fr-note',
+        L('还没有本地数据。构建时运行 tools/sync-daily.js 可生成；GitHub Actions 每天自动执行一次。')));
+      return;
+    }
+
+    if (metaEl) metaEl.textContent = (d.updated || '') + ' · ' + L('最新论文与机构报道');
+
+    body.appendChild(el('div', 'fr-note',
+      L('同步于 ') + (d.updated || '—') +
+      L('。内容来自公开接口，未经本项目核验，因此不参与答案推理；引用前请打开原文核对。')));
+
+    var papers = Array.isArray(d.papers) ? d.papers : [];
+    if (papers.length) {
+      body.appendChild(el('div', 'fr-h', L('预印本') + ' · arXiv（' + papers.length + '）'));
+      var pl = el('div', 'fr-list');
+      papers.forEach(function (p) { pl.appendChild(frPaper(p)); });
+      body.appendChild(pl);
+    }
+
+    var news = Array.isArray(d.news) ? d.news : [];
+    if (news.length) {
+      body.appendChild(el('div', 'fr-h', L('机构报道') + '（' + news.length + '）'));
+      var nl = el('div', 'fr-list');
+      news.forEach(function (n) { nl.appendChild(frNews(n)); });
+      body.appendChild(nl);
+    }
+
+    var comm = Array.isArray(d.community) ? d.community : [];
+    if (comm.length) {
+      body.appendChild(el('div', 'fr-h', L('长期阵地') + '（' + comm.length + '）'));
+      body.appendChild(el('div', 'fr-note',
+        L('研究者的博客、机构精选与爱好者论坛。这些不做自动抓取：论坛内容未经筛选，混进列表反而降低信噪比。')));
+      var cl = el('div', 'fr-comm');
+      comm.forEach(function (c) {
+        var a = el('a', 'fr-c');
+        a.href = c.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.appendChild(el('span', 'fr-cn', c.name));
+        if (c.kind) a.appendChild(el('span', 'fr-ck', c.kind));
+        if (c.note) a.appendChild(el('span', 'fr-cd', c.note));
+        cl.appendChild(a);
+      });
+      body.appendChild(cl);
+    }
+  }
+
+  /* 脚本在 body 末尾，DOM 已就绪，可直接绑定 */
+  (function bindFrontier() {
+    var open = document.getElementById('btnFrontier');
+    var close = document.getElementById('frontierClose');
+    if (open) {
+      open.addEventListener('click', function () {
+        renderFrontier();
+        openSheet('frontier');
+      });
+    }
+    if (close) close.addEventListener('click', function () { closeSheet('frontier'); });
+  })();
+
   function clearHistory(scope) {
     if (!window.Thread) return;
     var p = scope === 'all' ? window.Thread.clearAll() : window.Thread.clearCurrent();

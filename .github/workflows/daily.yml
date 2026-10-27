@@ -1,0 +1,51 @@
+name: daily-frontier
+
+# 为什么放在 Actions 而不是页面里定时请求：
+#   本项目是纯静态站点，没有后端。「每天自动更新」只能是构建期行为——
+#   由 Action 抓取、生成 data/daily.js、提交回仓库，Pages 再重建。
+#   页面端零网络请求，所以 file:// 双击打开也能看到最新一份数据。
+
+on:
+  schedule:
+    # UTC 01:00 = 北京 09:00。避开整点 00:00 的高峰（GitHub 会延迟甚至跳过高峰期的任务）
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-frontier
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 抓取预印本与报道
+        run: node tools/sync-daily.js
+
+      - name: 重建单文件版
+        # data/daily.js 会被内联进 astrum-standalone.html，
+        # 不重新构建会导致「单文件版」停在旧数据上。
+        run: node tools/build-standalone.js
+
+      - name: 提交（仅在确有变化时）
+        run: |
+          git config user.name "astrum-bot"
+          git config user.email "astrum-bot@users.noreply.github.com"
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "无变化，跳过提交"
+            exit 0
+          fi
+          git add data/daily.js astrum-standalone.html
+          git commit -m "chore: 每日前沿同步 $(date -u +%Y-%m-%d)"
+          # 期间可能有别人推送，先 rebase 再推，避免非快进失败
+          git pull --rebase --autostash
+          git push
