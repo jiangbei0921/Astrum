@@ -5395,8 +5395,23 @@
     body.appendChild(runGroup);
     }
 
-    SECTION = 'help';
-    group('关于', [
+  }
+
+  /* ---------- 帮助 ---------- */
+  var HELP_CARDS = [
+    ['01', '观测与星图', '方位、高度、升落与最佳窗口；星图可一键全屏放大，查看全部标注。'],
+    ['02', '天体知识', '距离、性质、演化，附来源与时效标签；每条结论都标注出处与核验日期。'],
+    ['03', '宇宙学与前沿', '黑洞、暗能量、哈勃张力，标注共识等级与仍需回答的问题。'],
+    ['04', '自建智能体', '定义角色、参数与专家注记，可指定参与哪类问题。']
+  ];
+
+  /* 关于区块：由 renderHelp 调用。
+   * 早前它写在 renderSettings 的 help 分支之后，而那个分支提前 return，
+   * 整块从未被渲染过——是一段死代码。独立成函数后才真正出现在「帮助」页。 */
+  function renderAbout(body) {
+    var g = el('div', 'group');
+    g.appendChild(el('h4', '', L('关于')));
+    var rows = [
       (function () {
         var r = el('div', 'set-row');
         r.innerHTML = '<div class="txt"><div class="t">ASTRUM</div><div class="d">天文多智能体工作台 · v1.4 · 事实层全程本地，不经网络</div></div>';
@@ -5410,17 +5425,30 @@
           '<div class="d">不展示条目数量。条目多少不等于覆盖能力，判断依据是每条结论的来源、共识等级与核验日期 —— ' +
           '这些信息在答案的「依据」章节逐条标注。知识库未收录的问题，会转由联网检索取证，或明确告知无法确证。</div></div>';
         return r;
+      })(),
+      (function () {
+        /* 侧栏底部原有三行（离线可用 / 知识库已核验 / 隐私入口）移到这里。
+         * 理由：它们是低频信息，不该常驻首屏——侧栏最贵的位置该留给「我聊过什么」。
+         * 同时**不再展示知识库的整体核验月份**：一个日期挂在页面上，会被读成
+         * 「内容截止到这里」；真正该核对的是每条结论自己的来源与核验日期。 */
+        var r = el('div', 'set-row');
+        r.innerHTML = '<div class="txt"><div class="t">' + esc(L('本地优先')) + '</div>' +
+          '<div class="d">' + esc(L('星历与知识库都在本机运行，断网可用。每条结论的来源与核验日期，会在答案的「依据」中逐条标注。')) +
+          '</div></div>';
+        return r;
+      })(),
+      (function () {
+        var r = el('div', 'set-row');
+        r.innerHTML = '<div class="txt"><div class="t">' + esc(L('数据与隐私')) + '</div>' +
+          '<div class="d">' + esc(L('数据存在哪、怎么导出与删除，以及哪些操作会让内容离开本机。')) +
+          ' <a href="privacy.html" style="color:var(--accent);text-decoration:none">' + esc(L('查看说明')) + ' →</a></div></div>';
+        return r;
       })()
-    ], '所有结论都附带依据与共识等级；未证实的部分会明确标注，不代替专业观测与研究结论。');
+    ];
+    rows.forEach(function (r) { g.appendChild(r); });
+    g.appendChild(el('div', 'note-box', L('所有结论都附带依据与共识等级；未证实的部分会明确标注，不代替专业观测与研究结论。')));
+    body.appendChild(g);
   }
-
-  /* ---------- 帮助 ---------- */
-  var HELP_CARDS = [
-    ['01', '观测与星图', '方位、高度、升落与最佳窗口；星图可一键全屏放大，查看全部标注。'],
-    ['02', '天体知识', '距离、性质、演化，附来源与时效标签；每条结论都标注出处与核验日期。'],
-    ['03', '宇宙学与前沿', '黑洞、暗能量、哈勃张力，标注共识等级与仍需回答的问题。'],
-    ['04', '自建智能体', '定义角色、参数与专家注记，可指定参与哪类问题。']
-  ];
 
   function renderHelp(body) {
     var g1 = el('div', 'group');
@@ -5517,6 +5545,8 @@
       '（Saeedi 等，arXiv:2503.23170，ICLR 2025 Workshop，MIT License）。仅借鉴工程与流程范式，' +
       '未引入其 Python 依赖，领域提示词与评分维度均按天文学场景重写。'));
     body.appendChild(g4);
+    renderAbout(body);
+
   }
 
   function exportAll() {

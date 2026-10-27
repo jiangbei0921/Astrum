@@ -229,11 +229,8 @@ input, select, textarea { font-family: inherit; }
 }
 .scene-list button:hover { background: var(--surface); color: var(--ink); }
 
-.side-foot {
-  border-top: 1px solid var(--line-soft); padding: 10px 16px 12px;
-  display: flex; flex-direction: column; gap: 4px;
-}
-.foot-row { display: flex; align-items: center; gap: 6px; font-size: 9.5px; color: var(--muted-2); }
+/* 侧栏底部状态区（离线可用 / 知识库核验 / 隐私入口）已移除：
+ * 低频信息不该常驻首屏，已并入设置 → 帮助 → 关于。 */
 
 /* 侧栏展开/收起 */
 #btnExpandSide { display: none; }
@@ -1012,7 +1009,6 @@ body.viewport-compact .hero .lede { font-size: 12px; margin-top: 8px; }
 body.viewport-compact .hero-cards { display: none; }
 body.viewport-compact .dock { padding: 6px 20px 10px; }
 body.viewport-compact .dock-note { display: none; }
-body.viewport-compact .side-foot { display: none; }
 body.viewport-compact .obs-head { padding: 8px 12px; }
 @media (max-width: 560px) {
   body.viewport-compact .hero { padding: 14px 16px 6px; }

@@ -98,6 +98,15 @@
     '云量': 'Cloud cover',
     '查询中…': 'Querying…',
 
+    /* 设置 · 关于 */
+    '本地优先': 'Local first',
+    '星历与知识库都在本机运行，断网可用。每条结论的来源与核验日期，会在答案的「依据」中逐条标注。':
+      'Ephemeris and knowledge base both run on this device and work offline. Each conclusion carries its source and verification date in the evidence section.',
+    '数据与隐私': 'Data & privacy',
+    '数据存在哪、怎么导出与删除，以及哪些操作会让内容离开本机。':
+      'Where data lives, how to export or delete it, and which actions send content off this device.',
+    '查看说明': 'Read the note',
+
     /* 设置小节 */
     '表达方式': 'How it speaks',
     '答案呈现': 'In the answer',
