@@ -5192,7 +5192,7 @@
         box.appendChild(el('div', 'hist-meta', '本机统计：问过 ' + (st.asks || 0) + ' 次' + (st.errors ? (' · 失败 ' + st.errors + ' 次') : '') + (tips ? (' · ' + tips) : '') + '（仅存本地，不上传）'));
         box.appendChild(el('div', 'hist-meta', '导出为 JSON 备份，可在另一台设备导入还原。'));
         var bar = el('div', 'hist-bar');
-        var b1 = el('button', 'hist-btn', '导出全部数据');
+        var b1 = el('button', 'hist-btn', '导出全部（含对话）');
         b1.type = 'button';
         b1.addEventListener('click', exportData);
         var b2 = el('button', 'hist-btn', '导入备份');
@@ -5301,7 +5301,7 @@
       dataGroup.appendChild(row);
     });
     var tools = el('div', 'ed-actions');
-    var exp = el('button', 'btn-ghost', '导出配置');
+    var exp = el('button', 'btn-ghost', '导出配置（不含对话与密钥）');
     exp.addEventListener('click', exportAll);
     var imp = el('button', 'btn-ghost', '导入配置');
     var file = document.createElement('input');
