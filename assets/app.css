@@ -2205,3 +2205,149 @@ sup.fn {
 .ps-item.on { color: var(--accent); }
 .ps-item .ps-tick { font-size: 10px; color: var(--accent); }
 .ps-sep { height: 1px; background: var(--line-soft); margin: 4px 2px; }
+
+/* ============================================================
+   设置面板 · 组件打磨（v6.2）
+   只作用于 #settingsBody，避免影响帮助页与其它 .group 复用处
+   ============================================================ */
+
+/* 页签：5 个之后在窄屏会挤成一团，改为可横向滚动且不换行 */
+#settingsBody .set-tabs {
+  display: flex; gap: 2px; padding: 3px; margin: 0 0 16px;
+  background: var(--paper-2); border-radius: 10px;
+  overflow-x: auto; scrollbar-width: none;
+}
+#settingsBody .set-tabs::-webkit-scrollbar { display: none; }
+#settingsBody .set-tabs button {
+  flex: 0 0 auto; padding: 7px 13px; border-radius: 8px;
+  font-size: 11.5px; white-space: nowrap; letter-spacing: .01em;
+}
+#settingsBody .set-tabs button.on {
+  background: var(--surface); color: var(--ink);
+  box-shadow: 0 1px 2px rgba(0,0,0,.06); font-weight: 600;
+}
+
+/* 分组：从"平铺分隔线"改为轻卡片，滚动时更容易看出块的边界 */
+#settingsBody .group {
+  margin-bottom: 14px; padding: 14px 16px 6px;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+}
+#settingsBody .group > h4 {
+  margin: 0 0 4px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 10px; letter-spacing: .14em;
+}
+
+/* 行：加大呼吸、hover 反馈；标签与说明的层级拉开 */
+#settingsBody .set-row { padding: 11px 0; border-bottom: 1px solid var(--line-soft); }
+#settingsBody .set-row:hover { background: rgba(0,0,0,.012); }
+#settingsBody .set-row .t { font-size: 13px; }
+#settingsBody .set-row .d { margin-top: 3px; font-size: 10.5px; line-height: 1.65; }
+
+/* 下拉：统一高度与焦点态，避免各处宽窄不一 */
+#settingsBody .mini-sel,
+#settingsBody select {
+  height: 28px; padding: 0 8px; border-radius: 7px;
+  border: 1px solid var(--line); background: var(--surface);
+  font-family: inherit; font-size: 11.5px; color: var(--ink);
+}
+#settingsBody select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* 说明块：原来偏灰偏小，读起来吃力 */
+#settingsBody .note-box {
+  margin-top: 10px; padding: 9px 12px; border-radius: 7px;
+  font-size: 11px; line-height: 1.75; color: var(--muted);
+}
+
+/* 按钮层级：普通=描边，危险=红字红边，主操作=实心 */
+#settingsBody .hist-btn {
+  padding: 6px 12px; border-radius: 7px; font-size: 11.5px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink-2);
+  transition: border-color .15s ease, color .15s ease, background .15s ease;
+}
+#settingsBody .hist-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(59,59,214,.04); }
+#settingsBody .hist-btn.danger { color: #b5352b; border-color: rgba(181,53,43,.28); }
+#settingsBody .hist-btn.danger:hover { background: rgba(181,53,43,.06); border-color: rgba(181,53,43,.55); }
+
+/* 危险操作与普通操作之间留一道气口，降低误触 */
+#settingsBody .hist-bar { gap: 8px; }
+#settingsBody .hist-panel .hist-btn.danger:not(:first-child) { margin-left: auto; }
+
+/* 英文模式：正文用系统字体栈，避免中文衬线字体渲染拉丁字母时字重不均 */
+body.lang-en { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif; }
+body.lang-en #settingsBody .set-tabs button { letter-spacing: .02em; }
+
+/* ============================================================
+   设置面板 · 组件打磨（v6.2）
+   只作用于 #settingsBody，避免影响帮助页与其它 .group 复用处
+   ============================================================ */
+
+/* 页签：5 个之后在窄屏会挤成一团，改为可横向滚动且不换行 */
+#settingsBody .set-tabs {
+  display: flex; gap: 2px; padding: 3px; margin: 0 0 16px;
+  background: var(--paper-2); border-radius: 10px;
+  overflow-x: auto; scrollbar-width: none;
+}
+#settingsBody .set-tabs::-webkit-scrollbar { display: none; }
+#settingsBody .set-tabs button {
+  flex: 0 0 auto; padding: 7px 13px; border-radius: 8px;
+  font-size: 11.5px; white-space: nowrap; letter-spacing: .01em;
+}
+#settingsBody .set-tabs button.on {
+  background: var(--surface); color: var(--ink);
+  box-shadow: 0 1px 2px rgba(0,0,0,.06); font-weight: 600;
+}
+
+/* 分组：从"平铺分隔线"改为轻卡片，滚动时更容易看出块的边界 */
+#settingsBody .group {
+  margin-bottom: 14px; padding: 14px 16px 6px;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+}
+#settingsBody .group > h4 {
+  margin: 0 0 4px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 10px; letter-spacing: .14em;
+}
+
+/* 行：加大呼吸、hover 反馈；标签与说明的层级拉开 */
+#settingsBody .set-row { padding: 11px 0; border-bottom: 1px solid var(--line-soft); }
+#settingsBody .set-row:hover { background: rgba(0,0,0,.012); }
+#settingsBody .set-row .t { font-size: 13px; }
+#settingsBody .set-row .d { margin-top: 3px; font-size: 10.5px; line-height: 1.65; }
+
+/* 下拉：统一高度与焦点态，避免各处宽窄不一 */
+#settingsBody .mini-sel,
+#settingsBody select {
+  height: 28px; padding: 0 8px; border-radius: 7px;
+  border: 1px solid var(--line); background: var(--surface);
+  font-family: inherit; font-size: 11.5px; color: var(--ink);
+}
+#settingsBody select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* 说明块：原来偏灰偏小，读起来吃力 */
+#settingsBody .note-box {
+  margin-top: 10px; padding: 9px 12px; border-radius: 7px;
+  font-size: 11px; line-height: 1.75; color: var(--muted);
+}
+
+/* 按钮层级：普通=描边，危险=红字红边，主操作=实心 */
+#settingsBody .hist-btn {
+  padding: 6px 12px; border-radius: 7px; font-size: 11.5px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink-2);
+  transition: border-color .15s ease, color .15s ease, background .15s ease;
+}
+#settingsBody .hist-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(59,59,214,.04); }
+#settingsBody .hist-btn.danger { color: #b5352b; border-color: rgba(181,53,43,.28); }
+#settingsBody .hist-btn.danger:hover { background: rgba(181,53,43,.06); border-color: rgba(181,53,43,.55); }
+
+/* 危险操作与普通操作之间留一道气口，降低误触 */
+#settingsBody .hist-bar { gap: 8px; }
+#settingsBody .hist-panel .hist-btn.danger:not(:first-child) { margin-left: auto; }
+
+/* 英文模式：正文用系统字体栈，避免中文衬线字体渲染拉丁字母时字重不均 */
+body.lang-en { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif; }
+body.lang-en #settingsBody .set-tabs button { letter-spacing: .02em; }

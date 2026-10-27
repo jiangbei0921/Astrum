@@ -5,6 +5,9 @@
   var A_ATT = window.Attachments;
 
   /* ================= 存储 ================= */
+  /* i18n：把中文原文当 key，缺词条自动回退中文，可逐步接入 */
+  function L(s) { return window.I18N ? window.I18N.t(s) : s; }
+
   /* 键名按档案命名空间生成；切换档案会整页重载，因此加载期计算即可 */
   var KEY = window.Profile ? Profile.ns('astrum.v2') : 'astrum.v2';
   /* 诊断信息只在 ?debug=1 时出现：普通用户不该看到错误栈与耗时 */
@@ -4581,6 +4584,9 @@
   }
 
   function selectRow(label, options, value, onPick, desc) {
+    label = L(label);
+    desc = desc ? L(desc) : desc;
+    options = (options || []).map(function (o) { return [o[0], L(o[1])]; });
     var wrap = el('div', 'set-row');
     wrap.innerHTML = '<div class="txt"><div class="t">' + esc(label) + '</div>' + (desc ? '<div class="d">' + esc(desc) + '</div>' : '') + '</div>';
     var ctl = el('div', 'ctl seg-mini');
@@ -4597,6 +4603,8 @@
     return wrap;
   }
   function switchRow(label, desc, value, onChange) {
+    label = L(label);
+    desc = desc ? L(desc) : desc;
     var wrap = el('div', 'set-row');
     wrap.innerHTML = '<div class="txt"><div class="t">' + esc(label) + '</div>' + (desc ? '<div class="d">' + esc(desc) + '</div>' : '') + '</div>';
     var b = el('button', 'switch' + (value ? ' on' : ''));
@@ -4847,7 +4855,7 @@
 
     var tabs = el('div', 'set-tabs');
     [['main', '设置'], ['sources', '来源'], ['obs', '观测'], ['data', '数据与档案'], ['help', '帮助']].forEach(function (t) {
-      var b = el('button', (settingsTab === t[0] ? 'on' : ''), t[1]);
+      var b = el('button', (settingsTab === t[0] ? 'on' : ''), L(t[1]));
       b.addEventListener('click', function () { renderSettings(t[0]); });
       tabs.appendChild(b);
     });
@@ -4860,6 +4868,8 @@
     var SECTION = 'main';
     function group(title, rows, foot, note) {
       if (SECTION !== settingsTab) return;
+      title = L(title);
+      note = note ? L(note) : note;
       var g = el('div', 'group');
       g.appendChild(el('h4', '', title));
       rows.forEach(function (r) { g.appendChild(r); });
@@ -4867,6 +4877,16 @@
       if (foot) g.appendChild(el('div', 'ed-field', '<div class="hintline">' + esc(foot) + '</div>'));
       body.appendChild(g);
     }
+
+    /* 界面语言：只影响界面文案，不翻译答案与知识库内容。
+     * 必须放在 SECTION 初始化与 group/selectRow 声明之后。 */
+    group('界面语言', [
+      selectRow('界面语言', [['zh', '中文'], ['en', 'English']],
+        (window.I18N ? window.I18N.current() : 'zh'), function (v) {
+          if (window.I18N) window.I18N.set(v);
+          location.reload();
+        }, '界面文字会切换；答案与知识库内容仍为中文。')
+    ]);
 
     if (settingsTab === 'sources') {
     /* 来源与密钥 */
@@ -6338,6 +6358,7 @@
   }
   function boot() {
     AC.setSkillResolver(skillFor);
+    if (window.I18N) window.I18N.init();
     loadStats();
     checkVersion();
     initContext();
