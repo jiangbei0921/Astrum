@@ -2361,3 +2361,16 @@ body.lang-en #settingsBody .set-tabs button { letter-spacing: .02em; }
   font-size: clamp(16px, 4.2vw, 42px);   /* 回退 */
   font-size: min(42px, 6.4cqw);          /* 6.4cqw × 14 字 ≈ 89.6cqw，留出余量 */
 }
+
+/* ============================================================
+   设置 · 第三级（组内小节标题）
+   ============================================================ */
+#settingsBody .sub-head {
+  margin: 14px 0 2px; padding: 0 0 6px 9px;
+  border-left: 2px solid var(--accent);
+  font-size: 10.5px; font-weight: 600; letter-spacing: .08em;
+  color: var(--ink-2);
+}
+#settingsBody .sub-head:first-of-type { margin-top: 6px; }
+/* 小节第一行与标题贴紧，最后一行收尾 */
+#settingsBody .sub-head + .set-row { padding-top: 9px; }

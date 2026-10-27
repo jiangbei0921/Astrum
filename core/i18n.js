@@ -98,6 +98,11 @@
     '云量': 'Cloud cover',
     '查询中…': 'Querying…',
 
+    /* 设置小节 */
+    '表达方式': 'How it speaks',
+    '答案呈现': 'In the answer',
+    '视觉': 'Visual',
+
     /* 智能体角色 */
     '总控 · 意图解析与协奏': 'Conductor · intent & orchestration',
     '知识 · 事实与依据': 'Knowledge · facts & evidence',

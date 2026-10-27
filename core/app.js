@@ -4595,6 +4595,14 @@
     wrap.appendChild(ctl);
     return wrap;
   }
+  /* 第三级：组内小节标题。给过长的组切段，不折叠内容——
+   * 折叠会让"找设置"变成"先展开再找"，对 4 行以内的小组得不偿失。 */
+  function subRow(title) {
+    var h = el('div', 'sub-head');
+    h.textContent = L(title);
+    return h;
+  }
+
   function switchRow(label, desc, value, onChange) {
     label = L(label);
     desc = desc ? L(desc) : desc;
@@ -5248,8 +5256,7 @@
 
     SECTION = 'main';
     group('对话与表述', [
-      switchRow('按问题自动切换风格', '问句明显偏向另一方向时临时换讲法；只影响表达，数值不变',
-        s.autoStyle !== false, function (v) { s.autoStyle = v; persist(); }),
+      subRow('表达方式'),
       selectRow('使用身份', [['observer', '看星 / 拍摄'], ['researcher', '查数据 / 读论文'], ['learner', '了解天文']],
         (s.persona && s.persona !== 'none') ? s.persona : 'observer', function (v) { applyPersona(v); }),
       selectRow('默认语体', [['auto', '自适应'], ['pro', '专业'], ['pop', '科普']], s.register, function (v) {
@@ -5258,6 +5265,9 @@
       selectRow('默认深度', [['brief', '精简'], ['standard', '标准'], ['deep', '详尽']], s.depth, function (v) {
         s.depth = v; cfg.muse.depth = v; persist();
       }),
+      switchRow('按问题自动切换风格', '问句明显偏向另一方向时临时换讲法；只影响表达，数值不变',
+        s.autoStyle !== false, function (v) { s.autoStyle = v; persist(); }),
+      subRow('答案呈现'),
       switchRow('显示协作链路', '在答案顶部展示参与的智能体', s.showTrace, function (v) { s.showTrace = v; persist(); }),
       switchRow('显示置信度', '', s.showConfidence, function (v) { s.showConfidence = v; persist(); }),
       switchRow('显示儒略日', '观测台中的 JD 时间戳', s.showJD, function (v) { s.showJD = v; persist(); refreshPanels(); }),
@@ -5265,6 +5275,7 @@
     ]);
 
     group('显示', [
+      subRow('视觉'),
       selectRow('星图标注', [['minimal', '极简'], ['labeled', '标注'], ['deep', '密集']], s.skymap, function (v) {
         s.skymap = v; cfg.orion.style = v; persist(); refreshPanels();
       }),
