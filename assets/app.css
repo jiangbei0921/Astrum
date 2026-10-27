@@ -2351,3 +2351,13 @@ body.lang-en #settingsBody .set-tabs button { letter-spacing: .02em; }
 /* 英文模式：正文用系统字体栈，避免中文衬线字体渲染拉丁字母时字重不均 */
 body.lang-en { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif; }
 body.lang-en #settingsBody .set-tabs button { letter-spacing: .02em; }
+
+/* 主标题单行：原来用 <br> 硬断，改为按容器宽度缩放，始终一行且不溢出。
+   旧浏览器用 vw 回退，支持容器查询的浏览器按 .hero 自身宽度计算。 */
+.hero { container-type: inline-size; }
+.hero h1 {
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+  font-size: clamp(16px, 4.2vw, 42px);   /* 回退 */
+  font-size: min(42px, 6.4cqw);          /* 6.4cqw × 14 字 ≈ 89.6cqw，留出余量 */
+}
