@@ -98,6 +98,11 @@
     '云量': 'Cloud cover',
     '查询中…': 'Querying…',
 
+    /* 侧栏对话 */
+    '搜索对话': 'Search chats',
+    '还没有对话': 'No chats yet',
+    '没有匹配的对话': 'No matching chat',
+
     /* 设置 · 关于 */
     '本地优先': 'Local first',
     '星历与知识库都在本机运行，断网可用。每条结论的来源与核验日期，会在答案的「依据」中逐条标注。':
@@ -218,6 +223,12 @@
       document.querySelectorAll('[data-i18n-ph]').forEach(function (el) {
         var zh = el.getAttribute('data-i18n-ph');
         el.setAttribute('placeholder', t(zh));
+      });
+      /* 只有图标的控件靠 aria-label 传达名称，必须跟着语言变，
+       * 否则英文界面下读屏会念出一句中文。 */
+      document.querySelectorAll('[data-i18n-aria]').forEach(function (el) {
+        var zh = el.getAttribute('data-i18n-aria');
+        el.setAttribute('aria-label', t(zh));
       });
     } catch (e) {}
   }

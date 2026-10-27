@@ -2443,3 +2443,19 @@ body.lang-en #settingsBody .set-tabs button { letter-spacing: .02em; }
   .fr-item { padding: 9px 8px; }
   .fr-t { font-size: 12.5px; }
 }
+
+/* ================= 侧栏对话搜索 ================= */
+.th-search { padding: 2px 10px 4px; }
+.th-search input {
+  width: 100%; height: 27px; padding: 0 9px;
+  border: 1px solid var(--line-soft); border-radius: 7px;
+  background: var(--surface); color: var(--ink);
+  font-family: inherit; font-size: 11px; line-height: 25px;
+}
+.th-search input::placeholder { color: var(--muted-2); }
+.th-search input:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(59, 59, 214, .10);
+}
+/* 有内容时抬高对比，避免看起来像禁用 */
+.th-search input:not(:placeholder-shown) { color: var(--ink); }

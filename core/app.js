@@ -6060,15 +6060,32 @@
     }
   }
   /* 侧栏会话列表 */
+  /* 对话搜索：标题由首句自动生成，长起来以后只能靠滚动找，
+   * 而列表又只显示最近 12 条——搜索补的正是这个缺口。
+   * 抽成纯函数，便于单独断言（不依赖 DOM 与存储）。 */
+  function filterThreads(list, q) {
+    var s = String(q == null ? '' : q).trim().toLowerCase();
+    var arr = Array.isArray(list) ? list : [];
+    if (!s) return arr;
+    return arr.filter(function (t) {
+      return String((t && t.title) || '').toLowerCase().indexOf(s) >= 0;
+    });
+  }
+
+  var threadQuery = '';
+
   function renderThreadList() {
     if (!window.Thread) return;
     var box = $('#threadList');
     if (!box) return;
     window.Thread.list().then(function (list) {
       box.innerHTML = '';
-      if (!list.length) { box.appendChild(el('div', 'th-empty', '还没有对话')); return; }
+      var shown = filterThreads(list, threadQuery);
+      if (!list.length) { box.appendChild(el('div', 'th-empty', L('还没有对话'))); return; }
+      if (!shown.length) { box.appendChild(el('div', 'th-empty', L('没有匹配的对话'))); return; }
       var cur = window.Thread.current();
-      list.slice(0, 12).forEach(function (t) {
+      /* 过滤后再截断：否则「最近 12 条里找」会漏掉更早的匹配项 */
+      shown.slice(0, 12).forEach(function (t) {
         var row = el('div', 'th-item' + (cur && cur.id === t.id ? ' on' : ''));
         var name = el('span', 'th-t', esc(t.title || '未命名'));
         name.title = '双击重命名';
@@ -6530,6 +6547,24 @@
     if (close) close.addEventListener('click', function () { closeSheet('frontier'); });
   })();
 
+  (function bindThreadFilter() {
+    var inp = document.getElementById('thFilter');
+    if (!inp) return;
+    inp.addEventListener('input', function () {
+      threadQuery = inp.value;
+      renderThreadList();
+    });
+    /* Esc 清空而不是冒泡到「关闭所有浮层」：用户在输入框里按 Esc，期望是清空 */
+    inp.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && inp.value) {
+        e.stopPropagation();
+        inp.value = '';
+        threadQuery = '';
+        renderThreadList();
+      }
+    });
+  })();
+
   function clearHistory(scope) {
     if (!window.Thread) return;
     var p = scope === 'all' ? window.Thread.clearAll() : window.Thread.clearCurrent();
@@ -6582,7 +6617,7 @@
       ask: ask, selectSource: selectSource, openSheet: openSheet, openAgent: openAgent,
       restoreHistory: restoreHistory, clearHistory: clearHistory,
       setPersona: setPersona, applyPersona: applyPersona, PERSONAS: PERSONAS,
-      detectStyle: detectStyle, newChat: newChat,
+      detectStyle: detectStyle, newChat: newChat, filterThreads: filterThreads,
       buildExportPayload: buildExportPayload,
       ready: ready, version: APP_VERSION, getSettings: function () { return state.settings; },
       /* 档案的程序化入口：与设置面板的 selectRow 等效。
