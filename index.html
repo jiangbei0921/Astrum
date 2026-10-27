@@ -74,6 +74,14 @@
         </button>
       </div>
       <div class="side-scroll">
+        <div class="profile-switch" id="profileSwitch">
+          <button class="ps-btn" id="psBtn" aria-haspopup="listbox" aria-expanded="false" aria-label="切换档案">
+            <span class="ps-name" id="psName">主档案</span>
+            <svg class="ps-chev" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+          <div class="ps-menu" id="psMenu" role="listbox" aria-label="档案列表"></div>
+        </div>
+
         <section class="side-block">
           <div class="side-head"><h3>对话</h3><span class="side-hint" id="threadHint">最近 12 条</span></div>
           <div class="thread-list" id="threadList"></div>

@@ -2173,3 +2173,35 @@ sup.fn {
 .wb-verdict.v-fair { background: rgba(160,116,20,.10); color: #8a6413; }
 .wb-verdict.v-bad  { background: rgba(181,53,43,.09); color: #b5352b; }
 .wb-verdict.v-unknown { background: var(--surface); color: var(--muted-2); }
+
+/* ================= 侧栏档案切换（工作区式） ================= */
+.profile-switch { position: relative; padding: 4px 10px 8px; }
+.ps-btn {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  width: 100%; padding: 7px 10px; border-radius: 7px;
+  border: 1px solid var(--line-soft); background: var(--surface);
+  font-family: inherit; font-size: 12px; color: var(--ink);
+  cursor: pointer; text-align: left;
+}
+.ps-btn:hover { border-color: var(--accent); }
+.ps-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ps-chev { color: var(--muted-2); flex: none; transition: transform .15s ease; }
+.profile-switch.open .ps-chev { transform: rotate(180deg); }
+.ps-menu {
+  display: none; position: absolute; left: 10px; right: 10px; top: 100%;
+  z-index: 40; margin-top: 4px; padding: 4px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.10);
+  max-height: 260px; overflow: auto;
+}
+.profile-switch.open .ps-menu { display: block; }
+.ps-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  width: 100%; padding: 6px 8px; border: none; border-radius: 5px;
+  background: none; font-family: inherit; font-size: 11.5px;
+  color: var(--ink-2); cursor: pointer; text-align: left;
+}
+.ps-item:hover { background: var(--surface-2); }
+.ps-item.on { color: var(--accent); }
+.ps-item .ps-tick { font-size: 10px; color: var(--accent); }
+.ps-sep { height: 1px; background: var(--line-soft); margin: 4px 2px; }

@@ -7,6 +7,9 @@
   /* ================= 存储 ================= */
   /* 键名按档案命名空间生成；切换档案会整页重载，因此加载期计算即可 */
   var KEY = window.Profile ? Profile.ns('astrum.v2') : 'astrum.v2';
+  /* 诊断信息只在 ?debug=1 时出现：普通用户不该看到错误栈与耗时 */
+  var DEBUG = /[?&]debug=1\b/.test(location.search);
+
   function load() {
     try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; }
   }
@@ -4813,7 +4816,7 @@
     body.innerHTML = '';
 
     var tabs = el('div', 'set-tabs');
-    [['main', '设置'], ['help', '帮助']].forEach(function (t) {
+    [['main', '设置'], ['sources', '来源'], ['obs', '观测'], ['data', '数据与档案'], ['help', '帮助']].forEach(function (t) {
       var b = el('button', (settingsTab === t[0] ? 'on' : ''), t[1]);
       b.addEventListener('click', function () { renderSettings(t[0]); });
       tabs.appendChild(b);
@@ -4823,7 +4826,10 @@
     if (settingsTab === 'help') { renderHelp(body); return; }
 
     var s = state.settings;
+    /* 当前分区：group() 只在所属分区渲染，避免一个面板一次铺满 */
+    var SECTION = 'main';
     function group(title, rows, foot, note) {
+      if (SECTION !== settingsTab) return;
       var g = el('div', 'group');
       g.appendChild(el('h4', '', title));
       rows.forEach(function (r) { g.appendChild(r); });
@@ -4832,6 +4838,7 @@
       body.appendChild(g);
     }
 
+    if (settingsTab === 'sources') {
     /* 来源与密钥 */
     var srcGroup = el('div', 'group');
     srcGroup.appendChild(el('h4', '', '来源与密钥'));
@@ -5093,6 +5100,9 @@
       });
     });
 
+    }
+
+    SECTION = 'obs';
     group('我的器材', [
       selectRow('主镜', (window.GEAR ? window.GEAR.LIST : []).map(function (g) { return [g.id, g.name]; }),
         s.gearId || 'new150', function (v) { s.gearId = v; AC.setGear(v, s.camId); persist(); }),
@@ -5101,6 +5111,7 @@
       (function () { return skillPanel(); })()
     ]);
 
+    SECTION = 'data';
     group('档案', [
       (function () {
         var box = el('div', 'hist-panel');
@@ -5129,13 +5140,7 @@
         });
         bar.appendChild(b1);
         bar.appendChild(rn);
-        P.list().forEach(function (p) {
-          if (p.id === P.currentId()) return;
-          var sw = el('button', 'hist-btn', '切到 ' + p.name);
-          sw.type = 'button';
-          sw.addEventListener('click', function () { P.switchTo(p.id); location.reload(); });
-          bar.appendChild(sw);
-        });
+        /* 切换档案在侧栏顶部下拉里完成，这里只保留管理动作 */
         box.appendChild(bar);
         P.list().forEach(function (p) {
           if (p.id === P.DEFAULT || p.id === P.currentId()) return;
@@ -5201,6 +5206,7 @@
       })()
     ]);
 
+    SECTION = 'main';
     group('对话与表述', [
       switchRow('按问题自动切换风格', '问句明显偏向另一方向时临时换讲法；只影响表达，数值不变',
         s.autoStyle !== false, function (v) { s.autoStyle = v; persist(); }),
@@ -5273,8 +5279,10 @@
       renderEditor(null); openSheet('drawer');
     });
     var mc = el('div', 'ctl'); mc.appendChild(mbtn); mgr.appendChild(mc);
-    group('智能体', [mgr], '在左侧点击任一智能体即可调整参数；自定义智能体可设定参与的问题类型与专家注记。');
+    /* 智能体管理已移至左侧栏：设置里再放一个入口属于重复 */
 
+    SECTION = 'data';
+    if (settingsTab === 'data') {
     var dataGroup = el('div', 'group');
     dataGroup.appendChild(el('h4', '', '数据与核验'));
     var stamp = el('div', 'set-row');
@@ -5309,7 +5317,9 @@
     tools.appendChild(exp); tools.appendChild(imp); tools.appendChild(reset); tools.appendChild(file);
     dataGroup.appendChild(tools);
     body.appendChild(dataGroup);
+    }
 
+    if (DEBUG) {
     /* ---------- 运行状态（可观测性） ---------- */
     var runGroup = el('div', 'group');
     runGroup.appendChild(el('h4', '', '运行状态'));
@@ -5368,7 +5378,9 @@
       runGroup.appendChild(ebox);
     }
     body.appendChild(runGroup);
+    }
 
+    SECTION = 'help';
     group('关于', [
       (function () {
         var r = el('div', 'set-row');
@@ -5911,6 +5923,7 @@
       if (sk) sk.remove();
       maybeShowPersona();
       renderThreadList();
+      renderProfileSwitch();
       return true;
     });
     return restorePromise;
@@ -5928,6 +5941,64 @@
     });
   }
 
+  /* 侧栏顶部的档案切换：像工作区一样，随时知道自己在哪个档案 */
+  var psDocBound = false;
+  function renderProfileSwitch() {
+    var P = window.Profile;
+    var btn = $('#psBtn'), menu = $('#psMenu'), wrap = $('#profileSwitch');
+    if (!P || !btn || !menu || !wrap) return;
+    var cur = P.current();
+    $('#psName').textContent = cur.name;
+    menu.innerHTML = '';
+    P.list().forEach(function (p) {
+      var on = p.id === P.currentId();
+      var it = el('button', 'ps-item' + (on ? ' on' : ''));
+      it.type = 'button';
+      it.setAttribute('role', 'option');
+      it.setAttribute('aria-selected', on ? 'true' : 'false');
+      it.innerHTML = '<span>' + esc(p.name) + '</span>' + (on ? '<span class="ps-tick">✓</span>' : '');
+      it.addEventListener('click', function () {
+        closePs();
+        if (on) return;
+        P.switchTo(p.id);
+        location.reload();
+      });
+      menu.appendChild(it);
+    });
+    menu.appendChild(el('div', 'ps-sep'));
+    var add = el('button', 'ps-item', '＋ 新建档案');
+    add.type = 'button';
+    add.addEventListener('click', function () {
+      closePs();
+      var nm = window.prompt('档案名称', '');
+      if (!nm) return;
+      var p = P.create(nm);
+      if (!p) { toast('名称无效'); return; }
+      P.switchTo(p.id);
+      location.reload();
+    });
+    menu.appendChild(add);
+
+    function closePs() {
+      wrap.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+    btn.onclick = function (e) {
+      e.stopPropagation();
+      var opened = wrap.classList.toggle('open');
+      btn.setAttribute('aria-expanded', opened ? 'true' : 'false');
+    };
+    if (!psDocBound) {
+      psDocBound = true;
+      document.addEventListener('click', function () {
+        var w = $('#profileSwitch');
+        var b = $('#psBtn');
+        if (w) w.classList.remove('open');
+        if (b) b.setAttribute('aria-expanded', 'false');
+      });
+      if (menu) menu.addEventListener('click', function (e) { e.stopPropagation(); });
+    }
+  }
   /* 侧栏会话列表 */
   function renderThreadList() {
     if (!window.Thread) return;

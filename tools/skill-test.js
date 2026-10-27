@@ -89,6 +89,10 @@ var SCRIPT = `
 
       /* 1) 面板存在 */
       openSettings();
+      /* 设置已分页：器材与技能在「观测」页 */
+      document.querySelectorAll('#settingsBody .set-tabs button').forEach(function (b) {
+        if (b.textContent.trim() === '观测') b.click();
+      });
       ok('面板渲染', !!panel());
 
       /* 2) 清空后为空态 */
