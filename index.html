@@ -168,23 +168,32 @@
         <button class="icon-btn" id="btnObsClose" aria-label="收起">×</button>
       </div>
       <div class="obs-scroll">
-        <section class="card">
+        <section class="card ctx-card">
           <div class="card-head"><h4>观测上下文</h4><span class="mini" id="ctxBadge">实时</span></div>
-          <div class="ctx-grid">
-            <label class="field"><span>日期</span><input type="date" id="ctxDate" /></label>
-            <label class="field"><span>时刻</span><input type="time" id="ctxTime" /></label>
-            <div class="field wide">
-              <span>地点</span>
-              <div class="place-row">
-                <input id="ctxPlace" autocomplete="off" placeholder="搜索全球任意地名，或输入 39.9,116.4" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="placePanel" />
-                <button class="mini-btn" id="btnLocate" title="按 IP 定位" aria-label="按 IP 定位">
-                  <svg viewBox="0 0 24 24" width="13" height="13"><path d="M12 21s7-6.1 7-11a7 7 0 10-14 0c0 4.9 7 11 7 11z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="10" r="2.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
-                </button>
-              </div>
-              <div class="place-panel" id="placePanel" role="listbox" aria-label="地点搜索结果" hidden></div>
-              <div class="place-sub"><span id="ctxPlaceSub">—</span><button class="link-btn" id="btnManualCoord">坐标</button></div>
+
+          <!-- 时刻是这一屏真正要回答的问题，所以给它最大的字号 -->
+          <div class="ctx-when">
+            <label class="ctx-clock">
+              <input type="time" id="ctxTime" aria-label="时刻" />
+            </label>
+            <label class="ctx-day">
+              <input type="date" id="ctxDate" aria-label="日期" />
+            </label>
+          </div>
+
+          <div class="ctx-place">
+            <div class="place-row">
+              <input id="ctxPlace" autocomplete="off" placeholder="搜索地名，或输入 39.9,116.4" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="placePanel" />
+              <button class="mini-btn" id="btnLocate" title="按 IP 定位" aria-label="按 IP 定位">
+                <svg viewBox="0 0 24 24" width="13" height="13"><path d="M12 21s7-6.1 7-11a7 7 0 10-14 0c0 4.9 7 11 7 11z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="10" r="2.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+              </button>
             </div>
-            <label class="field wide"><span>观测方式</span>
+            <div class="place-panel" id="placePanel" role="listbox" aria-label="地点搜索结果" hidden></div>
+            <div class="place-sub"><span id="ctxPlaceSub">—</span><button class="link-btn" id="btnManualCoord">坐标</button></div>
+          </div>
+
+          <div class="ctx-gear">
+            <label class="ctx-line"><span class="k">方式</span>
               <select id="ctxGear">
                 <option value="naked">肉眼</option>
                 <option value="binocular">双筒望远镜</option>
@@ -192,10 +201,10 @@
                 <option value="photo">天文摄影</option>
               </select>
             </label>
-            <label class="field wide"><span>主镜</span>
+            <label class="ctx-line"><span class="k">主镜</span>
               <select id="ctxScope" aria-label="主镜型号"></select>
             </label>
-            <label class="field wide"><span>相机</span>
+            <label class="ctx-line"><span class="k">相机</span>
               <select id="ctxCam" aria-label="相机型号"></select>
             </label>
           </div>
