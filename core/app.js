@@ -1969,7 +1969,7 @@
   function renderTrace(trace) {
     /* 检索过程属细节层：默认折叠，不占首屏 */
     var box = el('details', 'trace-fold');
-    box.appendChild(el('summary', '', '检索过程 · ' + trace.length + ' 步'));
+    box.appendChild(el('summary', '', L('检索过程') + ' · ' + trace.length + ' ' + L('步')));
     var t = el('div', 'trace');
     trace.forEach(function (s, i) {
       var a = AC.AGENT_BY_ID[s.agent] || AC.AGENTS[0];
@@ -6563,6 +6563,27 @@
         renderThreadList();
       }
     });
+  })();
+
+  /* 渲染后统一翻译：本项目大量用 HTML 字符串拼 DOM（答案骨架、评审块、器材名…），
+   * 逐个改渲染点必然漏，所以在主要容器变动后做一次整段精确匹配翻译。
+   * applyDom 是幂等的（英文值不会再命中中文键），因此不会自激成死循环。 */
+  (function watchForI18n() {
+    if (!window.I18N || !window.I18N.applyDom) return;
+    if (!window.MutationObserver) return;
+    /* 不在注册时判断语言：I18N.init() 要到 DOMContentLoaded 才读存储，
+     * 此刻 current() 还是默认值。applyDom 自己会在非英文时直接返回。 */
+    var pending = null;
+    function flush() { pending = null; window.I18N.applyDom(document.body); }
+    var mo = new MutationObserver(function () {
+      if (pending) return;
+      pending = setTimeout(flush, 40);
+    });
+    ['#thread', '#settingsBody', '#agentList', '#obsPanel', '#threadList', '#heroSlot']
+      .forEach(function (sel) {
+        var box = document.querySelector(sel);
+        if (box) mo.observe(box, { childList: true, subtree: true });
+      });
   })();
 
   function clearHistory(scope) {

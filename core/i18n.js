@@ -183,6 +183,14 @@
     '删除': 'Delete'
   };
 
+  /* 第二批词表（答案骨架、评审块、观测台、器材名…）单独成文件，
+   * 在这里合并。缺词条仍是回退中文，所以两批可以独立增补。 */
+  if (root.I18N_EN_EXTRA) {
+    Object.keys(root.I18N_EN_EXTRA).forEach(function (k) {
+      EN[k] = root.I18N_EN_EXTRA[k];
+    });
+  }
+
   var DICTS = { en: EN };
 
   function read() {
@@ -233,9 +241,41 @@
     } catch (e) {}
   }
 
+  /* 渲染后翻译：本项目大量用 HTML 字符串拼 DOM（答案骨架、评审块、器材名…），
+   * 逐个改渲染点必然漏，所以在渲染完成后对文本节点做一次**整段精确匹配**替换。
+   *
+   * 只处理「整段文本等于词条键」的节点，所以：
+   *   - 界面标签（距离 / 依据 / 评审结论）会被翻；
+   *   - 知识条目正文（长句）不会被翻，也不会被部分替换成中英混排。
+   * 幂等：英文值不是中文键，重复调用不会产生叠加。 */
+  function applyDom(rootNode) {
+    if (lang !== 'en') return 0;
+    var host = rootNode || (typeof document !== 'undefined' ? document.body : null);
+    if (!host || !document.createTreeWalker) return 0;
+    var walker = document.createTreeWalker(host, NodeFilter.SHOW_TEXT, null);
+    var node, count = 0;
+    /* 必须跳过脚本与样式节点：TreeWalker(document.body) 也会走到 <script> 的文本，
+     * 一旦匹配到词条就会改写 JS 源码 —— 页面看起来正常，行为却坏了。
+     * 这个坑是我加上这一层后的第一次运行就踩到的（联网用例集体失败）。 */
+    var SKIP = /^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA|CODE|PRE)$/;
+    while ((node = walker.nextNode())) {
+      var parent = node.parentNode;
+      if (parent && SKIP.test(parent.nodeName)) continue;
+      var raw = node.nodeValue;
+      if (!raw) continue;
+      var key = raw.trim();
+      if (!key || EN[key] === undefined) continue;
+      if (!/[\u4e00-\u9fff]/.test(key)) continue;
+      node.nodeValue = (key === raw) ? EN[key] : raw.replace(key, EN[key]);
+      count++;
+    }
+    return count;
+  }
+
   /* <html lang> 与字体：英文用系统字体栈更合适 */
   function apply() {
     applyStatic();
+    applyDom(document.body);
     try {
       document.documentElement.setAttribute('lang', lang === 'en' ? 'en' : 'zh-CN');
       document.body.classList.toggle('lang-en', lang === 'en');
@@ -244,5 +284,5 @@
 
   function current() { return lang; }
 
-  root.I18N = { init: init, t: t, set: set, current: current, DICTS: DICTS };
+  root.I18N = { init: init, t: t, set: set, current: current, applyDom: applyDom, DICTS: DICTS };
 })(typeof window !== 'undefined' ? window : globalThis);
