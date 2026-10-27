@@ -183,13 +183,13 @@
     '删除': 'Delete'
   };
 
-  /* 第二批词表（答案骨架、评审块、观测台、器材名…）单独成文件，
-   * 在这里合并。缺词条仍是回退中文，所以两批可以独立增补。 */
-  if (root.I18N_EN_EXTRA) {
-    Object.keys(root.I18N_EN_EXTRA).forEach(function (k) {
-      EN[k] = root.I18N_EN_EXTRA[k];
-    });
-  }
+  /* 第二、三批词表单独成文件，在这里合并。
+   * 缺词条仍是回退中文，所以几批可以独立增补、互不影响。 */
+  ['I18N_EN_EXTRA', 'I18N_EN_SETTINGS', 'I18N_EN_CONTENT'].forEach(function (name) {
+    var extra = root[name];
+    if (!extra) return;
+    Object.keys(extra).forEach(function (k) { EN[k] = extra[k]; });
+  });
 
   var DICTS = { en: EN };
 
@@ -225,8 +225,10 @@
     try {
       document.querySelectorAll('[data-i18n]').forEach(function (el) {
         var zh = el.getAttribute('data-i18n') || el.textContent.trim();
-        var out = t(zh);
-        if (out !== zh) el.textContent = out;
+        /* 必须无条件写回，不能只在「翻译结果与原文不同」时才写。
+         * 这些元素里放的是英文兜底文案，中文模式下 t(zh) 返回的正是 zh，
+         * 一旦跳过写入，页面上就会一直显示那句英文 —— 首屏标题就踩了这个坑。 */
+        el.textContent = t(zh);
       });
       document.querySelectorAll('[data-i18n-ph]').forEach(function (el) {
         var zh = el.getAttribute('data-i18n-ph');

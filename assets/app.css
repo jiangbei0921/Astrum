@@ -2431,8 +2431,8 @@ body.lang-en #settingsBody .set-tabs button { letter-spacing: .02em; }
 .hero h1 {
   white-space: nowrap;
   letter-spacing: -0.01em;
-  font-size: clamp(16px, 4.2vw, 42px);   /* 回退 */
-  font-size: min(42px, 6.4cqw);          /* 6.4cqw × 14 字 ≈ 89.6cqw，留出余量 */
+  font-size: clamp(15px, 2.6vw, 30px);   /* 回退 */
+  font-size: min(30px, 4.4cqw);          /* 4.4cqw × 14 字 ≈ 61cqw，留出余量 */
 }
 
 /* ============================================================

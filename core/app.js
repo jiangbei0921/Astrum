@@ -4543,20 +4543,26 @@
 
   /* ================= 抽屉 / 设置 ================= */
   var sheetReturnFocus = null;
+  /* 打开面板后有 30ms 延时聚焦；若期间就关掉（Esc 很快），
+   * 这个定时器仍会执行，把焦点塞进已经隐藏的面板里。必须能取消。 */
+  var sheetFocusTimer = null;
   function openSheet(id) {
     /* 记住触发点，关闭后把焦点还回去，否则键盘用户会掉到页面顶部 */
     sheetReturnFocus = document.activeElement;
     $('#' + id).classList.add('on');
     $('#scrim').classList.add('on');
     if (id === 'settings') renderSettings();
-    setTimeout(function () {
+    if (sheetFocusTimer) clearTimeout(sheetFocusTimer);
+    sheetFocusTimer = setTimeout(function () {
+      sheetFocusTimer = null;
       var box = $('#' + id);
-      if (!box) return;
+      if (!box || !box.classList.contains('on')) return;
       var f = box.querySelector('button:not([disabled]), input, select, textarea, [href]');
       if (f) f.focus();
     }, 30);
   }
   function closeSheet(id) {
+    if (sheetFocusTimer) { clearTimeout(sheetFocusTimer); sheetFocusTimer = null; }
     $('#' + id).classList.remove('on');
     if (sheetReturnFocus && sheetReturnFocus.focus) {
       try { sheetReturnFocus.focus(); } catch (e) {}
