@@ -18,18 +18,11 @@
       caps: ['星历复算', '引用来源', '离线可用'],
       cfg: {}, dot: '#3b3bd6'
     },
-    {
-      id: 'local-pro', name: '内核 · 研究视角', vendor: '本地策略', type: 'local',
-      desc: '同一套事实，改用专业语体与更长的事实链，适合核对参数。',
-      caps: ['星历复算', '引用来源', '离线可用'],
-      cfg: { register: 'pro', depth: 'deep', tone: 'academic' }, dot: '#1e5aa8'
-    },
-    {
-      id: 'local-pop', name: '内核 · 科普叙事', vendor: '本地策略', type: 'local',
-      desc: '同一套事实，改用类比与短句，适合讲给不熟悉天文的人。',
-      caps: ['星历复算', '引用来源', '离线可用'],
-      cfg: { register: 'pop', depth: 'brief', tone: 'warm' }, dot: '#c8791f'
-    },
+    /* 这里曾有「内核 · 研究视角 / 科普叙事」两个条目。
+     * 它们写的是 vega.scope 与 muse.depth —— 与「身份」完全同一组字段，
+     * 且身份在 ask() 里后执行会覆盖它们，实际只剩 tone 生效。
+     * 表述方式归「身份」管，来源只表示数据从哪来，所以移除。
+     * 旧设置里若仍指向这两个 id，会在启动时回落到 local。 */
     {
       id: 'web', name: '联网检索', vendor: 'Wikimedia / 开放接口', type: 'web',
       desc: '把检索到的公开资料整合进答案，附原文链接；不可用时自动回退本地索引。',

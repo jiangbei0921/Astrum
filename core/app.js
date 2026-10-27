@@ -36,7 +36,12 @@
   var store = load();
   var state = {
     ctx: null, busy: false, cacheKey: '', preview: null, counter: 0,
-    settings: Object.assign({}, DEFAULTS, store.settings || {}),
+    settings: (function (st) {
+      var s2 = Object.assign({}, DEFAULTS, st || {});
+      /* 已移除的伪来源：老用户设置里可能还留着，回落到内核 */
+      if (s2.sourceId === 'local-pro' || s2.sourceId === 'local-pop') s2.sourceId = 'local';
+      return s2;
+    })(store.settings),
     custom: Array.isArray(store.custom) ? store.custom : [],
     skills: Array.isArray(store.skills) ? store.skills : [],
     draft: null, editing: null, composerAt: 'hero', asked: false,
@@ -3108,18 +3113,6 @@
   }
 
   /* ================= 多来源编排 ================= */
-  function sourceCfgPatch(cfgObj, src) {
-    if (!src || src.type !== 'local') return;
-    var map = {
-      'local-pro': { register: 'pro', depth: 'deep', tone: 'academic' },
-      'local-pop': { register: 'pop', depth: 'brief', tone: 'warm' }
-    };
-    var p = map[src.id] || {};
-    if (p.register) cfgObj.vega.scope = p.register;
-    if (p.depth) cfgObj.muse.depth = p.depth;
-    if (p.tone) cfgObj.lyra.tone = p.tone;
-  }
-
   function factsFromAnswer(ans) {
     var facts = [], para = '', head = '';
     ans.sections.forEach(function (s) {
@@ -3691,7 +3684,6 @@
       try {
         ctx = readCtx();
         var cfgRun = JSON.parse(JSON.stringify(cfg));
-        sourceCfgPatch(cfgRun, src);
         AC.setMemory(state.memory);
         /* 附件里带目标线索时并入查询，让答案围绕附件目标展开；
            展示给用户的仍是原问题（q），只有解析用合并后的串 */
