@@ -624,6 +624,7 @@
       if (applyCoords(lat, lon, nm || '自定义地点', null, tz)) closeSheet('coord');
     });
     $('#ctxGear').addEventListener('change', function (e) {
+      syncGearControls();
       state.settings.gear = e.target.value;
       cfg.horizon.gear = e.target.value;
       state.cacheKey = ''; persist(); refreshPanels();
@@ -3944,6 +3945,35 @@
   }
 
   /* ================= 观测台开关 ================= */
+  /* 观测台的器材三件套：方式 / 主镜 / 相机。
+   * 置灰而不隐藏——隐藏会让人以为设置丢了，清空还会让视场与采样计算失去输入。 */
+  function populateGearControls() {
+    var scopeSel = $('#ctxScope'), camSel = $('#ctxCam');
+    if (!scopeSel || !camSel) return;
+    if (!scopeSel.options.length) {
+      (window.GEAR ? GEAR.LIST : []).forEach(function (g) {
+        var o = document.createElement('option'); o.value = g.id; o.textContent = g.name;
+        scopeSel.appendChild(o);
+      });
+    }
+    if (!camSel.options.length) {
+      (window.OBSPLAN ? OBSPLAN.CAMERAS : []).forEach(function (c) {
+        var o = document.createElement('option'); o.value = c.id; o.textContent = c.name;
+        camSel.appendChild(o);
+      });
+    }
+    scopeSel.value = state.settings.gearId || 'new150';
+    camSel.value = state.settings.camId || 'asi';
+    syncGearControls();
+  }
+
+  function syncGearControls() {
+    var mode = $('#ctxGear') ? $('#ctxGear').value : state.settings.gear;
+    var scopeSel = $('#ctxScope'), camSel = $('#ctxCam');
+    if (scopeSel) scopeSel.disabled = (mode === 'naked');
+    if (camSel) camSel.disabled = (mode !== 'photo');
+  }
+
   function toggleObs(force) {
     var wide = window.innerWidth > 1120;
     if (wide) {
@@ -5103,13 +5133,10 @@
     }
 
     SECTION = 'obs';
-    group('我的器材', [
-      selectRow('主镜', (window.GEAR ? window.GEAR.LIST : []).map(function (g) { return [g.id, g.name]; }),
-        s.gearId || 'new150', function (v) { s.gearId = v; AC.setGear(v, s.camId); persist(); }),
-      selectRow('相机', (window.OBSPLAN ? window.OBSPLAN.CAMERAS : []).map(function (c) { return [c.id, c.name]; }),
-        s.camId || 'asi', function (v) { s.camId = v; AC.setGear(s.gearId, v); persist(); }),
+    /* 主镜与相机已移入观测台（#ctxScope / #ctxCam），这里只留复用记录 */
+    group('技能记录', [
       (function () { return skillPanel(); })()
-    ]);
+    ], '主镜、相机与观测方式都在观测台调整；这里是同类问题的复用记录。');
 
     SECTION = 'data';
     group('档案', [
@@ -5236,50 +5263,14 @@
       })
     ]);
 
-    var gearSel = document.createElement('select');
-    gearSel.className = 'mini-sel';
-    [['naked', '肉眼'], ['binocular', '双筒'], ['telescope', '望远镜'], ['photo', '摄影']].forEach(function (o) {
-      var op = document.createElement('option'); op.value = o[0]; op.textContent = o[1];
-      if (o[0] === s.gear) op.selected = true;
-      gearSel.appendChild(op);
-    });
-    gearSel.addEventListener('change', function () {
-      s.gear = gearSel.value; cfg.horizon.gear = s.gear; $('#ctxGear').value = s.gear; persist(); refreshPanels();
-    });
-    var r2 = el('div', 'set-row');
-    r2.innerHTML = '<div class="txt"><div class="t">默认器材</div></div>';
-    var c2 = el('div', 'ctl'); c2.appendChild(gearSel); r2.appendChild(c2);
-
-    var placeRow = el('div', 'set-row');
-    placeRow.innerHTML = '<div class="txt"><div class="t">观测地点</div><div class="d" id="setPlaceName">' +
-      esc(state.place ? state.place.n : s.city) + '</div></div>';
-    var pc = el('div', 'ctl');
-    pc.style.display = 'flex'; pc.style.gap = '6px';
-    var locBtn = el('button', 'btn-tiny', 'IP 定位');
-    locBtn.addEventListener('click', function () { locateByIP(false); });
-    var manBtn = el('button', 'btn-tiny', '坐标');
-    manBtn.addEventListener('click', openCoordSheet);
-    pc.appendChild(locBtn); pc.appendChild(manBtn);
-    placeRow.appendChild(pc);
-
-    group('默认观测条件', [
-      placeRow, r2,
+    /* 地点与器材档位已在观测台（#ctxPlace / #ctxGear），此处不再重复提供 */
+    group('计算口径', [
       selectRow('数值精度', [['visual', '目视级'], ['photo', '摄影级']], s.precision, function (v) {
         s.precision = v; cfg.kepler.precision = v; persist();
       })
-    ], '地点支持全球检索（779 个城市与首都）、IP 自动定位与手动坐标；切换地点后星图与今晚清单立即重算。');
+    ], '地点、时间与器材都在观测台调整；这里只保留影响计算小数位的口径。');
 
-    var mgr = el('div', 'set-row');
-    mgr.innerHTML = '<div class="txt"><div class="t">智能体</div><div class="d">内置 7 个 · 自定义 ' + state.custom.length + ' 个</div></div>';
-    var mbtn = el('button', 'btn-tiny dark', '新建');
-    mbtn.addEventListener('click', function () {
-      closeSheet('settings');
-      state.editing = null; state.draft = newAgent();
-      setSheetHead(state.draft.sigil, '新建智能体', '自定义', state.draft.color);
-      renderEditor(null); openSheet('drawer');
-    });
-    var mc = el('div', 'ctl'); mc.appendChild(mbtn); mgr.appendChild(mc);
-    /* 智能体管理已移至左侧栏：设置里再放一个入口属于重复 */
+    /* 智能体管理只在左侧栏提供 */
 
     SECTION = 'data';
     if (settingsTab === 'data') {
@@ -5546,6 +5537,21 @@
     document.body.classList.toggle('large-text', !!s.largeText);
     AC.setCustomAgents(state.custom);
     if ($('#ctxGear')) $('#ctxGear').value = s.gear;
+    if ($('#ctxScope')) populateGearControls();
+    if ($('#ctxScope')) {
+      $('#ctxScope').addEventListener('change', function (e) {
+        s.gearId = e.target.value;
+        AC.setGear(s.gearId, s.camId);
+        persist(); refreshPanels();
+      });
+    }
+    if ($('#ctxCam')) {
+      $('#ctxCam').addEventListener('change', function (e) {
+        s.camId = e.target.value;
+        AC.setGear(s.gearId, s.camId);
+        persist(); refreshPanels();
+      });
+    }
     document.body.classList.toggle('obs-collapsed', !s.showObs);
     applySidebarCollapse(s.sidebarCollapsed);
     persist();
@@ -6370,7 +6376,7 @@
       setPersona: setPersona, applyPersona: applyPersona, PERSONAS: PERSONAS,
       detectStyle: detectStyle, newChat: newChat,
       buildExportPayload: buildExportPayload,
-      ready: ready, version: APP_VERSION,
+      ready: ready, version: APP_VERSION, getSettings: function () { return state.settings; },
       /* 档案的程序化入口：与设置面板的 selectRow 等效。
        * 注意：ask() 每次都会用 state.settings 覆盖 AC.setGear，
        * 所以外部只调 AC.setGear 是无效的，必须改 state 再同步。 */

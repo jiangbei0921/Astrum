@@ -187,13 +187,19 @@
               <div class="place-panel" id="placePanel" role="listbox" aria-label="地点搜索结果" hidden></div>
               <div class="place-sub"><span id="ctxPlaceSub">—</span><button class="link-btn" id="btnManualCoord">坐标</button></div>
             </div>
-            <label class="field wide"><span>器材</span>
+            <label class="field wide"><span>观测方式</span>
               <select id="ctxGear">
                 <option value="naked">肉眼</option>
                 <option value="binocular">双筒望远镜</option>
                 <option value="telescope">天文望远镜</option>
                 <option value="photo">天文摄影</option>
               </select>
+            </label>
+            <label class="field wide"><span>主镜</span>
+              <select id="ctxScope" aria-label="主镜型号"></select>
+            </label>
+            <label class="field wide"><span>相机</span>
+              <select id="ctxCam" aria-label="相机型号"></select>
             </label>
           </div>
         </section>
