@@ -1,11 +1,13 @@
 /* ASTRUM · 界面语言（i18n）
  *
- * 范围说明：只翻译**界面框架**（设置、侧栏、按钮、页签），不翻译生成的答案、
- * 知识库条目与天体数据。那些内容有几百条文案且带引用，机器翻译会破坏事实的
- * 可追溯性——宁可保持中文，也不给出一个半译的答案。
+ * 范围说明：翻译**界面框架**（设置、侧栏、按钮、页签）与**答案的界面骨架**
+ * （档位徽标、缺口提示、推荐问句）。不翻译知识库条目正文与天体数据：
+ * 那些内容带核验日期与出处，翻译会连带破坏可追溯性——宁可保持中文。
  *
  * 用法：把待翻译的中文原文直接作为 key —— L('使用身份')。
  * 缺词条时自动回退中文，所以可以**逐步接入**，不会出现空白或 undefined。
+ * 注意：由「固定片段 + 变量」拼出来的句子，整段匹配不到词表，
+ * 必须在生成处把每一段分别 L() 包住（见 core/agents.js 顶部说明）。
  */
 (function (root) {
   'use strict';
@@ -185,7 +187,7 @@
 
   /* 第二、三批词表单独成文件，在这里合并。
    * 缺词条仍是回退中文，所以几批可以独立增补、互不影响。 */
-  ['I18N_EN_EXTRA', 'I18N_EN_SETTINGS', 'I18N_EN_CONTENT'].forEach(function (name) {
+  ['I18N_EN_EXTRA', 'I18N_EN_SETTINGS', 'I18N_EN_CONTENT', 'I18N_EN_ANSWER'].forEach(function (name) {
     var extra = root[name];
     if (!extra) return;
     Object.keys(extra).forEach(function (k) { EN[k] = extra[k]; });

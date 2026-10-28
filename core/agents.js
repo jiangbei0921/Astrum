@@ -9,6 +9,13 @@
   'use strict';
   var A = root.Astro, CAT = root.CATALOG, KB = root.KNOWLEDGE, RT = root.AstroRuntime;
 
+  /* 固定文案取译。
+   * 这一层此前完全没有本地化通道，所有提示语都在生成时写死成中文，
+   * 到了英文界面就成了「英文框架 + 中文句子」的夹生状态。
+   * 只用于界面骨架（档位说明、缺口提示、推荐问句等）；
+   * 知识库条目正文不经过这里——它有自己的核验日期，翻译属于另一件事。 */
+  function L(s) { return root.I18N ? root.I18N.t(s) : s; }
+
   /* ================= 城市与观测地 ================= */
   var CITIES = [
     { n: '北京', lat: 39.9042, lon: 116.4074, tz: 8, bortle: 7 },
@@ -1860,36 +1867,36 @@
     var s = String(q || '');
     if (/论文|文献|研究|最新|测量|发现|期刊|doi/i.test(s)) {
       return {
-        gap: '本地知识库只有 160 条通用条目，没有收录具体论文的最新测量值。',
-        where: 'NASA ADS（ui.adsabs.harvard.edu）按关键词检索，或 arXiv astro-ph 预印本；拿到 DOI 后可回来核对数值与单位。',
-        alt: '贴一段论文摘要或数据表给我，我可以按已有事实做比对，并标出与本地数据的差异。'
+        gap: L('本地知识库只有 160 条通用条目，没有收录具体论文的最新测量值。'),
+        where: L('NASA ADS（ui.adsabs.harvard.edu）按关键词检索，或 arXiv astro-ph 预印本；拿到 DOI 后可回来核对数值与单位。'),
+        alt: L('贴一段论文摘要或数据表给我，我可以按已有事实做比对，并标出与本地数据的差异。')
       };
     }
     if (/图像|照片|拍摄|观测数据|光谱|光变|拟合/i.test(s)) {
       return {
-        gap: '本地没有原始观测数据，也不做图像处理与拟合。',
-        where: 'MAST / IRSA / ZTF 归档按坐标检索；星表级别的问题走 SIMBAD 或 VizieR。',
-        alt: '如果你有 FITS 文件，直接拖进来——我能读出目标、坐标、曝光与滤镜，并定位到星图。'
+        gap: L('本地没有原始观测数据，也不做图像处理与拟合。'),
+        where: L('MAST / IRSA / ZTF 归档按坐标检索；星表级别的问题走 SIMBAD 或 VizieR。'),
+        alt: L('如果你有 FITS 文件，直接拖进来——我能读出目标、坐标、曝光与滤镜，并定位到星图。')
       };
     }
     if (/实时|云量|天气|seeing|Kp|极光|光污染/i.test(s)) {
       return {
-        gap: '本地是离线快照，没有实时气象与空间天气数据。',
-        where: '云量与 seeing 看 Open-Meteo 或天文台站预报；地磁活动看 NOAA SWPC 的 Kp 指数。',
-        alt: '我可以先按你的地点和时间算出目标的可观测窗口与月亮干扰，天气那一项你对照一下即可。'
+        gap: L('本地是离线快照，没有实时气象与空间天气数据。'),
+        where: L('云量与 seeing 看 Open-Meteo 或天文台站预报；地磁活动看 NOAA SWPC 的 Kp 指数。'),
+        alt: L('我可以先按你的地点和时间算出目标的可观测窗口与月亮干扰，天气那一项你对照一下即可。')
       };
     }
     if (/坐标|星表|自行|视差|光谱型|距离|星等/i.test(s)) {
       return {
-        gap: '本地星表是 J2000 快照，未覆盖全部源，也没有测光与分光数据。',
-        where: 'SIMBAD（名称解析）、VizieR（星表）、Gaia 归档（TAP/ADQL）都能按坐标或名称查到权威值。',
-        alt: '把天体名或坐标给我，我先用本地星表给退化值，并明确标出哪些字段缺失。'
+        gap: L('本地星表是 J2000 快照，未覆盖全部源，也没有测光与分光数据。'),
+        where: L('SIMBAD（名称解析）、VizieR（星表）、Gaia 归档（TAP/ADQL）都能按坐标或名称查到权威值。'),
+        alt: L('把天体名或坐标给我，我先用本地星表给退化值，并明确标出哪些字段缺失。')
       };
     }
     return {
-      gap: '本地知识库与星表都没有命中这个问法。',
-      where: '换一个更具体的问法（给出天体名、时间、地点或坐标）通常就能命中；涉及专业结论时需要外部文献库。',
-      alt: '告诉我你想解决的具体问题（比如「想拍什么」「想核对哪个数值」），我按可算/可查的路径拆一遍。'
+      gap: L('本地知识库与星表都没有命中这个问法。'),
+      where: L('换一个更具体的问法（给出天体名、时间、地点或坐标）通常就能命中；涉及专业结论时需要外部文献库。'),
+      alt: L('告诉我你想解决的具体问题（比如「想拍什么」「想核对哪个数值」），我按可算/可查的路径拆一遍。')
     };
   }
 
@@ -2128,12 +2135,12 @@
 
   function composeFallback(answer, ctx, cfg) {
     var g = gapFor(answer.query);
-    answer.trace.push(step('muse', '边界判定', '无匹配实体 · 无匹配意图', {
-      tool: 'intent-router', check: RT.check('知识库与星表命中', false, '零命中')
+    answer.trace.push(step('muse', L('边界判定'), L('无匹配实体 · 无匹配意图'), {
+      tool: 'intent-router', check: RT.check(L('知识库与星表命中'), false, L('零命中'))
     }));
     answer.sections.push({
       kind: 'verdict',
-      head: '本地没有这个问题的依据。',
+      head: L('本地没有这个问题的依据。'),
       sub: ''
     });
     /* 缺口用紧凑的三行结构，不套科普表述卡片——
@@ -2141,12 +2148,12 @@
     answer.sections.push({
       kind: 'gap',
       items: [
-        { k: '缺什么', v: g.gap },
-        { k: '去哪拿', v: g.where },
-        { k: '我能做', v: g.alt }
+        { k: L('缺什么'), v: g.gap },
+        { k: L('去哪拿'), v: g.where },
+        { k: L('我能做'), v: g.alt }
       ]
     });
-    answer.sections.push({ kind: 'followup', items: ['今晚适合看什么？', '猎户座大星云怎么找？', '为什么会有月相变化？'] });
+    answer.sections.push({ kind: 'followup', items: [L('今晚适合看什么？'), L('猎户座大星云怎么找？'), L('为什么会有月相变化？')] });
     answer.meta = { agents: ['muse', 'vega'], confidence: 0.3, freshness: 'static', register: 'pop', computed: false, tier: 'unknown' };
     return answer;
   }

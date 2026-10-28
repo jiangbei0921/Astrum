@@ -1998,12 +1998,12 @@
     var tierKey = (ans.meta && ans.meta.tier) || 'infer';
     var tier = window.AstroRuntime ? window.AstroRuntime.tierOf(tierKey) : { label: '', hint: '' };
     var factText = {
-      compute: '本地计算 · 可复算',
-      fetch: '外部数据 · 附出处',
-      infer: '本地知识库 · 有出处',
-      unknown: '无可靠依据',
-      chat: '无需检索'
-    }[tierKey] || '本地星历 + 知识库';
+      compute: L('本地计算 · 可复算'),
+      fetch: L('外部数据 · 附出处'),
+      infer: L('本地知识库 · 有出处'),
+      unknown: L('无可靠依据'),
+      chat: L('无需检索')
+    }[tierKey] || L('本地星历 + 知识库');
     head.innerHTML =
       '<span class="lbl">依据</span><span class="srcbadge t-' + esc(tierKey) + '" title="' + esc(tier.hint) + '">' +
       '<span class="dot ' + (tierKey === 'unknown' ? 'warn' : 'ok') + '"></span>' + esc(factText) + '</span>' +
@@ -2026,11 +2026,11 @@
     }
     if (m.status) bits.push('<span class="st st-' + m.status + '">' + statusLabel(m.status) + '</span>');
     if (m.freshness) bits.push('<span class="chip">' + ({ static: '长期稳定', annual: '年度表', ephemeris: '实时计算', realtime: '需在线' }[m.freshness] || '—') + '</span>');
-    if (m.verified) bits.push('<span class="chip">核验 ' + esc(m.verified) + '</span>');
+    if (m.verified) bits.push('<span class="chip">' + esc(L('核验 ')) + esc(m.verified) + '</span>');
     if (m.agents && state.settings.showTrace) bits.push('<span class="chip">' + m.agents.length + ' agents</span>');
     var now = new Date();
     var bar = el('div', 'meta-bar');
-    bar.innerHTML = bits.join('') + '<span class="spacer"></span><span>' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ' · 本地引擎</span>';
+    bar.innerHTML = bits.join('') + '<span class="spacer"></span><span>' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ' · ' + esc(L('本地引擎')) + '</span>';
     return bar;
   }
 
@@ -3673,7 +3673,7 @@
     var src = sourceById(state.settings.sourceId);
     var think = el('div', 'thinking',
       '<span class="wave"><i></i><i></i><i></i></span><span>' +
-      ((src.type === 'cloud' || src.type === 'device') ? '核验事实 · 调用 ' + esc(src.name) : 'Muse 解析意图 · 调度智能体') + '</span>');
+      ((src.type === 'cloud' || src.type === 'device') ? L('核验事实 · 调用 ') + esc(src.name) : L('Muse 解析意图 · 调度智能体')) + '</span>');
     $('#thread').appendChild(think);
     $('#scroll').scrollTop = $('#scroll').scrollHeight;
     busy(true);
@@ -5920,19 +5920,19 @@
     if (document.getElementById('personaCard')) return;
     var card = el('div', 'persona-card');
     card.id = 'personaCard';
-    var html = '<div class="pc-title">先告诉我你主要想做什么</div>' +
-      '<div class="pc-sub">只影响默认的讲解方式与推荐，随时可改，也不影响任何数值。</div>';
+    var html = '<div class="pc-title">' + esc(L('先告诉我你主要想做什么')) + '</div>' +
+      '<div class="pc-sub">' + esc(L('只影响默认的讲解方式与推荐，随时可改，也不影响任何数值。')) + '</div>';
     card.innerHTML = html;
     Object.keys(PERSONAS).forEach(function (k) {
       var p = PERSONAS[k];
       var b = el('button', 'pc-item');
       b.type = 'button';
-      b.innerHTML = '<span class="pc-l">' + esc(p.label) + '</span>' +
-        '<span class="pc-d">' + esc(p.desc) + '</span>';
+      b.innerHTML = '<span class="pc-l">' + esc(L(p.label)) + '</span>' +
+        '<span class="pc-d">' + esc(L(p.desc)) + '</span>';
       b.addEventListener('click', function () { setPersona(k); });
       card.appendChild(b);
     });
-    var skip = el('button', 'pc-skip', '先跳过');
+    var skip = el('button', 'pc-skip', L('先跳过'));
     skip.type = 'button';
     skip.addEventListener('click', function () {
       state.settings.persona = 'none';
