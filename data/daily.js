@@ -10,265 +10,280 @@
   'use strict';
 
   root.ASTRUM_DAILY = {
-    "updated": "2026-10-27",
-    "generatedAt": "2026-10-27T10:47:35.418Z",
+    "updated": "2026-10-28",
+    "generatedAt": "2026-10-28T06:41:37.574Z",
     "note": "每日自动同步一次（UTC 01:00）。内容未经本项目核验，不参与答案推理。",
     "papers": [
       {
-        "id": "2610.35805",
-        "title": "The Impact of Flyby Interactions on the Rotation of Open Clusters",
+        "id": "2610.37661",
+        "title": "The Spatially-Resolved Recent Star Formation History of the M81 Disk",
         "authors": [
-          "Kyle R. Tregoning",
-          "Jeff J. Andrews"
+          "Vaishnav V. Rao",
+          "Eric F. Bell",
+          "Adam Smercina"
         ],
-        "summary": "The Gaia astrometric mission has provided the first evidence for the bulk rotation of open clusters. While this rotation may arise from residual spin inherited from a cluster's parent molecular cloud, it is unclear wheth…",
+        "summary": "The nearby M81 galaxy---a tidally interacting $L^*$ spiral disk---offers a unique perspective on the interplay of secular and external processes in shaping galaxy properties. We present the most detailed, panoramic map o…",
         "cat": "astro-ph.GA",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.35805"
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.37661"
       },
       {
-        "id": "2610.35776",
-        "title": "Tidal contributions to neutron star orbital precession around Sgr $A^*$",
+        "id": "2610.37646",
+        "title": "Measuring the magnetization profiles of galaxy groups and clusters",
         "authors": [
-          "H Lalrinfela",
-          "P. C. Lalremruati",
-          "Zodinmawia"
+          "Kritti Sharma",
+          "Vikram Ravi",
+          "Elisabeth Krause"
         ],
-        "summary": "We investigate tidal contributions to the orbital precession of neutron stars around the supermassive black hole Sgr A*, using stellar configurations described by the Tolman - Oppenheimer - Volkoff equations. We examine…",
-        "cat": "astro-ph.HE",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.35776"
-      },
-      {
-        "id": "2610.35713",
-        "title": "Mapping the Milky Way with SDSS-V: Galactic Genesis Selection Function and Mock Catalog",
-        "authors": [
-          "Madeline Lucey",
-          "Zoe Hackshaw",
-          "Robyn Sanderson"
-        ],
-        "summary": "Robust chemodynamic mapping of the Milky Way requires accounting for the selection function of the survey used, the probability that a given star is included in the final catalog as a function of its observable propertie…",
+        "summary": "Magnetic fields are vital in determining the physical conditions of baryons in massive halos. They are, however, notoriously difficult to observe. This impacts problems from our understanding of galaxy formation, to the…",
         "cat": "astro-ph.GA",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.35713"
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.37646"
       },
       {
-        "id": "2610.35673",
-        "title": "Constraining Supermassive Black Hole Seeding and Accretion via Occupation Fractions and Mass-Weighted Distributions",
+        "id": "2610.37643",
+        "title": "What shapes the bright end of the UV luminosity function? Stellar mass, star-formation variability, and dust in JADES",
         "authors": [
-          "Gianni Sims",
-          "Vicki Sarajedini"
+          "Amanda Stoffers",
+          "Sandro Tacchella",
+          "Benjamin D. Johnson"
         ],
-        "summary": "The formation of supermassive black holes (SMBHs) is a key open problem in galaxy evolution, with light- and heavy-seeding models predicting distinct black hole occupation fractions (BHOFs). Using multiwavelength observa…",
+        "summary": "JWST surveys find more UV-bright galaxies at $z>10$ than galaxy-formation models predict, but the roles of recent star formation, stellar mass and dust remain uncertain. We analyse 1365 spectroscopically confirmed JADES…",
         "cat": "astro-ph.GA",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.35673"
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.37643"
       },
       {
-        "id": "2610.35570",
-        "title": "SPAM: Survey Overview and JWST/NIRCam Multi-Band Photometry Catalog",
+        "id": "2610.37638",
+        "title": "Weighing dark matter particles with gravitational waves",
         "authors": [
-          "Rebecca L. Larson",
-          "Kelcey Davis",
+          "Rodrigo Vicente",
+          "Francisco Duque",
+          "Theophanes K. Karydas"
+        ],
+        "summary": "It is commonly assumed that the mass of dark matter particles cannot be determined from their gravitational effects when dark matter behaves as collisionless matter. Here we show that extreme-mass-ratio inspirals observa…",
+        "cat": "gr-qc",
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.37638"
+      },
+      {
+        "id": "2610.37621",
+        "title": "Galactic Dynamics Drives Cyclic Star Formation in Dipole Dwarf Galaxies",
+        "authors": [
+          "Robel Geda",
+          "Akaxia Cruz",
+          "Alyson Brooks"
+        ],
+        "summary": "Dwarf galaxies are dark matter-dominated systems that are sensitive to feedback and display bursty star formation histories. This makes them ideal probes of the processes that regulate star formation. This work investiga…",
+        "cat": "astro-ph.GA",
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.37621"
+      },
+      {
+        "id": "2610.37612",
+        "title": "The Role of Star Formation and Morphology in the Mass-Metallicity Relation of Galaxies at Cosmic Noon",
+        "authors": [
+          "Farhanul Hasan",
+          "Marc Rafelski",
+          "Kalina V. Nedkova"
+        ],
+        "summary": "We investigate the dependence of the mass-metallicity relation (MZR) on star formation and galaxy morphology at 1.7<z<3.5, using JWST/NIRISS wide-field slitless spectroscopy of >1000 galaxies. The observations span >85 a…",
+        "cat": "astro-ph.GA",
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.37612"
+      },
+      {
+        "id": "2610.37591",
+        "title": "The UKIRT M33 Monitoring Project - VII. A 15-year K-band photometric catalogue of long-period variable stars in the central kiloparsec of M33",
+        "authors": [
+          "Mina Alizadeh",
+          "Atefeh Javadi",
+          "Yousefali Abedini"
+        ],
+        "summary": "We present a homogenised K-band photometric catalogue for the central ${\\approx}12$ arcmin$^2$ (${\\approx}0.9$ kpc$^2$) of the Triangulum spiral galaxy M33, combining four independent PSF-based near-infrared datasets obt…",
+        "cat": "astro-ph.GA",
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.37591"
+      },
+      {
+        "id": "2610.37564",
+        "title": "Little Red Dots with Broad H$β$ Lines Reveal the Black Hole Mass Function at 7<z<9.5",
+        "authors": [
+          "Anthony J. Taylor",
+          "Steven L. Finkelstein",
           "Hollis B. Akins"
         ],
-        "summary": "We present the Star-formation from Photometry through the Addition of Medium-bands (SPAM) survey, a 62.9 hr JWST/NIRCam imaging program to add ten new filters, nine medium-band filters, and one broad-band filter to the C…",
+        "summary": "We present a systematic search for broad H$β$ emission at $7<z<9.5$ in 21,770 JWST/NIRSpec PRISM spectra drawn from four blank fields and six lensing clusters with photometry spanning 1942 arcmin$^2$. We find a sample of…",
         "cat": "astro-ph.GA",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.35570"
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.37564"
       },
       {
-        "id": "2610.35449",
-        "title": "Parameter-Decoupling-Informed Learning for Superresolution: Laboratory Validation and Galaxy Imaging",
+        "id": "2610.37664",
+        "title": "Improving cosmological distance measurements at high redshift using Lyman-Alpha forest BAO reconstruction",
         "authors": [
-          "Abdelali Sajia",
-          "Bilal Benzimoun",
-          "James Qu"
+          "Boryana Hadzhiyska",
+          "Roger de Belsunce"
         ],
-        "summary": "We present a parameter-decoupling-informed learning model for estimating subwavelength separations of point sources, without requiring prior knowledge of source properties, control over the sources, or continued access t…",
-        "cat": "physics.optics",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.35449"
-      },
-      {
-        "id": "2610.35366",
-        "title": "Inferring the Total Mass of Galaxy Halos Using Photometry",
-        "authors": [
-          "Chris Brook",
-          "Arianna di Cintio",
-          "Claudio Dalla Vecchia"
-        ],
-        "summary": "Galaxy size, as defined as the radius at which the stellar surface density reaches $1~\\mathrm{M}_\\odot\\,\\mathrm{pc}^{-2}$ ($R_1$), has been shown to correlate more tightly with stellar mass than the effective radius. Cos…",
-        "cat": "astro-ph.GA",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.35366"
-      },
-      {
-        "id": "2610.35278",
-        "title": "NOEMA Observations of the Center of M33: A Parsec-scale Molecular Filament and an Ordered Gas-Star-Formation Sequence",
-        "authors": [
-          "Zongnan Li",
-          "Zhiyuan Li",
-          "Gan Luo"
-        ],
-        "summary": "We present NOEMA CO(1-0) observations of the inner $\\sim$500 pc of M33 at a resolution of $0.91''\\times0.37''$ ($3.7\\times1.5$ pc), resolving the compact molecular gas structures and revealing their relation to recent ma…",
-        "cat": "astro-ph.GA",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.35278"
-      },
-      {
-        "id": "2610.35703",
-        "title": "pbhalo: computing primordial black hole and minihalo populations from a single primordial perturbation spectrum",
-        "authors": [
-          "B. A. Rudenko"
-        ],
-        "summary": "An enhancement of the primordial curvature power spectrum on small scales can give rise to two populations of compact objects: primordial black holes (PBHs), which form during radiation domination, and dark matter miniha…",
+        "summary": "The Dark Energy Spectroscopic Instrument (DESI) measures baryon acoustic oscillations (BAO) in the Lyman-$α$ (Lyman-alpha) forest and provides a robust probe of the expansion history in the matter-dominated era. Yet, non…",
         "cat": "astro-ph.CO",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.35703"
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.37664"
       },
       {
-        "id": "2610.35503",
-        "title": "Model-independent calibration of gamma-ray bursts with Bayesian neural networks",
+        "id": "2610.37604",
+        "title": "Cosmological Constraints on Interacting Dark Matter with SPT-3G D1",
         "authors": [
-          "P. Caterino",
-          "M. Demianski",
-          "E. Piedipalumbo"
+          "Cynthia Trendafilova",
+          "Fei Ge",
+          "Ali Rida Khalife"
         ],
-        "summary": "Context. Gamma-ray bursts (GRBs) extend cosmological distance measurements beyond the range densely sampled by Type Ia supernovae, but their standardization requires reliable calibration and uncertainty estimates. Aims.…",
+        "summary": "Models of the dark sector in which the dark matter participates in nontrivial interactions can create detectable signatures in cosmological observables, providing non-terrestrial means of probing the nature of dark matte…",
         "cat": "astro-ph.CO",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.35503"
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.37604"
       },
       {
-        "id": "2610.35249",
-        "title": "Reconstructing the Three-Dimensional Stellar Mass Profiles of Massive Galaxy Clusters",
+        "id": "2610.37596",
+        "title": "A self-supervised machine learning approach to identify instrumental systematics in 21cm Cosmology",
         "authors": [
-          "Jong-In Park",
-          "Jubee Sohn",
-          "I-Non Chiu"
+          "Ajith Sampath"
         ],
-        "summary": "We investigate the three-dimensional (3D) stellar mass profiles of galaxy clusters using simulations and observations. We develop the Projection-to-Enclosed Estimator by Layers (PEEL) model, which geometrically reconstru…",
-        "cat": "astro-ph.GA",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.35249"
-      },
-      {
-        "id": "2610.35207",
-        "title": "Cracking into RACS - I. Measuring the cosmic dipole in the RACS-low3 and RACS-mid1 radio surveys with simulation-based inference",
-        "authors": [
-          "Oliver T. Oayda",
-          "Mali Land-Strykowski",
-          "Stefan W. Duchesne"
-        ],
-        "summary": "We measure the dipole in the count of radio galaxies over the sky as seen by the Australian SKA Pathfinder (ASKAP) in the Rapid ASKAP Continuum Survey (RACS). Our analysis focuses on the third observational epoch in the…",
+        "summary": "The primordial sound waves in the baryon-photon plasma are imprinted on the large-scale galaxy distribution as Baryon Acoustic Oscillations (BAO), serving as a cosmological standard ruler to constrain dark energy and the…",
         "cat": "astro-ph.CO",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.35207"
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.37596"
       },
       {
-        "id": "2610.35124",
-        "title": "Relating Dark Dimension Size with Dark Energy via 5D Quintessence Potential and Casimir Energy",
+        "id": "2610.37455",
+        "title": "Getting Ready For Analysing Rubin Data : CLMM v2, The Updated LSST-DESC Cluster Weak Lensing Mass Modeling Library For Cosmology",
         "authors": [
-          "Rashmikanta Mantry",
-          "Kazuyuki Furuuchi"
+          "Michel Aguena",
+          "Céline Combet",
+          "Shenming Fu"
         ],
-        "summary": "We explore effective field theory (EFT) realizations of the dark dimension (DD) scenario in which the size of the DD is determined by the competition between a 5D quintessence potential and the Casimir energy. When only…",
-        "cat": "hep-th",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.35124"
-      },
-      {
-        "id": "2610.35057",
-        "title": "Radial dependence of galaxy and halo properties in cosmic voids: SDSS DR7 and the ELUCID constrained simulation",
-        "authors": [
-          "Youcai Zhang"
-        ],
-        "summary": "Cosmic voids provide a setting for examining the interplay between mass and environment in shaping galaxy and halo properties. Using the SDSS DR7 volume-limited galaxy sample and the ELUCID constrained simulation of the…",
+        "summary": "The Dark Energy Science Collaboration has prepared a multitude of pipelines to process the upcoming Vera C. Rubin Observatory data and perform different scientific analyses. Here, we present the methodology to constrain…",
         "cat": "astro-ph.CO",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.35057"
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.37455"
       },
       {
-        "id": "2610.35046",
-        "title": "Calibration requirements for Epoch of Reionization 21-cm signal observations - V. Bias and variance in the cylindrical power spectrum from uGMRT Band 3 observations of the ELAIS-N1 field",
+        "id": "2610.37383",
+        "title": "Cosmological constraints on single-field inflation models from ACT/SPT data and observations at sub-Mpc scales",
         "authors": [
-          "Saikat Gayen",
-          "Suvam Tripathy",
-          "Saqueb Tanveer"
+          "Qing-Yang Wang",
+          "Jing-Zhi Zhou",
+          "Fei-Yu Chen"
         ],
-        "summary": "Detection of the redshifted 21-cm signal from neutral hydrogen requires precise control of systematic effects arising from instrumental calibration. In this work, we investigate the impact of both time- and frequency-dep…",
+        "summary": "We investigate single-field inflation models that can produce large curvature perturbations at sub-Mpc scales while remaining consistent with cosmological observations across multiple regimes. We highlight the tension be…",
         "cat": "astro-ph.CO",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.35046"
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.37383"
       },
       {
-        "id": "2610.34667",
-        "title": "Radio view of the Peanut cluster: merger-induced stripping and a radio halo shortly after pericentric passage",
+        "id": "2610.37368",
+        "title": "A Point-source Catalogue from Direction-dependent Calibrated 21CMA Images",
         "authors": [
-          "K. Rajpurohit",
-          "N. Lyskova",
-          "E. Churazov"
+          "Qizhe Tang",
+          "Jingying Wang",
+          "Junhua Gu"
         ],
-        "summary": "The Peanut galaxy cluster (SRGe CL0238.3+2005) offers a rare opportunity to investigate thermal and nonthermal processes only $\\sim0.1$\\,Gyr after pericentric passage. We present a multi-frequency radio study of this sys…",
-        "cat": "astro-ph.CO",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.34667"
+        "summary": "We present a deep low-frequency radio point-source catalogue centred on the North Celestial Pole (NCP) and extending $5^\\circ$ in radius, derived from a single 24-h observation with the 21 CentiMeter Array (21CMA). Cover…",
+        "cat": "astro-ph.IM",
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.37368"
       },
       {
-        "id": "2610.35825",
-        "title": "Spectroscopic Survey of Small Solar System Bodies with Ariel",
+        "id": "2610.37540",
+        "title": "JWST/MIRI Observations of Amorphous Silicates in Interstellar Comet 3I/ATLAS",
         "authors": [
-          "Jin Beniyama",
-          "Eri Tatsumi",
-          "Sunao Hasegawa"
+          "Cristina A. Thomas",
+          "Michael S. P. Kelley",
+          "David E. Harker"
         ],
-        "summary": "The small Solar System bodies (SSSBs) preserve records of the formation and evolution of the Solar System. In particular, the near-infrared wavelength region around 3 $μ$m provides crucial insights into the origin and tr…",
+        "summary": "We present JWST/MIRI Low Resolution Spectroscopy (LRS) of 3I/ATLAS obtained post-perihelion at a heliocentric distance of 2.21 au. Our spectrum contains a prominent 10 micron silicate emission feature with a broad, smoot…",
         "cat": "astro-ph.EP",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.35825"
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.37540"
       },
       {
-        "id": "2610.35718",
-        "title": "Post-DART impact ejecta re-accumulation on Dimorphos and implications for Hera gravity measurements",
+        "id": "2610.37004",
+        "title": "Unbound grains in gaseous debris discs",
         "authors": [
-          "S. D. Raducan",
-          "Ö. Karatekin",
-          "M. Popescu"
+          "Marija R. Jankovic",
+          "Tim D. Pearce",
+          "Johan Olofsson"
         ],
-        "summary": "Context. The DART impact might have substantially modified the surface and near-surface structure of Dimorphos, affecting the morphology and gravity field that is to be measured by ESA's Hera mission. Aims. We investigat…",
+        "summary": "Context. Some debris discs contain cold molecular gas. The origin of this gas is one of the key questions in our understanding of the evolution of planetary systems. The effect of gas on the smallest dust grains, which a…",
         "cat": "astro-ph.EP",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.35718"
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.37004"
       },
       {
-        "id": "2610.35617",
-        "title": "Distilling neural networks into equations to predict planetary instability",
+        "id": "2610.36979",
+        "title": "The impact of the sulfur allotropes and sulfur hydrides on the Venus cloud chemistry",
         "authors": [
-          "Simon Alford",
-          "Edward Gu",
-          "Omar Costilla-Reyes"
+          "Maxence Lefèvre",
+          "Franck Lefèvre",
+          "Anni Määttänen"
         ],
-        "summary": "The problem of predicting when a multi-planet system will become dynamically unstable has defied analytical progress over the past three hundred years. Recent machine learning advances achieve high predictive performance…",
-        "cat": "cs.LG",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.35617"
-      },
-      {
-        "id": "2610.35548",
-        "title": "A Warped Dust Ring in the CQ Tau Disk",
-        "authors": [
-          "Shu Ishibashi",
-          "Masayuki Yamaguchi",
-          "Takayuki Muto"
-        ],
-        "summary": "The diversity of planetary orbital architectures calls for observational constraints on radial variations in disk-plane orientation, or warps, yet such variations in dust disks remain poorly characterized. CQ Tau is a pr…",
+        "summary": "Venus is home to vivid sulfur chemistry, with SO$_2$ as the major sulfur gas species and a global cloud layer between 47 and~70 km composed of H$_2$SO$_4$ and H$_2$O. The chemistry in the clouds has been extensively stud…",
         "cat": "astro-ph.EP",
-        "published": "2026-10-26…",
-        "url": "https://arxiv.org/abs/2610.35548"
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.36979"
+      },
+      {
+        "id": "2610.36664",
+        "title": "Revisiting the Photometric Modulation Amplitudes of Kepler Planet Hosts: A Confounder-Adjusted Test of Stellar Spin-Orbit Alignment",
+        "authors": [
+          "Kento Masuda",
+          "Subo Dong"
+        ],
+        "summary": "T. Mazeh and coworkers pioneered a method using rotational photometric modulation as a proxy to infer stellar obliquities in Kepler transiting planetary systems, based on the expected positive correlation between spot-in…",
+        "cat": "astro-ph.EP",
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.36664"
+      },
+      {
+        "id": "2610.36446",
+        "title": "Retention of primordial atmospheres through giant impacts",
+        "authors": [
+          "Darius Modirrousta-Galian",
+          "Jun Korenaga"
+        ],
+        "summary": "Rocky planets the size of Earth or larger are expected to undergo one or more giant impacts during the final stages of their formation. Some of these collisions occur after protoplanetary disk dissipation, potentially dr…",
+        "cat": "astro-ph.EP",
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.36446"
+      },
+      {
+        "id": "2610.37617",
+        "title": "A Quiet Night in the Millihertz Sky? LISA Forecasts from LIGO/Virgo/KAGRA Populations",
+        "authors": [
+          "Ignacio Magaña Hernandez",
+          "Antonella Palmese"
+        ],
+        "summary": "The high-mass black hole population inferred from ground-based observations can substantially affect the number of binaries detectable by the Laser Interferometer Space Antenna (LISA). We use population constraints based…",
+        "cat": "astro-ph.HE",
+        "published": "2026-10-27",
+        "url": "https://arxiv.org/abs/2610.37617"
       }
     ],
     "news": [
+      {
+        "title": "James Webb discovers a scorching lava planet with a “giant sunscreen”",
+        "summary": "A scorching lava planet 280 light-years away has surprised astronomers by apparently maintaining a thick atmosphere despite conditions that should have stripped…",
+        "source": "ScienceDaily",
+        "date": "2026-10-27",
+        "url": "https://www.sciencedaily.com/releases/2026/10/261026225603.htm"
+      },
+      {
+        "title": "Smithsonian scientists just recreated the first 2 billion years of the Universe",
+        "summary": "Scientists have created one of the largest and most detailed simulations of the early universe ever made, offering an extraordinary new glimpse into the cosmos…",
+        "source": "ScienceDaily",
+        "date": "2026-10-27",
+        "url": "https://www.sciencedaily.com/releases/2026/10/261026225600.htm"
+      },
       {
         "title": "A 2,700-year-old solar eclipse just revealed something surprising about Earth",
         "summary": "A solar eclipse recorded more than 2,700 years ago is revealing surprising secrets about Earth's rotation and the Sun's ancient behavior. By correcting an eight…",
@@ -317,20 +332,6 @@
         "source": "ESA",
         "date": "2026-10-22",
         "url": "https://www.esa.int/ESA_Multimedia/Images/2026/10/Stars_brewing_in_a_nebulous_cauldron"
-      },
-      {
-        "title": "NASA’s Curiosity rover reveals a spectacular new view of Mars with a mystery on the horizon",
-        "summary": "NASA’s Curiosity rover has revealed a spectacular new view of mysterious, wind-carved cliffs on Mars that may hold evidence of ancient volcanic activity. With t…",
-        "source": "ScienceDaily",
-        "date": "2026-10-22",
-        "url": "https://www.sciencedaily.com/releases/2026/10/261021231238.htm"
-      },
-      {
-        "title": "A train was delayed by a solar storm. But something didn't add up.",
-        "summary": "Scientists have cracked a 178-year-old mystery surrounding a train delayed by a solar storm, revealing that the famous incident happened in 1848 rather than 184…",
-        "source": "ScienceDaily",
-        "date": "2026-10-21",
-        "url": "https://www.sciencedaily.com/releases/2026/10/261020085021.htm"
       },
       {
         "title": "MMX lifts off to Mars’s moon Phobos",
