@@ -4954,3 +4954,79 @@ PASS 入口: 关闭后清空 hash
 - 详情页目前是浮层，不是独立路由页面。改成整页会丢掉"在对话上下文里看一眼就回去"的便利；
   若以后要做可分享的静态详情页，可复用 `core/topics.js` 的内容，不必重写。
 - 卡片没有配图。当前风格是排印驱动，加图会与整体调性冲突。
+
+## 六十三、运行期自适应布局（v7.4）
+
+### 63.1 约束先于实现
+
+这条需求里最要紧的不是"能适配"，而是**初始化必须用固定预设**。
+所以整个模块的设计顺序是：先保证"不启用时页面和上一版一模一样"，再谈适配。
+
+落点选 `html` 上的五个 `data-*` 属性，而不是直接写内联样式：
+
+| 属性 | 取值 | 作用 |
+|---|---|---|
+| `data-adapt` | `on` | 总开关；不存在则本模块的所有 CSS 规则全部不匹配 |
+| `data-w` | `wide` / `mid` / `narrow` | 环境宽度档 |
+| `data-hero` | `full` / `compact` | 首屏四张卡 |
+| `data-list` | `normal` / `dense` | 侧栏会话列表 |
+| `data-compose` | `idle` / `expanded` | 输入区 |
+
+CSS 侧每条规则都以 `html[data-adapt="on"]` 开头。回退就是删属性，
+不会留下"半截内联样式"这种需要反向清理的中间态。
+
+### 63.2 四个维度与阈值
+
+```js
+wide: 980, mid: 660,
+heroCompactAt: 2,  heroRestoreAt: 0,
+listDenseAt: 9,    listRestoreAt: 6,
+composeAt: 2,      resizeDebounce: 160
+```
+
+宽度只调留白与标题字距，**不改列数**——列数仍然由媒体查询负责。
+两套真相同时决定列数，迟早会互相打架。
+
+### 63.3 迟滞：为什么必须双向阈值
+
+第一版首屏用的是一对反向阈值 `heroCompactAt: 2 / heroRestoreAt: 1`：
+进入条件 `≥2`、退出条件 `≤1`。看似留了 1 格余量，实际带宽为 0——
+消息数在 1 和 2 之间时，每来一条就压缩、每删一条就还原，界面会一直抖。
+
+现在的写法是「已经是 compact 就一直保持，直到回落到 `heroRestoreAt` 以下」，
+`heroRestoreAt` 取 0：只要有 1 条消息就保持压缩，彻底清空才回预设。
+列表同理，`9` 进 `6` 出，带宽 3 格。
+
+### 63.4 生命周期：start 不 tick
+
+`start()` 里注册了 `resize`、输入框 `input`、以及三个定向 `MutationObserver`
+（`#thread` 的 `.msg`、`#threadList` 的 `.th-item`、`#attachTray` 的子节点），
+但**故意不调用 `tick()`**。第一次适配必须由真实信号触发。
+
+`boot()` 里也不是同步调用，而是 `requestAnimationFrame` 之后再 `setTimeout(arm, 250)`：
+`restoreHistory()` 会渲染历史消息并产生 mutation，如果监听已经挂上，
+适配就会发生在初始化阶段——直接违反需求。
+
+### 63.5 三条退路
+
+1. 设置里关掉「自适应布局」（`settings.adaptive = false`）→ `Adaptive.stop(true)`
+2. URL 带 `?layout=fixed` → 同上，用于截图与排障
+3. 熔断：`apply()` 内部累计 3 次异常后自动 `stop`，并把 `reason` 记为 `error`。
+   宁可整体回到预设，也不要"适配了一半"的界面。
+
+### 63.6 验证
+
+`selftest` 补 6 条：引擎存在 / 宽屏预设 / 窄屏压缩 / 迟滞不抖动 /
+条件消失回退 / `stop` 摘属性 / 重新启用挂回。
+
+探针实测：初始化后 `documentElement` 无 `data-adapt`；输入多行后出现
+`data-compose="expanded"`；清空后属性被摘除。
+
+全套回归：`selftest` 156/156（本次网络可用，联网用例全过）、`a11y-test` 9/9
+（连跑 3 次，焦点回位稳定）、`csptest` 6/6、`store-test` 17/17、
+`skill-test` 10/10、`consistency-test` 7/7、`research-test` 77/77。
+
+### 63.7 未做
+
+- 没有做"记住上次形态"。适配是当下的，不是偏好；记住会变成第二份预设。
+- 窄屏只是收留白，没有重排卡片顺序或隐藏功能入口。
