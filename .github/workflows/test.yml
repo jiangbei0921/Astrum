@@ -30,6 +30,10 @@ jobs:
       - name: 前沿数据语法检查
         run: node --check data/daily.js
 
+      # 语法检查挡不住「摘要里出现 </script> 把内联脚本截断」，这条要离线样本测
+      - name: 抓取器 daily-test
+        run: node tools/daily-test.js
+
       # 每个套件单独成步：失败时能立刻看出是哪一层坏了
       - name: 功能回归 selftest
         run: node tools/selftest.js "file://$PWD/index.html"

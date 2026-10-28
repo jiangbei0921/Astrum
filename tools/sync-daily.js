@@ -249,7 +249,31 @@ async function fetchNews() {
 
 /* ---------------- 输出 ---------------- */
 
+/* 顶层结构是前端 core/app.js「每日前沿」面板的契约：
+ * updated 显示在标题行，papers/news/community 必须都是数组，缺一个就是空白面板。
+ * 单独抽出来是为了能在离线测试里验证字段名与日期格式，不必真的联网跑一次。 */
+function buildPayload(papers, news, now) {
+  var t = now || new Date();
+  return {
+    updated: t.toISOString().slice(0, 10),
+    generatedAt: t.toISOString(),
+    note: '每日自动同步一次（UTC 01:00）。内容未经本项目核验，不参与答案推理。',
+    papers: papers.items,
+    news: news.items,
+    community: COMMUNITY
+  };
+}
+
 function render(data) {
+  /* `</` 转义成 `<\/`：JSON 里两者等价，JSON.parse 结果不变。
+   * 但 data/daily.js 会被 build-standalone 内联进 <script>，
+   * 一旦某条摘要里出现字面的 </script>（RSS 里的 &lt;/script&gt; 经 clean 后会还原成它），
+   * 浏览器会在那里提前闭合脚本，后面的代码全变成文本——表现为白屏加一个莫名其妙的语法错。
+   * 作为外部文件加载时不触发，所以这个坑只在单文件版出现，很难在开发时发现。 */
+  var body = JSON.stringify(data, null, 2)
+    .replace(/<\//g, '<\\/')
+    .replace(/\n/g, '\n  ');
+
   return [
     '/* ASTRUM · 每日前沿（自动生成，请勿手工编辑）',
     ' *',
@@ -262,7 +286,7 @@ function render(data) {
     '(function (root) {',
     "  'use strict';",
     '',
-    '  root.ASTRUM_DAILY = ' + JSON.stringify(data, null, 2).replace(/\n/g, '\n  ') + ';',
+    '  root.ASTRUM_DAILY = ' + body + ';',
     '})(typeof window !== \'undefined\' ? window : this);',
     ''
   ].join('\n');
@@ -277,15 +301,7 @@ async function main() {
   console.log('- 抓取机构报道（RSS）…');
   var news = await fetchNews();
 
-  var now = new Date();
-  var payload = {
-    updated: now.toISOString().slice(0, 10),
-    generatedAt: now.toISOString(),
-    note: '每日自动同步一次（UTC 01:00）。内容未经本项目核验，不参与答案推理。',
-    papers: papers.items,
-    news: news.items,
-    community: COMMUNITY
-  };
+  var payload = buildPayload(papers, news, new Date());
 
   console.log('');
   console.log('  论文 ' + papers.items.length + ' 条' + (papers.okCats.length ? '（' + papers.okCats.join(' ') + '）' : ''));
@@ -313,6 +329,7 @@ module.exports = {
   parseArxiv: parseArxiv,
   parseRss: parseRss,
   clean: clean,
+  buildPayload: buildPayload,
   render: render,
   COMMUNITY: COMMUNITY,
   ARXIV_CATS: ARXIV_CATS,
