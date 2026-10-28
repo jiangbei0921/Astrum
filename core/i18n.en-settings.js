@@ -36,6 +36,9 @@
     '在答案顶部展示参与的智能体': 'Show which agents took part, above each answer',
     '适合投屏或视力不便时使用': 'For projectors or low vision',
     '减小行距与内边距': 'Tighten line height and padding',
+    '自适应布局': 'Adaptive layout',
+    '初始化固定；运行中按输入行数、对话数量与窗口宽度调密度，条件消失即回退':
+      'Fixed at startup; during use it adjusts density by input lines, chat count and window width, and reverts when the condition clears',
     '问句明显偏向另一方向时临时换讲法；只影响表达，数值不变':
       'Switch wording when the question clearly leans another way. Presentation only; numbers never change.',
     '地点、时间与器材都在观测台调整；这里只保留影响计算小数位的口径。':

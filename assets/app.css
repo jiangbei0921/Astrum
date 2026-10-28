@@ -2611,3 +2611,29 @@ body.lang-en #settingsBody .set-tabs button { letter-spacing: .02em; }
   .hero-cards { grid-template-columns: 1fr; gap: 10px; }
   .hcard { min-height: 0; }
 }
+
+/* ============================================================
+   运行期自适应（v7.4）
+   所有规则都以 html[data-adapt="on"] 开头：
+   属性不存在时（初始化阶段 / 关闭开关 / ?layout=fixed / 熔断）完全不生效，
+   预设样式原封不动——这就是回退策略的落点。
+   ============================================================ */
+
+/* ① 对话已有内容 → 首屏卡片收成"标题行"，把纵向空间让给对话 */
+html[data-adapt="on"][data-hero="compact"] .hcard { min-height: 0; padding-bottom: 12px; }
+html[data-adapt="on"][data-hero="compact"] .hcard p { display: none; }
+html[data-adapt="on"][data-hero="compact"] .hero-cards { gap: 8px; }
+html[data-adapt="on"][data-hero="compact"] .hcard .go { opacity: .45; transform: none; }
+
+/* ② 会话变多 → 侧栏列表压缩，单位高度优先于计数 */
+html[data-adapt="on"][data-list="dense"] .th-item { padding: 4px 8px; font-size: 11px; }
+html[data-adapt="on"][data-list="dense"] .th-item .th-n { display: none; }
+
+/* ③ 输入超过一行或带附件 → 收起提示语，避免换行后挤压 */
+html[data-adapt="on"][data-compose="expanded"] .comp-hint { display: none; }
+html[data-adapt="on"][data-compose="expanded"] .hero-slot { margin-bottom: 16px; }
+
+/* ④ 环境宽度：只调留白与标题字，不改列数（列数仍由媒体查询负责，避免两套真相） */
+html[data-adapt="on"][data-w="wide"] .hero { max-width: 840px; }
+html[data-adapt="on"][data-w="narrow"] .hero { padding-left: 18px; padding-right: 18px; }
+html[data-adapt="on"][data-w="narrow"] .hero h1 { letter-spacing: 0; }

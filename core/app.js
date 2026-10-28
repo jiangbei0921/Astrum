@@ -5290,7 +5290,12 @@
       }),
       switchRow('紧凑模式', '减小行距与内边距', s.compact, function (v) {
         s.compact = v; document.body.classList.toggle('compact', v); persist();
-      })
+      }),
+      switchRow('自适应布局', '初始化固定；运行中按输入行数、对话数量与窗口宽度调密度，条件消失即回退',
+        s.adaptive !== false, function (v) {
+          s.adaptive = v; persist();
+          if (window.Adaptive) window.Adaptive.setEnabled(v);
+        })
     ]);
 
     /* 地点与器材档位已在观测台（#ctxPlace / #ctxGear），此处不再重复提供 */
@@ -6693,6 +6698,23 @@
       renderSettings();
     }).catch(function (e) { toast('清空失败：' + String(e && e.message || e)); });
   }
+  /* 自适应布局只在「运行期」启用：boot 完成后再挂监听，且首次计算由真实信号触发。
+   * ?layout=fixed 与设置开关都可让它整体退回预设。 */
+  function initAdaptive() {
+    if (!window.Adaptive) return;
+    if (/[?&]layout=fixed(&|$)/.test(location.search)) { window.Adaptive.stop(true); return; }
+    if (state.settings.adaptive === false) { window.Adaptive.stop(true); return; }
+    /* 延后到首帧之后再挂监听：
+     * restoreHistory 会渲染历史消息并产生 mutation，如果此时已挂监听，
+     * 适配会发生在初始化阶段 —— 而需求是「初始化用预设，之后才适配」。 */
+    var arm = function () { window.Adaptive.start(); };
+    if (window.requestAnimationFrame) {
+      window.requestAnimationFrame(function () { setTimeout(arm, 250); });
+    } else {
+      setTimeout(arm, 250);
+    }
+  }
+
   function boot() {
     AC.setSkillResolver(skillFor);
     if (window.I18N) window.I18N.init();
@@ -6720,6 +6742,7 @@
     document.body.appendChild(fileInput);
 
     restoreHistory();
+    initAdaptive();
     refreshPanels();
     mountComposer('hero');
     $$('#modeSeg button').forEach(function (b) {
