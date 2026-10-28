@@ -51,6 +51,56 @@
     '猎户座大星云怎么找？': 'How do I find the Orion Nebula?',
     '为什么会有月相变化？': 'Why does the Moon show phases?',
 
+    /* ---------- 答案段落骨架：标题、注记、星图跳转 ---------- */
+    '观测建议': 'Observing tips',
+    '银心 Sgr A*': 'Galactic centre Sgr A*',
+    '在实时星图中查看「{0}」': 'View {0} on the live sky map',
+    '按 {0}（Bortle {1}）计算': 'Computed for {0} (Bortle {1})',
+
+    /* ---------- 推荐追问（含变量的三条，用占位符让英文自己排语序） ---------- */
+    '这条结论有没有争议？': 'Is this conclusion disputed?',
+    '还有哪些常见误解？': 'What are the common misconceptions?',
+    '用一句话讲给孩子听？': 'Explain it to a child in one sentence?',
+    '今晚在北京能看到什么？': 'What can I see in Beijing tonight?',
+    '什么是「视星等」？': 'What is apparent magnitude?',
+    '英仙座流星雨什么时候看最好？': 'When is the best time for the Perseids?',
+    '在{0}今晚几点看{1}最好？': 'In {0}, when is the best time tonight to see {1}?',
+    '{0}用双筒望远镜能看到什么？': 'What can binoculars show of {0}?',
+    '它的光走了多久才到地球？': 'How long has its light been travelling?',
+
+    /* ---------- 城市名 ----------
+     * 城市是 core/agents.js 里的固定枚举（33 个），不是会随星表更新的数据，
+     * 所以放词表是安全的。北京/上海/广州/拉萨 已在第二批词表里，这里不重复。 */
+    '深圳': 'Shenzhen',
+    '成都': 'Chengdu',
+    '重庆': 'Chongqing',
+    '西安': "Xi'an",
+    '南京': 'Nanjing',
+    '杭州': 'Hangzhou',
+    '武汉': 'Wuhan',
+    '昆明': 'Kunming',
+    '丽江': 'Lijiang',
+    '乌鲁木齐': 'Urumqi',
+    '哈尔滨': 'Harbin',
+    '漠河': 'Mohe',
+    '三亚': 'Sanya',
+    '青岛': 'Qingdao',
+    '厦门': 'Xiamen',
+    '长沙': 'Changsha',
+    '郑州': 'Zhengzhou',
+    '沈阳': 'Shenyang',
+    '呼和浩特': 'Hohhot',
+    '西宁': 'Xining',
+    '贵阳': 'Guiyang',
+    '福州': 'Fuzhou',
+    '兰州': 'Lanzhou',
+    '东京': 'Tokyo',
+    '首尔': 'Seoul',
+    '新加坡': 'Singapore',
+    '悉尼': 'Sydney',
+    '奥克兰': 'Auckland',
+    '伦敦': 'London',
+
     /* ---------- 缺口文案（按问句线索分五档） ---------- */
     '本地知识库只有 160 条通用条目，没有收录具体论文的最新测量值。':
       'The local knowledge base holds 160 general entries; it does not index latest measurements from individual papers.',

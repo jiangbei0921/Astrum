@@ -16,6 +16,35 @@
    * 知识库条目正文不经过这里——它有自己的核验日期，翻译属于另一件事。 */
   function L(s) { return root.I18N ? root.I18N.t(s) : s; }
 
+  /* 带占位符的取译：语序由词条自己决定，代码只喂值（见 core/i18n.js 的 tpl） */
+  function T(s, a, b) {
+    if (root.I18N) return root.I18N.tpl(s, a, b);
+    return String(s).replace('{0}', a == null ? '' : String(a))
+      .replace('{1}', b == null ? '' : String(b));
+  }
+
+  /* 天体名的显示名（只用于界面骨架，不用于答案正文）。
+   * 知识库条目带 en 字段（如 猎户座大星云 → Orion Nebula），星表没有。
+   * 所以只有存在对应知识条目时才换名；查不到就保持中文——
+   * 半截翻译的专名（"View 猎户座大星云 on the live sky map"）比原名更难看。 */
+  function objLabel(t) {
+    if (!t) return '';
+    if (!root.I18N || root.I18N.current() !== 'en') return t.name;
+    /* 键名不统一：星表用 k（'m42'）、条目用 id（'M42'）、目标对象可能带 dsoId。
+     * 所以先试键，再按名称/别名反查——星表没有 en 字段，只能借知识库那条。 */
+    var key = t.k || t.dsoId || (t.id ? String(t.id).toLowerCase() : '');
+    var e = (KB.byId && key) ? KB.byId[key] : null;
+    if (!e) {
+      var list = KB.entries || [];
+      var nm = String(t.name || '');
+      for (var i = 0; i < list.length; i++) {
+        var it = list[i];
+        if (it.cn === nm || (it.aliases && it.aliases.indexOf(nm.toLowerCase()) >= 0)) { e = it; break; }
+      }
+    }
+    return (e && e.en) ? e.en : t.name;
+  }
+
   /* ================= 城市与观测地 ================= */
   var CITIES = [
     { n: '北京', lat: 39.9042, lon: 116.4074, tz: 8, bortle: 7 },
@@ -578,14 +607,14 @@
 
   function chipsFor(target, ctx, isConcept) {
     if (isConcept) {
-      return ['这条结论有没有争议？', '还有哪些常见误解？', '用一句话讲给孩子听？'];
+      return [L('这条结论有没有争议？'), L('还有哪些常见误解？'), L('用一句话讲给孩子听？')];
     }
-    if (!target) return ['今晚在北京能看到什么？', '什么是「视星等」？', '英仙座流星雨什么时候看最好？'];
-    var n = target.name;
+    if (!target) return [L('今晚在北京能看到什么？'), L('什么是「视星等」？'), L('英仙座流星雨什么时候看最好？')];
+    var n = objLabel(target);
     return [
-      '在' + ctx.city + '今晚几点看' + n + '最好？',
-      n + '用双筒望远镜能看到什么？',
-      '它的光走了多久才到地球？'
+      T('在{0}今晚几点看{1}最好？', L(ctx.city), n),
+      T('{0}用双筒望远镜能看到什么？', n),
+      L('它的光走了多久才到地球？')
     ];
   }
 
@@ -1029,7 +1058,7 @@
         obs.push({ k: '要点', v: entry.observe[0] });
         if (depth === 'deep' && entry.observe[1]) obs.push({ k: '进阶', v: entry.observe[1] });
       }
-      answer.sections.push({ kind: 'observe', title: intent === 'knowledge-target' ? '观测延伸' : '观测建议', items: obs, note: '按 ' + ctx.city + '（Bortle ' + ctx.bortle + '）计算' });
+      answer.sections.push({ kind: 'observe', title: intent === 'knowledge-target' ? L('观测延伸') : L('观测建议'), items: obs, note: T('按 {0}（Bortle {1}）计算', L(ctx.city), ctx.bortle) });
       answer.trace.push(step('horizon', '评估观测条件', '暗夜窗口 ' + A.fmtHM(ep.darkStart, tz) + '–' + A.fmtHM(ep.darkEnd, tz) + ' · 月光 ' + (ep.moon.illum * 100).toFixed(0) + '%'));
     }
 
@@ -1065,7 +1094,7 @@
           }
         }
       });
-      answer.sections.push({ kind: 'mapref', ra: 17.7611, dec: -29.0078, label: '银心 Sgr A*' });
+      answer.sections.push({ kind: 'mapref', ra: 17.7611, dec: -29.0078, label: L('银心 Sgr A*') });
       answer.trace.push(step('orion', '定位银心', 'RA 17h45m40s / Dec −29°00′28″'));
     }
 
@@ -1074,7 +1103,7 @@
     if (boundary) answer.sections.push({ kind: 'boundary', text: boundary });
 
     if (target && typeof target.ra === 'number') {
-      answer.sections.push({ kind: 'mapref', ra: target.ra, dec: target.dec, label: target.name });
+      answer.sections.push({ kind: 'mapref', ra: target.ra, dec: target.dec, label: objLabel(target) });
     }
     answer.sections.push({ kind: 'followup', items: chipsFor(target || (entry ? { name: entry.cn } : null), ctx, !!entry && entry.type === 'concept') });
 
@@ -1276,7 +1305,7 @@
     if (cfg.muse.depth !== 'brief') {
       var obs = entry.observe.map(function (o, i) { return { k: i === 0 ? '首要' : '要点 ' + i, v: o }; });
       obs.push({ k: '当前月相', v: mp.name + ' · 照亮 ' + (mp.illum * 100).toFixed(0) + '%（按 ' + ctx.city + ' 计算）' });
-      answer.sections.push({ kind: 'observe', title: '观测建议', items: obs });
+      answer.sections.push({ kind: 'observe', title: L('观测建议'), items: obs });
       answer.trace.push(step('horizon', '结合当地条件', ctx.city + ' · Bortle ' + ctx.bortle + ' · 月相 ' + mp.name));
     }
 
@@ -1568,7 +1597,7 @@
     });
     if (entry.observe) {
       answer.sections.push({
-        kind: 'observe', title: '观测建议',
+        kind: 'observe', title: L('观测建议'),
         items: entry.observe.map(function (o, i) { return { k: '要点 ' + (i + 1), v: o }; })
       });
       answer.trace.push(step('horizon', '结合观测条件', ctx.city + ' · Bortle ' + ctx.bortle));

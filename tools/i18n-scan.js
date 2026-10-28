@@ -7,11 +7,12 @@
  *
  * 覆盖范围：
  *   首屏 / 侧栏、设置五个页签、观测台、每日前沿、四个入口详情、一次未知档问答、
- *   一次问候（smalltalk）与空输入提示。
+ *   一次问候（smalltalk）与一次真实天文问题（含展开的检索过程）。
  *
  * 用法：
  *   node tools/i18n-scan.js            打印完整清单
  *   node tools/i18n-scan.js --max=328  界面残留超过 328 条时以 1 退出（CI 门禁）
+ *   node tools/i18n-scan.js --quiet    只打印结论行
  *
  * 为什么要门禁：这个数字目前不是 0，短期内也到不了 0（首屏观测台卡片、帮助正文
  * 各自是独立的一批活）。没有门禁的话，每加一条新文案就悄悄变差一点，没人发现。
@@ -116,11 +117,12 @@ var SCRIPT = `
   }
 
   /* 兜底：任何一步抛错或超时，先把已收集到的结果写出去，别交白卷 */
-  setTimeout(finish, 20000);
+  setTimeout(finish, 25000);
 
   /* __astrum 是 boot() 里挂的，而本脚本在 </body> 前同步执行——此时还没有。
    * 所以只能在第一步取，不能在 IIFE 顶部取。 */
   var A = null;
+  var TAB_NAMES = ['Settings', 'Sources', 'Observing', 'Data & Profiles', 'Help'];
 
   function step(fn, delay) { setTimeout(fn, delay || 60); }
 
@@ -131,6 +133,64 @@ var SCRIPT = `
     for (var i = 0; i < btns.length; i++) {
       if (btns[i].textContent.trim() === name) { btns[i].click(); return; }
     }
+    ERR.push('找不到页签：' + name);
+  }
+
+  /* 切页签是同步重建 DOM，而翻译走的是 40ms 防抖的 MutationObserver。
+   * 点完立刻读，读到的是渲染瞬间的原样，会把「有词条、只是还没翻」误算成残留。 */
+  function scanSettings(then) {
+    var ti = 0;
+    (function next() {
+      if (ti >= TAB_NAMES.length) { then(); return; }
+      var name = TAB_NAMES[ti++];
+      openTab(name);
+      step(function () {
+        scan(document.getElementById('settingsBody'), '设置/' + name);
+        next();
+      }, 160);
+    })();
+  }
+
+  function scanTopics(then) {
+    var ids = ['observing', 'objects', 'cosmology', 'agents'];
+    var i = 0;
+    (function next() {
+      if (i >= ids.length) { then(); return; }
+      var id = ids[i++];
+      location.hash = '#/topic/' + id;
+      step(function () {
+        scan(document.querySelector('.sheet.on') || document.body, '入口/' + id);
+        next();
+      }, 180);
+    })();
+  }
+
+  /* 未知档最容易留中文拼接句；真实问题才会走到检索过程折叠区 */
+  function scanDialogs() {
+    A.ask('what is the airspeed velocity of an unladen swallow');
+    step(function () {
+      scan(document.getElementById('thread'), '对话/未知档');
+      A.ask('你好');
+      step(function () {
+        scan(document.getElementById('thread'), '对话/问候');
+        A.ask('M42 今晚在北京能看到吗');
+        step(function () {
+          scan(document.getElementById('thread'), '对话/正常');
+          /* 折叠区默认收起，展开后才算「用户看得到的界面」。
+           * 找不到折叠区时要显式说出来，否则「一条都没报」会被误读成干净。 */
+          var folds = document.querySelectorAll('details.trace-fold');
+          if (!folds.length) ERR.push('未找到 trace 折叠区，检索过程未被扫描');
+          Array.prototype.forEach.call(folds, function (d, i) {
+            d.open = true;
+            scan(d, '对话/检索过程' + (i + 1));
+          });
+          step(function () {
+            scan(document.getElementById('thread'), '对话/终态');
+            finish();
+          }, 250);
+        }, 700);
+      }, 400);
+    }, 500);
   }
 
   step(function () {
@@ -144,68 +204,23 @@ var SCRIPT = `
 
       A.openSheet('settings');
       step(function () {
-        /* 页签文字此时已是英文，用英文名点 */
-        ['Settings', 'Sources', 'Observing', 'Data & Profiles', 'Help'].forEach(function (name) {
-          openTab(name);
-          scan(document.getElementById('settingsBody'), '设置/' + name);
-        });
-
-        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-        step(function () {
-          scan(document.getElementById('obsPanel') || document.body, '观测台');
-          scan(document.getElementById('threadList'), '侧栏列表');
-
-          A.openSheet('frontier');
+        scanSettings(function () {
+          document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
           step(function () {
-            scan(document.querySelector('.sheet.on, #frontier') || document.body, '每日前沿');
-            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+            scan(document.getElementById('obsPanel') || document.body, '观测台');
+            scan(document.getElementById('threadList'), '侧栏列表');
 
+            A.openSheet('frontier');
             step(function () {
-              var ids = ['observing', 'objects', 'cosmology', 'agents'];
-              var i = 0;
-              (function nextTopic() {
-                if (i >= ids.length) {
-                  /* 一次未知档 + 一次问候 + 一次真实天文问题：
-                   * 前两条最容易留中文拼接句，第三条才会走到检索过程折叠区 */
-                  A.ask('what is the airspeed velocity of an unladen swallow');
-                  step(function () {
-                    scan(document.getElementById('thread'), '对话/未知档');
-                    A.ask('你好');
-                    step(function () {
-                      scan(document.getElementById('thread'), '对话/问候');
-                      A.ask('M42 今晚在北京能看到吗');
-                      step(function () {
-                        scan(document.getElementById('thread'), '对话/正常');
-                        /* 折叠区默认收起，展开后才算「用户看得到的界面」。
-                         * 找不到折叠区时要显式说出来，否则「一条都没报」会被误读成干净。 */
-                        var folds = document.querySelectorAll('details.trace-fold');
-                        if (!folds.length) ERR.push('未找到 trace 折叠区，检索过程未被扫描');
-                        Array.prototype.forEach.call(folds, function (d, i) {
-                          d.open = true;
-                          scan(d, '对话/检索过程' + (i + 1));
-                        });
-                        step(function () {
-                          scan(document.getElementById('thread'), '对话/终态');
-                          finish();
-                        }, 200);
-                      }, 600);
-                    }, 400);
-                  }, 500);
-                  return;
-                }
-                var id = ids[i++];
-                location.hash = '#/topic/' + id;
-                step(function () {
-                  scan(document.querySelector('.sheet.on') || document.body, '入口/' + id);
-                  nextTopic();
-                }, 120);
-              })();
-            }, 150);
+              scan(document.querySelector('.sheet.on, #frontier') || document.body, '每日前沿');
+              document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+              step(function () { scanTopics(scanDialogs); }, 150);
+            }, 250);
           }, 200);
-        }, 200);
+        });
       }, 250);
     }, 150);
-  }, 400);
+  });
 })();
 `;
 
@@ -231,7 +246,7 @@ function main() {
     out = cp.execFileSync(findChrome(), [
       '--headless=new', '--disable-gpu', '--no-sandbox',
       '--user-data-dir=' + profile,
-      '--virtual-time-budget=40000',
+      '--virtual-time-budget=45000',
       '--dump-dom',
       'file:///' + tmp.replace(/\\/g, '/')
     ], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });

@@ -7,6 +7,12 @@
   /* ================= 存储 ================= */
   /* i18n：把中文原文当 key，缺词条自动回退中文，可逐步接入 */
   function L(s) { return window.I18N ? window.I18N.t(s) : s; }
+  /* 带占位符的取译：中英语序不同，靠前缀后缀拼接会让英文别扭（见 core/i18n.js） */
+  function T(s, a, b) {
+    if (window.I18N) return window.I18N.tpl(s, a, b);
+    return String(s).replace('{0}', a == null ? '' : String(a))
+      .replace('{1}', b == null ? '' : String(b));
+  }
 
   /* 键名按档案命名空间生成；切换档案会整页重载，因此加载期计算即可 */
   var KEY = window.Profile ? Profile.ns('astrum.v2') : 'astrum.v2';
@@ -84,7 +90,9 @@
   }
   function initials(src) {
     if (src.id === 'local') return '✦';
-    var m = String(src.name).replace(/[^\u4e00-\u9fa5A-Za-z]/g, '');
+    /* 取译名首字：英文界面下中文首字（「联」「智」）会孤零零地挂在那里，
+     * 看成一个汉字方块，而不是一个缩写 */
+    var m = String(L(src.name)).replace(/[^\u4e00-\u9fa5A-Za-z]/g, '');
     return (m.charAt(0) || 'A').toUpperCase();
   }
   function statusTone(st) {
@@ -2275,7 +2283,7 @@
     } else if (s.kind === 'mapref') {
       wrap.className = 'sec mapref';
       var mb = el('button', 'mapref-btn',
-        '<span class="ic">◎</span><span>在实时星图中查看「' + esc(s.label) + '」</span><span class="ar">→</span>');
+        '<span class="ic">◎</span><span>' + esc(T('在实时星图中查看「{0}」', s.label)) + '</span><span class="ar">→</span>');
       mb.addEventListener('click', function () { openViewerAt(s.ra, s.dec, s.label); });
       wrap.appendChild(mb);
     } else if (s.kind === 'synthesis') {
@@ -2636,7 +2644,7 @@
     var list = (state.skills || []).slice().sort(function (a, b) { return (b.at || 0) - (a.at || 0); });
 
     var head = el('div', 'skill-head');
-    head.innerHTML = '<span class="k">技能记录</span><span class="n">' + list.length + ' 条</span>';
+    head.innerHTML = '<span class="k">' + esc(L('技能记录')) + '</span><span class="n">' + esc(T('{0} 条', list.length)) + '</span>';
     box.appendChild(head);
 
     if (!list.length) {
@@ -5217,10 +5225,10 @@
       (function () {
         var box = el('div', 'hist-panel');
         var b = (window.Thread && window.Thread.backend && window.Thread.backend()) || '';
-        var label = b === 'idb' ? 'IndexedDB' : b === 'ls' ? 'localStorage（降级）' : '不可用';
+        var label = b === 'idb' ? 'IndexedDB' : (b === 'ls' ? L('localStorage（降级）') : L('不可用'));
         var turns = document.querySelectorAll('.msg.user').length;
         box.appendChild(el('div', 'hist-meta',
-          '本机已保存 ' + turns + ' 轮 · 存储：' + label));
+          T('本机已保存 {0} 轮 · 存储：{1}', turns, label)));
         var b1 = el('button', 'hist-btn', '清空当前对话');
         b1.type = 'button';
         b1.addEventListener('click', function () {
@@ -5531,12 +5539,12 @@
       var row = el('div', 'roster-row');
       var attrs = (a.attrs || []).map(function (k) {
         var d = AC.ATTRS[k];
-        return d ? d.label : k;
+        return d ? L(d.label) : k;
       }).join(' · ');
       row.innerHTML = '<span class="sg" style="color:' + esc(a.color) + '">' + esc(a.sigil) + '</span>' +
         '<div class="mt"><b>' + esc(a.name) + ' · ' + esc(a.cn) + '</b><em>' + esc(a.role) + '</em>' +
         '<p>' + esc(a.desc || '') + '</p>' +
-        '<span class="at">可调参数：' + esc(attrs) + '</span></div>';
+        '<span class="at">' + esc(T('可调参数：{0}', attrs)) + '</span></div>';
       roster.appendChild(row);
     });
     gAgents.appendChild(roster);

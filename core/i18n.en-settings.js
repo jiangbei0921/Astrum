@@ -150,6 +150,46 @@
     '不展示条目数量。条目多少不等于覆盖能力，判断依据是每条结论的来源、共识等级与核验日期。这些信息在答案的「依据」章节逐条标注。知识库未收录的问题，会转由联网检索取证，或明确告知无法确证。':
       'Entry counts are not shown: quantity is not coverage. What matters is each conclusion source, consensus level and verification date, all listed under Evidence. Questions outside the knowledge base go to web retrieval, or are explicitly marked as unconfirmed.',
     '所有结论都附带依据与共识等级；未证实的部分会明确标注，不代替专业观测与研究结论。':
-      'Every conclusion comes with evidence and a consensus level. Unverified parts are marked, and this never substitutes for professional observation or research.'
+      'Every conclusion comes with evidence and a consensus level. Unverified parts are marked, and this never substitutes for professional observation or research.',
+
+    /* ---------- 数据与档案 / 来源 / 技能记录 ---------- */
+    '数据与核验': 'Data and verification',
+    '核验日期': 'Verified on',
+    '数值来自论文或机构发布，未采用二手转述':
+      'Numbers come from papers or institutional releases, never second-hand summaries',
+    '宇宙学参数': 'Cosmological parameters',
+    '暗能量演化约束': 'Dark energy constraints',
+    'M87* 阴影与质量': 'M87* shadow and mass',
+    '人马座 A* 质量': 'Sagittarius A* mass',
+    '流星雨与日月食年度表': 'Annual meteor shower and eclipse tables',
+    '系外行星 6,354 颗': '6,354 known exoplanets',
+    '全球 779 个地点坐标与时区': 'Coordinates and time zones for 779 places worldwide',
+
+    '本机已保存 {0} 轮 · 存储：{1}': 'Saved on this device: {0} turns · storage: {1}',
+    'localStorage（降级）': 'localStorage (fallback)',
+    '不可用': 'Unavailable',
+
+    '云端模型 · 统一配置': 'Cloud models · shared settings',
+    '不可复算星历': 'Ephemeris not reproducible',
+    '密钥创建入口：': 'Get a key:',
+    '待测试': 'Not tested yet',
+    '把 sk- 开头的密钥粘贴到下方输入框': 'Paste your sk- key into the field below',
+    '点「测试连接」，显示已连通后再「设为默认」':
+      'Click “Test connection”, then “Set as default” once it shows connected',
+
+    '技能记录': 'Reusable patterns',
+    '{0} 条': '{0} items',
+
+    /* ---------- 智能体名册里的属性名 ---------- */
+    '可调参数：{0}': 'Tunable: {0}',
+    '专业领域': 'Domain',
+    '器材倾向': 'Gear bias',
+    '回答深度': 'Answer depth',
+    '知识范围': 'Knowledge scope',
+    '证据门槛': 'Evidence bar',
+    '专业侧重': 'Specialism',
+    '推断尺度': 'Inference range',
+    '星图风格': 'Chart style',
+    '语气风格': 'Tone'
   };
 })(typeof window !== 'undefined' ? window : this);

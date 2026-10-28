@@ -214,6 +214,21 @@
     return Object.prototype.hasOwnProperty.call(d, s) ? d[s] : s;
   }
 
+  /* 带占位符的词条：{0} {1} 依次替换。
+   *
+   * 为什么不沿用「前缀 + 变量 + 后缀」的拼法：
+   *   中文「在{城市}今晚几点看{目标}最好？」和英文
+   *   "In {city}, when is the best time tonight to see {target}?" 变量位置不同，
+   *   按前缀后缀硬拼，英文会变成 "In Beijing, best time tonight to see M42?" 这种
+   *   半通不通的句子。占位符让每种语言自己排语序，代码只负责喂值。
+   *
+   * 键仍是中文原句（含占位符），所以 applyDom 不会误伤——带 {0} 的串不会出现在 DOM 里。 */
+  function tpl(s, a, b) {
+    return t(s)
+      .replace(/\{0\}/g, a == null ? '' : String(a))
+      .replace(/\{1\}/g, b == null ? '' : String(b));
+  }
+
   function set(v) {
     lang = DICTS[v] ? v : 'zh';
     try { root.localStorage.setItem(KEY, lang); } catch (e) {}
@@ -288,5 +303,5 @@
 
   function current() { return lang; }
 
-  root.I18N = { init: init, t: t, set: set, current: current, applyDom: applyDom, DICTS: DICTS };
+  root.I18N = { init: init, t: t, tpl: tpl, set: set, current: current, applyDom: applyDom, DICTS: DICTS };
 })(typeof window !== 'undefined' ? window : globalThis);
