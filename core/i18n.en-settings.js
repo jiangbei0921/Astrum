@@ -152,6 +152,15 @@
     '所有结论都附带依据与共识等级；未证实的部分会明确标注，不代替专业观测与研究结论。':
       'Every conclusion comes with evidence and a consensus level. Unverified parts are marked, and this never substitutes for professional observation or research.',
 
+    /* ---------- 外观（主题） ---------- */
+    '外观': 'Appearance',
+    '主题': 'Theme',
+    '浅色': 'Light',
+    '深色': 'Dark',
+    '跟随系统': 'System',
+    '深色适合夜间观测与暗环境；选「跟随系统」会随操作系统的外观自动切换，无需刷新。':
+      'Dark suits night observing and low-light rooms. “System” follows your OS appearance and switches without a reload.',
+
     /* ---------- 数据与档案 / 来源 / 技能记录 ---------- */
     '全部设置': 'All settings',
     '返回设置分类': 'Back to settings categories',

@@ -109,27 +109,47 @@ var SCRIPT = `
           return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
         }
 
-        var root = getComputedStyle(document.documentElement);
-        var paper = parseColor(root.getPropertyValue('--paper'));
-        var pairs = [
-          ['--ink', '正文'], ['--ink-2', '次级正文'],
-          ['--muted', '说明文字'], ['--muted-2', '元信息'],
-          ['--accent', '强调'], ['--amber', '警告'],
-          ['--green', '通过'], ['--red', '危险']
-        ];
-        var low = [];
-        pairs.forEach(function (p) {
-          var c = parseColor(root.getPropertyValue(p[0]));
-          if (!c) return;
-          var r = ratio(c, paper);
-          if (r < 4.5) low.push(p[0] + '(' + p[1] + ') ' + r.toFixed(2));
-        });
-        ok('配色对比度 ≥ 4.5（对 --paper）', low.length === 0, low.join('; '));
+        /* 两套主题都要验：深色令牌是覆写的另一组值，
+         * 只验浅色等于漏掉一半（而且深色下更容易踩到对比不足） */
+        function checkTheme(tag) {
+          var root = getComputedStyle(document.documentElement);
+          var paper = parseColor(root.getPropertyValue('--paper'));
+          var pairs = [
+            ['--ink', '正文'], ['--ink-2', '次级正文'],
+            ['--muted', '说明文字'], ['--muted-2', '元信息'],
+            ['--accent', '强调'], ['--amber', '警告'],
+            ['--green', '通过'], ['--red', '危险']
+          ];
+          var low = [];
+          pairs.forEach(function (p) {
+            var c = parseColor(root.getPropertyValue(p[0]));
+            if (!c) return;
+            var r = ratio(c, paper);
+            if (r < 4.5) low.push(p[0] + '(' + p[1] + ') ' + r.toFixed(2));
+          });
+          ok('配色对比度 ≥ 4.5（' + tag + '）', low.length === 0, low.join('; '));
+          return paper;
+        }
+
+        var html = document.documentElement;
+        var paperDay = checkTheme('浅色');
+
+        html.setAttribute('data-theme', 'night');
+        var paperNight = checkTheme('深色');
+        html.setAttribute('data-theme', 'day');
 
         var d = document.querySelector('#settingsBody .si-d');
         if (d) {
-          var r2 = ratio(parseColor(getComputedStyle(d).color), paper);
+          var r2 = ratio(parseColor(getComputedStyle(d).color), paperDay);
           ok('分类摘要实际对比度 ≥ 4.5', r2 >= 4.5, r2.toFixed(2));
+
+          /* 同一元素在深色下也复核一次：元素级的色是选择器写死的，
+           * 变量对了不代表它一定跟着走 */
+          html.setAttribute('data-theme', 'night');
+          var cc = getComputedStyle(d).color;
+          html.setAttribute('data-theme', 'day');
+          var r3 = ratio(parseColor(cc), paperNight);
+          ok('分类摘要实际对比度 ≥ 4.5（深色）', r3 >= 4.5, r3.toFixed(2));
         } else {
           ok('分类摘要实际对比度 ≥ 4.5', false, '找不到 .si-d');
         }

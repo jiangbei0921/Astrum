@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#f6f4ef" />
 <meta name="referrer" content="no-referrer" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-74ZW8U/HrCTFxJpm8T2AC8xbpQkSWPus7gJNd4yFteU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' http://localhost:* http://127.0.0.1:* https://localhost:* https://127.0.0.1:* https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com https://api.deepseek.com https://api.moonshot.cn https://open.bigmodel.cn https://dashscope.aliyuncs.com https://api.mistral.ai https://api.groq.com https://api.x.ai https://images-api.nasa.gov https://api.openalex.org https://api.semanticscholar.org https://api.wikimedia.org https://zh.wikipedia.org https://ipapi.co https://ipwho.is https://ipinfo.io https://api.ipapi.is https://geocoding-api.open-meteo.com https://photon.komoot.io https://timeapi.io https://simbad.u-strasbg.fr https://api.open-meteo.com; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-8bmn+C3+dsG0AJzfifsQ4nZmJNYXGMsc7+La8KSAby4=' 'sha256-74ZW8U/HrCTFxJpm8T2AC8xbpQkSWPus7gJNd4yFteU='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' http://localhost:* http://127.0.0.1:* https://localhost:* https://127.0.0.1:* https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com https://api.deepseek.com https://api.moonshot.cn https://open.bigmodel.cn https://dashscope.aliyuncs.com https://api.mistral.ai https://api.groq.com https://api.x.ai https://images-api.nasa.gov https://api.openalex.org https://api.semanticscholar.org https://api.wikimedia.org https://zh.wikipedia.org https://ipapi.co https://ipwho.is https://ipinfo.io https://api.ipapi.is https://geocoding-api.open-meteo.com https://photon.komoot.io https://timeapi.io https://simbad.u-strasbg.fr https://api.open-meteo.com; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'" />
 <title>ASTRUM · 天文多智能体工作台</title>
 <meta name="description" content="天文问答工作台：星历本地复算，事实带来源与核验日期，联网检索多源取证并标注证据强弱。纯静态、可离线。" />
 <meta property="og:type" content="website" />
@@ -13,6 +13,22 @@
 <meta property="og:description" content="星历本地复算 · 事实可追溯 · 证据分级 · 支持 FITS 头解析。纯静态网页，无需安装。" />
 <meta name="twitter:card" content="summary" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%233b3bd6'/%3E%3Ccircle cx='16' cy='16' r='6.5' fill='none' stroke='%23f6f4ef' stroke-width='1.6'/%3E%3Ccircle cx='16' cy='16' r='2.2' fill='%23f6f4ef'/%3E%3C/svg%3E" />
+<script>
+/* 首屏主题：必须内联、且放在样式表之前——否则深色用户会先看到一帧浅色。
+   只读独立的 astrum.theme 键，不依赖 app.js / Profile 的加载顺序（那些都在 body 末尾）。 */
+(function () {
+  try {
+    var m = localStorage.getItem('astrum.theme') || 'auto';
+    var night = m === 'night' || (m === 'auto' && window.matchMedia &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches);
+    var h = document.documentElement;
+    h.setAttribute('data-theme', night ? 'night' : 'day');
+    h.style.colorScheme = night ? 'dark' : 'light';
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', night ? '#0e1116' : '#f6f4ef');
+  } catch (e) { /* 隐私模式读不到存储，按浅色走 */ }
+})();
+</script>
 <link rel="stylesheet" href="assets/app.css" />
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebApplication","name":"ASTRUM","alternateName":"天文多智能体工作台","applicationCategory":"EducationalApplication","operatingSystem":"Any","description":"本地星历复算与多源取证的天文问答工作台，事实带来源与核验日期。","offers":{"@type":"Offer","price":"0","priceCurrency":"CNY"},"inLanguage":"zh-CN"}

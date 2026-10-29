@@ -54,6 +54,51 @@
     } catch (e) { /* 隐私模式降级 */ }
   }
 
+  /* ================= 主题 =================
+   * 主题是设备级的显示偏好，不属于档案数据，所以存在独立的键里：
+   * 首屏内联脚本必须在 app.js 之前同步读到它，不能依赖 settings 的加载流程。
+   * 取值 day / night / auto，与 <html data-theme> 的取值保持一致。 */
+  var THEME_KEY = 'astrum.theme';
+  var themeMedia = null;
+
+  function themeMode() {
+    try { return localStorage.getItem(THEME_KEY) || 'auto'; } catch (e) { return 'auto'; }
+  }
+
+  function resolveNight(mode) {
+    /* 兼容旧值 dark/light，避免历史存储导致判成浅色 */
+    if (mode === 'night' || mode === 'dark') return true;
+    if (mode === 'day' || mode === 'light') return false;
+    return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  }
+
+  function applyTheme(mode) {
+    var night = resolveNight(mode || themeMode());
+    var h = document.documentElement;
+    h.setAttribute('data-theme', night ? 'night' : 'day');
+    h.style.colorScheme = night ? 'dark' : 'light';
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', night ? '#0e1116' : '#f6f4ef');
+    return night;
+  }
+
+  function setTheme(mode) {
+    try { localStorage.setItem(THEME_KEY, mode); } catch (e) {}
+    applyTheme(mode);
+    /* 星图是按底色画的，切换主题后必须重绘一次，否则网格与标签还是旧配色 */
+    if (window.SV && SV.sizeCanvas) SV.sizeCanvas();
+    if ($('#viewer').classList.contains('on')) drawViewer();
+  }
+
+  /* 跟随系统时，系统换外观要实时生效（不刷新页面） */
+  function watchTheme() {
+    if (!window.matchMedia || themeMedia) return;
+    themeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    var onChange = function () { if (themeMode() === 'auto') applyTheme('auto'); };
+    if (themeMedia.addEventListener) themeMedia.addEventListener('change', onChange);
+    else if (themeMedia.addListener) themeMedia.addListener(onChange);
+  }
+
   var DEFAULTS = {
     sourceId: 'local', mode: 'single',
     register: 'auto', depth: 'standard', skymap: 'labeled', precision: 'visual',
@@ -5034,6 +5079,12 @@
         }, '界面文字会切换；答案与知识库内容仍为中文。')
     ]);
 
+    /* 外观：和「显示」里的字号、紧凑度分开——那些调密度，这里调明暗 */
+    group('外观', [
+      selectRow('主题', [['day', '浅色'], ['night', '深色'], ['auto', '跟随系统']],
+        themeMode(), function (v) { setTheme(v); })
+    ], '深色适合夜间观测与暗环境；选「跟随系统」会随操作系统的外观自动切换，无需刷新。');
+
     if (settingsTab === 'sources') {
     /* 来源与密钥 */
     var srcGroup = el('div', 'group');
@@ -6880,6 +6931,10 @@
   function boot() {
     AC.setSkillResolver(skillFor);
     if (window.I18N) window.I18N.init();
+    /* 首屏脚本已经设过 data-theme，这里再跑一次是为了接管「跟随系统」的实时监听；
+     * 两者用同一套解析规则，重复调用是幂等的。 */
+    applyTheme();
+    watchTheme();
     loadStats();
     checkVersion();
     initContext();
