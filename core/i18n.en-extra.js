@@ -139,6 +139,115 @@
     '北京': 'Beijing',
     '上海': 'Shanghai',
     '广州': 'Guangzhou',
-    '拉萨': 'Lhasa'
+    '拉萨': 'Lhasa',
+
+    /* ---------- 观测台：卡片标题、图例、按钮 ---------- */
+    '实时星图': 'Live sky chart',
+    '目标目录': 'Target list',
+    '观测清单': 'Observing plan',
+    '今晚优先': 'Tonight’s picks',
+    '月相与暗夜': 'Moon and darkness',
+    '太阳系观测': 'Solar system view',
+    '恒星': 'Stars',
+    '行星': 'Planets',
+    '星座': 'Constellations',
+    '地面视角 · 点击放大': 'Ground view · click to zoom',
+    '梅西耶': 'Messier',
+    '深空': 'Deep sky',
+    '导出计划单': 'Export plan',
+    '清空': 'Clear',
+    '本地': 'Local',
+    '加入观测清单': 'Add to plan',
+    '使用该坐标': 'Use this coordinate',
+    '该分类暂无条目': 'Nothing in this category',
+    '待升': 'not yet risen',
+    '地平线下': 'below horizon',
+    '清单为空：在目标目录点「＋」，或在今晚优先里加入':
+      'Plan is empty: tap ＋ in the target list, or add from tonight’s picks',
+    '事实层始终由本地星历与知识库核验':
+      'The fact layer is always verified against local ephemeris and the knowledge base',
+    '切换来源不会改变任何数值': 'Switching sources never changes any number',
+    '南纬为负、西经为负。例如：南半球 −33.87, 151.21；西经 −74.0。':
+      'South latitude and west longitude are negative. Example: southern hemisphere −33.87, 151.21; west longitude −74.0.',
+
+    /* 计数与高度（含变量，走 I18N.tpl） */
+    '{0} 个目标': '{0} targets',
+    '{0} 个 · 此刻可见 {1}': '{0} objects · {1} above horizon',
+    '{0} 项': '{0} items',
+    '高 {0}°': 'alt {0}°',
+
+    /* ---------- 月相名（core/astro.js 的 PHASES） ---------- */
+    '新月': 'New Moon',
+    '蛾眉月': 'Waxing Crescent',
+    '上弦月': 'First Quarter',
+    '盈凸月': 'Waxing Gibbous',
+    '满月': 'Full Moon',
+    '亏凸月': 'Waning Gibbous',
+    '下弦月': 'Last Quarter',
+    '残月': 'Waning Crescent',
+    '月相': 'Phase',
+    '照亮': 'Illumination',
+    '暗夜': 'Dark window',
+    '月升落': 'Moonrise / set',
+
+    /* ---------- 太阳系天体（core/astro.js 的 PLANETS） ---------- */
+    '太阳': 'Sun',
+    '月球': 'Moon',
+    '水星': 'Mercury',
+    '金星': 'Venus',
+    '地球': 'Earth',
+    '火星': 'Mars',
+    '木星': 'Jupiter',
+    '土星': 'Saturn',
+    '天王星': 'Uranus',
+    '海王星': 'Neptune',
+
+    /* ---------- 深空天体类型（目标目录的副标题用） ---------- */
+    '旋涡星系': 'Spiral galaxy',
+    '椭圆星系': 'Elliptical galaxy',
+    '球状星团': 'Globular cluster',
+    '疏散星团': 'Open cluster',
+    '发射星云': 'Emission nebula',
+    '反射星云': 'Reflection nebula',
+    '行星状星云': 'Planetary nebula',
+    '超新星遗迹': 'Supernova remnant',
+    '星暴星系': 'Starburst galaxy',
+
+    /* ---------- 全屏星图与太阳系视图 ---------- */
+    '星空全图': 'Full sky chart',
+    '拖动环顾天空 · 滚轮缩放 · 悬停看名称 · 点击天体查看资料 · 上方天体条可直接定位 · Esc 关闭':
+      'Drag to look around · scroll to zoom · hover for names · click a body for details · use the strip above to jump · Esc to close',
+    /* 键里的分隔符是全角空格（U+3000），照抄 HTML 原文——半角空格匹配不到 */
+    '点=恒星　菱形=深空天体　球体=行星　淡点=银河星场（示意）　虚线圈=地平线下　右下=你所在的地球':
+      'dot = star　diamond = deep-sky object　sphere = planet　faint dots = Milky Way field (schematic)　dashed arc = below horizon　lower right = your Earth',
+    '全部标注': 'Label all',
+    '标准标注': 'Standard labels',
+
+    '正在生成天体贴图与轨道…': 'Building body textures and orbits…',
+    '拖动旋转 · 滚轮缩放 · 滑杆调天体放大 · 双击进入近景 · 1/2/3 切层级 · Tab 切换天体 · Esc 关闭':
+      'Drag to rotate · scroll to zoom · slider to enlarge bodies · double-click for close-up · 1/2/3 for levels · Tab to cycle bodies · Esc to close',
+    '标签': 'Labels',
+    '真实等比': 'True scale',
+    '轨道': 'Orbits',
+    '暂停': 'Pause',
+    '放大': 'Magnify',
+    '特写': 'Close-up',
+    '近景': 'Near view',
+    '全系': 'All planets',
+    '1 天/秒': '1 day/s',
+    '10 天/秒': '10 days/s',
+    '1 年/秒': '1 year/s',
+
+    /* ---------- 坐标面板与来源弹层 ---------- */
+    '时区（UTC 偏移）': 'Time zone (UTC offset)',
+    '默认按经度估算，跨时区或使用夏令时的地区请手动指定。':
+      'Estimated from longitude by default; set it manually for regions with other time zones or daylight saving.',
+    '配置密钥': 'Configure key',
+    '来源、显示与数据核验': 'Sources, display and data verification',
+    '总控': 'Orchestrator',
+
+    /* ---------- 器材名（data/gear.js 的 name） ---------- */
+    '手机长焦（约 135mm 等效）': 'Phone telephoto (~135mm equiv.)',
+    '长焦镜筒（1000mm f/5）': 'Telephoto scope (1000mm f/5)'
   };
 })(typeof window !== 'undefined' ? window : this);

@@ -56,9 +56,9 @@ jobs:
       - name: 安全策略 csptest
         run: node tools/csptest.js
 
-      # 英文界面不得继续变差。基线只降不升：想加基线，先还债。
+      # 英文界面必须零中文残留（答案正文与用户输入除外，已按类别排除）。
       - name: 英文残留基线 i18n-scan
-        run: node tools/i18n-scan.js --quiet --max=156
+        run: node tools/i18n-scan.js --quiet --max=0
 
       - name: Worker 语法检查
         run: node --input-type=module --check < worker/cors-proxy.js

@@ -14,6 +14,29 @@
       .replace('{1}', b == null ? '' : String(b));
   }
 
+  /* 天体名的显示名：中文名 → 英文名。
+   *
+   * 星表三条主线（54 个深空天体、132 颗恒星、22 个星座）都带 en 字段，
+   * 行星与月相名走词表，所以一张表就够。为什么不直接改各处的渲染对象：
+   * 那些对象里的 name 还用于观测清单匹配与跨模块对照，改了就断。
+   * 表按需构建一次（约 200 项），比每次遍历星表便宜。 */
+  var EN_BY_CN = null;
+  function objEn(name) {
+    var zh = String(name == null ? '' : name);
+    if (!zh) return '';
+    if (!window.I18N || window.I18N.current() !== 'en') return zh;
+    if (!EN_BY_CN) {
+      EN_BY_CN = {};
+      var put = function (n, e) { if (n && e) EN_BY_CN[n] = e; };
+      if (window.CATALOG) {
+        (window.CATALOG.dso || []).forEach(function (d) { put(d.cn, d.en); });
+        (window.CATALOG.stars || []).forEach(function (s) { put(s.cn, s.en); });
+        (window.CATALOG.constellations || []).forEach(function (c) { put(c.cn, c.en); });
+      }
+    }
+    return EN_BY_CN[zh] || L(zh);
+  }
+
   /* 键名按档案命名空间生成；切换档案会整页重载，因此加载期计算即可 */
   var KEY = window.Profile ? Profile.ns('astrum.v2') : 'astrum.v2';
   /* 诊断信息只在 ?debug=1 时出现：普通用户不该看到错误栈与耗时 */
@@ -1573,18 +1596,18 @@
       yaw: top ? A.altAz(top.ra, top.dec, jd, ctx.lat, ctx.lon).az : 180,
       pitch: 40, fov: 150, compact: true, showGlobe: true
     });
-    $('#skyMeta').textContent = A.fmtHM(jd, ctx.tz) + ' · ' + ctx.city;
-    $('#ctxBadge').textContent = state.settings.showJD ? 'JD ' + jd.toFixed(2) : '本地';
+    $('#skyMeta').textContent = A.fmtHM(jd, ctx.tz) + ' · ' + L(ctx.city);
+    $('#ctxBadge').textContent = state.settings.showJD ? 'JD ' + jd.toFixed(2) : L('本地');
 
     var list = $('#tonightList');
     list.innerHTML = '';
     pv.list.forEach(function (it, i) {
       var row = el('div', 'mini-item');
-      row.innerHTML = '<span class="r">' + pad(i + 1) + '</span><span class="n">' + esc(it.name) + '</span>' +
+      row.innerHTML = '<span class="r">' + pad(i + 1) + '</span><span class="n">' + esc(objEn(it.name)) + '</span>' +
         '<span class="m">' + Math.round(it.maxAlt) + '° · ' + A.fmtHM(it.peak, ctx.tz) + '</span>';
       row.addEventListener('click', function () { ask('在' + ctx.city + '今晚怎么找' + it.name + '？'); });
       var add = el('button', 'mini-btn add-plan', '＋');
-      add.title = '加入观测清单';
+      add.title = L('加入观测清单');
       add.addEventListener('click', function (e) {
         e.stopPropagation();
         togglePlan({
@@ -1595,7 +1618,7 @@
       row.appendChild(add);
       list.appendChild(row);
     });
-    $('#tonightMeta').textContent = pv.list.length + ' 个目标';
+    $('#tonightMeta').textContent = T('{0} 个目标', pv.list.length);
     renderCatalog();
     renderPlan();
 
@@ -1603,10 +1626,10 @@
     var mtr = A.track(pv.moon.ra, pv.moon.dec, midnight, ctx.lat, ctx.lon);
     drawMoon($('#moonCanvas'), pv.moon);
     $('#moonInfo').innerHTML =
-      '<div class="row"><span>月相</span><b>' + pv.moon.name + '</b></div>' +
-      '<div class="row"><span>照亮</span><b>' + Math.round(pv.moon.illum * 100) + '%</b></div>' +
-      '<div class="row"><span>暗夜</span><b>' + A.fmtHM(pv.darkStart, ctx.tz) + '–' + A.fmtHM(pv.darkEnd, ctx.tz) + '</b></div>' +
-      '<div class="row"><span>月升落</span><b>' + A.fmtHM(mtr.rise, ctx.tz) + ' / ' + A.fmtHM(mtr.set, ctx.tz) + '</b></div>';
+      '<div class="row"><span>' + esc(L('月相')) + '</span><b>' + esc(L(pv.moon.name)) + '</b></div>' +
+      '<div class="row"><span>' + esc(L('照亮')) + '</span><b>' + Math.round(pv.moon.illum * 100) + '%</b></div>' +
+      '<div class="row"><span>' + esc(L('暗夜')) + '</span><b>' + A.fmtHM(pv.darkStart, ctx.tz) + '–' + A.fmtHM(pv.darkEnd, ctx.tz) + '</b></div>' +
+      '<div class="row"><span>' + esc(L('月升落')) + '</span><b>' + A.fmtHM(mtr.rise, ctx.tz) + ' / ' + A.fmtHM(mtr.set, ctx.tz) + '</b></div>';
 
     /* 全屏星图若开着，跟随时间/地点同步刷新 */
     if ($('#viewer').classList.contains('on')) {
@@ -2990,15 +3013,16 @@
     items.sort(function (a, b) { return (b.alt - a.alt) || ((a.mag || 99) - (b.mag || 99)); });
     var vis = items.filter(function (x) { return x.alt > 0; }).length;
     var meta = $('#catMeta');
-    if (meta) meta.textContent = items.length + ' 个 · 此刻可见 ' + vis;
+    if (meta) meta.textContent = T('{0} 个 · 此刻可见 {1}', items.length, vis);
     box.innerHTML = '';
     items.slice(0, 40).forEach(function (it) {
       var row = el('div', 'cat-row' + (planHas(it.name) ? ' picked' : ''));
       var up = it.alt > 0;
-      row.innerHTML = '<span class="n">' + esc(it.name) + '</span>' +
-        '<span class="m">' + (it.mag != null ? '★' + it.mag.toFixed(1) + ' · ' : '') +
-        (up ? '高 ' + Math.round(it.alt) + '°' : '地平线下') + '</span>' +
-        '<button class="mini-btn" title="加入观测清单">＋</button>';
+      var magTxt = it.mag != null ? '★' + it.mag.toFixed(1) + ' · ' : '';
+      var altTxt = up ? T('高 {0}°', Math.round(it.alt)) : L('地平线下');
+      row.innerHTML = '<span class="n">' + esc(objEn(it.name)) + '</span>' +
+        '<span class="m">' + magTxt + altTxt + '</span>' +
+        '<button class="mini-btn" title="' + esc(L('加入观测清单')) + '">＋</button>';
       var add = row.querySelector('button');
       add.addEventListener('click', function (e) {
         e.stopPropagation();
@@ -3009,23 +3033,23 @@
       });
       box.appendChild(row);
     });
-    if (!items.length) box.appendChild(el('div', 'mini-item', '该分类暂无条目'));
+    if (!items.length) box.appendChild(el('div', 'mini-item', L('该分类暂无条目')));
   }
 
   function renderPlan() {
     var box = $('#planList');
     if (!box) return;
     var meta = $('#planMeta');
-    if (meta) meta.textContent = plan.length + ' 项';
+    if (meta) meta.textContent = T('{0} 项', plan.length);
     box.innerHTML = '';
     if (!plan.length) {
-      box.appendChild(el('div', 'mini-item', '清单为空：在目标目录点「＋」，或在今晚优先里加入'));
+      box.appendChild(el('div', 'mini-item', L('清单为空：在目标目录点「＋」，或在今晚优先里加入')));
       return;
     }
     plan.forEach(function (p, i) {
       var row = el('div', 'mini-item');
-      row.innerHTML = '<span class="r">' + pad(i + 1) + '</span><span class="n">' + esc(p.name) + '</span>' +
-        '<span class="m">' + (p.alt != null && p.alt > 0 ? '高 ' + Math.round(p.alt) + '°' : '待升') + '</span>';
+      row.innerHTML = '<span class="r">' + pad(i + 1) + '</span><span class="n">' + esc(objEn(p.name)) + '</span>' +
+        '<span class="m">' + (p.alt != null && p.alt > 0 ? T('高 {0}°', Math.round(p.alt)) : L('待升')) + '</span>';
       row.addEventListener('click', function () {
         if (p.ra != null) openViewerAt(p.ra, p.dec, p.name);
       });
