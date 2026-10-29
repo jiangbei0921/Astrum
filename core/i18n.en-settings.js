@@ -153,6 +153,8 @@
       'Every conclusion comes with evidence and a consensus level. Unverified parts are marked, and this never substitutes for professional observation or research.',
 
     /* ---------- 数据与档案 / 来源 / 技能记录 ---------- */
+    '全部设置': 'All settings',
+    '返回设置分类': 'Back to settings categories',
     '数据与核验': 'Data and verification',
     '核验日期': 'Verified on',
     '数值来自论文或机构发布，未采用二手转述':
@@ -181,8 +183,7 @@
     '{0} 条': '{0} items',
 
     /* ---------- 智能体名册里的属性名 ---------- */
-    '可调参数：{0}': 'Tunable: {0}',
-    '专业领域': 'Domain',
+    '可调参数：{0}': 'Tunable: {0}',    '专业领域': 'Domain',
     '器材倾向': 'Gear bias',
     '回答深度': 'Answer depth',
     '知识范围': 'Knowledge scope',

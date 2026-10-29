@@ -65,7 +65,16 @@ var SCRIPT = `
     });
   }
   function panel() { return document.querySelector('.skill-panel'); }
-  function openSettings() { window.__astrum.openSheet('settings'); }
+  /* 打开设置并直达「技能记录」：设置是两级导航，
+   * 技能面板在「观测」页的第一个分类里，不进去就不会渲染。 */
+  function openSettings() {
+    window.__astrum.openSheet('settings');
+    document.querySelectorAll('#settingsBody .set-tabs button').forEach(function (b) {
+      if (b.textContent.trim() === '观测') b.click();
+    });
+    var sec = document.querySelector('#settingsBody .sec-item');
+    if (sec) sec.click();
+  }
 
   function hasReuseMark(bot) {
     var hit = false;
@@ -89,10 +98,6 @@ var SCRIPT = `
 
       /* 1) 面板存在 */
       openSettings();
-      /* 设置已分页：器材与技能在「观测」页 */
-      document.querySelectorAll('#settingsBody .set-tabs button').forEach(function (b) {
-        if (b.textContent.trim() === '观测') b.click();
-      });
       ok('面板渲染', !!panel());
 
       /* 2) 清空后为空态 */

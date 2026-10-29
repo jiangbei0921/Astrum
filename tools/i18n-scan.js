@@ -137,17 +137,41 @@ var SCRIPT = `
   }
 
   /* 切页签是同步重建 DOM，而翻译走的是 40ms 防抖的 MutationObserver。
-   * 点完立刻读，读到的是渲染瞬间的原样，会把「有词条、只是还没翻」误算成残留。 */
+   * 点完立刻读，读到的是渲染瞬间的原样，会把「有词条、只是还没翻」误算成残留。
+   *
+   * 设置面板是两级结构：列表页只有分类入口，具体选项在详情里。
+   * 只扫列表会漏掉所有设置项文案，所以每个分类都要进去扫一遍再返回。 */
   function scanSettings(then) {
     var ti = 0;
-    (function next() {
+    (function nextTab() {
       if (ti >= TAB_NAMES.length) { then(); return; }
       var name = TAB_NAMES[ti++];
       openTab(name);
       step(function () {
-        scan(document.getElementById('settingsBody'), '设置/' + name);
-        next();
+        var body = document.getElementById('settingsBody');
+        scan(body, '设置/' + name);
+        scanEachItem(body, name, body.querySelectorAll('.sec-item').length, nextTab);
       }, 160);
+    })();
+  }
+
+  /* 逐个进入分类扫描。每次返回后列表会重建，所以每轮重新查询、按索引取。 */
+  function scanEachItem(body, name, count, then) {
+    var i = 0;
+    (function next() {
+      if (i >= count) { then(); return; }
+      var it = body.querySelectorAll('.sec-item')[i];
+      if (!it) { then(); return; }
+      var st = it.querySelector('.si-t');
+      var title = st ? st.textContent.trim() : '';
+      i++;
+      it.click();
+      step(function () {
+        scan(body, '设置/' + name + '/' + title);
+        var back = body.querySelector('.sec-back');
+        if (back) back.click();
+        step(next, 150);
+      }, 150);
     })();
   }
 

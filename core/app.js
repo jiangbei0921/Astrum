@@ -4891,8 +4891,110 @@
   var settingsTab = 'main';
   var modelProvider = null;   /* 统一配置面板当前选中的供应商 */
 
+  /* ================= 设置面板的两级导航 =================
+   * L1 页签（设置 / 来源 / 观测 / 数据与档案 / 帮助）
+   * L2 分类列表：本页所有分组只显示入口与摘要
+   * L3 分类详情：点进去才看到该类的具体选项
+   *
+   * 之前所有分组平铺在一页，长页只能靠滚动与记忆找位置；
+   * 现在一屏看全本页有哪几类，进详情后只保留当前类的选项。 */
+  var settingsSection = '';   /* '' = 分类列表；否则是当前打开的那一类 id */
+  var tabSections = [];       /* 本次渲染登记的分类：{ id, n, title, node } */
+
+  function pushSection(title, node) {
+    var n = tabSections.length + 1;
+    var id = 'set-sec-' + n;
+    tabSections.push({ id: id, n: n, title: L(title), node: node });
+    return id;
+  }
+
+  /* 列表项的一句摘要：优先取组内前两个设置「标签 + 当前值」，取不到再退到说明文字。
+   * 不另维护一份摘要文案——设置项改名后列表与详情就会对不上。
+   * 若设置标签与分类同名（界面语言 / 界面语言），只显示当前值，避免重复。 */
+  function sectionHint(node, title) {
+    var rows = node.querySelectorAll('.set-row');
+    if (rows.length) {
+      var parts = [];
+      for (var i = 0; i < rows.length && parts.length < 2; i++) {
+        var t = rows[i].querySelector('.t');
+        if (!t) continue;
+        var label = t.textContent.trim();
+        var on = rows[i].querySelector('.ctl button.on');
+        if (!on) parts.push(label);
+        else if (label === title) parts.push(on.textContent.trim());
+        else parts.push(label + ' ' + on.textContent.trim());
+      }
+      return parts.join(' · ') + (rows.length > 2 ? ' · ' + T('{0} 项', rows.length) : '');
+    }
+    var first = node.querySelector('.note-box, .hist-meta, .help-card p, .tip summary, .pc-name, .mini-item, .hintline');
+    return first ? first.textContent.trim().slice(0, 48) : '';
+  }
+
+  function mountTabBody(body) {
+    var cur = null;
+    for (var i = 0; i < tabSections.length; i++) {
+      if (tabSections[i].id === settingsSection) { cur = tabSections[i]; break; }
+    }
+
+    if (cur) {
+      /* 详情：返回条 + 该分类的内容。分类名只在返回条里出现一次，
+       * 组内不再重复标题（原来那层 h4 已由 pushSection 接管）。 */
+      var head = el('div', 'sec-detail-head');
+      var back = el('button', 'sec-back', '<span aria-hidden="true">‹</span> ' + esc(L('全部设置')));
+      back.type = 'button';
+      back.setAttribute('aria-label', L('返回设置分类'));
+      back.addEventListener('click', function () {
+        settingsSection = '';
+        renderSettings();
+        /* 回到列表后焦点交还给刚进去的那一项，键盘用户不用重新找 */
+        var again = document.querySelector('#settingsBody .sec-item[data-sec="' + cur.id + '"]');
+        if (again) again.focus();
+      });
+      head.appendChild(back);
+      var title = el('h3', 'sec-detail-title');
+      title.innerHTML = '<span class="gn" aria-hidden="true">' + pad(cur.n) + '</span>' + esc(cur.title);
+      head.appendChild(title);
+      body.appendChild(head);
+      cur.node.classList.add('in-detail');
+      body.appendChild(cur.node);
+      return;
+    }
+
+    /* 列表：只显示分类入口 */
+    var list = el('div', 'sec-list');
+    tabSections.forEach(function (s) {
+      /* 先把分类节点翻译一遍再取摘要。
+       * 摘要读的是节点里的文字，而这些文字有些是在构造时写死的中文（长说明句），
+       * 靠挂载后的 applyDom 兜底才翻——如果先取摘要再挂载，摘要就会是中文。
+       * 顺带让详情页内容提前翻好，挂上去不会闪一下中文。 */
+      if (window.I18N && window.I18N.applyDom) window.I18N.applyDom(s.node);
+      var hint = sectionHint(s.node, s.title);
+      var b = el('button', 'sec-item');
+      b.type = 'button';
+      b.setAttribute('data-sec', s.id);
+      b.innerHTML = '<span class="sn" aria-hidden="true">' + pad(s.n) + '</span>' +
+        '<span class="si-m"><span class="si-t">' + esc(s.title) + '</span>' +
+        (hint ? '<span class="si-d">' + esc(hint) + '</span>' : '') + '</span>' +
+        '<span class="sa" aria-hidden="true">›</span>';
+      b.addEventListener('click', function () {
+        settingsSection = s.id;
+        renderSettings();
+        /* 进详情后焦点落到返回键：读屏与键盘立刻知道「进了一层、怎么退」 */
+        var bk = document.querySelector('#settingsBody .sec-back');
+        if (bk) bk.focus();
+      });
+      list.appendChild(b);
+    });
+    body.appendChild(list);
+  }
+
   function renderSettings(tab) {
-    if (tab) settingsTab = tab;
+    if (tab) {
+      /* 换页签回到该页的分类列表，不要停在上一个页签的详情里 */
+      if (tab !== settingsTab) settingsSection = '';
+      settingsTab = tab;
+    }
+    tabSections = [];
     var body = $('#settingsBody');
     body.innerHTML = '';
 
@@ -4904,42 +5006,22 @@
     });
     body.appendChild(tabs);
 
-    if (settingsTab === 'help') { renderHelp(body); return; }
+    if (settingsTab === 'help') { renderHelp(body); mountTabBody(body); return; }
 
     var s = state.settings;
     /* 当前分区：group() 只在所属分区渲染，避免一个面板一次铺满 */
     var SECTION = 'main';
 
-    /* 本页已渲染的小节，渲染末尾交给顶部索引条。
-     * 层级：页签(L1) → 小节(L2，带序号) → 组内小节标题(L3) → 设置行(L4)。 */
-    var groups = [];
-
-    /* 小节头：序号 + 标题，同时登记到索引。
-     * 抽出来是因为有几组是手写构造的（来源与密钥、云端模型、数据与核验、运行状态），
-     * 它们不走 group()，但序号必须和自动渲染的那几组连成一条线。 */
-    function sectionHead(title) {
-      title = L(title);
-      var idx = groups.length + 1;
-      var id = 'set-sec-' + idx;
-      groups.push({ id: id, title: title });
-      var h = el('h4');
-      /* 序号只是视觉刻度，不进无障碍名称——否则读屏会把标题读成「01Language」 */
-      h.innerHTML = '<span class="gn" aria-hidden="true">' + pad(idx) + '</span>' +
-        '<span class="gt">' + esc(title) + '</span>';
-      return { id: id, head: h };
-    }
-
     function group(title, rows, foot, note) {
       if (SECTION !== settingsTab) return;
       note = note ? L(note) : note;
-      var sh = sectionHead(title);
       var g = el('div', 'group');
-      g.id = sh.id;
-      g.appendChild(sh.head);
       rows.forEach(function (r) { g.appendChild(r); });
       if (note) g.appendChild(el('div', 'note-box', note));
       if (foot) g.appendChild(el('div', 'ed-field', '<div class="hintline">' + esc(foot) + '</div>'));
-      body.appendChild(g);
+      /* 分组不再直接挂到面板上：先登记成一个「分类」，
+       * 再由 mountTabBody 决定画分类列表，还是画某一类的详情。 */
+      pushSection(title, g);
     }
 
     /* 界面语言：只影响界面文案，不翻译答案与知识库内容。
@@ -4954,11 +5036,8 @@
 
     if (settingsTab === 'sources') {
     /* 来源与密钥 */
-    var srcHead = sectionHead('来源与密钥');
     var srcGroup = el('div', 'group');
-    srcGroup.id = srcHead.id;
-    srcGroup.appendChild(srcHead.head);
-    srcGroup.appendChild(el('div', 'note-box', KEY_NOTE));
+    srcGroup.appendChild(el('div', 'note-box', L(KEY_NOTE)));
     S.list().forEach(function (src) {
       if (src.type === 'local') {
         var row = el('div', 'provider-card');
@@ -4988,7 +5067,7 @@
         return;
       }
     });
-    body.appendChild(srcGroup);
+    pushSection('来源与密钥', srcGroup);
 
     /* 云端模型 · 统一配置入口 */
     var cloud = S.cloudProviders();
@@ -4998,10 +5077,7 @@
     }
     var cur = cloud.filter(function (c) { return c.id === modelProvider; })[0];
 
-    var modelHead = sectionHead('云端模型 · 统一配置');
     var modelGroup = el('div', 'group');
-    modelGroup.id = modelHead.id;
-    modelGroup.appendChild(modelHead.head);
     modelGroup.appendChild(el('div', 'note-box', '先选供应商，再填该供应商需要的参数。所有密钥只保存在本机浏览器，切换供应商不会丢失已填配置。'));
 
     /* 供应商选择器 */
@@ -5188,7 +5264,7 @@
     foot.appendChild(btnUse);
     panel.appendChild(foot);
     modelGroup.appendChild(panel);
-    body.appendChild(modelGroup);
+    pushSection('云端模型 · 统一配置', modelGroup);
 
     /* 本地/检索卡片的事件 */
     $$('[data-use]', srcGroup).forEach(function (btn) {
@@ -5370,10 +5446,7 @@
 
     SECTION = 'data';
     if (settingsTab === 'data') {
-    var dataHead = sectionHead('数据与核验');
     var dataGroup = el('div', 'group');
-    dataGroup.id = dataHead.id;
-    dataGroup.appendChild(dataHead.head);
     var stamp = el('div', 'set-row');
     stamp.innerHTML = '<div class="txt"><div class="t">核验日期</div><div class="d">数值来自论文或机构发布，未采用二手转述</div></div>' +
       '<div class="ctl"><span class="st st-established">2026-10</span></div>';
@@ -5405,15 +5478,12 @@
     });
     tools.appendChild(exp); tools.appendChild(imp); tools.appendChild(reset); tools.appendChild(file);
     dataGroup.appendChild(tools);
-    body.appendChild(dataGroup);
+    pushSection('数据与核验', dataGroup);
     }
 
     if (DEBUG) {
     /* ---------- 运行状态（可观测性） ---------- */
-    var runHead = sectionHead('运行状态');
     var runGroup = el('div', 'group');
-    runGroup.id = runHead.id;
-    runGroup.appendChild(runHead.head);
     runGroup.appendChild(el('div', 'note-box', '本机实时统计：渲染耗时、端点健康度、智能体意图分布与错误记录。用于定位「卡」与「不可用」的根因，不上传任何数据。'));
     var perf = window.__astrum ? window.__astrum.perf() : { sky: {}, solar: {} };
     var ast = AC.stats();
@@ -5468,98 +5538,13 @@
         }).join('');
       runGroup.appendChild(ebox);
     }
-    body.appendChild(runGroup);
+    pushSection('运行状态', runGroup);
     }
 
-    /* 所有分组都挂完之后再插索引条：索引要知道本页有几节、每节叫什么 */
-    mountSettingsIndex(body, groups);
+    /* 所有分组都登记完之后，再决定画列表还是画某一类的详情 */
+    mountTabBody(body);
   }
 
-  /* 设置面板的页内索引条。
-   *
-   * 为什么需要：页签是 L1，分组是 L2。原来 L2 的标题样式（9.5px 灰色大写）
-   * 比组内小节标题（10.5px 深色 + 强调色左框）还弱，层级是倒挂的——
-   * 眼睛先看到「表达方式」，却不知道它属于「对话与表述」。
-   * 现在 L2 升级成带序号的章节头，索引条再把「本页有哪些节、现在在哪」摆到眼前。 */
-  var settingsIndexScroll = null;
-
-  function mountSettingsIndex(body, groups) {
-    /* 面板每次重建都换一套 DOM，旧的滚动监听必须摘掉，否则会越挂越多 */
-    if (settingsIndexScroll) {
-      body.removeEventListener('scroll', settingsIndexScroll);
-      settingsIndexScroll = null;
-    }
-    var old = body.querySelector('.set-index');
-    if (old && old.parentNode) old.parentNode.removeChild(old);
-    /* 只有一节时索引没有意义，徒增一行噪音 */
-    if (!groups || groups.length < 2) return;
-
-    var nav = el('nav', 'set-index');
-    nav.setAttribute('aria-label', L('本页小节'));
-    var chips = {};
-    /* 点击跳转后短暂锁住滚动联动。
-     * 原因：本页内容常常不够长，点第三节点完就到底了，
-     * 触底逻辑会把高亮改到最后一节——用户明明点的是第三节。
-     * 点击的意图优先，滚动停稳后再交还给 scrollspy。 */
-    var lockUntil = 0;
-
-    function mark(id) {
-      Object.keys(chips).forEach(function (k) {
-        var on = k === id;
-        chips[k].classList.toggle('on', on);
-        chips[k].setAttribute('aria-current', on ? 'true' : 'false');
-      });
-    }
-
-    groups.forEach(function (g, i) {
-      var b = el('button', 'si-chip' + (i === 0 ? ' on' : ''), esc(g.title));
-      b.type = 'button';
-      b.setAttribute('aria-current', i === 0 ? 'true' : 'false');
-      b.addEventListener('click', function () {
-        var t = document.getElementById(g.id);
-        if (!t) return;
-        lockUntil = Date.now() + 900;
-        mark(g.id);
-        /* 用相对位置算，不能用 offsetTop：分组不是滚动容器的直接子节点。
-         * 减 46 是索引条自身的高度，否则跳过去会被它盖住第一节标题。 */
-        var top = t.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop - 46;
-        body.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-        /* 平滑滚动期间可能有滚动事件被锁吞掉，锁过期后按最终位置补一次校正。
-         * 不补的话，那次滚动就成了最后一次事件，高亮会一直停在旧值。 */
-        setTimeout(function () { lockUntil = 0; syncActive(); }, 950);
-      });
-      chips[g.id] = b;
-      nav.appendChild(b);
-    });
-
-    /* 当前位置：最后一个「顶到索引条下方」的节。
-     * 不做「触底就选最后一节」的特判——那会和点击冲突：
-     * 页签内容不够长时，点中间某节就必然滚到底，特判会把高亮抢到最后一节。 */
-    function syncActive() {
-      var line = body.getBoundingClientRect().top + 64;
-      var activeId = groups[0].id;
-      groups.forEach(function (g) {
-        var t = document.getElementById(g.id);
-        if (t && t.getBoundingClientRect().top <= line) activeId = g.id;
-      });
-      mark(activeId);
-    }
-
-    /* 节流用时间戳而不是「标志 + requestAnimationFrame」：
-     * 只要有一帧 rAF 没被执行，标志就永远停在 true，之后整个联动都不再工作。 */
-    var lastRun = 0;
-    settingsIndexScroll = function () {
-      var now = Date.now();
-      if (now - lastRun < 60) return;
-      lastRun = now;
-      if (now < lockUntil) return;
-      syncActive();
-    };
-    body.addEventListener('scroll', settingsIndexScroll, { passive: true });
-
-    var tabs = body.querySelector('.set-tabs');
-    body.insertBefore(nav, tabs ? tabs.nextSibling : body.firstChild);
-  }
 
   /* ---------- 帮助 ---------- */
   var HELP_CARDS = [
@@ -5611,7 +5596,7 @@
     ];
     rows.forEach(function (r) { g.appendChild(r); });
     g.appendChild(el('div', 'note-box', L('所有结论都附带依据与共识等级；未证实的部分会明确标注，不代替专业观测与研究结论。')));
-    body.appendChild(g);
+    pushSection('关于', g);
   }
 
   function renderHelp(body) {
@@ -5623,7 +5608,7 @@
         '<span class="n">' + c[0] + '</span><b>' + esc(c[1]) + '</b><p>' + esc(c[2]) + '</p>'));
     });
     g1.appendChild(cards);
-    body.appendChild(g1);
+    pushSection('能帮你做什么', g1);
 
     var g2 = el('div', 'group');
     g2.appendChild(el('h4', '', '使用技巧'));
@@ -5642,7 +5627,7 @@
       d.innerHTML = '<summary>' + esc(t[0]) + '</summary><div class="body">' + esc(t[1]) + '</div>';
       g2.appendChild(d);
     });
-    body.appendChild(g2);
+    pushSection('使用技巧', g2);
 
     var g3 = el('div', 'group');
     g3.appendChild(el('h4', '', '配套教程'));
@@ -5674,7 +5659,7 @@
         t[1].map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol></div>';
       g3.appendChild(d);
     });
-    body.appendChild(g3);
+    pushSection('配套教程', g3);
 
     /* 智能体阵容：展示每个内置角色的职责与可调参数 */
     var gAgents = el('div', 'group');
@@ -5694,7 +5679,7 @@
     });
     gAgents.appendChild(roster);
     gAgents.appendChild(el('div', 'note-box', '点左侧任意智能体可调整其语气、深度与侧重；Critic 的「证据门槛」设为严格时，证据不足的答案会被强制标注为线索而非定论。'));
-    body.appendChild(gAgents);
+    pushSection('智能体阵容', gAgents);
 
     var g4 = el('div', 'group');
     g4.appendChild(el('h4', '', '数据与边界'));
@@ -5708,7 +5693,7 @@
       '多智能体的评审—回流闭环、多来源去重合并与提示词透明化借鉴了开源项目 AstroAgents' +
       '（Saeedi 等，arXiv:2503.23170，ICLR 2025 Workshop，MIT License）。仅借鉴工程与流程范式，' +
       '未引入其 Python 依赖，领域提示词与评分维度均按天文学场景重写。'));
-    body.appendChild(g4);
+    pushSection('数据与边界', g4);
     renderAbout(body);
 
   }
@@ -6027,6 +6012,16 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
         if ($('#viewer').classList.contains('on')) { closeViewer(); return; }
+        /* 设置面板是两级导航：在分类详情里按 Esc 先退到列表，
+         * 再按一次才关面板——这样 Esc 的层次与点击「返回」一致。 */
+        if ($('#settings').classList.contains('on') && settingsSection) {
+          settingsSection = '';
+          renderSettings();
+          e.preventDefault();
+          var backItem = document.querySelector('#settingsBody .sec-item');
+          if (backItem) backItem.focus();
+          return;
+        }
         closeAll();
       }
       if (e.key === '/' && document.activeElement !== $('#input')) { e.preventDefault(); $('#input').focus(); }

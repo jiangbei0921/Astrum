@@ -1,17 +1,13 @@
-/* ASTRUM · 设置面板层级测试（零依赖）
+/* ASTRUM · 设置两级导航测试（零依赖）
  *
- * 守的是「层级不要退化」：
- *   1) 页签(L1) → 小节(L2，带序号) → 组内小节标题(L3) → 行(L4) 这四层必须都在
- *   2) 索引条与分组一一对应（数量、文字、顺序）
- *   3) 序号连续、视觉元素不进无障碍名
- *   4) 单节页签不渲染索引（只有一节时索引是噪音）
- *   5) 滚动/点击时高亮跟随
+ * 守的是「列表 ↔ 详情」这套结构本身：
+ *   1) 一级只见分类入口，不出现任何具体设置行
+ *   2) 点进去只显示该分类的内容，标题与入口标题一致
+ *   3) 返回、切页签、Esc 都能回到列表；列表里再按 Esc 才关面板
+ *   4) 每个页签都走同一套结构（来源 / 帮助也一致）
  *
- * 为什么不断言「索引有 4 项」这类硬数字：文案增删就会红，
- * 而真正要守的是「索引和分组对得上」。所以用自洽断言。
- *
- * 时序一律用 until(条件) 轮询，不猜固定毫秒：
- * 连续跑多个 Chrome 实例时机器负载会变，固定 setTimeout 会随机红。
+ * 时序一律 until(条件) 轮询，不猜固定毫秒：连跑多个 Chrome 实例时负载会变，
+ * 固定 setTimeout 会随机红。
  *
  * 用法：node tools/settings-test.js
  */
@@ -51,7 +47,6 @@ var SCRIPT = `
   }
   setTimeout(function () { ok('看门狗：流程未在 40s 内完成', false, ''); finish(); }, 40000);
 
-  /* 等一个条件成立，而不是等一个固定时长 */
   function until(cond, cb, ms) {
     var t0 = Date.now();
     var limit = ms || 6000;
@@ -65,16 +60,10 @@ var SCRIPT = `
   }
 
   var body = null;
-  function groups() { return Array.prototype.slice.call(body.querySelectorAll('.group')); }
-  function chips() { return Array.prototype.slice.call(body.querySelectorAll('.si-chip')); }
-  function onChip() {
-    var on = body.querySelector('.si-chip.on');
-    return on ? on.textContent.trim() : '';
-  }
-  function headText(g) {
-    var gt = g.querySelector('h4 .gt');
-    return gt ? gt.textContent.trim() : '';
-  }
+  function items() { return Array.prototype.slice.call(body.querySelectorAll('.sec-item')); }
+  function backBtn() { return body.querySelector('.sec-back'); }
+  function detailTitle() { return body.querySelector('.sec-detail-title'); }
+  function rowCount() { return body.querySelectorAll('.set-row').length; }
   function openTab(cn) {
     var want = window.I18N.t(cn);
     var btns = body.querySelectorAll('.set-tabs button');
@@ -83,103 +72,102 @@ var SCRIPT = `
     }
     return false;
   }
-
-  /* 点第三节 → 等它高亮 → 滚到第二节 → 等它高亮 → 触底 → 高亮仍在视口内 */
-  function phaseScroll() {
-    var third = chips()[2];
-    if (!third) {
-      ok('主页签至少有 3 个小节（否则无法验证跳转）', false, 'chips=' + chips().length);
-      finish();
-      return;
-    }
-    var want3 = third.textContent.trim();
-    third.click();
-    until(function () { return onChip() === want3; }, function (got3) {
-      ok('点击索引后该项高亮', got3, onChip());
-
-      /* 点击会锁 900ms 的滚动联动，等锁过期再手动滚，否则这次滚动会被吞掉 */
-      setTimeout(function () {
-        var s2 = document.getElementById('set-sec-2');
-        var want2 = chips()[1].textContent.trim();
-        body.scrollTop = s2.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop - 46;
-        until(function () { return onChip() === want2; }, function (got2) {
-          ok('滚动到第二节时高亮它', got2, onChip());
-
-          body.scrollTop = body.scrollHeight;
-          until(function () {
-            var on = body.querySelector('.si-chip.on');
-            if (!on) return false;
-            var sec = groups()[chips().indexOf(on)];
-            if (!sec) return false;
-            var r = sec.getBoundingClientRect(), br = body.getBoundingClientRect();
-            return r.top < br.bottom && r.bottom > br.top;
-          }, function (got4) {
-            ok('触底时高亮项仍在视口内', got4, 'on=' + onChip());
-            phaseOtherTabs();
-          }, 4000);
-        }, 4000);
-      }, 1100);
-    }, 4000);
+  function esc() {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
   }
-
-  function phaseOtherTabs() {
-    openTab('观测');
-    until(function () { return groups().length > 0; }, function () {
-      var g1 = groups().length, c1 = chips().length;
-      if (g1 >= 2) ok('两节以上的页签有索引', c1 === g1, c1 + ' vs ' + g1);
-      else ok('单节页签不渲染索引', c1 === 0, 'groups=' + g1 + ' chips=' + c1);
-
-      openTab('数据与档案');
-      until(function () { return groups().length >= 3; }, function () {
-        var gs2 = groups();
-        var missing = gs2.filter(function (g) { return !g.querySelector('h4 .gn'); });
-        ok('手写分组的序号不缺失', missing.length === 0,
-          '缺序号 ' + missing.length + ' / 共 ' + gs2.length);
-        ok('数据页索引项数 = 分组数', chips().length === gs2.length,
-          chips().length + ' vs ' + gs2.length);
-        finish();
-      }, 4000);
-    }, 4000);
+  /* 详情标题形如「02 对话与表述」，取掉序号后的文字 */
+  function titleText() {
+    var t = detailTitle();
+    if (!t) return '';
+    var gt = t.querySelector('.gn');
+    return t.textContent.replace(gt ? gt.textContent : '', '').trim();
   }
 
   setTimeout(function () {
     window.__astrum.openSheet('settings');
-    until(function () {
-      return !!document.querySelector('#settingsBody .set-index');
-    }, function () {
+    /* 条件函数里不能用 body：它要等这个回调才赋值，先取 body 会让条件永远为假 */
+    until(function () { return document.querySelectorAll('#settingsBody .sec-item').length > 0; }, function (got) {
       body = document.getElementById('settingsBody');
 
-      /* ---------- 四层结构与索引 ---------- */
-      var gs = groups();
-      var cs = chips();
-      ok('主页签有分组', gs.length >= 2, 'groups=' + gs.length);
-      ok('主页签渲染了索引条', cs.length > 0, 'chips=' + cs.length);
-      ok('索引项数 = 分组数', cs.length === gs.length, cs.length + ' vs ' + gs.length);
+      /* ---------- 一级：只有分类入口 ---------- */
+      ok('设置页显示分类列表', got, 'items=' + items().length);
+      ok('列表页不含具体设置行', rowCount() === 0, 'rows=' + rowCount());
 
-      var navText = cs.map(function (c) { return c.textContent.trim(); }).join(' | ');
-      var headTexts = gs.map(headText).join(' | ');
-      ok('索引文字与分组标题一一对应', navText === headTexts, navText + ' ≠ ' + headTexts);
-
-      var nums = gs.map(function (g) {
-        var gn = g.querySelector('h4 .gn');
-        return gn ? gn.textContent.trim() : '';
-      });
-      var expect = gs.map(function (_, i) { return (i + 1) < 10 ? '0' + (i + 1) : String(i + 1); }).join(',');
-      ok('分组序号连续', nums.join(',') === expect, nums.join(','));
-
-      /* 序号只是刻度：不能被读屏念成「01Language」 */
-      ok('序号不进入无障碍名称', gs.every(function (g) {
-        var gn = g.querySelector('h4 .gn');
-        return gn && gn.getAttribute('aria-hidden') === 'true';
+      var its = items();
+      ok('分类入口都有标题', its.every(function (b) {
+        var t = b.querySelector('.si-t');
+        return t && t.textContent.trim().length > 0;
       }));
 
-      ok('分组标题都有可见文字', gs.every(function (g) { return headText(g).length > 0; }));
+      var noNum = its.filter(function (b) {
+        var sn = b.querySelector('.sn');
+        return !sn || !/[0-9]/.test(sn.textContent);
+      });
+      ok('分类入口都有序号', noNum.length === 0, '缺序号 ' + noNum.length + ' / 共 ' + its.length);
 
-      var nav = body.querySelector('.set-index');
-      ok('索引条吸顶', nav && getComputedStyle(nav).position === 'sticky',
-        nav ? getComputedStyle(nav).position : 'missing');
+      var nums = its.map(function (b) { return b.querySelector('.sn').textContent.trim(); });
+      var expect = its.map(function (_, i) { return (i + 1) < 10 ? '0' + (i + 1) : String(i + 1); }).join(',');
+      ok('入口序号连续', nums.join(',') === expect, nums.join(','));
 
-      phaseScroll();
+      ok('入口带一句摘要', its.some(function (b) {
+        var d = b.querySelector('.si-d');
+        return d && d.textContent.trim().length > 0;
+      }));
+
+      var firstName = its[0].querySelector('.si-t').textContent.trim();
+
+      /* ---------- 进入详情 ---------- */
+      its[0].click();
+      until(function () { return !!detailTitle(); }, function (entered) {
+        ok('点击入口进入详情', entered);
+        ok('详情页有返回键', !!backBtn(), backBtn() ? backBtn().textContent.trim() : 'missing');
+        ok('详情页不再显示分类列表', items().length === 0, 'items=' + items().length);
+        ok('详情标题与入口标题一致', titleText() === firstName, titleText() + ' vs ' + firstName);
+        ok('详情页显示具体设置项', rowCount() > 0, 'rows=' + rowCount());
+
+        /* ---------- 返回 ---------- */
+        backBtn().click();
+        until(function () { return items().length > 0; }, function (backed) {
+          ok('返回后回到分类列表', backed && !detailTitle(), 'items=' + items().length);
+
+          /* ---------- 换页签要回到列表，不能停在上一个详情 ---------- */
+          items()[0].click();
+          until(function () { return !!detailTitle(); }, function () {
+            openTab('来源');
+            until(function () { return items().length > 0 && !detailTitle(); }, function (reset) {
+              ok('换页签回到新页签的列表', reset, 'items=' + items().length + ' title=' + (detailTitle() ? '有' : '无'));
+              ok('来源页有分类入口', items().length >= 2, 'items=' + items().length);
+
+              /* ---------- 帮助页也走同一套结构 ---------- */
+              openTab('帮助');
+              until(function () { return items().length >= 3; }, function (helpOk) {
+                ok('帮助页同样两级化', helpOk, 'items=' + items().length);
+
+                /* ---------- Esc：详情 → 列表，列表 → 关面板 ---------- */
+                openTab('设置');
+                until(function () { return items().length > 0; }, function () {
+                  items()[0].click();
+                  until(function () { return !!detailTitle(); }, function () {
+                    esc();
+                    until(function () { return items().length > 0 && !detailTitle(); }, function (escBack) {
+                      ok('详情里按 Esc 回到列表', escBack);
+                      var stillOpen = document.getElementById('settings').classList.contains('on');
+                      ok('此时面板仍未关闭', stillOpen);
+
+                      esc();
+                      setTimeout(function () {
+                        ok('列表里再按 Esc 关闭面板',
+                          !document.getElementById('settings').classList.contains('on'));
+                        finish();
+                      }, 260);
+                    }, 4000);
+                  }, 4000);
+                }, 4000);
+              }, 4000);
+            }, 5000);
+          }, 4000);
+        }, 4000);
+      }, 4000);
     }, 6000);
   }, 700);
 })();
