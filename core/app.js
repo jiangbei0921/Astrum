@@ -1716,6 +1716,9 @@
       $('#hero').style.display = 'none';
     }
     state.composerAt = where;
+    /* 对话态与新建态的主区垂直节奏不同：新建态靠 hero 的引导留白，
+     * 对话态要让滚动区从顶栏下方开始铺满（见 app.css 的 body.chatting）。 */
+    document.body.classList.toggle('chatting', where !== 'hero');
   }
 
   function newChat() {
@@ -4007,6 +4010,7 @@
     if (wide) {
       state.settings.showObs = (force === undefined) ? !state.settings.showObs : !!force;
       document.body.classList.toggle('obs-collapsed', !state.settings.showObs);
+      relayoutAfterRail();
       persist();
     } else {
       var on = (force === undefined) ? !$('#obsPanel').classList.contains('on') : !!force;
@@ -5654,8 +5658,22 @@
     persist();
   }
 
+  /* 侧栏收放只改变主区宽度，浏览器不会派发 window resize，
+   * 但主区里可能有按容器宽度绘制的画布（答案中的星图、满屏视图）。
+   * 过渡结束后再补一次 resize，让所有监听者按新宽度重算——
+   * 早发会拿到过渡途中的中间宽度，画布尺寸就定错了。 */
+  var railTimer = null;
+  function relayoutAfterRail() {
+    if (railTimer) clearTimeout(railTimer);
+    railTimer = setTimeout(function () {
+      railTimer = null;
+      try { window.dispatchEvent(new Event('resize')); } catch (e) {}
+    }, 320);
+  }
+
   function applySidebarCollapse(collapsed) {
     document.body.classList.toggle('sidebar-collapsed', !!collapsed);
+    relayoutAfterRail();
   }
 
   function toggleSidebarCollapse(force) {

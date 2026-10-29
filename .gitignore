@@ -13,6 +13,7 @@ astrum-standalone.html
 # 本地临时/调试产物（截图、诊断脚本）
 dev/
 __*.html
+__*.png
 
 # 依赖与构建缓存（本项目零依赖，仅防御）
 node_modules/

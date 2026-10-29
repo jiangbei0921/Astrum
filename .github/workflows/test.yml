@@ -50,6 +50,10 @@ jobs:
       - name: 无障碍 a11y-test
         run: node tools/a11y-test.js
 
+      # 侧栏四栏组合的宽度分配 + 往返稳定性（曾因布局过渡卡死过）
+      - name: 布局宽度 rail-test
+        run: node tools/rail-test.js
+
       - name: 检索 research-test
         run: node tools/research-test.js
 
