@@ -4909,12 +4909,33 @@
     var s = state.settings;
     /* 当前分区：group() 只在所属分区渲染，避免一个面板一次铺满 */
     var SECTION = 'main';
+
+    /* 本页已渲染的小节，渲染末尾交给顶部索引条。
+     * 层级：页签(L1) → 小节(L2，带序号) → 组内小节标题(L3) → 设置行(L4)。 */
+    var groups = [];
+
+    /* 小节头：序号 + 标题，同时登记到索引。
+     * 抽出来是因为有几组是手写构造的（来源与密钥、云端模型、数据与核验、运行状态），
+     * 它们不走 group()，但序号必须和自动渲染的那几组连成一条线。 */
+    function sectionHead(title) {
+      title = L(title);
+      var idx = groups.length + 1;
+      var id = 'set-sec-' + idx;
+      groups.push({ id: id, title: title });
+      var h = el('h4');
+      /* 序号只是视觉刻度，不进无障碍名称——否则读屏会把标题读成「01Language」 */
+      h.innerHTML = '<span class="gn" aria-hidden="true">' + pad(idx) + '</span>' +
+        '<span class="gt">' + esc(title) + '</span>';
+      return { id: id, head: h };
+    }
+
     function group(title, rows, foot, note) {
       if (SECTION !== settingsTab) return;
-      title = L(title);
       note = note ? L(note) : note;
+      var sh = sectionHead(title);
       var g = el('div', 'group');
-      g.appendChild(el('h4', '', title));
+      g.id = sh.id;
+      g.appendChild(sh.head);
       rows.forEach(function (r) { g.appendChild(r); });
       if (note) g.appendChild(el('div', 'note-box', note));
       if (foot) g.appendChild(el('div', 'ed-field', '<div class="hintline">' + esc(foot) + '</div>'));
@@ -4933,8 +4954,10 @@
 
     if (settingsTab === 'sources') {
     /* 来源与密钥 */
+    var srcHead = sectionHead('来源与密钥');
     var srcGroup = el('div', 'group');
-    srcGroup.appendChild(el('h4', '', '来源与密钥'));
+    srcGroup.id = srcHead.id;
+    srcGroup.appendChild(srcHead.head);
     srcGroup.appendChild(el('div', 'note-box', KEY_NOTE));
     S.list().forEach(function (src) {
       if (src.type === 'local') {
@@ -4975,8 +4998,10 @@
     }
     var cur = cloud.filter(function (c) { return c.id === modelProvider; })[0];
 
+    var modelHead = sectionHead('云端模型 · 统一配置');
     var modelGroup = el('div', 'group');
-    modelGroup.appendChild(el('h4', '', '云端模型 · 统一配置'));
+    modelGroup.id = modelHead.id;
+    modelGroup.appendChild(modelHead.head);
     modelGroup.appendChild(el('div', 'note-box', '先选供应商，再填该供应商需要的参数。所有密钥只保存在本机浏览器，切换供应商不会丢失已填配置。'));
 
     /* 供应商选择器 */
@@ -5345,8 +5370,10 @@
 
     SECTION = 'data';
     if (settingsTab === 'data') {
+    var dataHead = sectionHead('数据与核验');
     var dataGroup = el('div', 'group');
-    dataGroup.appendChild(el('h4', '', '数据与核验'));
+    dataGroup.id = dataHead.id;
+    dataGroup.appendChild(dataHead.head);
     var stamp = el('div', 'set-row');
     stamp.innerHTML = '<div class="txt"><div class="t">核验日期</div><div class="d">数值来自论文或机构发布，未采用二手转述</div></div>' +
       '<div class="ctl"><span class="st st-established">2026-10</span></div>';
@@ -5383,8 +5410,10 @@
 
     if (DEBUG) {
     /* ---------- 运行状态（可观测性） ---------- */
+    var runHead = sectionHead('运行状态');
     var runGroup = el('div', 'group');
-    runGroup.appendChild(el('h4', '', '运行状态'));
+    runGroup.id = runHead.id;
+    runGroup.appendChild(runHead.head);
     runGroup.appendChild(el('div', 'note-box', '本机实时统计：渲染耗时、端点健康度、智能体意图分布与错误记录。用于定位「卡」与「不可用」的根因，不上传任何数据。'));
     var perf = window.__astrum ? window.__astrum.perf() : { sky: {}, solar: {} };
     var ast = AC.stats();
@@ -5442,6 +5471,94 @@
     body.appendChild(runGroup);
     }
 
+    /* 所有分组都挂完之后再插索引条：索引要知道本页有几节、每节叫什么 */
+    mountSettingsIndex(body, groups);
+  }
+
+  /* 设置面板的页内索引条。
+   *
+   * 为什么需要：页签是 L1，分组是 L2。原来 L2 的标题样式（9.5px 灰色大写）
+   * 比组内小节标题（10.5px 深色 + 强调色左框）还弱，层级是倒挂的——
+   * 眼睛先看到「表达方式」，却不知道它属于「对话与表述」。
+   * 现在 L2 升级成带序号的章节头，索引条再把「本页有哪些节、现在在哪」摆到眼前。 */
+  var settingsIndexScroll = null;
+
+  function mountSettingsIndex(body, groups) {
+    /* 面板每次重建都换一套 DOM，旧的滚动监听必须摘掉，否则会越挂越多 */
+    if (settingsIndexScroll) {
+      body.removeEventListener('scroll', settingsIndexScroll);
+      settingsIndexScroll = null;
+    }
+    var old = body.querySelector('.set-index');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    /* 只有一节时索引没有意义，徒增一行噪音 */
+    if (!groups || groups.length < 2) return;
+
+    var nav = el('nav', 'set-index');
+    nav.setAttribute('aria-label', L('本页小节'));
+    var chips = {};
+    /* 点击跳转后短暂锁住滚动联动。
+     * 原因：本页内容常常不够长，点第三节点完就到底了，
+     * 触底逻辑会把高亮改到最后一节——用户明明点的是第三节。
+     * 点击的意图优先，滚动停稳后再交还给 scrollspy。 */
+    var lockUntil = 0;
+
+    function mark(id) {
+      Object.keys(chips).forEach(function (k) {
+        var on = k === id;
+        chips[k].classList.toggle('on', on);
+        chips[k].setAttribute('aria-current', on ? 'true' : 'false');
+      });
+    }
+
+    groups.forEach(function (g, i) {
+      var b = el('button', 'si-chip' + (i === 0 ? ' on' : ''), esc(g.title));
+      b.type = 'button';
+      b.setAttribute('aria-current', i === 0 ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        var t = document.getElementById(g.id);
+        if (!t) return;
+        lockUntil = Date.now() + 900;
+        mark(g.id);
+        /* 用相对位置算，不能用 offsetTop：分组不是滚动容器的直接子节点。
+         * 减 46 是索引条自身的高度，否则跳过去会被它盖住第一节标题。 */
+        var top = t.getBoundingClientRect().top - body.getBoundingClientRect().top + body.scrollTop - 46;
+        body.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+        /* 平滑滚动期间可能有滚动事件被锁吞掉，锁过期后按最终位置补一次校正。
+         * 不补的话，那次滚动就成了最后一次事件，高亮会一直停在旧值。 */
+        setTimeout(function () { lockUntil = 0; syncActive(); }, 950);
+      });
+      chips[g.id] = b;
+      nav.appendChild(b);
+    });
+
+    /* 当前位置：最后一个「顶到索引条下方」的节。
+     * 不做「触底就选最后一节」的特判——那会和点击冲突：
+     * 页签内容不够长时，点中间某节就必然滚到底，特判会把高亮抢到最后一节。 */
+    function syncActive() {
+      var line = body.getBoundingClientRect().top + 64;
+      var activeId = groups[0].id;
+      groups.forEach(function (g) {
+        var t = document.getElementById(g.id);
+        if (t && t.getBoundingClientRect().top <= line) activeId = g.id;
+      });
+      mark(activeId);
+    }
+
+    /* 节流用时间戳而不是「标志 + requestAnimationFrame」：
+     * 只要有一帧 rAF 没被执行，标志就永远停在 true，之后整个联动都不再工作。 */
+    var lastRun = 0;
+    settingsIndexScroll = function () {
+      var now = Date.now();
+      if (now - lastRun < 60) return;
+      lastRun = now;
+      if (now < lockUntil) return;
+      syncActive();
+    };
+    body.addEventListener('scroll', settingsIndexScroll, { passive: true });
+
+    var tabs = body.querySelector('.set-tabs');
+    body.insertBefore(nav, tabs ? tabs.nextSibling : body.firstChild);
   }
 
   /* ---------- 帮助 ---------- */

@@ -813,11 +813,19 @@ body.chatting .scroll { padding-top: 18px; }
 .sheet-body { flex: 1; overflow-y: auto; padding: 0 18px 22px; }
 
 /* 设置与编辑器表单 */
-.group { margin-bottom: 22px; }
+.group { margin-bottom: 24px; }
+/* 第二级：小节。此前是 9.5px 灰色大写，比组内的小节标题还轻，层级倒挂；
+ * 现在给它章节的分量——序号 + 正文色 + 13px，让「我在哪一节」先立住。 */
 .group > h4 {
-  margin: 0 0 8px; padding-bottom: 7px; border-bottom: 1px solid var(--line);
-  font-size: 9.5px; font-weight: 600; letter-spacing: 0.16em; color: var(--muted-2); text-transform: uppercase;
+  display: flex; align-items: baseline; gap: 8px;
+  margin: 0 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--line);
+  font-size: 13px; font-weight: 600; letter-spacing: 0.01em; color: var(--ink);
 }
+.group > h4 .gn {
+  flex: 0 0 auto; font-family: var(--mono); font-size: 9.5px; font-weight: 500;
+  letter-spacing: 0.1em; color: var(--accent);
+}
+.group > h4 .gt { min-width: 0; }
 .set-row {
   display: flex; align-items: center; justify-content: space-between; gap: 14px;
   padding: 9px 0; border-bottom: 1px solid var(--line-soft);
@@ -2466,15 +2474,43 @@ body.lang-en #settingsBody .set-tabs button { letter-spacing: .02em; }
 }
 
 /* ============================================================
+   设置 · 页内索引（第二级的入口层）
+   ============================================================ */
+.set-index {
+  position: sticky; top: 0; z-index: 6;
+  display: flex; align-items: center; gap: 6px;
+  overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+  margin: 0 -18px 16px; padding: 9px 18px 10px;
+  background: linear-gradient(180deg, var(--paper) 74%, rgba(246, 244, 239, 0));
+  border-bottom: 1px solid var(--line-soft);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+.set-index::-webkit-scrollbar { display: none; }
+.si-chip {
+  flex: 0 0 auto; height: 24px; padding: 0 10px;
+  border: 1px solid var(--line); border-radius: 999px; background: transparent;
+  font-size: 11px; color: var(--muted); cursor: pointer; white-space: nowrap;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.si-chip:hover { color: var(--ink); border-color: var(--line-strong, var(--line)); }
+.si-chip.on {
+  color: var(--accent); font-weight: 600;
+  border-color: rgba(59, 59, 214, 0.32); background: rgba(59, 59, 214, 0.07);
+}
+@media (max-width: 560px) {
+  .si-chip { height: 22px; font-size: 10.5px; }
+}
+
+/* ============================================================
    设置 · 第三级（组内小节标题）
    ============================================================ */
 #settingsBody .sub-head {
-  margin: 14px 0 2px; padding: 0 0 6px 9px;
-  border-left: 2px solid var(--accent);
-  font-size: 10.5px; font-weight: 600; letter-spacing: .08em;
-  color: var(--ink-2);
+  margin: 15px 0 2px; padding: 0 0 5px 9px;
+  border-left: 2px solid var(--line);
+  font-size: 9.5px; font-weight: 600; letter-spacing: 0.14em;
+  color: var(--muted-2); text-transform: uppercase;
 }
-#settingsBody .sub-head:first-of-type { margin-top: 6px; }
+#settingsBody .sub-head:first-of-type { margin-top: 4px; }
 /* 小节第一行与标题贴紧，最后一行收尾 */
 #settingsBody .sub-head + .set-row { padding-top: 9px; }
 

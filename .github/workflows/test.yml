@@ -54,6 +54,10 @@ jobs:
       - name: 布局宽度 rail-test
         run: node tools/rail-test.js
 
+      # 设置面板的四层结构与页内索引（索引与分组必须一一对应）
+      - name: 设置层级 settings-test
+        run: node tools/settings-test.js
+
       - name: 检索 research-test
         run: node tools/research-test.js
 
