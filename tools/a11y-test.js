@@ -88,6 +88,53 @@ var SCRIPT = `
       ok('打开设置后焦点进入面板', inPanel,
          document.activeElement ? (document.activeElement.tagName + '.' + document.activeElement.className) : 'none');
 
+      /* 8) 配色对比度：灰阶与状态色对纸底必须达到 AA 正文标准（4.5:1）
+       * 直接读 CSS 变量的值来算，不依赖某个元素是否存在；
+       * 再抽一个真实元素复核，防止「变量达标但渲染时用错了色」。 */
+      (function () {
+        function parseColor(s) {
+          s = String(s || '').trim();
+          if (s.charAt(0) === '#') {
+            var h = s.slice(1);
+            if (h.length === 3) h = h.charAt(0) + h.charAt(0) + h.charAt(1) + h.charAt(1) + h.charAt(2) + h.charAt(2);
+            return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16), 1];
+          }
+          var m = s.match(/([\\d.]+)/g);
+          return m ? [+m[0], +m[1], +m[2], m[3] === undefined ? 1 : +m[3]] : null;
+        }
+        function chan(v) { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }
+        function lum(c) { return 0.2126 * chan(c[0]) + 0.7152 * chan(c[1]) + 0.0722 * chan(c[2]); }
+        function ratio(a, b) {
+          var l1 = lum(a), l2 = lum(b);
+          return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+        }
+
+        var root = getComputedStyle(document.documentElement);
+        var paper = parseColor(root.getPropertyValue('--paper'));
+        var pairs = [
+          ['--ink', '正文'], ['--ink-2', '次级正文'],
+          ['--muted', '说明文字'], ['--muted-2', '元信息'],
+          ['--accent', '强调'], ['--amber', '警告'],
+          ['--green', '通过'], ['--red', '危险']
+        ];
+        var low = [];
+        pairs.forEach(function (p) {
+          var c = parseColor(root.getPropertyValue(p[0]));
+          if (!c) return;
+          var r = ratio(c, paper);
+          if (r < 4.5) low.push(p[0] + '(' + p[1] + ') ' + r.toFixed(2));
+        });
+        ok('配色对比度 ≥ 4.5（对 --paper）', low.length === 0, low.join('; '));
+
+        var d = document.querySelector('#settingsBody .si-d');
+        if (d) {
+          var r2 = ratio(parseColor(getComputedStyle(d).color), paper);
+          ok('分类摘要实际对比度 ≥ 4.5', r2 >= 4.5, r2.toFixed(2));
+        } else {
+          ok('分类摘要实际对比度 ≥ 4.5', false, '找不到 .si-d');
+        }
+      })();
+
       /* 7) Esc 关闭后焦点回到触发点 */
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
       setTimeout(function () {
