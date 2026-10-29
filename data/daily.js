@@ -10,8 +10,8 @@
   'use strict';
 
   root.ASTRUM_DAILY = {
-    "updated": "2026-10-28",
-    "generatedAt": "2026-10-28T06:41:37.574Z",
+    "updated": "2026-10-29",
+    "generatedAt": "2026-10-29T06:49:03.169Z",
     "note": "每日自动同步一次（UTC 01:00）。内容未经本项目核验，不参与答案推理。",
     "papers": [
       {
@@ -271,6 +271,20 @@
     ],
     "news": [
       {
+        "title": "Meteors don't just burn up. What really happens is far more violent",
+        "summary": "Scientists have uncovered seven surprising stages that space rocks go through as they hurtle toward Earth, revealing that melting and violent fragmentation, rat…",
+        "source": "ScienceDaily",
+        "date": "2026-10-29",
+        "url": "https://www.sciencedaily.com/releases/2026/10/261027063710.htm"
+      },
+      {
+        "title": "NASA’s Artemis I mission reveals surprising radiation levels near the Moon",
+        "summary": "NASA’s Artemis I mission has revealed that cosmic radiation near the Moon is higher than in Earth orbit, but not by as much as scientists might expect. Tiny exp…",
+        "source": "ScienceDaily",
+        "date": "2026-10-28",
+        "url": "https://www.sciencedaily.com/releases/2026/10/261027063659.htm"
+      },
+      {
         "title": "James Webb discovers a scorching lava planet with a “giant sunscreen”",
         "summary": "A scorching lava planet 280 light-years away has surprised astronomers by apparently maintaining a thick atmosphere despite conditions that should have stripped…",
         "source": "ScienceDaily",
@@ -311,20 +325,6 @@
         "source": "ScienceDaily",
         "date": "2026-10-24",
         "url": "https://www.sciencedaily.com/releases/2026/10/261023023734.htm"
-      },
-      {
-        "title": "Astronomers uncover a mysterious magnetic web above the Sun",
-        "summary": "The Sun’s seemingly peaceful regions are hiding a surprisingly complex magnetic world. Using a balloon-borne telescope high above Earth, scientists discovered d…",
-        "source": "ScienceDaily",
-        "date": "2026-10-24",
-        "url": "https://www.sciencedaily.com/releases/2026/10/261023023723.htm"
-      },
-      {
-        "title": "Nearly 3,000 exploding stars challenge our understanding of the Universe",
-        "summary": "A massive analysis of 2,884 exploding stars has uncovered new evidence that dark energy, the mysterious force accelerating the universe’s expansion, may change…",
-        "source": "ScienceDaily",
-        "date": "2026-10-23",
-        "url": "https://www.sciencedaily.com/releases/2026/10/261021231244.htm"
       },
       {
         "title": "Stars brewing in a nebulous cauldron",
