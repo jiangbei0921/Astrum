@@ -21,8 +21,10 @@ var cp = require('child_process');
 var crypto = require('crypto');
 
 var CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-var DEFAULT_URL =
-  'file:///D:/AI/workbuddy_cunchu/2026-10-22-18-29-15/astrum/astrum-standalone.html';
+/* 用相对位置算，不写绝对路径——项目目录改名或搬到别处就断 */
+var DEFAULT_URL = 'file:///' + path
+  .resolve(__dirname, '..', 'astrum-standalone.html')
+  .replace(/\\/g, '/');
 
 var ASSERT_BODY = [
   '(function () {',
