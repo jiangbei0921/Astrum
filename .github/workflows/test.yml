@@ -58,6 +58,10 @@ jobs:
       - name: 设置层级 settings-test
         run: node tools/settings-test.js
 
+      # 上下文隔离：验证分片不会污染 ctx / CITIES，且 15 个 intent 全覆盖
+      - name: 上下文隔离 ctx-isolation-test
+        run: node tools/ctx-isolation-test.js
+
       - name: 检索 research-test
         run: node tools/research-test.js
 
