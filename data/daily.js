@@ -10,8 +10,8 @@
   'use strict';
 
   root.ASTRUM_DAILY = {
-    "updated": "2026-10-30",
-    "generatedAt": "2026-10-30T06:52:27.350Z",
+    "updated": "2026-10-31",
+    "generatedAt": "2026-10-31T06:43:51.373Z",
     "note": "每日自动同步一次（UTC 01:00）。内容未经本项目核验，不参与答案推理。",
     "papers": [
       {
@@ -270,6 +270,34 @@
     ],
     "news": [
       {
+        "title": "Astronauts just gave the International Space Station a powerful upgrade",
+        "summary": "Two astronauts completed a 7-hour, 11-minute spacewalk to install a new solar array on the International Space Station, bringing NASA one step closer to a major…",
+        "source": "ScienceDaily",
+        "date": "2026-10-30",
+        "url": "https://www.sciencedaily.com/releases/2026/10/261030002931.htm"
+      },
+      {
+        "title": "Hubble reveals a stunning twist in how the universe emerged from darkness",
+        "summary": "A surprising discovery by astronomers using the Hubble Space Telescope is challenging a leading explanation for how the early universe emerged from a dense fog…",
+        "source": "ScienceDaily",
+        "date": "2026-10-30",
+        "url": "https://www.sciencedaily.com/releases/2026/10/261029072113.htm"
+      },
+      {
+        "title": "Physicists created a tiny universe and watched time emerge without a clock",
+        "summary": "Scientists have created a miniature universe in the laboratory that could help answer one of the biggest mysteries in physics: What is time, and where does it c…",
+        "source": "ScienceDaily",
+        "date": "2026-10-30",
+        "url": "https://www.sciencedaily.com/releases/2026/10/261028234703.htm"
+      },
+      {
+        "title": "A mysterious star system just 16 light-years away may be hiding habitable planets",
+        "summary": "Astronomers have solved a 170-year-old planetary mystery in a nearby two-star system, discovering that a mysterious wobble was caused by stellar activity rather…",
+        "source": "ScienceDaily",
+        "date": "2026-10-30",
+        "url": "https://www.sciencedaily.com/releases/2026/10/261028232711.htm"
+      },
+      {
         "title": "Ghostly Cat’s Head Nebula lurks within sight of Hubble and Webb",
         "summary": "The NASA/ESA Hubble and the NASA/ESA/CSA James Webb Space Telescopes recently stared at an eerie star-forming scene within the Carina Nebula, a massive gas and…",
         "source": "ESA",
@@ -303,34 +331,6 @@
         "source": "ScienceDaily",
         "date": "2026-10-28",
         "url": "https://www.sciencedaily.com/releases/2026/10/261027063659.htm"
-      },
-      {
-        "title": "James Webb discovers a scorching lava planet with a “giant sunscreen”",
-        "summary": "A scorching lava planet 280 light-years away has surprised astronomers by apparently maintaining a thick atmosphere despite conditions that should have stripped…",
-        "source": "ScienceDaily",
-        "date": "2026-10-27",
-        "url": "https://www.sciencedaily.com/releases/2026/10/261026225603.htm"
-      },
-      {
-        "title": "Smithsonian scientists just recreated the first 2 billion years of the Universe",
-        "summary": "Scientists have created one of the largest and most detailed simulations of the early universe ever made, offering an extraordinary new glimpse into the cosmos…",
-        "source": "ScienceDaily",
-        "date": "2026-10-27",
-        "url": "https://www.sciencedaily.com/releases/2026/10/261026225600.htm"
-      },
-      {
-        "title": "A 2,700-year-old solar eclipse just revealed something surprising about Earth",
-        "summary": "A solar eclipse recorded more than 2,700 years ago is revealing surprising secrets about Earth's rotation and the Sun's ancient behavior. By correcting an eight…",
-        "source": "ScienceDaily",
-        "date": "2026-10-26",
-        "url": "https://www.sciencedaily.com/releases/2026/10/261025073055.htm"
-      },
-      {
-        "title": "Three giant black holes discovered in a galaxy from the dawn of time",
-        "summary": "Astronomers have discovered three actively feeding black holes inside a single galaxy more than 12.5 billion light-years away, revealing a remarkable scene from…",
-        "source": "ScienceDaily",
-        "date": "2026-10-25",
-        "url": "https://www.sciencedaily.com/releases/2026/10/261024222000.htm"
       },
       {
         "title": "Stars brewing in a nebulous cauldron",
