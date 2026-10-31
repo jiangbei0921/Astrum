@@ -814,8 +814,14 @@ function main() {
   }
 
   var url = process.argv[2] || DEFAULT_URL;
-  var filePath = url.replace(/^file:\/\/\/?/, '');
-  filePath = decodeURIComponent(filePath).replace(/\//g, path.sep);
+  /* 去掉 file:// 前缀时不能连根斜杠一起吃掉。
+   * 旧写法 file:\/\/\/? 会把 Linux 的 /home/runner/... 变成 home/runner/...，
+   * 相对当前目录找不到文件 → 立刻 exit 2，表现为「秒失败」，看着像断言挂了。
+   * Windows 的 file:///D:/... 才需要额外去掉一个前导斜杠。 */
+  var filePath = url.replace(/^file:\/\//, '');
+  if (process.platform === 'win32' && /^\/[A-Za-z]:/.test(filePath)) filePath = filePath.slice(1);
+  filePath = decodeURIComponent(filePath);
+  if (path.sep === '\\') filePath = filePath.replace(/\//g, path.sep);
   if (!fs.existsSync(filePath)) {
     console.error('[selftest] 找不到文件: ' + filePath);
     process.exit(2);
