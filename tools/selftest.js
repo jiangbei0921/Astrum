@@ -31,6 +31,17 @@ function findChrome() {
     '/usr/bin/google-chrome', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
   ];
   for (var i = 0; i < c.length; i++) { if (fs.existsSync(c[i])) return c[i]; }
+  /* 有些镜像没有 /usr/bin/google-chrome，只有 chromium 或 -stable 后缀，
+   * 按 PATH 再找一遍，避免又变成「找不到浏览器」这一类假失败。 */
+  var names = ['google-chrome', 'google-chrome-stable', 'chromium', 'chromium-browser'];
+  var dirs = (process.env.PATH || '').split(path.delimiter);
+  for (var n = 0; n < names.length; n++) {
+    for (var d = 0; d < dirs.length; d++) {
+      if (!dirs[d]) continue;
+      var p = path.join(dirs[d], names[n]);
+      try { if (fs.existsSync(p) && fs.statSync(p).isFile()) return p; } catch (e) {}
+    }
+  }
   return 'chrome';
 }
 var CHROME = findChrome();
@@ -843,6 +854,10 @@ function main() {
 
   var out = cp.spawnSync(CHROME, [
     '--headless=new', '--disable-gpu',
+    /* --no-sandbox 不能省：CI 的容器里 Chrome 没有可使用沙箱，会直接退出，
+     * 表现为 spawnSync 秒回、stdout 为空、报「未取得结果」，看起来像断言失败。
+     * 其余套件（a11y/rail/settings/store/skill/consistency）都带这个参数。 */
+    '--no-sandbox',
     '--enable-logging=stderr',
     '--window-size=1440,900',
     '--virtual-time-budget=45000',
