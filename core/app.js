@@ -172,10 +172,26 @@
     for (var i = 0; i < AC.CITIES.length; i++) if (AC.CITIES[i].n === n) return AC.CITIES[i];
     return AC.CITIES[0];
   }
+  /* 城市名是**数据**，不是界面文案，不该走 L()。
+   * L() 按静态词条查表，而城市有 779 个（外加 GeoNames 合并的），
+   * 不可能全进词表——查不到就原样返回中文，于是英文界面里漏出「凤凰城」。
+   * 英文界面优先用 GeoNames 英文原名；拿不到原名（如「自定义地点」这类
+   * 真的是界面文案的标签）才退回词条翻译，原有国际化行为不变。
+   * 注意：不要叫 placeLabel——那是既有的地点搜索标签函数（含区域/国家），
+   * 同名会被后定义的覆盖，改动静默失效。 */
+  function cityLabel(ref, name) {
+    name = name || (ref && ref.n) || '';
+    var isEn = window.I18N && window.I18N.current && window.I18N.current() === 'en';
+    if (isEn && ref && ref.en) return ref.en;
+    return L(name);
+  }
   /* ===== 地点：检索 + IP 定位 + 手动坐标 ===== */
   function normPlace(p) {
     return {
       n: p.n || p.en || '自定义地点', lat: +p.lat, lon: +p.lon,
+      /* 留住英文原名：城市名是数据，英文界面要按原名显示（见 cityLabel）。
+       * 不在这里留，IP 定位与手选城市落到 state.place 后原名就丢了。 */
+      en: p.en || '',
       tzid: p.tzid || null, tz: typeof p.tz === 'number' ? p.tz : null,
       bortle: p.bortle || 6, cc: p.cc || ''
     };
@@ -1641,7 +1657,7 @@
       yaw: top ? A.altAz(top.ra, top.dec, jd, ctx.lat, ctx.lon).az : 180,
       pitch: 40, fov: 150, compact: true, showGlobe: true
     });
-    $('#skyMeta').textContent = A.fmtHM(jd, ctx.tz) + ' · ' + L(ctx.city);
+    $('#skyMeta').textContent = A.fmtHM(jd, ctx.tz) + ' · ' + cityLabel(ctx.cityRef, ctx.city);
     $('#ctxBadge').textContent = state.settings.showJD ? 'JD ' + jd.toFixed(2) : L('本地');
 
     var list = $('#tonightList');
