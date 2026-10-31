@@ -20,7 +20,20 @@ var path = require('path');
 var cp = require('child_process');
 var crypto = require('crypto');
 
-var CHROME = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+/* Chrome 路径不能写死：写死 Windows 路径时，CI（ubuntu）会在启动浏览器这一步
+ * 直接失败，整套 test 工作流从第一步就红，且看起来像功能回归。
+ * 与其余套件（a11y/rail/settings/…）保持同一套解析顺序。 */
+function findChrome() {
+  var c = [
+    'C:/Program Files/Google/Chrome/Application/chrome.exe',
+    'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
+    'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
+    '/usr/bin/google-chrome', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+  ];
+  for (var i = 0; i < c.length; i++) { if (fs.existsSync(c[i])) return c[i]; }
+  return 'chrome';
+}
+var CHROME = findChrome();
 /* 用相对位置算，不写绝对路径——项目目录改名或搬到别处就断 */
 var DEFAULT_URL = 'file:///' + path
   .resolve(__dirname, '..', 'astrum-standalone.html')
