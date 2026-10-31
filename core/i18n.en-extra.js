@@ -248,6 +248,99 @@
 
     /* ---------- 器材名（data/gear.js 的 name） ---------- */
     '手机长焦（约 135mm 等效）': 'Phone telephoto (~135mm equiv.)',
-    '长焦镜筒（1000mm f/5）': 'Telephoto scope (1000mm f/5)'
+    '长焦镜筒（1000mm f/5）': 'Telephoto scope (1000mm f/5)',
+
+    /* ---------- 提示（toast，走 app.js 的 toast()/T 模板） ---------- */
+    '坐标无效：纬度需在 −90~90，经度需在 −180~180':
+      'Invalid coordinates: latitude must be between −90 and 90, longitude between −180 and 180',
+    '未找到「{0}」，可直接输入经纬度（例：39.9,116.4）':
+      'No match for “{0}”. Enter latitude/longitude directly (e.g. 39.9,116.4)',
+    '未找到「{0}」，可从列表选择或点「坐标」手动输入':
+      'No match for “{0}”. Pick from the list or use “Coordinates” to enter it manually',
+    '定位超时，请手动选择地点': 'Locating timed out. Please choose a location manually',
+    '「{0}」尚未配置密钥，本次仍由本地内核生成':
+      '“{0}” has no API key yet; the local kernel will generate this answer',
+    '已删除该条技能记录': 'Skill record deleted',
+    '已清空全部技能记录': 'All skill records cleared',
+    '观测清单为空': 'Observation list is empty',
+    '已导出 {0} 项观测计划': 'Exported {0} observation items',
+    '最多 {0} 个附件，请先移除': 'Up to {0} attachments. Remove one first',
+    '超出上限，只添加前 {0} 个': 'Over the limit; added only the first {0}',
+    '已添加 {0} 个附件，其中 {1} 个未能解析（已标注原因）':
+      'Added {0} attachments; {1} could not be parsed (reason noted)',
+    '{0} 此刻在地平线以下（高度 {1}°）': '{0} is below the horizon right now (altitude {1}°)',
+    '智能体已保存': 'Agent saved',
+    '密钥已保存到本机（显示时仅保留末 4 位）':
+      'Key saved on this device (only the last 4 digits are shown)',
+    '已清除该来源的密钥': 'Key removed for this source',
+    '连接成功：{0}': 'Connected: {0}',
+    '连接失败：{0}': 'Connection failed: {0}',
+    '已切换默认来源：{0}': 'Default source set to {0}',
+    '已切换默认来源': 'Default source updated',
+    '可用端点 {0} / {1}': '{0} of {1} endpoints available',
+    '全部端点不可达，将使用本地索引': 'No endpoint reachable; falling back to the local index',
+    '名称无效': 'Invalid name',
+    '已重命名': 'Renamed',
+    '已删除档案': 'Profile deleted',
+    '导出内容检测到密钥字段，已中止导出': 'Export aborted: the content contains key fields',
+    '已导出配置（不含密钥）': 'Settings exported (keys excluded)',
+    '配置已导入': 'Settings imported',
+    '配置文件无法解析：{0}': 'Could not parse the settings file: {0}',
+    '需要至少一个已连通的云端来源才能对比':
+      'At least one connected cloud source is required for comparison',
+    '观测清单已清空': 'Observation list cleared',
+    '已切换为「{0}」，可在设置里随时更改':
+      'Switched to “{0}”. You can change it anytime in Settings',
+    '本机存储写入失败，刷新后这条对话可能丢失':
+      'Local storage write failed; this conversation may be lost after a refresh',
+    '历史记录读取失败，本次以空白对话开始':
+      'Could not load history; starting with an empty conversation',
+    '打开对话失败：{0}': 'Failed to open the conversation: {0}',
+    '文件不是合法 JSON': 'The file is not valid JSON',
+    '这不是 ASTRUM 的备份文件': 'This is not an ASTRUM backup file',
+    '创建档案失败': 'Failed to create the profile',
+    '写入设置失败': 'Failed to write settings',
+    '已导入为档案「{0}」，正在切换': 'Imported as profile “{0}”. Switching now',
+    '导入失败：{0}': 'Import failed: {0}',
+    '存储未就绪': 'Storage is not ready yet',
+    '已导出 {0} 个对话、{1} 条消息': 'Exported {0} conversations and {1} messages',
+    '导出失败：{0}': 'Export failed: {0}',
+    '已更新到 v{0}': 'Updated to v{0}',
+    '清空失败：{0}': 'Failed to clear: {0}',
+    'SIMBAD 响应超时（服务在境外，可能是网络不通，可稍后重试）':
+      'SIMBAD timed out (the service is overseas; the network may be unreachable — try again later)',
+    'SIMBAD 未找到该天体': 'SIMBAD has no entry for this object',
+    '天气服务超时': 'The weather service timed out',
+    '未取到{0}的天气': 'Could not get the weather for {0}',
+    '已清空全部历史对话': 'All conversations cleared',
+    '已清空当前对话': 'Current conversation cleared',
+    '已切换到 {0}': 'Switched to {0}',
+    '已切换到 {0}（{1}）': 'Switched to {0} ({1})',
+    '已定位到 {0}（距坐标 {1} 公里）': 'Located {0} ({1} km from the coordinates)',
+    '已按 IP 定位：{0}': 'Located by IP: {0}',
+    '已按 IP 定位：{0} {1}': 'Located by IP: {0} {1}',
+    '已按 IP 定位：{0}（距 {1} km）': 'Located by IP: {0} ({1} km away)',
+    '定位服务超时，请手动选择地点':
+      'The geolocation service timed out. Please choose a location manually',
+    '定位服务被网络策略拦截，请手动选择地点':
+      'Geolocation is blocked by the network policy. Please choose a location manually',
+    'IP 定位不可用，请手动选择地点':
+      'IP geolocation is unavailable. Please choose a location manually',
+    '请输入包含文字或数字的内容': 'Enter text or numbers',
+    '提问已截断到 {0} 字': 'Question truncated to {0} characters',
+    '超过 {0} 字，请缩短': 'Over {0} characters. Please shorten it',
+    '已打开太阳系观测视图。': 'Opened the solar system view.',
+    '已切换到「{0}」视角。': 'Switched to the “{0}” view.',
+    '视角已重置。': 'View reset.',
+    '时间推进已暂停。': 'Time progression paused.',
+    '时间推进已恢复。': 'Time progression resumed.',
+    '轨道已显示。': 'Orbits shown.',
+    '轨道已隐藏。': 'Orbits hidden.',
+    '标签已显示。': 'Labels shown.',
+    '标签已隐藏。': 'Labels hidden.',
+    '天体统一放大系数已调整为 ×{0}（直径比例不变）。':
+      'Body scale set to ×{0} (diameter ratios unchanged).',
+    '指令执行失败：{0}': 'Command failed: {0}',
+    '（距 {0} km）': '({0} km away)'
   };
 })(typeof window !== 'undefined' ? window : this);

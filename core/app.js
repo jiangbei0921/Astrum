@@ -339,7 +339,7 @@
       cc: p.cc || ''
     };
     if (p.src === 'local') np.bortle = (AC.CITIES.filter(function (c) { return c.n === p.n; })[0] || {}).bortle || 6;
-    setPlace(np, { toast: '已切换到 ' + p.n });
+    setPlace(np, { toast: T('已切换到 {0}', p.n) });
     hidePlacePanel();
   }
 
@@ -393,13 +393,13 @@
     }
     var near = AC.nearestPlace(lat, lon);
     if (!tzid && !tzNum && near && near.km < 25) {
-      setPlace(near.place, { toast: '已定位到 ' + near.place.n + '（距坐标 ' + near.km.toFixed(0) + ' 公里）' });
+      setPlace(near.place, { toast: T('已定位到 {0}（距坐标 {1} 公里）', near.place.n, near.km.toFixed(0)) });
       return true;
     }
     var p = { n: name || (near && near.km < 60 ? near.place.n + ' 附近' : '自定义地点'),
       lat: lat, lon: lon, tzid: tzid || null,
       tz: typeof tzNum === 'number' ? tzNum : Math.round(lon / 15), bortle: 6, cc: '' };
-    setPlace(p, { toast: '已切换到 ' + p.n + '（' + lat.toFixed(2) + ', ' + lon.toFixed(2) + '）' });
+    setPlace(p, { toast: T('已切换到 {0}（{1}）', p.n, lat.toFixed(2) + ', ' + lon.toFixed(2)) });
     return true;
   }
 
@@ -409,23 +409,23 @@
     var m = t.match(/^(-?\d+(?:\.\d+)?)\s*[,，]\s*(-?\d+(?:\.\d+)?)$/);
     if (m) return applyCoords(parseFloat(m[1]), parseFloat(m[2]));
     var hit = AC.findCity(t) || (AC.searchPlaces(t, 1)[0] || null);
-    if (hit) { setPlace(hit, { toast: '已切换到 ' + hit.n }); return true; }
+    if (hit) { setPlace(hit, { toast: T('已切换到 {0}', hit.n) }); return true; }
     /* 本地库没有 —— 走在线全球检索 */
     if (window.GeoSearch) {
       GeoSearch.search(t, 1).then(function (list) {
         if (list && list.length) {
           choosePlace(list[0]);
         } else {
-          toast('未找到「' + t + '」，可直接输入经纬度（例：39.9,116.4）');
+          toast('未找到「{0}」，可直接输入经纬度（例：39.9,116.4）', t);
           if (state.place) $('#ctxPlace').value = state.place.n;
         }
       }).catch(function () {
-        toast('未找到「' + t + '」，可直接输入经纬度（例：39.9,116.4）');
+        toast('未找到「{0}」，可直接输入经纬度（例：39.9,116.4）', t);
         if (state.place) $('#ctxPlace').value = state.place.n;
       });
       return true;
     }
-    toast('未找到「' + t + '」，可从列表选择或点「坐标」手动输入');
+    toast('未找到「{0}」，可从列表选择或点「坐标」手动输入', t);
     if (state.place) $('#ctxPlace').value = state.place.n;
     return false;
   }
@@ -621,15 +621,15 @@
             }
             if (useCity) {
               setPlace(near.place);
-              finish(true, '已按 IP 定位：' + near.place.n +
-                (near.km < 1 ? '' : '（距 ' + near.km.toFixed(1) + ' km）'));
+              finish(true, near.km < 1
+                ? T('已按 IP 定位：{0}', near.place.n)
+                : T('已按 IP 定位：{0}（距 {1} km）', near.place.n, near.km.toFixed(1)));
             } else {
               var p = { n: name, lat: g.lat, lon: g.lon, tzid: g.tzid,
                 tz: Math.round(g.lon / 15), bortle: 6, cc: g.cc || '' };
               setPlace(p);
-              finish(true, '已按 IP 定位：' + name +
-                (detail ? '（' + detail + '）' : '') +
-                ' ' + g.lat.toFixed(3) + '°, ' + g.lon.toFixed(3) + '°');
+              finish(true, T('已按 IP 定位：{0} {1}', name + (detail ? '（' + detail + '）' : ''),
+                g.lat.toFixed(3) + '°, ' + g.lon.toFixed(3) + '°'));
             }
           });
       })
@@ -639,9 +639,9 @@
         var allTimeout = reasons.length && reasons.every(function (r) { return /timeout/.test(r); });
         var allBlocked = reasons.length && reasons.every(function (r) { return /blocked/.test(r); });
         var msg;
-        if (allTimeout) msg = '定位服务超时，请手动选择地点';
-        else if (allBlocked) msg = '定位服务被网络策略拦截，请手动选择地点';
-        else msg = 'IP 定位不可用，请手动选择地点';
+        if (allTimeout) msg = L('定位服务超时，请手动选择地点');
+        else if (allBlocked) msg = L('定位服务被网络策略拦截，请手动选择地点');
+        else msg = L('IP 定位不可用，请手动选择地点');
 
         /* 把焦点交给可直接输入的地点框，并说明可用的输入格式 */
         var inp = $('#ctxPlace');
@@ -1742,7 +1742,7 @@
     renderSources();
     var src = sourceById(id);
     if ((src.type === 'cloud' || src.type === 'device') && !src.hasKey) {
-      toast('「' + src.name + '」尚未配置密钥，本次仍由本地内核生成');
+      toast('「{0}」尚未配置密钥，本次仍由本地内核生成', src.name);
     }
   }
 
@@ -2969,32 +2969,33 @@
     try {
       if (action.type === 'open') {
         openSolar({ key: action.target || solarKey, level: action.level || 'system' });
-        return '已打开太阳系观测视图。';
+        return L('已打开太阳系观测视图。');
       }
       if (action.type === 'focus' || action.type === 'level') {
         openSolar({ key: action.target || solarKey, level: action.level || 'planet' });
         selectSolar(action.target || solarKey);
-        return '已切换到「' + (action.level === 'close' ? '特写' : action.level === 'planet' ? '近景' : '全系') + '」视角。';
+        return T('已切换到「{0}」视角。', L(action.level === 'close' ? '特写' : action.level === 'planet' ? '近景' : '全系'));
       }
-      if (action.type === 'reset') { SV.reset(); syncSolarTools(); return '视角已重置。'; }
+      if (action.type === 'reset') { SV.reset(); syncSolarTools(); return L('视角已重置。'); }
       if (action.type === 'pause') {
         if (SV.state.paused !== !!action.value) SV.togglePause();
         syncSolarTools();
-        return action.value ? '时间推进已暂停。' : '时间推进已恢复。';
+        return action.value ? L('时间推进已暂停。') : L('时间推进已恢复。');
       }
       if (action.type === 'toggle') {
         if (action.item === 'orbits') SV.setOrbits(!!action.value);
         if (action.item === 'labels') SV.setLabels(!!action.value);
         syncSolarTools();
-        return (action.item === 'orbits' ? '轨道' : '标签') + (action.value ? '已显示。' : '已隐藏。');
+        if (action.item === 'orbits') return action.value ? L('轨道已显示。') : L('轨道已隐藏。');
+        return action.value ? L('标签已显示。') : L('标签已隐藏。');
       }
       if (action.type === 'boost') {
         SV.setBoost(SV.state.boost * action.value);
         syncSolarTools();
-        return '天体统一放大系数已调整为 ×' + Math.round(SV.state.boost).toLocaleString() + '（直径比例不变）。';
+        return T('天体统一放大系数已调整为 ×{0}（直径比例不变）。', Math.round(SV.state.boost).toLocaleString());
       }
     } catch (e) {
-      return '指令执行失败：' + e.message;
+      return T('指令执行失败：{0}', e.message);
     }
     return '';
   }
@@ -3145,7 +3146,7 @@
     a.download = 'astrum-observation-plan.md';
     document.body.appendChild(a); a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 400);
-    toast('已导出 ' + plan.length + ' 项观测计划');
+    toast('已导出 {0} 项观测计划', plan.length);
   }
 
   /* ================= 天象模型预热 =================
@@ -3595,12 +3596,12 @@
     if (!files.length) return;
     var room = A_ATT.LIMITS.maxFiles - state.attachments.length;
     if (room <= 0) {
-      toast('最多 ' + A_ATT.LIMITS.maxFiles + ' 个附件，请先移除');
+      toast('最多 {0} 个附件，请先移除', A_ATT.LIMITS.maxFiles);
       return;
     }
     if (files.length > room) {
       files = files.slice(0, room);
-      toast('超出上限，只添加前 ' + room + ' 个');
+      toast('超出上限，只添加前 {0} 个', room);
     }
     var pending = files.map(function (f) {
       return A_ATT.process(f).catch(function (e) {
@@ -3616,7 +3617,7 @@
       list.forEach(function (it) { state.attachments.push(it); });
       renderAttachTray();
       var bad = list.filter(function (x) { return x.status === 'error' || x.status === 'unparsed'; }).length;
-      if (bad) toast('已添加 ' + list.length + ' 个附件，其中 ' + bad + ' 个未能解析（已标注原因）');
+      if (bad) toast('已添加 {0} 个附件，其中 {1} 个未能解析（已标注原因）', list.length, bad);
     });
   }
 
@@ -3724,12 +3725,12 @@
       .replace(/[\u0000-\u001f\u007f]/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
-    if (!s) return { ok: false, code: 'empty', text: '', msg: '请输入包含文字或数字的内容' };
-    if (!/[\w一-龥]/.test(s)) return { ok: false, code: 'symbol', text: s, msg: '请输入包含文字或数字的内容' };
+    if (!s) return { ok: false, code: 'empty', text: '', msg: L('请输入包含文字或数字的内容') };
+    if (!/[\w一-龥]/.test(s)) return { ok: false, code: 'symbol', text: s, msg: L('请输入包含文字或数字的内容') };
     if (s.length > max) {
       return opt.overflow === 'truncate'
-        ? { ok: true, code: 'truncated', text: s.slice(0, max), msg: '提问已截断到 ' + max + ' 字' }
-        : { ok: false, code: 'toolong', text: s, msg: '超过 ' + max + ' 字，请缩短' };
+        ? { ok: true, code: 'truncated', text: s.slice(0, max), msg: T('提问已截断到 {0} 字', max) }
+        : { ok: false, code: 'toolong', text: s, msg: T('超过 {0} 字，请缩短', max) };
     }
     return { ok: true, code: 'ok', text: s, msg: '' };
   }
@@ -4020,7 +4021,7 @@
 
   /* ================= 提示 ================= */
   var toastTimer = null;
-  function toast(msg) {
+  function toast(msg, a, b) {
     var t = $('#toast');
     if (!t) {
       t = el('div', 'toast');
@@ -4030,7 +4031,9 @@
       t.setAttribute('aria-live', 'polite');
       document.body.appendChild(t);
     }
-    t.textContent = msg;
+    /* 统一走 i18n：静态文案按中文原文查词条，带参文案走 {0}/{1} 模板；
+     * 已由调用方翻译过的、或本身就是外部数据的文案查不到词条，原样返回。 */
+    t.textContent = T(msg, a, b);
     t.classList.add('on');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { t.classList.remove('on'); }, 2800);
@@ -4202,7 +4205,7 @@
           drawViewer();
           applyViewerTransform();
         } else {
-          toast(b.name + ' 此刻在地平线以下（高度 ' + Math.round(aa.alt) + '°）');
+          toast('{0} 此刻在地平线以下（高度 {1}°）', b.name, Math.round(aa.alt));
         }
         describeObject({ type: b.kind, data: b });
       });
@@ -5316,7 +5319,7 @@
       S.test(cur.id).then(function (r) {
         btnTest.textContent = '测试连接'; btnTest.disabled = false;
         renderSources(); renderSettings();
-        toast((r.ok ? '连接成功：' : '连接失败：') + r.msg);
+        toast(r.ok ? '连接成功：{0}' : '连接失败：{0}', r.msg);
       });
     });
     var btnUse = el('button', 'btn-tiny dark', state.settings.sourceId === cur.id ? '当前默认' : '设为默认');
@@ -5324,7 +5327,7 @@
       btnUse.addEventListener('click', function () {
         state.settings.sourceId = cur.id;
         persist(); renderSources(); renderSettings();
-        toast('已切换默认来源：' + cur.name);
+        toast('已切换默认来源：{0}', cur.name);
       });
     }
     foot.appendChild(btnTest);
@@ -5356,7 +5359,7 @@
             }).join('');
           }
           var okCount = list.filter(function (d) { return d.state === 'ok'; }).length;
-          toast(okCount ? ('可用端点 ' + okCount + ' / ' + list.length) : '全部端点不可达，将使用本地索引');
+          toast(okCount ? '可用端点 {0} / {1}' : '全部端点不可达，将使用本地索引', okCount, list.length);
         });
       });
     });
@@ -5790,7 +5793,7 @@
         if (d.cfg) cfg = mergeCfg(d.cfg);
         applySettings(); renderAgents(); renderSettings(); refreshPanels();
         toast('配置已导入');
-      } catch (e) { toast('配置文件无法解析：' + e.message); }
+      } catch (e) { toast('配置文件无法解析：{0}', e.message); }
     };
     rd.readAsText(f);
   }
@@ -6140,7 +6143,7 @@
   function setPersona(id) {
     if (!applyPersona(id)) return;
     closePersona();
-    toast('已切换为「' + PERSONAS[id].label + '」，可在设置里随时更改');
+    toast('已切换为「{0}」，可在设置里随时更改', PERSONAS[id].label);
   }
 
   function maybeShowPersona() {
@@ -6370,7 +6373,7 @@
       if (sc) sc.scrollTop = sc.scrollHeight;
       renderThreadList();
       if (window.innerWidth <= 860) $('#sidebar').classList.remove('on');
-    }).catch(function (e) { toast('打开对话失败：' + String(e && e.message || e)); });
+    }).catch(function (e) { toast('打开对话失败：{0}', String(e && e.message || e)); });
   }
 
   /* ================= 数据导入导出 =================
@@ -6417,12 +6420,12 @@
       } catch (e) { toast('写入设置失败'); }
       window.Store.importInto(p.id, data.threads, data.messages || []).then(function () {
         window.Profile.switchTo(p.id);
-        toast('已导入为档案「' + p.name + '」，正在切换');
+        toast('已导入为档案「{0}」，正在切换', p.name);
         setTimeout(function () { location.reload(); }, 800);
       }).catch(function (e) {
         window.Profile.remove(p.id);
         window.Profile.purgeKeys(p.id);
-        toast('导入失败：' + String(e && e.message || e));
+        toast('导入失败：{0}', String(e && e.message || e));
       });
     };
     reader.readAsText(file);
@@ -6438,8 +6441,8 @@
       document.body.appendChild(a);
       a.click();
       setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 1500);
-      toast('已导出 ' + payload.threads.length + ' 个对话、' + payload.messages.length + ' 条消息');
-    }).catch(function (e) { toast('导出失败：' + String(e && e.message || e)); });
+      toast('已导出 {0} 个对话、{1} 条消息', payload.threads.length, payload.messages.length);
+    }).catch(function (e) { toast('导出失败：{0}', String(e && e.message || e)); });
   }
 
   /* ================= 版本 / 统计 / 答案操作 ================= */
@@ -6449,7 +6452,7 @@
   function checkVersion() {
     var seen = '';
     try { seen = localStorage.getItem('astrum.version') || ''; } catch (e) {}
-    if (seen && seen !== APP_VERSION) toast('已更新到 v' + APP_VERSION);
+    if (seen && seen !== APP_VERSION) toast('已更新到 v{0}', APP_VERSION);
     try { localStorage.setItem('astrum.version', APP_VERSION); } catch (e) {}
   }
 
@@ -6622,7 +6625,7 @@
           wb.textContent = '云量';
           wb.disabled = false;
           if (!r || !r.ok) {
-            toast(r && r.reason === 'timeout' ? '天气服务超时' : '未取到' + (state.settings.city || '北京') + '的天气');
+            toast(r && r.reason === 'timeout' ? '天气服务超时' : '未取到{0}的天气', state.settings.city || '北京');
             return;
           }
           card.insertBefore(weatherBox(r), bar);
@@ -6925,7 +6928,7 @@
       mountComposer('hero');
       toast(scope === 'all' ? '已清空全部历史对话' : '已清空当前对话');
       renderSettings();
-    }).catch(function (e) { toast('清空失败：' + String(e && e.message || e)); });
+    }).catch(function (e) { toast('清空失败：{0}', String(e && e.message || e)); });
   }
   /* 自适应布局只在「运行期」启用：boot 完成后再挂监听，且首次计算由真实信号触发。
    * ?layout=fixed 与设置开关都可让它整体退回预设。 */
