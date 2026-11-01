@@ -10,8 +10,8 @@
   'use strict';
 
   root.ASTRUM_DAILY = {
-    "updated": "2026-10-31",
-    "generatedAt": "2026-10-31T06:43:51.373Z",
+    "updated": "2026-11-01",
+    "generatedAt": "2026-11-01T07:12:32.332Z",
     "note": "每日自动同步一次（UTC 01:00）。内容未经本项目核验，不参与答案推理。",
     "papers": [
       {
@@ -270,6 +270,20 @@
     ],
     "news": [
       {
+        "title": "Scientists say a forgotten particle may explain why the universe exists",
+        "summary": "A mysterious particle overlooked for decades may hold the key to why matter survived the Big Bang, allowing stars, planets, and life to exist. Scientists believ…",
+        "source": "ScienceDaily",
+        "date": "2026-11-01",
+        "url": "https://www.sciencedaily.com/releases/2026/10/261031221201.htm"
+      },
+      {
+        "title": "Scientists smash oxygen nuclei to recreate matter from the Big Bang",
+        "summary": "Scientists have recreated a primordial state of matter from the dawn of the universe by colliding oxygen nuclei at nearly the speed of light. The surprising res…",
+        "source": "ScienceDaily",
+        "date": "2026-10-31",
+        "url": "https://www.sciencedaily.com/releases/2026/10/261030002935.htm"
+      },
+      {
         "title": "Astronauts just gave the International Space Station a powerful upgrade",
         "summary": "Two astronauts completed a 7-hour, 11-minute spacewalk to install a new solar array on the International Space Station, bringing NASA one step closer to a major…",
         "source": "ScienceDaily",
@@ -317,20 +331,6 @@
         "source": "ScienceDaily",
         "date": "2026-10-29",
         "url": "https://www.sciencedaily.com/releases/2026/10/261028232715.htm"
-      },
-      {
-        "title": "Meteors don't just burn up. What really happens is far more violent",
-        "summary": "Scientists have uncovered seven surprising stages that space rocks go through as they hurtle toward Earth, revealing that melting and violent fragmentation, rat…",
-        "source": "ScienceDaily",
-        "date": "2026-10-29",
-        "url": "https://www.sciencedaily.com/releases/2026/10/261027063710.htm"
-      },
-      {
-        "title": "NASA’s Artemis I mission reveals surprising radiation levels near the Moon",
-        "summary": "NASA’s Artemis I mission has revealed that cosmic radiation near the Moon is higher than in Earth orbit, but not by as much as scientists might expect. Tiny exp…",
-        "source": "ScienceDaily",
-        "date": "2026-10-28",
-        "url": "https://www.sciencedaily.com/releases/2026/10/261027063659.htm"
       },
       {
         "title": "Stars brewing in a nebulous cauldron",
