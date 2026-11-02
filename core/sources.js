@@ -360,10 +360,21 @@
     ]).filter(Boolean).join('\n');
   }
 
-  function withTimeout(ms) {
+  function withTimeout(ms, external) {
     var ctl = new AbortController();
     var t = setTimeout(function () { ctl.abort(); }, ms);
-    return { signal: ctl.signal, done: function () { clearTimeout(t); } };
+    function onAbort() { ctl.abort(); }
+    if (external) {
+      if (external.aborted) ctl.abort();
+      else if (external.addEventListener) external.addEventListener('abort', onAbort);
+    }
+    return {
+      signal: ctl.signal,
+      done: function () {
+        clearTimeout(t);
+        if (external && external.removeEventListener) external.removeEventListener('abort', onAbort);
+      }
+    };
   }
 
   /* ---------- 适配器 ---------- */
@@ -674,7 +685,7 @@
     if (!gate.ok) return Promise.reject(new Error(gate.msg));
     var req = buildRequest(id, payload);
     var t0 = Date.now();
-    var timer = withTimeout(20000);
+    var timer = withTimeout(payload.timeoutMs || 20000, payload.signal);
 
     return fetch(req.url, {
       method: 'POST', headers: req.headers, body: JSON.stringify(req.body), signal: timer.signal
@@ -916,7 +927,13 @@
         o.version = versionOf(w, o.doi);
         o.uncertainty = findUncertainty(abs);
         o.authors = authors.slice(0, 6);
-        o.extra = { citedBy: w.cited_by_count || 0, type: w.type || '', venue: (w.primary_location && w.primary_location.source && w.primary_location.source.display_name) || '' };
+        o.extra = {
+          citedBy: w.cited_by_count || 0, type: w.type || '',
+          venue: (w.primary_location && w.primary_location.source && w.primary_location.source.display_name) || '',
+          pdfUrl: (w.best_oa_location && w.best_oa_location.pdf_url) ||
+            (w.open_access && w.open_access.oa_url) || '',
+          arxivId: (w.ids && w.ids.arxiv) ? String(w.ids.arxiv).replace(/^https?:\/\/arxiv.org\/abs\//, '') : ''
+        };
         return o;
       }).filter(function (x) { return x.snippet; });
     });
@@ -926,7 +943,7 @@
   function semanticScholar(q) {
     var eq = enQueryFor(q);
     var u = 'https://api.semanticscholar.org/graph/v1/paper/search?query=' +
-      encodeURIComponent(eq) + '&limit=3&fields=title,abstract,year,externalIds,url,authors,publicationDate';
+      encodeURIComponent(eq) + '&limit=3&fields=title,abstract,year,externalIds,url,authors,publicationDate,openAccessPdf';
     return fetchJSON(u, 8000).catch(function (e) {
       if (e && e.status === 429) {
         /* 匿名调用共享限流池，过载属常态：明确说明并让降级链继续尝试其它端点 */
@@ -954,7 +971,11 @@
         o.version = ext.ArXiv ? 'preprint' : versionOf({ type: '', title: p.title }, o.doi);
         o.uncertainty = findUncertainty(p.abstract);
         o.authors = (p.authors || []).map(function (a) { return a && a.name; }).filter(Boolean).slice(0, 6);
-        o.extra = { venue: p.venue || '' };
+        o.extra = {
+          venue: p.venue || '',
+          pdfUrl: (p.openAccessPdf && p.openAccessPdf.url) || '',
+          arxivId: ext.ArXiv || ''
+        };
         return o;
       }).filter(function (x) { return x.snippet; });
     });

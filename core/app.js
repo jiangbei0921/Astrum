@@ -2850,6 +2850,12 @@
       var vstrip = renderVerifyStrip(verifyList);
       if (vstrip) card.appendChild(vstrip);
     }
+    if (ans.research && window.AstroResearchUI) {
+      try {
+        var rp = window.AstroResearchUI.render(ans.research);
+        if (rp) card.appendChild(rp);
+      } catch (e) { console.warn('research render failed', e); }
+    }
     if (ans.meta && ans.meta.styleSwitch) {
       var sw = el('div', 'recall');
       sw.innerHTML = '<span class="ic">↳</span>这题按「' + esc(ans.meta.styleSwitch.label) + '」风格回答（你的默认是「' + esc(PERSONAS[ans.meta.styleSwitch.from] ? PERSONAS[ans.meta.styleSwitch.from].label : '未设置') + '」）';
@@ -3548,7 +3554,7 @@
   /* ============================================================
      附件：任意类型可添加，按类型如实解析（见 core/attachments.js）
      ============================================================ */
-  var ATTACH_KIND_LABEL = { image: '图片', text: '文本', fits: 'FITS', other: '文件' };
+  var ATTACH_KIND_LABEL = { image: '图片', text: '文本', fits: 'FITS', paper: '论文 PDF', other: '文件' };
 
   function bindAttachments() {
     var btn = $('#btnAttach');
@@ -3652,6 +3658,9 @@
       }
       var meta = A_ATT.fmtSize(it.size) + ' · ' + (ATTACH_KIND_LABEL[it.kind] || '文件');
       if (it.kind === 'fits' && it.fits && it.fits.hasCoords) meta += ' · 含坐标';
+      if (it.kind === 'paper' && it.paper && it.paper.ok) {
+        meta += ' · ' + (it.paper.pageCount || '?') + ' 页';
+      }
       var warn = (it.status === 'error' || it.status === 'unparsed' || it.status === 'partial' || it.status === 'too-large')
         ? '<span class="atch-warn">' + esc(it.note || '') + '</span>' : '';
       chip.innerHTML = thumb +
@@ -3684,6 +3693,13 @@
           o.ra = it.fits.ra; o.dec = it.fits.dec;
         }
         if (it.kind === 'text') o.chars = (it.text || '').length;
+        if (it.kind === 'paper' && it.paper && it.paper.ok) {
+          o.pageCount = it.paper.pageCount;
+          o.sections = (it.paper.sections || []).map(function (s) { return s.name; });
+          o.chunks = (it.paper.chunks || []).length;
+          o.fulltextAvailable = true;
+          o.extractionMethod = it.paper.extractionMethod;
+        }
         return o;
       })
     };
@@ -3733,6 +3749,117 @@
         : { ok: false, code: 'toolong', text: s, msg: T('超过 {0} 字，请缩短', max) };
     }
     return { ok: true, code: 'ok', text: s, msg: '' };
+  }
+
+  /* ================= 统一入口桥接（V1.1） =================
+   * 只负责把 Control 的结果交给现有 renderAnswer；旧 ask 的业务分支不受影响。 */
+  var LAST_ROUTE = null;
+
+  /* V1.5：模型表述统一经由 Control Bridge；Bridge 不可用时才回退旧入口。 */
+  function modelGenerate(id, payload) {
+    if (window.AstroControlBridge && typeof window.AstroControlBridge.modelGenerate === 'function') {
+      return window.AstroControlBridge.modelGenerate(id, payload).then(function (r) {
+        if (!r || r.ok !== true) {
+          var err = new Error((r && r.reason) || '模型调用失败');
+          err.code = r && r.code;
+          throw err;
+        }
+        return { text: r.text, latency: r.latency, tokens: r.tokens };
+      });
+    }
+    return S.generate(id, payload);
+  }
+
+  function controlAnswer(info, q, qForAns, ctx, cfgRun, think, tAgent, attachmentsEvidence, src, atts) {
+    var ac = new AbortController();
+    var label = think.querySelector('span:not(.wave)');
+    if (label) label.textContent = L('研究任务执行中');
+    var cancel = el('button', 'btn-ghost', L('取消'));
+    cancel.type = 'button';
+    cancel.style.marginLeft = '10px';
+    think.appendChild(cancel);
+    cancel.addEventListener('click', function () {
+      cancel.disabled = true;
+      if (label) label.textContent = L('已取消，等待收尾');
+      ac.abort();
+    });
+
+    var store = null;
+    try { store = window.AstroTaskStore ? window.AstroTaskStore.create({}) : null; } catch (e) { store = null; }
+
+    function fail(text) {
+      think.remove(); busy(false);
+      renderAnswer({
+        query: q, intent: 'unknown', targets: [], trace: [],
+        sections: [{ kind: 'boundary', mode: 'uncertain', text: text }],
+        meta: { register: 'pop', tier: 'unknown' }
+      });
+    }
+
+    if (!window.AstroControlBridge) { fail(L('研究任务未能完成，未生成结论。')); return; }
+    window.AstroControlBridge.runWithRoute(info, qForAns, ctx, cfgRun, {
+      signal: ac.signal, store: store, network: true,
+      attachmentsEvidence: attachmentsEvidence || null,
+      fulltext: info.route.mode === 'research',
+      researchLoop: info.route.mode === 'research',
+      forceCompare: state.settings.mode === 'compare'
+    }).then(function (r) {
+      taskEnd(tAgent, r && r.cancelled ? new Error('cancelled') : null);
+      if (!r) { fail(L('研究任务未能完成，未生成结论。')); return; }
+      if (r.cancelled) { fail(L('任务已取消；已完成步骤不会作为结论使用。')); return; }
+      if (!r.answer) { fail(L('研究任务未能完成，未生成结论。缺失数据不会被当作事实。')); return; }
+      r.answer.query = q;
+      bumpStat('ask', r.answer.intent || info.intent);
+
+      function finish() {
+        think.remove(); busy(false);
+        renderAnswer(r.answer, { control: true, verdict: r.verdict });
+      }
+
+      /* V1.5：云端/设备模型表述进入 Control 研究链路。
+       * 科学结论仍由 Evidence/Claims/Report 决定；模型只追加“表述”段，
+       * 失败或取消时保留研究结论并如实标注，不伪造模型成功。 */
+      var canExpress = src && (src.type === 'cloud' || src.type === 'device') &&
+        (src.type === 'device' || src.hasKey) &&
+        window.AstroControlBridge && typeof window.AstroControlBridge.modelGenerate === 'function';
+      if (!canExpress) { finish(); return; }
+      var pay = factsFromAnswer(r.answer);
+      var ev = evidenceForPrompt(r.answer);
+      /* 与旧契约一致：没有任何可核实事实/证据时不外发模型。 */
+      if (!pay.facts.length && !ev.length) { finish(); return; }
+      var ctxLine2 = ctx.city + ' · ' + ctx.y + '-' + pad(ctx.mo) + '-' + pad(ctx.d) + ' ' +
+        pad(ctx.h) + ':' + pad(ctx.mi);
+      window.AstroControlBridge.modelGenerate(src.id, {
+        question: qForAns, facts: pay.facts, para: pay.para, evidence: ev,
+        attachments: A_ATT.forPrompt(atts || []),
+        images: src.vision ? A_ATT.imagesForPrompt(atts || []) : [],
+        tone: state.settings.register === 'pro' ? 'academic' : 'warm', context: ctxLine2,
+        memory: memoryForPrompt()
+      }, { signal: ac.signal }).then(function (m) {
+        r.answer.meta = r.answer.meta || {};
+        r.answer.meta.cloudExpression = {
+          sourceId: src.id, code: m && m.code || 'unknown',
+          latency: m && m.latency || 0, tokens: m && m.tokens != null ? m.tokens : null
+        };
+        if (m && m.ok && m.text) {
+          r.answer.sections.splice(sectionIndexAfterVerdict(r.answer), 0,
+            noteFor(src, m.text, m.latency, false));
+        } else if (!(m && m.code === 'cancelled')) {
+          r.answer.sections.splice(sectionIndexAfterVerdict(r.answer), 0,
+            noteFor(src, '云端表述失败（' + (m && m.code || 'unknown') + '）：' +
+              (m && m.reason || '未知原因') + '。研究结论仍按证据链保留，未用模型输出替代。', 0, true));
+        }
+        finish();
+      }).catch(function (e) {
+        r.answer.meta = r.answer.meta || {};
+        r.answer.meta.cloudExpression = { sourceId: src.id, code: 'exception', reason: String(e && e.message || e).slice(0, 120) };
+        finish();
+      });
+    }).catch(function (e) {
+      taskEnd(tAgent, e);
+      console.warn('control run failed', e);
+      fail(L('研究任务执行失败：') + String(e && e.message || e).slice(0, 120));
+    });
   }
 
   function ask(text) {
@@ -3797,6 +3924,24 @@
             cfgRun.muse.depth = PERSONAS[stDet].depth;
             styleSwitch = { from: stBase, to: stDet, label: PERSONAS[stDet].label };
           }
+        }
+        /* V1.2：统一入口最多接管“本地来源 + 非对比 + 无附件或全部已解析 FITS”。
+         * 论文/图片/文本附件与显式对比模式继续走旧流程，避免丢失旧能力。 */
+        if (window.AstroRequest && window.AstroControlBridge) {
+          try {
+            var routeInfo = window.AstroRequest.classify(qForAns, ctx, cfgRun);
+            LAST_ROUTE = routeInfo;
+            if (window.AstroControlBridge.canControl(routeInfo, {
+              mode: state.settings.mode, sourceType: src.type, attachments: atts,
+              forceCompare: state.settings.mode === 'compare'
+            })) {
+              var attPack = atts.length && window.AstroAttachmentEvidence
+                ? window.AstroAttachmentEvidence.fromAttachments(atts) : null;
+              controlAnswer(routeInfo, q, qForAns, ctx, cfgRun, think, tAgent,
+                attPack && attPack.evidence.length ? attPack.evidence : null, src, atts);
+              return;
+            }
+          } catch (e) { console.warn('route failed', e); }
         }
         ans = AC.buildAnswer(qForAns, ctx, cfgRun);
         if (styleSwitch) ans.meta.styleSwitch = styleSwitch;
@@ -3922,7 +4067,7 @@
           }
           var ev = evidenceForPrompt(ans);
           var pay2 = factsFromAnswer(ans);
-          return S.generate(src.id, {
+          return modelGenerate(src.id, {
             question: q, facts: pay2.facts, para: pay2.para,
             evidence: ev,
             /* 附件：文本类作为参考材料；图片仅发给声明支持视觉的来源 */
@@ -3979,7 +4124,7 @@
         /* 云端列：已连接的模型最多一个，避免过宽 */
         S.list().filter(function (x) { return x.type === 'cloud' && x.status.state === 'ready'; })
           .slice(0, 1).forEach(function (c) {
-            cols.push(S.generate(c.id, {
+            cols.push(modelGenerate(c.id, {
               question: q, facts: payload.facts, para: payload.para, tone: 'warm', context: ctxLine,
               memory: memoryForPrompt()
             }).then(function (r) {
@@ -6947,6 +7092,46 @@
     }
   }
 
+  /* V1.1：刷新后只提示未完成任务，用户点击才恢复，避免启动时自动跑长任务。 */
+  function offerResumeTask() {
+    if (!window.AstroTaskStore || !window.AstroControlBridge) return;
+    var store = null;
+    try { store = window.AstroTaskStore.create({}); } catch (e) { return; }
+    store.init().then(function () { return store.list({ limit: 5 }); }).then(function (list) {
+      var hit = (list || []).filter(function (x) { return x.resumable; })[0];
+      if (!hit) return;
+      var box = el('div', 'msg bot research-resume');
+      var card = el('div', 'answer');
+      card.appendChild(el('div', 'sec-title', esc(L('有未完成的研究任务'))));
+      card.appendChild(el('div', 'sec-note', esc(hit.question)));
+      var btn = el('button', 'btn-ghost', L('继续任务'));
+      btn.type = 'button';
+      btn.addEventListener('click', function () {
+        btn.disabled = true;
+        btn.textContent = L('研究任务执行中');
+        var ctx = readCtx();
+        var cfgRun = JSON.parse(JSON.stringify(cfg));
+        window.AstroControlBridge.resume(hit.id, ctx, cfgRun, { store: store }).then(function (r) {
+          box.remove();
+          if (!r || !r.answer) { toast(L('任务恢复失败')); return; }
+          r.answer.query = hit.question;
+          renderAnswer(r.answer, { control: true, resumed: true });
+        }).catch(function (e) {
+          btn.disabled = false;
+          btn.textContent = L('继续任务');
+          toast(L('任务恢复失败'));
+          console.warn('task resume failed', e);
+        });
+      });
+      card.appendChild(btn);
+      box.appendChild(card);
+      var th = $('#thread');
+      if (th) th.insertBefore(box, th.firstChild);
+      state.asked = true;
+      mountComposer('dock');
+    }).catch(function (e) { console.warn('task list failed', e); });
+  }
+
   function boot() {
     AC.setSkillResolver(skillFor);
     if (window.I18N) window.I18N.init();
@@ -6978,6 +7163,7 @@
     document.body.appendChild(fileInput);
 
     restoreHistory();
+    setTimeout(offerResumeTask, 300);
     initAdaptive();
     refreshPanels();
     mountComposer('hero');
@@ -6990,6 +7176,7 @@
     window.__astrum = {
       ask: ask, selectSource: selectSource, openSheet: openSheet, openAgent: openAgent,
       restoreHistory: restoreHistory, clearHistory: clearHistory,
+      renderAnswer: renderAnswer, lastRoute: function () { return LAST_ROUTE; },
       setPersona: setPersona, applyPersona: applyPersona, PERSONAS: PERSONAS,
       detectStyle: detectStyle, newChat: newChat, filterThreads: filterThreads,
       buildExportPayload: buildExportPayload,

@@ -1,0 +1,2 @@
+{"t":"2026-11-02T01:22:16.774Z","elapsedMin":1,"tasks":260,"ok":228,"fail":0,"cancelled":32,"running":0,"appends":33,"replans":32,"idbOk":304,"idbFail":0,"cacheHit":44,"cacheMiss":44,"heap":5.3,"pageErrors":0,"unhandled":0,"ws":"n/a","maxTaskMs":1857}
+{"t":"2026-11-02T01:23:16.749Z","elapsedMin":2,"tasks":529,"ok":463,"fail":0,"cancelled":66,"running":0,"appends":66,"replans":66,"idbOk":618,"idbFail":0,"cacheHit":89,"cacheMiss":89,"heap":5.4,"pageErrors":0,"unhandled":0,"ws":"n/a","maxTaskMs":1857}

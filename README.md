@@ -109,24 +109,40 @@ npx serve .
 
 ## 部署到 GitHub Pages
 
-1. 把本目录（`astrum/`）作为仓库根目录推送到 GitHub：
+本项目使用 **GitHub Actions + Pages artifact** 发布，不把整个仓库直接暴露为站点。
 
-```bash
-cd astrum
-git init
-git add .
-git commit -m "ASTRUM: 天文多智能体工作台"
-git branch -M main
-git remote add origin https://github.com/<你的用户名>/<仓库名>.git
-git push -u origin main
+1. 把本目录作为仓库根目录推送到 GitHub（`main` 分支）。
+2. 仓库 **Settings → Pages**：Source 选 **GitHub Actions**。
+3. 推送到 `main` 后：
+   - `test` workflow 先跑静态、离线核心、离线浏览器三层测试；
+   - 测试成功后 `pages` workflow 用 `tools/build-pages.js` 生成 `_site/` 并发布；
+   - 访问 `https://<你的用户名>.github.io/<仓库名>/`（仓库子路径）。
+
+发布目录只包含：
+
+```
+index.html
+privacy.html
+.nojekyll
+assets/app.css
+core/*.js
+data/*.js
+version.json
 ```
 
-2. 仓库 **Settings → Pages**：
-   - Source 选 `Deploy from a branch`
-   - Branch 选 `main`，目录选 `/ (root)`
-   - 保存，等 1–2 分钟
+`tools/`、`docs/`、`dev/`、`worker/`、`astrum-standalone.html` 不会进入发布目录。
+`version.json` 记录应用版本、发布版本、构建时间、commit、构建模式与部署环境；
+工作区有未提交修改时会标记 `dirty: true`，不会伪装成正式版本。
 
-3. 访问 `https://<你的用户名>.github.io/<仓库名>/`
+本地等价验证：
+
+```bash
+node tools/build-pages.js
+node tools/v1-4-pages-test.js
+```
+
+`v1-4-pages-test` 会以 `/Astrum/` 子路径启动本地 HTTP 服务，并用 Chrome 验证
+13 个 Agent、控制层模块与 CSP。它**不是** GitHub Pages 线上验证。
 
 ### 为什么能直接在 Pages 上用
 

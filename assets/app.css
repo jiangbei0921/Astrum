@@ -2861,3 +2861,46 @@ html[data-adapt="on"][data-compose="expanded"] .hero-slot { margin-bottom: 16px;
 html[data-adapt="on"][data-w="wide"] .hero { max-width: 840px; }
 html[data-adapt="on"][data-w="narrow"] .hero { padding-left: 18px; padding-right: 18px; }
 html[data-adapt="on"][data-w="narrow"] .hero h1 { letter-spacing: 0; }
+
+/* ============================================================
+   V1.1 Research Report 卡片
+   复用既有 kv / rows / boundary / sec-title 视觉，不引入新框架。
+   ============================================================ */
+.research-panel {
+  margin-top: 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--panel, rgba(255,255,255,.55));
+  overflow: hidden;
+}
+.research-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--ink);
+  list-style: none;
+}
+.research-summary::-webkit-details-marker { display: none; }
+.research-summary .ic { color: var(--accent, #3b3bd6); }
+.research-summary .mt {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--muted-2);
+}
+.research-body { padding: 2px 12px 12px; }
+.research-block { padding-top: 10px; }
+.research-block .sec-title { margin-bottom: 6px; }
+.research-link {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--accent, #3b3bd6);
+  text-decoration: none;
+}
+.research-link:hover { text-decoration: underline; }
+.research-resume { margin-bottom: 10px; }
+.research-resume .answer { padding: 10px 12px; }

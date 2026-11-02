@@ -10,6 +10,9 @@ desktop.ini
 # （每次改源码都会产生 1MB 的无意义 diff，需要时一条命令重建）
 astrum-standalone.html
 
+# GitHub Pages 发布暂存目录：由 node tools/build-pages.js 生成，不入库
+_site/
+
 # 本地临时/调试产物（截图、诊断脚本）
 dev/
 __*.html

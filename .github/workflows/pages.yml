@@ -1,0 +1,61 @@
+name: pages
+
+# GitHub Pages 正式发布：
+#   - 只在 `test` workflow 成功之后部署 main 的同一提交；
+#   - 手动 workflow_dispatch 可作为紧急重发（仍需仓库 Pages Source = GitHub Actions）；
+#   - 发布内容由 tools/build-pages.js 白名单生成，不整仓发布。
+on:
+  workflow_run:
+    workflows: [test]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: 构建发布目录（白名单 + 安全扫描 + 版本元数据）
+        env:
+          BUILD_COMMIT: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: node tools/build-pages.js
+
+      - uses: actions/configure-pages@v5
+        with:
+          # 若仓库尚未启用 Pages，尝试启用并切到 Actions 源；
+          # 若组织策略禁止，需要在 Settings → Pages 手动选择 GitHub Actions。
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -518,6 +518,19 @@
       type: 'constellation', con: abbr, key: member.k, anchor: member.cn };
   }
 
+  /* ================= B8：控制层预计算结果（仅同步作用域内有效） ================= */
+  var ACTIVE_PRELOADED = null;
+
+  function takePreloaded(name) {
+    if (!ACTIVE_PRELOADED || !ACTIVE_PRELOADED.ephem) return null;
+    return name && ACTIVE_PRELOADED.ephem[name] ? ACTIVE_PRELOADED.ephem[name] : null;
+  }
+
+  function ephemForPreloaded(name, ra, dec, ctx) {
+    var pre = takePreloaded(name);
+    return pre || ephemFor(ra, dec, ctx);
+  }
+
   function ephemFor(ra, dec, ctx) {
     var jd = jdOfCtx(ctx);
     var midnight = A.fromLocal(ctx.y, ctx.mo, ctx.d, 0, 0, ctx.tz);
@@ -655,13 +668,17 @@
   }
 
   /* ================= 答案组装 ================= */
-  function buildAnswer(query, ctx, cfg) {
+  function buildAnswer(query, ctx, cfg, preloaded) {
+    /* B8：preloaded 只在本次同步调用内生效；旧 ask() 不传该参数，行为完全不变。 */
+    ACTIVE_PRELOADED = preloaded || null;
+    try {
     var tStart = (typeof performance !== 'undefined' ? performance.now() : 0);
     buildAlias();
     cfg = JSON.parse(JSON.stringify(cfg));
     applyCustomConfig(cfg);
     var q = String(query || '').trim();
-    var targets = resolveTargets(q);
+    var preTargets = preloaded && preloaded.targets && preloaded.targets.length ? preloaded.targets : null;
+    var targets = preTargets || resolveTargets(q);
     var mem = resolveByMemory(q, targets);
     targets = mem.targets;
     var when = parseDate(q, ctx);
@@ -704,6 +721,9 @@
     STATS.lastIntent = intent;
     STATS.lastMs = (typeof performance !== 'undefined' ? performance.now() : 0) - tStart;
     return applyCustom(criticReview(finalize(out), cfg), ctx);
+    } finally {
+      ACTIVE_PRELOADED = null;
+    }
   }
 
   /* 协作链路按固定工作流排序，保证呈现顺序符合真实分工 */
@@ -730,6 +750,47 @@
     checks.push({ k: '置信度', v: conf.toFixed(2), ok: conf >= 0.5 });
 
     var failed = checks.filter(function (c) { return !c.ok; });
+
+    /* 【P0-03 兼容扩展｜legacy-derived compatibility mapping】
+     * 这一层的四维结果是从下面旧 5 项 checks 派生出的兼容映射，
+     * 不是 Claim/Evidence 级科学验证，也不接入 R1–R4。
+     *
+     * 三层边界必须区分清楚：
+     *   1) 旧版 Critic（本函数）：5 项 checks 的顺序、值、passed 聚合保持不变；
+     *   2) P0-02 判定能力：core/claims.js 的 judgeClaim 处理 Claim 级 R1–R4、
+     *      numeric/uncertainty/basis，仅在 Claim fixture 与未来 TaskState 路径使用；
+     *   3) 后续阶段：entity 别名/时空一致性、source 白名单/独立性/时效等
+     *      真正的科学证据验证尚未实现。
+     *
+     * 因此 dimensions 只是旧检查的维度化视图，gaps 只是旧检查失败项，
+     * 不得被解读为已经完成科学证据缺口分析；结果只写入 meta.review，
+     * 不改 checks，也不写入 sections。 */
+    function oldCheck(k) {
+      var found = null;
+      checks.forEach(function (c) { if (!found && c.k === k) found = c; });
+      return found ? { name: k, ok: found.ok, source: 'rule', detail: found.v } : null;
+    }
+    var dims = {
+      numeric: {
+        status: (a.meta && a.meta.computed) ? 'PASS' : 'PARTIAL',
+        checks: [oldCheck('数值可复算')].filter(Boolean)
+      },
+      entity: { status: 'PASS', checks: [] },
+      semantic: {
+        status: (evCount > 0 && conf >= 0.5) ? 'PASS' : 'PARTIAL',
+        checks: [oldCheck('证据条数'), oldCheck('置信度')].filter(Boolean)
+      },
+      source: {
+        status: (evCount > 0 && hasBoundary) ? 'PASS' : 'PARTIAL',
+        checks: [oldCheck('共识等级'), oldCheck('边界声明')].filter(Boolean)
+      }
+    };
+    var dimNames = ['numeric', 'entity', 'semantic', 'source'];
+    var dimFail = dimNames.some(function (k) { return dims[k].status === 'FAIL'; });
+    var dimPartial = dimNames.some(function (k) { return dims[k].status === 'PARTIAL'; });
+    var verdict = dimFail ? 'FAIL' : ((failed.length || dimPartial) ? 'PARTIAL' : 'PASS');
+    var gaps = failed.map(function (c) { return { claimId: null, kind: 'legacy-check', hint: c.k }; });
+
     if (gate === 'strict' && (failed.length || !hasEvidence)) {
       a.sections.push({
         kind: 'boundary', mode: 'uncertain',
@@ -740,7 +801,10 @@
     a.trace.push(step('critic', '证据复核',
       checks.length + ' 项检查 · ' + (failed.length ? failed.length + ' 项未达标' : '全部通过') +
       ' · 门槛 ' + (gate === 'strict' ? '严格' : gate === 'open' ? '开放' : '均衡')));
-    a.meta.review = { gate: gate, checks: checks, passed: failed.length === 0 };
+    a.meta.review = {
+      gate: gate, checks: checks, passed: failed.length === 0,
+      verdict: verdict, dimensions: dims, gaps: gaps
+    };
     a.sections.push({
       kind: 'review', title: '评审结论', gate: gate, passed: failed.length === 0,
       checks: checks,
@@ -931,7 +995,7 @@
       target = { name: '太阳', ra: s.ra, dec: s.dec, mag: -26.7, type: 'sun' };
     }
 
-    var ep = target ? ephemFor(target.ra, target.dec, ctx) : null;
+    var ep = target ? ephemForPreloaded(target.name, target.ra, target.dec, ctx) : null;
     if (target && ep) {
       answer.trace.push(step('kepler', '计算星历', '中天 ' + A.fmtHM(ep.track.transit, tz) + ' · 最大高度 ' + deg(ep.track.maxAlt, cfg)));
     }
@@ -1149,7 +1213,7 @@
     var TYPE_W = { constellation: 0.82, planet: 1.05, moon: 0.9, dso: 1.0 };
 
     var scored = cands.map(function (c) {
-      var ep = ephemFor(c.ra, c.dec, ctx);
+      var ep = ephemForPreloaded(c.name, c.ra, c.dec, ctx);
       var sc = A.scoreTarget(ep.track, c.mag, ep.moonSep, mp.illum) * (TYPE_W[c.type] || 1);
       var wins = windowsWithin(c.ra, c.dec, darkStart, Math.max(darkEnd, darkStart + 0.1), ctx.lat, ctx.lon, 20);
       var best = null;
@@ -1688,7 +1752,7 @@
       answer.meta = { agents: ['muse'], confidence: 0.2, freshness: 'static', register: 'pop', computed: false };
       return answer;
     }
-    var ep = target ? ephemFor(target.ra, target.dec, ctx) : null;
+    var ep = target ? ephemForPreloaded(target.name, target.ra, target.dec, ctx) : null;
     answer.trace.push(step('kepler', '核对可见窗口', ep ? ('最大高度 ' + deg(ep.track.maxAlt, cfg) + ' · 月光 ' + moonInterference(ep, ctx.tz)) : '无坐标'));
     answer.trace.push(step('horizon', '匹配器材与光害', 'Bortle ' + ctx.bortle + ' · 器材倾向 ' + toneLabel(cfg.horizon.gear)));
 
@@ -2250,6 +2314,7 @@
     findCity: findCity, searchPlaces: searchPlaces, nearestPlace: nearestPlace, ianaOffset: ianaOffset,
     /* 供检索规划层复用意图识别，避免两套判定逻辑分叉 */
     detectIntent: detectIntent, nameOf: nameOf, TRACE_ORDER: TRACE_ORDER,
+    ephemFor: ephemFor, windowsWithin: windowsWithin,
     tzOf: tzOf, setMemory: setMemory, getMemory: getMemory, clearMemory: clearMemory, curate: curate,
     stats: stats,
     version: '1.0.0'

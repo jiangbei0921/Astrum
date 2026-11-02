@@ -19,6 +19,7 @@
   var TEXT_EXT = /\.(txt|md|markdown|csv|tsv|json|log|ya?ml|xml|html?|ini|cfg|py|js|ts|css|sh|tex|bib)$/i;
   var TEXT_MIME = /^text\/|^application\/(json|xml|x-yaml)/;
   var FITS_EXT = /\.(fits?|fts)$/i;
+  var PDF_EXT = /\.pdf$/i;
 
   /* 上限：单文件读取量与总附件数，避免把浏览器内存打满 */
   var LIMITS = {
@@ -26,6 +27,8 @@
     textChars: 12000,      /* 单文件最多读这么多字符 */
     promptChars: 4000,     /* 送模型时每个文件最多带这么多字符 */
     fitsBytes: 28800,      /* FITS 头最多读 10 个 2880 字节块 */
+    fitsFullBytes: 8 * 1024 * 1024,  /* D3：完整解析最多读 8 MB（多 HDU + 统计） */
+    pdfBytes: 12 * 1024 * 1024,      /* 本机论文 PDF 上限，与远程全文一致 */
     imageBytes: 6 * 1024 * 1024,
     previewSize: 240
   };
@@ -47,6 +50,7 @@
   function kindOf(file) {
     var name = file.name || '';
     if (FITS_EXT.test(name)) return 'fits';
+    if (PDF_EXT.test(name) || /^application\/pdf/i.test(file.type || '')) return 'paper';
     if (IMAGE_MIME.test(file.type || '') || IMAGE_EXT.test(name)) return 'image';
     if (TEXT_MIME.test(file.type || '') || TEXT_EXT.test(name)) return 'text';
     return 'other';
@@ -211,7 +215,8 @@
       thumb: '',
       full: '',
       width: 0, height: 0,
-      fits: null
+      fits: null,
+      paper: null
     };
 
     if (kind === 'image') {
@@ -230,22 +235,82 @@
     }
 
     if (kind === 'fits') {
-      return readSlice(file, LIMITS.fitsBytes).then(function (buf) {
+      var readBytes = Math.min(file.size || LIMITS.fitsFullBytes, LIMITS.fitsFullBytes);
+      return readSlice(file, readBytes).then(function (buf) {
         if (!buf) { item.status = 'error'; item.note = '读取失败'; return item; }
         var h = null;
-        try { h = parseFitsHeader(buf); } catch (e) { h = null; }
+        var product = null;
+        try {
+          if (root.AstroFits && typeof root.AstroFits.parse === 'function') {
+            product = root.AstroFits.parse({ bytes: new Uint8Array(buf), fileName: item.name });
+          }
+          if (product && product.ok && product.hdus && product.hdus[0]) {
+            h = product.hdus[0].header;
+          }
+          if (!h) h = parseFitsHeader(buf);
+        } catch (e) { h = parseFitsHeader(buf); product = null; }
         if (!h) {
           item.status = 'error';
           item.note = '不是有效的 FITS 头（缺少 SIMPLE = T）';
           return item;
         }
         var s = summarizeFits(h);
-        item.fits = { header: h, facts: s.facts, ra: s.ra, dec: s.dec, hasCoords: s.hasCoords };
+        var stats = (product && product.hdus || []).map(function (x) {
+          return {
+            index: x.index, type: x.type,
+            naxis1: x.header.NAXIS1, naxis2: x.header.NAXIS2,
+            bitpix: x.header.BITPIX, stats: x.stats || null,
+            table: x.table ? { rows: x.table.rows, fields: x.table.fields } : null,
+            wcs: x.wcs || null
+          };
+        });
+        var truncated = (file.size || 0) > readBytes;
+        var warnings = (product && product.warnings || []).slice();
+        if (truncated) warnings.push('文件超过 ' + fmtSize(readBytes) + '，仅解析前 ' + fmtSize(readBytes));
+        item.fits = {
+          header: h,
+          facts: s.facts,
+          ra: s.ra,
+          dec: s.dec,
+          hasCoords: s.hasCoords,
+          hdus: stats,
+          warnings: warnings,
+          file: { name: item.name, size: item.size, sizeText: item.sizeText, fileHash: product && product.fileHash || '' }
+        };
         item.status = s.hasCoords ? 'ready' : 'partial';
         item.note = s.hasCoords
-          ? '已解析头信息，可用于定位'
+          ? '已解析头信息，可用于定位' + (stats.length > 1 ? ' · ' + stats.length + ' HDU' : '')
           : (s.facts.length ? '已解析头信息（无坐标）' : '头信息里没有可用字段');
         return item;
+      });
+    }
+
+    if (kind === 'paper') {
+      if ((file.size || 0) > LIMITS.pdfBytes) {
+        item.status = 'too-large';
+        item.note = 'PDF 超过 ' + fmtSize(LIMITS.pdfBytes) + '，已拒绝解析';
+        return Promise.resolve(item);
+      }
+      return readSlice(file, file.size || 0).then(function (buf) {
+        if (!buf) { item.status = 'error'; item.note = '读取失败'; return item; }
+        if (!root.AstroPaperAttachment || typeof root.AstroPaperAttachment.parseBytes !== 'function') {
+          item.status = 'error'; item.note = 'PDF 解析模块未加载'; return item;
+        }
+        return root.AstroPaperAttachment.parseBytes(new Uint8Array(buf), {
+          fileName: item.name, maxBytes: LIMITS.pdfBytes
+        }).then(function (r) {
+          if (!r || !r.ok) {
+            item.status = 'error';
+            item.note = (r && r.reason) || 'PDF 解析失败';
+            item.paper = r || null;
+            return item;
+          }
+          item.paper = r;
+          item.status = 'ready';
+          item.note = '已解析 ' + (r.pageCount || '?') + ' 页 · ' +
+            (r.sections || []).length + ' 章节 · ' + (r.chunks || []).length + ' 块';
+          return item;
+        });
       });
     }
 
@@ -270,6 +335,12 @@
       var o = { id: it.id, name: it.name, kind: it.kind, size: it.sizeText };
       if (it.kind === 'image') { o.width = it.width; o.height = it.height; o.thumb = it.thumb; }
       if (it.kind === 'text') o.chars = it.text.length;
+      if (it.kind === 'paper' && it.paper && it.paper.ok) {
+        o.pageCount = it.paper.pageCount;
+        o.sections = (it.paper.sections || []).map(function (s) { return s.name; });
+        o.chunks = (it.paper.chunks || []).length;
+        o.fulltextAvailable = true;
+      }
       if (it.kind === 'fits') {
         o.facts = it.fits.facts;
         o.hasCoords = it.fits.hasCoords;
@@ -282,14 +353,28 @@
 
   /* 送模型的文本参考材料：只取文本类，且每份截断 */
   function forPrompt(items) {
-    return (items || []).filter(function (it) {
-      return it.kind === 'text' && it.text && it.status === 'ready';
-    }).map(function (it) {
-      return {
-        name: it.name,
-        excerpt: it.text.replace(/\s+/g, ' ').slice(0, LIMITS.promptChars)
-      };
+    var out = [];
+    (items || []).forEach(function (it) {
+      if (it.kind === 'text' && it.text && it.status === 'ready') {
+        out.push({
+          name: it.name,
+          excerpt: it.text.replace(/\s+/g, ' ').slice(0, LIMITS.promptChars)
+        });
+        return;
+      }
+      if (it.kind === 'paper' && it.paper && it.paper.ok) {
+        var text = (it.paper.chunks || []).map(function (c) {
+          return '[' + (c.section || '正文') + '] ' + c.content;
+        }).join('\n').replace(/\s+/g, ' ');
+        out.push({
+          name: it.name,
+          excerpt: text.slice(0, LIMITS.promptChars),
+          pageCount: it.paper.pageCount,
+          sections: (it.paper.sections || []).map(function (s) { return s.name; })
+        });
+      }
     });
+    return out;
   }
 
   /* 送模型的图像：只取图片，且只给支持视觉的来源 */

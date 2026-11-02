@@ -79,13 +79,25 @@
 
   function Qty(value, unit, opts) {
     opts = opts || {};
-    return {
+    /* 【P0-03 兼容扩展】新字段只追加，旧字段 v/u/err/src/basis 原样保留。
+     * epoch/frame/inputs/uncertainty 是 CalcRecord 对齐字段；
+     * 四项齐全时不写 legacy，任一缺失则标记 legacy:true。
+     * 旧调用方无需修改，仍按 v/u/err/src/basis 读取。 */
+    var hasNew = opts.epoch != null && opts.frame != null &&
+      opts.inputs != null && opts.uncertainty != null;
+    var q = {
       v: value,
       u: unit || '',
       err: (opts.err == null ? null : opts.err),
       src: opts.src || '',
-      basis: opts.basis || ''
+      basis: opts.basis || '',
+      epoch: opts.epoch == null ? null : opts.epoch,
+      frame: opts.frame == null ? null : opts.frame,
+      inputs: opts.inputs == null ? null : opts.inputs,
+      uncertainty: opts.uncertainty == null ? null : opts.uncertainty
     };
+    if (!hasNew) q.legacy = true;
+    return q;
   }
 
   function qtyText(q) {

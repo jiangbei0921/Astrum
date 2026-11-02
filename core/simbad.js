@@ -88,40 +88,55 @@
     return c.info || null;
   }
 
-  function lookup(ident) {
+  var HOSTS = [
+    'https://simbad.harvard.edu/simbad/sim-tap/sync',
+    TAP,
+    'https://simbad.cds.unistra.fr/simbad/sim-tap/sync'
+  ];
+
+  function tapUrl(base, ident) {
+    return base + '?request=doQuery&lang=adql&format=json&query=' +
+      encodeURIComponent(buildAdql(ident));
+  }
+
+  async function lookup(ident, opts) {
+    opts = opts || {};
     var key = norm(ident).toLowerCase();
-    if (!key) return Promise.resolve({ ok: false, reason: 'empty' });
+    if (!key) return { ok: false, reason: 'empty' };
 
     var hit = cached(ident);
-    if (hit) return Promise.resolve({ ok: true, info: hit, from: 'cache' });
+    if (hit) return { ok: true, info: hit, from: 'cache' };
 
-    var url = TAP + '?request=doQuery&lang=adql&format=json&query=' +
-      encodeURIComponent(buildAdql(ident));
-
-    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, TIMEOUT);
-
-    return fetch(url, { signal: ctrl ? ctrl.signal : undefined })
-      .then(function (r) {
+    var extSignal = opts.signal || null;
+    var cancelled = false;
+    var last = 'network';
+    for (var i = 0; i < HOSTS.length; i++) {
+      if (cancelled || (extSignal && extSignal.aborted)) {
+        return { ok: false, reason: 'cancelled' };
+      }
+      var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+      var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, TIMEOUT);
+      var onExtAbort = function () { cancelled = true; if (ctrl) ctrl.abort(); };
+      if (extSignal && extSignal.addEventListener) extSignal.addEventListener('abort', onExtAbort);
+      try {
+        var r = await fetch(tapUrl(HOSTS[i], ident), { signal: ctrl ? ctrl.signal : undefined });
         if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.json();
-      })
-      .then(function (payload) {
+        var payload = await r.json();
         var info = parse(payload);
         if (!info) return { ok: false, reason: 'not-found' };
         var c = readCache();
         c[key] = { at: Date.now(), info: info };
         writeCache(c);
-        return { ok: true, info: info, from: 'network' };
-      })
-      .catch(function (e) {
-        var msg = (e && e.name === 'AbortError') ? 'timeout' : String(e && e.message || e);
-        return { ok: false, reason: msg };
-      })
-      .then(function (res) {
+        return { ok: true, info: info, from: 'network', host: HOSTS[i] };
+      } catch (e) {
+        last = cancelled ? 'cancelled' : ((e && e.name === 'AbortError') ? 'timeout' : String(e && e.message || e));
+        if (cancelled) return { ok: false, reason: 'cancelled' };
+      } finally {
         clearTimeout(timer);
-        return res;
-      });
+        if (extSignal && extSignal.removeEventListener) extSignal.removeEventListener('abort', onExtAbort);
+      }
+    }
+    return { ok: false, reason: last };
   }
 
   function clearCache() {
@@ -131,6 +146,7 @@
   root.Simbad = {
     lookup: lookup, parse: parse, norm: norm,
     distanceLy: distanceLy, buildAdql: buildAdql,
+    HOSTS: HOSTS,
     clearCache: clearCache, TIMEOUT: TIMEOUT
   };
 })(typeof window !== 'undefined' ? window : globalThis);
