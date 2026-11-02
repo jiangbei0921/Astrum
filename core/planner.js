@@ -79,6 +79,45 @@
     return out;
   }
 
+  /* 研究检索不能把整句中文问题直接丢给 OpenAlex/Semantic Scholar：
+   * “M42 的距离是多少？不同论文的测量是否一致？” 会被当成普通中文短语，
+   * 返回大量无关的中文论文。这里用“英文目标名 + 1–2 个主题词”构造检索式，
+   * 目标名仍由既有实体索引给出，不引入新的模型或外部服务。 */
+  var RESEARCH_TERMS = [
+    { re: /距离|distance|parallax|视差/i, terms: ['distance'] },
+    { re: /测量|测距|measurement|measure/i, terms: ['measurement'] },
+    { re: /一致|分歧|比较|差异|不同|controvers|disagree|tension/i, terms: ['comparison'] },
+    { re: /年龄|age/i, terms: ['age'] },
+    { re: /质量|mass/i, terms: ['mass'] },
+    { re: /半径|大小|size|radius/i, terms: ['radius'] },
+    { re: /温度|temperature/i, terms: ['temperature'] },
+    { re: /金属|化学成分|abundance|metallicity/i, terms: ['metallicity'] },
+    { re: /形成|演化|formation|evolution/i, terms: ['formation'] },
+    { re: /光谱|spectroscopy|spectra/i, terms: ['spectroscopy'] },
+    { re: /自转|rotation/i, terms: ['rotation'] },
+    { re: /磁场|magnetic/i, terms: ['magnetic field'] },
+    { re: /观测|拍摄|imaging|observation/i, terms: ['observation'] }
+  ];
+
+  function researchQueryOf(b) {
+    var target = b.names[0] || '';
+    var en = target;
+    if (target && root.Sources && typeof root.Sources.enQueryFor === 'function') {
+      try { en = root.Sources.enQueryFor(target) || target; } catch (e) { en = target; }
+    }
+    var terms = [], seen = {};
+    RESEARCH_TERMS.forEach(function (p) {
+      if (terms.length >= 2 || !p.re.test(b.query)) return;
+      p.terms.forEach(function (t) {
+        if (terms.length >= 2 || seen[t]) return;
+        seen[t] = 1;
+        terms.push(t);
+      });
+    });
+    var q = [en || target].concat(terms).join(' ').replace(/\s+/g, ' ').trim();
+    return q || b.query;
+  }
+
   function jdOf(ctx) {
     if (root.Astro && root.Astro.fromLocal) {
       return root.Astro.fromLocal(ctx.y, ctx.mo, ctx.d, ctx.h, ctx.mi, ctx.tz);
@@ -99,10 +138,12 @@
       if (/争议|分歧|不同观点/.test(q)) return 'T-F';
       return 'T-E';
     }
+    /* compare 必须排在 TARGET_INTENTS 之前：
+     * “比较 M31 和 M33”同时是 observe-target，旧顺序会错选 T-A 单目标模板。 */
+    if (route.mode === 'compare') return 'T-D';
     if (includes(TARGET_INTENTS, intent)) return 'T-A';
     if (intent === 'tonight') return 'T-B';
     if ((intent === 'observe-target' || intent === 'photo-target') && /为什么|机制|原理/.test(q)) return 'T-C';
-    if (route.mode === 'compare') return 'T-D';
     if (intent === 'system-view') return 'T-G';
     return null;   /* 无匹配 → LEGACY，不创造第 8 个模板 */
   }
@@ -175,18 +216,20 @@
     },
     'T-E': function (input, b) {
       var first = b.names[0] || b.query;
+      var search = researchQueryOf(b);
       return [
         makeStep('t1', 'simbad.tap', { query: first }, [], true, false, true),
-        makeStep('t2', 'paper.search', { query: b.query }, [], true, true, false),
-        makeStep('t3', 'evidence.search', { query: b.query, direction: 'counter' }, [], false, true, false),
+        makeStep('t2', 'paper.search', { query: search }, [], true, true, false),
+        makeStep('t3', 'evidence.search', { query: search, direction: 'counter' }, [], false, true, false),
         makeStep('t4', 'compose.domain', { query: b.query, intent: b.intent, from: ['t1', 't2', 't3'] }, ['t1', 't2', 't3'], false, true, false)
       ];
     },
     'T-F': function (input, b) {
+      var search = researchQueryOf(b);
       var steps = [
         makeStep('t1', 'simbad.tap', { query: b.names[0] || b.query }, [], true, false, true),
-        makeStep('t2', 'evidence.search', { query: b.query, direction: 'positive' }, [], true, true, false),
-        makeStep('t3', 'evidence.search', { query: b.query, direction: 'negative' }, [], true, true, false)
+        makeStep('t2', 'evidence.search', { query: search, direction: 'positive' }, [], true, true, false),
+        makeStep('t3', 'evidence.search', { query: search, direction: 'negative' }, [], true, true, false)
       ];
       if (hasCoordTarget(input.targets || [])) {
         steps.push(makeStep('t4', 'kepler.ephemeris',

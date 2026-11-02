@@ -98,7 +98,9 @@ var EXPECTED = [
   { intent: 'chart', sha: '0beb2a85c8f0313ab575f38422f86a1d2c887e98b826d81864aab8ce6358518c', bytes: 1083 },
   { intent: 'gear', sha: '4796e09921e19966dadd35a6b22e46d06e577923dadd86d4a6167b0c28f55872', bytes: 1750 },
   { intent: 'gear-fit', sha: '87f6b67831cb19c4ac300411c4d8ce38008e19b04e1e7ada47831da3d457362b', bytes: 1450 },
-  { intent: 'photo-target', sha: 'd0a94d21f881d6511a2f3772b4578e803f344af5dd00e7de5492e59085f17d2a', bytes: 2289 },
+  /* 2026-11-02 用户授权更新：M42 理论焦距由错误的 93,258 mm 修正为 259 mm；
+   * 第 11 问 sections 基线同步更新，其余 19 问哈希保持不变。 */
+  { intent: 'photo-target', sha: 'c71400db293f74195fb1c8e0681c2f06e3fe8c40bd38c2948c5e7d39391186e4', bytes: 2259 },
   { intent: 'observe-target', sha: '877a8b00133d3718b88ca24188229d243d46b8298f47def48adcbda81c3c3516', bytes: 2678 },
   { intent: 'knowledge-target', sha: '8572b0d5c150b480c544f8a8f1e97a501e62170c45bd6477e57ddf8453632544', bytes: 2560 },
   { intent: 'intro-target', sha: '4b0d8b0d4fb17690aeb382a0ac8dd584fc700e6cbf3a8d19845377eb1617807e', bytes: 2641 },

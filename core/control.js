@@ -206,6 +206,8 @@
           s.args = s.args || {};
           s.args.fulltext = true;
           s.args.maxFulltext = 4;
+          /* 最多尝试 3 篇：单篇出版社 403/反爬时继续下一篇，而不是只试第一本。 */
+          s.args.fulltextItems = Math.max(1, Math.min(3, s.args.fulltextItems || 3));
         }
       });
       state.plan = prepared.plan;

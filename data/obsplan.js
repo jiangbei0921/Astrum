@@ -42,10 +42,14 @@
     if (sizeArcmin >= 8) return 1.5;
     return 1;
   }
-  /* 由目标角径与采样率反推焦距（mm） */
+  /* 由采样率反推焦距（mm）。
+   * 旧公式把目标角径乘进去，M42 会算出 9 万 mm 的荒谬焦距；
+   * 采样率只取决于像元大小与焦距：arcsec/px = 206.265 × pixelUm / fl。
+   * 目标角径决定目标占多少像素，不决定焦距。
+   * 2026-11-02 用户授权更新 P0-03 基线后，此公式统一修正。 */
   function focalFor(sizeArcmin, pixelUm, arcsecPerPx) {
-    if (!sizeArcmin) return null;
-    return Math.round(sizeArcmin * 60 * 206.265 / (pixelUm * arcsecPerPx));
+    if (!pixelUm || !arcsecPerPx) return null;
+    return Math.round(206.265 * pixelUm / arcsecPerPx);
   }
   /* 视场（度） */
   function fovDeg(sensorMm, fl) {

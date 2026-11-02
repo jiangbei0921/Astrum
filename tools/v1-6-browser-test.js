@@ -438,6 +438,35 @@ function ok(n, p, x) { results.push({ n: n, p: !!p, x: x == null ? '' : String(x
     var nv = narrow && narrow.result && narrow.result.value;
     ok('B30 窄屏无横向溢出', nv && nv.w === 375 && nv.overflow <= 1, nv && JSON.stringify(nv));
     await cdp.send('Emulation.clearDeviceMetricsOverride', {}, 10000);
+
+    var submitted = await cdp.eval(`(function(){
+      var i=document.querySelector('#input'), b=document.querySelector('#send');
+      if(!i||!b) return false;
+      i.value='比较 M31 和 M33 的观测难度与距离测量';
+      i.dispatchEvent(new Event('input',{bubbles:true}));
+      b.click();
+      return true;
+    })()`, 10000);
+    ok('B31 对比问题可提交', submitted && submitted.result && submitted.result.value === true);
+    var cmpDom = null;
+    for (var ci = 0; ci < 60; ci++) {
+      var cd = await cdp.eval(`(function(){
+        var cards=document.querySelectorAll('.compare .model-note');
+        if(cards.length<2) return null;
+        return {n:cards.length,
+          texts:Array.prototype.map.call(cards,function(c){return c.textContent;}),
+          hasDistance:Array.prototype.some.call(cards,function(c){return /距离/.test(c.textContent);}),
+          hasType:Array.prototype.some.call(cards,function(c){return /类型/.test(c.textContent);}),
+          hasVisibility:Array.prototype.some.call(cards,function(c){return /可见性/.test(c.textContent);})};
+      })()`, 10000);
+      cmpDom = cd && cd.result ? cd.result.value : null;
+      if (cmpDom) break;
+      await sleep(300);
+    }
+    ok('B32 对比 UI 渲染两个目标', cmpDom && cmpDom.n >= 2, cmpDom && cmpDom.n);
+    ok('B33 对比 UI 显示距离/类型/可见性', cmpDom && cmpDom.hasDistance &&
+      cmpDom.hasType && cmpDom.hasVisibility,
+      cmpDom && cmpDom.texts.map(function (t) { return t.slice(0, 80); }).join(' || '));
   } catch (e) {
     ok('浏览器异常', false, String(e && e.stack || e).slice(0, 240));
   } finally {

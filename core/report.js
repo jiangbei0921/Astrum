@@ -257,6 +257,15 @@
     if (!papers.length) gaps.push('未获得论文元数据');
     if (paperStats.abstractOnly) gaps.push(paperStats.abstractOnly + ' 篇论文仅获得摘要，未获取全文');
     if (paperStats.failed) gaps.push(paperStats.failed + ' 篇论文全文获取/解析失败');
+    var ftFails = (input.fulltextFailures || (reducer && reducer.fulltextFailures) || []);
+    if (ftFails.length) {
+      var reasons = unique(ftFails.map(function (f) {
+        var code = String(f && f.code || 'fulltext_failed');
+        var reason = String(f && f.reason || '').replace(/\s+/g, ' ').slice(0, 48);
+        return code + (reason ? '（' + reason + '）' : '');
+      })).slice(0, 3);
+      gaps.push('全文失败原因：' + reasons.join('；'));
+    }
     var hasSimbad = evidence.some(function (e) {
       return e.sourceId === 'src_simbad' ||
         (e.provenance && e.provenance.service === 'SIMBAD TAP');
@@ -276,6 +285,7 @@
     }
     if (!hasSimbad) limitations.push('SIMBAD 数据缺失，天体参数可能不完整。');
     if (!observations.length) limitations.push('没有 FITS 观测数据，缺少独立观测验证。');
+    if (ftFails.length) limitations.push('部分论文全文被出版社拒绝或无法解析，结论仅基于摘要。');
     if (differences.length) limitations.push('存在无法判定的数值差异，已保留原始值。');
     limitations = unique(limitations);
 

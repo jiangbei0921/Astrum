@@ -334,12 +334,27 @@
     READY = true;
   }
 
+  /* 目录编号（m42 / ngc1976 / hd12345）必须独立出现：
+   * “m42”里不能再匹配出“m4”，“m33”里不能再匹配出“m3”。
+   * 中文别名仍按子串匹配，保持“猎户座大星云”等自然语言命中。 */
+  function aliasHitsQuery(q, key) {
+    if (!/^[a-z0-9]+$/.test(key)) return q.indexOf(key) >= 0;
+    var at = q.indexOf(key);
+    while (at >= 0) {
+      var before = at > 0 ? q.charAt(at - 1) : '';
+      var after = at + key.length < q.length ? q.charAt(at + key.length) : '';
+      if (!/[a-z0-9]/.test(before) && !/[a-z0-9]/.test(after)) return true;
+      at = q.indexOf(key, at + 1);
+    }
+    return false;
+  }
+
   function resolveTargets(text) {
     buildAlias();
     var q = normKey(text), hits = [], seen = {};
     for (var i = 0; i < ALIAS.length; i++) {
       var a = ALIAS[i];
-      if (q.indexOf(a.k) >= 0) {
+      if (aliasHitsQuery(q, a.k)) {
         var id = a.item.kind === 'kb' ? 'kb:' + a.item.entry.id
           : a.item.kind === 'star' ? 'star:' + a.item.key
           : a.item.kind === 'dso' ? 'dso:' + a.item.key
@@ -437,7 +452,7 @@
     nova: /超新星|新星|爆发|伽马暴|耀斑|爆发态|超新星遗迹|中子星形成|光度极大|超新星前驱星|脉冲星|磁星|致密天体/,
     helios: /太阳|日冕|日珥|太阳风|磁暴|空间天气|太阳黑子|太阳活动|日面|米粒组织|日冕物质抛射|极光预报/,
     solar: /太阳系|行星视图|全系|天体导航|切换视角|聚焦|近景|特写|轨道布局|距离布局|放大天体|重置视角|太阳系视图|哪些行星|轨道标签|隐藏轨道|显示轨道|天体标签|暂停|继续/,
-    photo: /拍摄参数|曝光时间|快门|焦距|像素比例|采样率|感光度|ISO|直焦率|怎么拍|如何拍|拍这张|能拍吗|参数怎么设|叠加|出图/
+    photo: /拍摄参数|拍摄设置|相机设置|曝光时间|曝光|快门|焦距|像素比例|采样率|感光度|ISO|直焦率|怎么拍|如何拍|拍这张|能拍吗|参数怎么设|怎么设置参数|设置参数|赤道仪|导星|叠加|出图/
   };
 
   /* 问候 / 自我介绍 / 测试性输入：完全锚定，避免「你好，今晚能看什么」被误判 */
@@ -1744,6 +1759,15 @@
     }
     answer.trace.push(step('muse', '解析意图', '拍摄参数咨询' + (target ? ' · ' + target.name : '')));
     var rows = shootingAdvice(target, ctx, cfg);
+    if (rows && q) {
+      var aperture = String(q).match(/(\d{2,4})\s*(?:mm|毫米)/i);
+      if (aperture) {
+        rows.splice(0, 0, {
+          k: '你的口径',
+          v: aperture[1] + ' mm（下面按 APS-C 400mm 预设估算；视场与曝光还取决于实际焦距/焦比）'
+        });
+      }
+    }
     if (!rows) {
       answer.sections.push({
         kind: 'boundary', mode: 'uncertain',

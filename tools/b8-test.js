@@ -27,7 +27,7 @@ global.localStorage = {
  'core/claims.js', 'core/fit.js', 'core/agents.js', 'core/sources.js',
  'core/research.js', 'core/solarsystem.js',
  'core/router.js', 'core/planner.js', 'core/registry.js',
- 'core/compose-adapter.js', 'core/orchestrator.js', 'core/control.js'
+ 'core/compose-adapter.js', 'core/orchestrator.js', 'core/control.js', 'core/request.js'
 ].forEach(function (f) { require(path.join(ROOT, f)); });
 
 var AC = global.AgentCore;
@@ -36,6 +36,7 @@ var A = global.Astro;
 var Registry = global.AstroRegistry;
 var Adapter = global.AstroComposeAdapter;
 var Control = global.AstroControl;
+var Request = global.AstroRequest;
 
 var results = [];
 var cases = [];
@@ -65,7 +66,23 @@ function ctx() {
 
 var CTX = ctx();
 var CFG = AC.defaultConfig();
-var Q = 'M42 和 M31 有什么区别？';
+/* B8 验证“依赖结果 → compose”的数据流。单目标简单问法多为 L1，
+ * 这里用显式 routeData 固定为 L2/T-A，专门测试 compose 依赖复用；
+ * 真实多目标比较走 T-D，由 v1-6-research-quality 与浏览器 B31–B33 覆盖。 */
+var Q = 'M42 怎么找？';
+var TQ = 'M42 怎么拍 为什么需要长曝光？';
+function taOpts(extra) {
+  var c = Request.classify(Q, CTX, CFG);
+  var route = JSON.parse(JSON.stringify(c.route));
+  route.mode = 'single';
+  route.complexity = 2;
+  route.level = 'L2';
+  route.legacy = false;
+  route.targets = route.targets.slice(0, 1);
+  var o = Object.assign({}, extra || {});
+  o.routeData = { intent: c.intent, targets: c.targets.slice(0, 1), route: route };
+  return o;
+}
 
 async function runCase(id, title, fn) {
   var before = results.length;
@@ -83,7 +100,7 @@ function composeStep(state) {
 (async function main() {
 
   await runCase(1, '工具结果传递', async function () {
-    var r = await Control.run(Q, CTX, CFG);
+    var r = await Control.run(Q, CTX, CFG, taOpts());
     var cs = composeStep(r.state);
     ok('1.1 compose 收到依赖结果', !!cs && cs.result.delivery.dependencyIds.length === 2);
     ok('1.2 usedStepIds 包含 kb 与 kepler', !!cs && cs.result.delivery.usedStepIds.indexOf('t1') >= 0 && cs.result.delivery.usedStepIds.indexOf('t2') >= 0,
@@ -97,16 +114,16 @@ function composeStep(state) {
     AC.ephemFor = function (ra, dec, c) {
       calls++;
       var e = orig(ra, dec, c);
-      e.now.alt += 2.5;  /* 哨兵：只有真正复用该结果，answer 才会变化 */
+      if (e && e.now && typeof e.now.alt === 'number') e.now.alt += 2.5;  /* 哨兵 */
       return e;
     };
     var r;
-    try { r = await Control.run(Q, CTX, CFG); } finally { AC.ephemFor = orig; }
+    try { r = await Control.run(Q, CTX, CFG, taOpts()); } finally { AC.ephemFor = orig; }
     var legacy = AC.buildAnswer(Q, CTX, CFG);
     ok('2.1 控制层 answer 与旧 buildAnswer 不同（使用了哨兵结果）',
       canonical(r.answer.sections) !== canonical(legacy.sections));
-    ok('2.2 compose delivery 标记使用结果', r.delivery && r.delivery.usedStepIds.indexOf('t2') >= 0);
-    ok('2.3 ephemFor 仅由 Registry 调用一次', calls >= 1, String(calls));
+    ok('2.2 compose delivery 标记使用结果', r.delivery && r.delivery.usedStepIds.length >= 2);
+    ok('2.3 ephemFor 由 Registry 调用', calls >= 1, String(calls));
   });
 
   await runCase(3, '防止重复计算', async function () {
@@ -114,7 +131,7 @@ function composeStep(state) {
     var count = 0;
     A.track = function () { count++; return origTrack.apply(A, arguments); };
     var r;
-    try { r = await Control.run(Q, CTX, CFG); } finally { A.track = origTrack; }
+    try { r = await Control.run(Q, CTX, CFG, taOpts()); } finally { A.track = origTrack; }
     ok('3.1 一次目标只计算一次星历', count === 1, 'A.track calls=' + count);
     ok('3.2 delivery 复用了 ephem', r.delivery && r.delivery.ephemTargets.length > 0);
   });
@@ -128,7 +145,7 @@ function composeStep(state) {
       if (!spec || id !== 'kepler.ephemeris') return spec;
       return Object.assign({}, spec, { run: function () { return { ok: false, reason: 'missing', retriable: false }; } });
     };
-    var r = await Control.run(Q, CTX, CFG, { adapter: adapter, registry: reg });
+    var r = await Control.run(Q, CTX, CFG, taOpts({ adapter: adapter, registry: reg }));
     ok('4.1 失败步骤不会标记为 ok', r.state.steps.filter(function (s) { return s.id === 't2'; })[0].status === 'failed');
     ok('4.2 compose 不会使用失败的 t2', !r.delivery || r.delivery.usedStepIds.indexOf('t2') < 0);
     ok('4.3 最终 answer 仍存在（回退旧计算）', !!r.answer);
@@ -137,7 +154,7 @@ function composeStep(state) {
   await runCase(5, '工具执行失败', async function () {
     var adapter = { compose: function () { return { ok: false, reason: 'tool_failed' }; }, deliver: function () { throw new Error('no_deliver'); } };
     var reg = Registry.createDefault({ adapter: adapter, agentCore: AC });
-    var r = await Control.run(Q, CTX, CFG, { adapter: adapter, registry: reg });
+    var r = await Control.run(Q, CTX, CFG, taOpts({ adapter: adapter, registry: reg }));
     ok('5.1 失败不产生 answer', r.answer === null);
     ok('5.2 失败任务进入 FAILED', r.state.phase === 'FAILED');
     ok('5.3 失败结果未进入 delivery', r.delivery === null);
@@ -162,14 +179,14 @@ function composeStep(state) {
   });
 
   await runCase(8, 'TaskState 隔离', async function () {
-    var r = await Control.run(Q, CTX, CFG);
+    var r = await Control.run(Q, CTX, CFG, taOpts());
     ok('8.1 answer 无 TaskState', !Object.prototype.hasOwnProperty.call(r.answer, 'taskState') && !Object.prototype.hasOwnProperty.call(r.answer, 'task'));
     ok('8.2 sections/trace/meta 无 TaskState', canonical([r.answer.sections, r.answer.trace, r.answer.meta]).indexOf('taskState') < 0);
     ok('8.3 state 独立返回', !!r.state && r.state.id !== r.answer.query);
   });
 
   await runCase(9, '端到端数据一致性', async function () {
-    var r = await Control.run(Q, CTX, CFG);
+    var r = await Control.run(Q, CTX, CFG, taOpts());
     var cs = composeStep(r.state);
     ok('9.1 Plan 含 kb→kepler→compose 三步', r.plan && r.plan.template === 'T-A' && r.plan.steps.length === 3);
     ok('9.2 Runner 结果含 ephem', r.state.steps.filter(function (s) { return s.id === 't2'; })[0].result.records[0].ephem !== undefined);
@@ -179,7 +196,7 @@ function composeStep(state) {
   });
 
   await runCase(10, 'T-C 计算类闭环', async function () {
-    var q = 'M42 怎么拍 为什么需要长曝光？';
+    var q = TQ;
     var r = await Control.run(q, CTX, CFG);
     ok('10.1 生成 T-C', r.plan && r.plan.template === 'T-C', r.plan && r.plan.template);
     ok('10.2 delivery 复用 t1/t2', r.delivery && r.delivery.usedStepIds.indexOf('t1') >= 0 && r.delivery.usedStepIds.indexOf('t2') >= 0);

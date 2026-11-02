@@ -99,9 +99,15 @@ function offlineRuntime() {
       c.route.level + '/' + c.route.mode);
     var rt = offlineRuntime();
     var r = await Request.handle(q, CTX, CFG, rt);
-    ok('R3.2 进入控制层并生成计划', r.control.plan && r.control.plan.template === 'T-A',
+    /* 比较型问题必须走 T-D；旧断言期望 T-A，会把第二个目标丢掉。 */
+    ok('R3.2 进入控制层并生成 T-D 计划', r.control.plan && r.control.plan.template === 'T-D',
       r.control.plan && r.control.plan.template);
     ok('R3.3 answer 存在', !!r.answer);
+    var cmp = (r.answer.sections || []).filter(function (s) { return s.kind === 'compare'; })[0];
+    ok('R3.4 对比章节包含两个目标',
+      cmp && cmp.items.length === 2 && cmp.items[0].text.indexOf('距离') >= 0 &&
+      cmp.items[1].text.indexOf('距离') >= 0,
+      cmp && cmp.items.map(function (x) { return x.name; }).join(','));
   });
 
   await runCase('R4', 'L4 综合研究进入 T-E', async function () {

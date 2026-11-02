@@ -15,6 +15,47 @@
 (function (root) {
   'use strict';
 
+  /* 对比回答需要每个目标的同口径事实：距离/类型/星等来自本地知识库，
+   * 高度/方位/可见性来自同一次星历计算。只读取既有字段，不新增数据源。 */
+  function knowledgeFactsOf(name) {
+    var K = root.KNOWLEDGE;
+    if (!K || !Array.isArray(K.entries) || !name) return [];
+    var key = String(name).toLowerCase();
+    for (var i = 0; i < K.entries.length; i++) {
+      var e = K.entries[i];
+      if (!e) continue;
+      var aliases = (e.aliases || []).map(function (a) { return String(a).toLowerCase(); });
+      if (String(e.cn) === name || String(e.en) === name || String(e.id) === name ||
+        aliases.indexOf(key) >= 0) {
+        var facts = (e.facts || []).filter(function (f) { return f && f[0] && f[1]; });
+        /* 对比优先展示可横向比较的字段；知识库条目顺序不一致，不能简单取前三条。 */
+        var wanted = ['距离', '类型', '视星等', '直径', '质量'];
+        var out = [], used = {};
+        wanted.forEach(function (label) {
+          for (var j = 0; j < facts.length; j++) {
+            if (String(facts[j][0]) === label && !used[j]) {
+              used[j] = 1;
+              out.push(String(facts[j][0]) + ' ' + String(facts[j][1]));
+              break;
+            }
+          }
+        });
+        for (var k = 0; k < facts.length && out.length < 3; k++) {
+          if (!used[k]) out.push(String(facts[k][0]) + ' ' + String(facts[k][1]));
+        }
+        return out.slice(0, 4);
+      }
+    }
+    return [];
+  }
+
+  function visibilityLabel(score) {
+    if (score == null || !isFinite(score)) return '';
+    if (score >= 0.75) return '可见性 较易';
+    if (score >= 0.5) return '可见性 中等';
+    return '可见性 较难';
+  }
+
   function create(options) {
     options = options || {};
     var AC = options.agentCore || root.AgentCore;
@@ -152,16 +193,19 @@
         kind: 'compare',
         title: '多目标对比',
         items: records.map(function (rec, i) {
+          var facts = knowledgeFactsOf(rec.target);
+          var score = rec.ephem && rec.ephem.score != null ? rec.ephem.score : null;
           return {
             name: rec.target,
             dot: colors[i % colors.length],
             sigil: String(i + 1),
-            text: [
+            text: facts.concat([
+              visibilityLabel(score),
               rec.ra != null ? 'RA ' + rec.ra.toFixed(4) : '',
               rec.dec != null ? 'Dec ' + rec.dec.toFixed(4) : '',
               rec.alt != null ? '高度 ' + rec.alt.toFixed(1) + '°' : '',
               rec.az != null ? '方位 ' + rec.az.toFixed(1) + '°' : ''
-            ].filter(Boolean).join(' · ') || '仅有目标名称，缺少可比参数',
+            ]).filter(Boolean).join(' · ') || '仅有目标名称，缺少可比参数',
             latency: 0
           };
         })

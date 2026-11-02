@@ -46,7 +46,8 @@ var CORE_TESTS = [
   'tools/v1-4-paper-attachment-test.js', 'tools/v1-4-cloud-control-test.js',
   'tools/v1-5-perf-test.js', 'tools/v1-5-concurrency-test.js', 'tools/v1-5-store-stress-test.js',
   'tools/v1-5-research-loop-test.js', 'tools/v1-6-legacy-test.js',
-  'tools/v1-6-pdf-fixtures-test.js', 'tools/v1-6-provider-test.js'
+  'tools/v1-6-pdf-fixtures-test.js', 'tools/v1-6-research-quality-test.js',
+  'tools/v1-6-provider-test.js'
 ];
 var BROWSER_TESTS = [
   'tools/selftest.js', 'tools/store-test.js', 'tools/skill-test.js', 'tools/consistency-test.js',

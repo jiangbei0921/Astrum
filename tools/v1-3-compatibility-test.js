@@ -65,7 +65,16 @@ function ok(name, cond, extra) { if (cond) pass++; else fails.push(name + (extra
     try {
       var r = await Request.handle(q, CTX, CFG, { registry: registry, store: null });
       var old = AC.buildAnswer(q, CTX, CFG);
-      ok('Q' + (i + 1) + ' sections', T.canonicalJSON(r.answer && r.answer.sections) === T.canonicalJSON(old.sections));
+      var tpl = r.control && r.control.plan && r.control.plan.template;
+      if (tpl === 'T-D') {
+        /* 用户授权基线更新：显式比较新增 compare；原有 sections 必须不变。 */
+        var base = (r.answer && r.answer.sections || []).filter(function (s) { return s.kind !== 'compare'; });
+        var cmp = (r.answer && r.answer.sections || []).filter(function (s) { return s.kind === 'compare'; })[0];
+        ok('Q' + (i + 1) + ' sections', T.canonicalJSON(base) === T.canonicalJSON(old.sections) &&
+          !!cmp && (cmp.items || []).length === 2);
+      } else {
+        ok('Q' + (i + 1) + ' sections', T.canonicalJSON(r.answer && r.answer.sections) === T.canonicalJSON(old.sections));
+      }
     } catch (e) { fails.push('Q' + (i + 1) + ' error ' + e.message); }
   }
 

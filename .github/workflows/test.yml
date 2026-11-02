@@ -176,6 +176,9 @@ jobs:
       - name: V1.6 复杂 PDF 合成样本 v1-6-pdf-fixtures-test
         run: node tools/v1-6-pdf-fixtures-test.js
 
+      - name: V1.6 研究场景质量 v1-6-research-quality-test
+        run: node tools/v1-6-research-quality-test.js
+
       # 无 Key 时脚本以 exit 2 返回 BLOCKED_API_KEY；有 Key 时只校验配置并提示手动运行真实调用。
       - name: V1.6 真实 Provider 配置检查
         run: |

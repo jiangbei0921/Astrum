@@ -79,9 +79,20 @@ var CFG = AC.defaultConfig();
     try {
       var r = await Request.handle(q, CTX, CFG, { adapter: adapter, registry: registry, store: null });
       var old = AC.buildAnswer(q, CTX, CFG);
-      var same = T.canonicalJSON(r.answer && r.answer.sections) === T.canonicalJSON(old.sections);
+      var tpl = r.control && r.control.plan && r.control.plan.template;
+      var same;
+      if (tpl === 'T-D') {
+        /* 用户授权的基线更新：显式比较新增 compare 章节；
+         * 原有 sections 仍必须逐字节一致，且 compare 必须含两个目标。 */
+        var base = (r.answer && r.answer.sections || []).filter(function (s) { return s.kind !== 'compare'; });
+        var cmp = (r.answer && r.answer.sections || []).filter(function (s) { return s.kind === 'compare'; })[0];
+        same = T.canonicalJSON(base) === T.canonicalJSON(old.sections) &&
+          !!cmp && (cmp.items || []).length === 2;
+      } else {
+        same = T.canonicalJSON(r.answer && r.answer.sections) === T.canonicalJSON(old.sections);
+      }
       if (same) pass++;
-      else fails.push({ q: q, mode: r.mode, template: r.control && r.control.plan && r.control.plan.template });
+      else fails.push({ q: q, mode: r.mode, template: tpl });
     } catch (e) {
       fails.push({ q: q, error: String(e && e.message) });
     }

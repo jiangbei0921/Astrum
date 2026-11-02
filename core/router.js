@@ -41,17 +41,20 @@
       var t = list[i];
       var m = String((t && t.match) || '').toLowerCase();
       if (!m || !isCatalogAlias(m)) { out.push(t); continue; }
-      var drop = false;
+      /* 先收集所有“包含当前短编号”的更长编号，再把它们从查询里全部挖掉。
+       * 旧实现逐个替换，`m33` 被替换后仍含 `m3`，导致 m3 留在结果里。 */
+      var longer = [];
       for (j = 0; j < list.length; j++) {
         var o = list[j];
         var om = String((o && o.match) || '').toLowerCase();
         var sameItem = (t && t.item) === (o && o.item);
         if (j === i || sameItem || !isCatalogAlias(om) || om.length <= m.length) continue;
         if (om.indexOf(m) < 0) continue;
-        /* 把长编号整体挖掉后，短编号是否还剩独立出现 */
-        var rest = q.split(om).join('');
-        if (countOccurrences(rest, m) === 0) { drop = true; break; }
+        longer.push(om);
       }
+      var rest = q;
+      longer.forEach(function (om) { rest = rest.split(om).join(' '); });
+      var drop = longer.length > 0 && countOccurrences(rest, m) === 0;
       if (!drop) out.push(t);
     }
     return out;
