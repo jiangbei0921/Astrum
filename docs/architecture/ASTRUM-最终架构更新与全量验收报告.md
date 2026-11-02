@@ -149,4 +149,8 @@ B12 文本进入上下文
 | commit message | `test: verify browser recovery, attachments and rollback drill` |
 | push | 正常 push，无 force |
 | 本地/远端 | 一致 `5aa644a` |
-| Actions | 推送后运行；以最终报告补充为准 |
+| Actions test | Run `41411083290` success（5aa644a） |
+| Actions pages | Run `41411228469` success（5aa644a） |
+| 线上 version.json | commit `5aa644a`、dirty=false、runId 41411228469 |
+| 线上浏览器验证 | 首页/13 Agent/核心问答/无 console/CSP/404 全 PASS |
+| 线上开发文件隔离 | tools/docs 均 404 |
