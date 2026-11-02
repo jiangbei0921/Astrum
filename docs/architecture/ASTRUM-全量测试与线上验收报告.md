@@ -22,6 +22,7 @@
 | V1.5 | perf / concurrency / research-loop / claims | 指标输出、17/17、29/29、48/48 |
 | V1.6 legacy | `node tools/v1-6-legacy-test.js` | 23/23 |
 | V1.6 PDF fixtures | `node tools/v1-6-pdf-fixtures-test.js` | 39/39 |
+| V1.6 研究质量 | `node tools/v1-6-research-quality-test.js` | 22/22 |
 | 长跑 smoke | `node tools/v1-5-longrun-test.js --minutes=1 --label=LR-FINAL-SMOKE` | 18/18 |
 | 抓取器 / 部署 / CSP / CI | daily / deploy / csptest / v1-4-ci | 31/31、20/20、6/6、22/22 |
 
@@ -53,9 +54,11 @@
 | v1-5-resource | 13/13 |
 | v1-5-cache | 15/15 |
 | v1-5-bigfile | 13/13（FITS 200MB、PDF 10MB、重复 10 次） |
-| v1-6-browser | 33/33 |
+| v1-6-browser | 36/36（新增对比 UI B31–B33） |
 
-`v1-6-browser` 覆盖：任务种入/刷新列表/逐个恢复/步骤面板/失败步骤；TXT/BOM/空/二进制伪装/PNG/JPG/WebP/超大/MIME 冲突/多附件隔离；真实 PDF 字节 HTTP 下载/解析/全文 UI/章节/页码/chunk；扫描件失败；375px 窄屏无横向溢出。
+`v1-6-browser` 覆盖：任务种入/刷新列表/逐个恢复/步骤面板/失败步骤；TXT/BOM/空/二进制伪装/PNG/JPG/WebP/超大/MIME 冲突/多附件隔离；真实 PDF 字节 HTTP 下载/解析/全文 UI/章节/页码/chunk；扫描件失败；375px 窄屏无横向溢出；M31/M33 对比 UI 两个目标与距离/类型/可见性。
+
+本轮研究质量修复另见 `ASTRUM-研究质量与调度修复报告.md`：M42 论文检索从无关考古论文修正为 Orion 论文；M42/M33 目标碰撞修复；显式比较走 T-D；200mm 拍摄参数与焦距公式修正；全文失败原因分类。
 
 ## 4. 20 问兼容
 

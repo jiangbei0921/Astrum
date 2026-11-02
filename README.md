@@ -224,7 +224,10 @@ node tools/v1-6-legacy-test.js
 node tools/v1-6-pdf-fixtures-test.js
 node tools/v1-6-pdf-fixtures-test.js --write   # 可选：落盘到 tools/fixtures/pdf/
 
-# 多任务恢复、附件、真实 PDF 字节、Research UI、失败步骤、窄屏（33 项，需 Chrome）
+# 研究场景质量（目标碰撞/检索式/对比/拍摄参数/全文失败原因，22 项）
+node tools/v1-6-research-quality-test.js
+
+# 多任务恢复、附件、真实 PDF 字节、Research UI、失败步骤、窄屏、对比 UI（36 项，需 Chrome）
 node tools/v1-6-browser-test.js
 
 # 真实 Provider 配置检查（无 Key 时 exit 2 / BLOCKED_API_KEY）
