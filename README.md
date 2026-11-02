@@ -217,6 +217,19 @@ node tools/research-test.js
 # 再加上真实联网测试
 node tools/research-test.js --online
 
+# V1.6 跨版本遗留（23 项）
+node tools/v1-6-legacy-test.js
+
+# 复杂 PDF 合成样本（13 类 / 39 项）
+node tools/v1-6-pdf-fixtures-test.js
+node tools/v1-6-pdf-fixtures-test.js --write   # 可选：落盘到 tools/fixtures/pdf/
+
+# 多任务恢复、附件、真实 PDF 字节、Research UI、失败步骤、窄屏（33 项，需 Chrome）
+node tools/v1-6-browser-test.js
+
+# 真实 Provider 配置检查（无 Key 时 exit 2 / BLOCKED_API_KEY）
+node tools/v1-6-provider-test.js
+
 # CSP 拦截 / CORS / 断网 三类失败的区分（6 项，需 Chrome）
 node tools/csptest.js
 
@@ -239,7 +252,8 @@ node tools/build-standalone.js
 | 维基百科 | 部分地区网络不可达，检索会自动降级到其他源 |
 | Chrome 内置 AI | 需特定硬件；官方语言列表暂不含中文 |
 | FITS | 只解析头信息，不解析像素（不做拉伸、伪彩、测光） |
-| PDF / DOCX | 暂不解析，按「未解析」标注，不谎称能读 |
+| PDF | 解析文本层（章节/页码/chunks/CID+ToUnicode）；扫描件无 OCR，明确 `pdf_no_text`；复杂版面不还原 |
+| DOCX | 暂不解析，按「未解析」标注，不谎称能读 |
 | 实时数据 | 云量、空间天气等需外部接口，未接入 |
 
 ---

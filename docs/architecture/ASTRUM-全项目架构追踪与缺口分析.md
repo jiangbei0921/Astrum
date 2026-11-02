@@ -153,3 +153,23 @@ Router → Planner → TaskState → Orchestrator → Runner → Tools
 | ARCH-30 V1.6 | DEFERRED | DEFERRED | 12 候选未启动 |
 
 补充：L03 T-B/T-D 复用、L12 搜索依赖、L16 边界、L20 SEM、L25 HTML 全文、L29 chunk 粒度、L37 会话缓存已补齐；复杂 PDF/页码、附件、浏览器 UI 仍 PARTIAL。
+
+---
+
+## 8. 2026-11-02 最终复核（覆盖 §7）
+
+| ID | 最新状态 | 证据 |
+|---|---|---|
+| ARCH-03/07 实时进度 | COMPLETE | 浏览器 B5/B6/B29；Node L17；失败步骤显示原因 |
+| ARCH-27 云端 Control | PARTIAL（仅真实 Key） | 分类 4/4；`BLOCKED_API_KEY`；协议/Schema/降级完成 |
+| ARCH-28 Pages | COMPLETE | Actions + 线上 `version.json`；最终发布回填 |
+| ARCH-29 长时/IDB | COMPLETE | 30/60/180m；IDB 7/7；bigfile 13/13 |
+| ARCH-30 V1.6 | BLOCKED_EXTERNAL（NOT_STARTED） | 门槛 2/5；不启动 |
+
+工程补齐：
+
+- 复杂 PDF：`tools/v1-6-pdf-fixtures-test.js` 13 类 / 39 断言；CID+ToUnicode、加密识别、扫描件失败分类、双栏/表格/图注/罗马页码/页码偏移。
+- 附件：MIME/扩展名双向冲突拒绝、二进制伪装文本失败、单附件失败隔离；浏览器 B8–B17c。
+- UI：B18–B30 覆盖 Research UI、真实 PDF 字节全文 UI、空/长文本、失败步骤、窄屏。
+- CI：v1-6 legacy/pdf/browser/provider 已纳入 workflow。
+- 真实复杂 PDF 与真实 Key 仍为外部条件，详见 `ASTRUM-外部条件与剩余验证说明.md`。

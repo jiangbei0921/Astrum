@@ -1,0 +1,154 @@
+# ASTRUM 外部条件与剩余验证说明
+
+> 日期：2026-11-02
+> 原则：仅记录真正依赖外部输入/授权的事项；本地可执行项已在本轮完成。
+> 禁止：把 API Key 粘贴到聊天、代码、日志、截图或 Git；使用本地环境变量或系统密钥管理。
+
+---
+
+## 1. 真实 Cloud Provider
+
+### 1.1 当前状态
+
+- 代码路径：`core/control-bridge.js` → `core/sources.js` → Provider 请求；JSON 输出、Schema 校验、错误分类、重试/降级入口已实现。
+- 本地验证：`v1-6-provider-test.js` 分类 4/4（auth / rate_limit / timeout / network），结果 `RESULT BLOCKED_API_KEY`，exit 2。
+- 未执行：真实模型网络调用；未伪造任何真实返回。
+
+### 1.2 所需环境变量（只在本地 shell 设置，不写入仓库）
+
+```powershell
+$env:ASTRUM_LIVE_PROVIDER = "openai-compatible"   # 或 gemini / anthropic
+$env:ASTRUM_LIVE_BASE_URL = "https://api.openai.com/v1"
+$env:ASTRUM_LIVE_MODEL    = "gpt-4o-mini"
+$env:ASTRUM_LIVE_API_KEY  = "<在本地安全输入，不要发到聊天>"
+```
+
+> `ASTRUM_LIVE_BASE_URL` 必须与 Provider 形状匹配；不要把它写进 `.env` 后提交。仓库没有 `.env` 加载器。
+
+### 1.3 运行命令
+
+```powershell
+node tools/v1-6-provider-test.js
+```
+
+预期：
+
+- 无 Key：`RESULT BLOCKED_API_KEY`，exit 2；这是当前状态。
+- 有 Key：脚本校验配置并提示真实调用入口；真实调用需在本地运行 `core/control-bridge.js` 的 `modelGenerate` 场景（或使用应用设置页“测试连接”），不得把 Key 写入测试代码。
+
+### 1.4 验收标准
+
+| 项 | 通过条件 |
+|---|---|
+| auth | 401/403 → `auth`，不重试 |
+| rate_limit | 429 → `rate_limit`，保留降级 |
+| timeout | 超时 → `timeout`，可重试但不无限 |
+| server/network | 5xx/断网 → `server`/`network`，保留本地确定性结果 |
+| schema | 非 JSON/字段缺失 → `schema`，不写入答案 |
+| 空值/截断 | 明确失败或降级，不伪造数字 |
+| 多模型路由 | 仍按原架构评分/回退，不新增模型注册中心 |
+| 旧模型命名 | 旧名迁移兼容测试通过 |
+
+## 2. 真实复杂 PDF 样本
+
+### 2.1 当前状态
+
+- 已建立合成样本集：`tools/v1-6-pdf-fixtures-test.js`，39/39。
+- 覆盖：普通、双栏、扫描、CID+ToUnicode、CID 无映射、公式、表格、图注、罗马页码、物理/印刷页码偏移、混合、加密、截断。
+- 未覆盖：真实出版社 PDF 的复杂版面、真实扫描件 OCR、真实 CID 字体子集、真实双栏阅读顺序。
+
+### 2.2 需要的样本（合法公开许可）
+
+| 类型 | 要求 | 验收 |
+|---|---|---|
+| 扫描版 | 无文本层，公开许可 | `pdf_no_text`，不生成证据 |
+| CID 字体 | Type0/Identity-H，最好含 ToUnicode | 有 ToUnicode → 正确 Unicode；无 → `pdf_cid_unsupported` |
+| 双栏 | 真实期刊/会议排版 | 阅读顺序、章节边界正确；错序时明确报告 |
+| 公式/表格/图注 | 含数学符号、表格、Figure caption | 文本/公式/表格单元/图注可追溯 |
+| 罗马页码 | 前言用 i/ii/iii | 物理页码与印刷页码分别记录，不混淆 |
+| 页码偏移 | 印刷页码 ≠ 物理页码 | 报告明确映射限制 |
+| 混合复杂 | 文本+公式+表格+图注 | 不把错误提取当成功 |
+
+### 2.3 放置与运行
+
+将合法样本放到仓库外的本地目录（例如 `D:\astrum-pdf-samples\`），不要提交受限版权 PDF。用临时脚本或测试读取：
+
+```powershell
+node tools/v1-6-pdf-fixtures-test.js --write   # 生成合成样本到 tools/fixtures/pdf/
+```
+
+真实样本验证时，把 `AstroPdfText.parse` 的输出与人工核对表逐项比对；失败类型必须记录为 `pdf_no_text` / `pdf_cid_unsupported` / `pdf_encrypted` 等，不得改写为成功。
+
+## 3. 正式线上回滚与紧急下线
+
+### 3.1 当前状态
+
+- 隔离演练已完成：目标 `7e50227`，构建 58 文件，首页/version/app/css 200，停服 DOWN，重启恢复 200。
+- 正式 Pages 未被关闭、未删除资源、未执行不可逆操作。
+- 脚本/步骤见 `docs/operations/ASTRUM-最终发布与回滚手册.md`。
+
+### 3.2 需要的授权
+
+| 操作 | 授权要求 |
+|---|---|
+| 正式回滚到旧 commit | 明确目标 commit、影响范围、时间窗口 |
+| 紧急下线 | 明确是关闭 Pages、切回旧源还是撤下 artifact |
+| 强制重发 Pages | 明确 workflow_dispatch 的提交 |
+
+### 3.3 验收标准
+
+- 回滚后 `version.json.commit` 等于目标 commit；
+- 首页/核心资源 200；
+- 13 Agent、核心问答、Research、全文页面可用；
+- 浏览器无严重 console/CSP 错误；
+- 缓存/Service Worker 不导致新旧版本混用（当前无 SW；Pages 缓存由 `Cache-Control` 与版本文件校验）。
+
+## 4. 外部搜索/网络
+
+### 4.1 当前观测
+
+- `v1-4-network-ci.js`：79/82；SUITES 6/7。
+- 不可达：Wikipedia、Semantic Scholar（当前网络）。
+- 可用：arXiv、SIMBAD、OpenAlex、export.arxiv.org。
+
+### 4.2 已实现的降级
+
+- 端点链与备用来源；
+- 超时/重试/退避；
+- 429 限流识别；
+- 搜索缓存（TTL/主动清理）；
+- 部分成功保留有效结果；
+- 失败原因呈现，不标记为成功。
+
+### 4.3 复验命令
+
+```powershell
+node tools/v1-4-network-ci.js
+```
+
+验收：可达主机返回结果、保留原始链接、不出现无关结果；不可达主机必须标记为外部不可用，不得伪造条目。
+
+## 5. 长时运行
+
+- 上一轮已完成 30/60/180 分钟（LR-01/02/03，180 分钟采样 178/180）。
+- 本轮补 1 分钟 smoke；未重跑 3 小时。
+- 复验：
+
+```powershell
+node tools/v1-5-longrun-test.js --minutes=30 --label=LR-01 --out=lr-01.log
+node tools/v1-5-longrun-test.js --minutes=60 --label=LR-02 --out=lr-02.log
+node tools/v1-5-longrun-test.js --minutes=180 --label=LR-03 --out=lr-03.log
+```
+
+验收：无持续内存增长、无任务串扰、无预算越界、取消/恢复可用。
+
+## 6. 外部条件汇总
+
+| 项 | 状态 | 最后一步 |
+|---|---|---|
+| 真实 Provider Key | BLOCKED_API_KEY | 本地设置 4 个环境变量后运行 `node tools/v1-6-provider-test.js`，再在应用设置页“测试连接” |
+| 真实复杂 PDF | BLOCKED_SAMPLE | 提供合法公开样本到仓库外目录，按 §2.3 验证 |
+| 正式回滚/下线 | BLOCKED_AUTHORIZATION | 明确目标 commit/影响范围后执行手册步骤 |
+| Wikipedia/Semantic | ENV_LIMITATION | 换网络或代理后重跑 network CI；不伪造结果 |
+| 180 分钟长跑 | 已完成（历史） | 需要新一轮时按 §5 重跑 |
+</content>

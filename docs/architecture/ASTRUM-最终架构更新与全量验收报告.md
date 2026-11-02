@@ -154,3 +154,31 @@ B12 文本进入上下文
 | 线上 version.json | commit `5aa644a`、dirty=false、runId 41411228469 |
 | 线上浏览器验证 | 首页/13 Agent/核心问答/无 console/CSP/404 全 PASS |
 | 线上开发文件隔离 | tools/docs 均 404 |
+
+---
+
+## 10. 2026-11-02 最终复核（覆盖 §2–§4 的旧数字）
+
+| 项 | 最终值 |
+|---|---|
+| `v1-6-browser` | **33/33**（新增 B17a–c、B22–B30） |
+| `v1-6-pdf-fixtures` | **39/39**（13 类合成 PDF） |
+| 附件 | TXT/BOM/空/二进制伪装/PNG/JPG/WebP/超大/MIME 双向冲突/多附件隔离 |
+| 复杂 PDF | CID+ToUnicode 解码、CID 无映射 `pdf_cid_unsupported`、加密全文件识别、扫描件 `pdf_no_text` |
+| 全文 UI | 真实 PDF 字节经 HTTP（B23–B25）；扫描件零证据（B26） |
+| 失败 UI | B27–B29 失败步骤显示“失败”+错误原因 |
+| 窄屏 | B30 375px 无横向溢出 |
+| Node 全量 | 全部通过；PDF fixtures 39/39；legacy 23/23 |
+| Chrome 全量 | 全部通过；selftest 156/156、v1-6 33/33 |
+| 构建 | `_site` 58 文件 / 1,680,982 B；standalone 1,616 KB |
+| Provider | 分类 4/4；`BLOCKED_API_KEY` |
+| 外部网络 | 79/82；Wikipedia/Semantic 不可达，未伪造 |
+
+最终交付与逐项矩阵见：
+
+- `ASTRUM-最终工程实施报告.md`
+- `ASTRUM-原始架构逐项完成度对照表.md`
+- `ASTRUM-全量测试与线上验收报告.md`
+- `ASTRUM-最终架构文档.md`
+- `ASTRUM-外部条件与剩余验证说明.md`
+- `docs/operations/ASTRUM-最终发布与回滚手册.md`
