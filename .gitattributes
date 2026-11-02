@@ -1,0 +1,10 @@
+# 二进制 fixture 不做行尾转换，避免 PDF/图片字节被改写
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.fits binary
+*.fit binary
+</content>

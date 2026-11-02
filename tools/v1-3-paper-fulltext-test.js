@@ -75,7 +75,15 @@ var CTX = { y: 2026, mo: 10, d: 31, h: 21, mi: 0, lat: 39.9, lon: 116.4, tz: 8, 
   });
 
   await runCase('P2', '资源限制/类型/取消', async function () {
-    var big = await FT.fetchPdf(FT.resolveUrl(REAL_PAPER), { maxBytes: 1000 });
+    /* 大小限制是纯本地逻辑，不依赖真实网络；离线 CI 也必须稳定通过。 */
+    var oldFetchBig = global.fetch;
+    global.fetch = function () {
+      return Promise.resolve(new Response(new Uint8Array(2048),
+        { headers: { 'content-type': 'application/pdf', 'content-length': '2048' } }));
+    };
+    var big;
+    try { big = await FT.fetchPdf(FT.resolveUrl(REAL_PAPER), { maxBytes: 1000 }); }
+    finally { global.fetch = oldFetchBig; }
     ok('P2.1 大小限制', big.ok === false && big.code === 'pdf_too_large', big.code);
     var oldFetch2 = global.fetch;
     global.fetch = function () {

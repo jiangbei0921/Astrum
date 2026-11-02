@@ -1,0 +1,58 @@
+%PDF-1.4
+1 0 obj
+<</Type/Catalog/Pages 2 0 R>>
+endobj
+2 0 obj
+<</Type/Pages/Kids[9 0 R 10 0 R 11 0 R]/Count 3>>
+endobj
+5 0 obj
+<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>
+endobj
+6 0 obj
+<< /Length 119 >>
+stream
+BT /F1 10 Tf 50 720 Td
+(Page i) Tj
+T*
+(Preface) Tj
+T*
+(This preface introduces the synthetic roman page fixture.) Tj
+ET
+endstream
+endobj
+7 0 obj
+<< /Length 146 >>
+stream
+BT /F1 10 Tf 50 720 Td
+(Page ii) Tj
+T*
+(1. INTRODUCTION) Tj
+T*
+(The introduction explains why roman page labels differ from physical pages.) Tj
+ET
+endstream
+endobj
+8 0 obj
+<< /Length 141 >>
+stream
+BT /F1 10 Tf 50 720 Td
+(Page iii) Tj
+T*
+(2. RESULTS) Tj
+T*
+(The results confirm that physical page numbers remain 1 2 3 in the parser.) Tj
+ET
+endstream
+endobj
+9 0 obj
+<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]/Resources<</Font<</F1 5 0 R>>>>/Contents 6 0 R>>
+endobj
+10 0 obj
+<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]/Resources<</Font<</F1 5 0 R>>>>/Contents 7 0 R>>
+endobj
+11 0 obj
+<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]/Resources<</Font<</F1 5 0 R>>>>/Contents 8 0 R>>
+endobj
+trailer
+<</Size 12>>
+%%EOF

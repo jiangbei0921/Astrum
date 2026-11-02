@@ -1,0 +1,72 @@
+%PDF-1.4
+1 0 obj
+<</Type/Catalog/Pages 2 0 R>>
+endobj
+2 0 obj
+<</Type/Pages/Kids[9 0 R]/Count 1>>
+endobj
+5 0 obj
+<</Type/Font/Subtype/Type0/BaseFont/SimSun/Encoding/Identity-H/DescendantFonts[6 0 R]/ToUnicode 7 0 R>>
+endobj
+6 0 obj
+<</Type/Font/Subtype/CIDFontType2/BaseFont/SimSun>>
+endobj
+7 0 obj
+<< /Length 661 >>
+stream
+/CIDInit /ProcSet findresource begin
+12 dict begin
+begincmap
+/CIDSystemInfo << /Registry (Adobe) /Ordering (UCS) /Supplement 0 >> def
+/CMapName /Adobe-Identity-UCS def
+/CMapType 2 def
+1 begincodespacerange
+<0000> <FFFF>
+endcodespacerange
+24 beginbfchar
+<000E> <0031>
+<0009> <0032>
+<000F> <0033>
+<0008> <0034>
+<0001> <730E>
+<0002> <6237>
+<0003> <5EA7>
+<0004> <5927>
+<0005> <661F>
+<0006> <4E91>
+<0007> <004D>
+<000A> <7684>
+<000B> <8DDD>
+<000C> <79BB>
+<000D> <662F>
+<0010> <5149>
+<0011> <5E74>
+<0012> <FF0C>
+<0013> <6D4B>
+<0014> <91CF>
+<0015> <8BEF>
+<0016> <5DEE>
+<0017> <4E3A>
+<0018> <3002>
+endbfchar
+endcmap
+CMapName currentdict /CMap defineresource pop
+end
+end
+
+endstream
+endobj
+8 0 obj
+<< /Length 151 >>
+stream
+BT /F1 10 Tf 50 720 Td
+<000100020003000400050006000700080009000A000B000C000D000E000F0008000800100011001200130014001500160017000E0009001000110018> Tj
+ET
+endstream
+endobj
+9 0 obj
+<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]/Resources<</Font<</F1 5 0 R>>>>/Contents 8 0 R>>
+endobj
+trailer
+<</Size 10>>
+%%EOF

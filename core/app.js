@@ -3587,7 +3587,7 @@
   /* ============================================================
      附件：任意类型可添加，按类型如实解析（见 core/attachments.js）
      ============================================================ */
-  var ATTACH_KIND_LABEL = { image: '图片', text: '文本', fits: 'FITS', paper: '论文 PDF', other: '文件' };
+  var ATTACH_KIND_LABEL = { image: '图片', text: '文本', fits: 'FITS', paper: '论文 PDF', mismatch: '类型冲突', other: '文件' };
 
   function bindAttachments() {
     var btn = $('#btnAttach');

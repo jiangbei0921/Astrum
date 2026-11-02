@@ -1,0 +1,68 @@
+%PDF-1.4
+1 0 obj
+<</Type/Catalog/Pages 2 0 R>>
+endobj
+2 0 obj
+<</Type/Pages/Kids[7 0 R]/Count 1>>
+endobj
+5 0 obj
+<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>
+endobj
+6 0 obj
+<< /Length 621 >>
+stream
+BT /F1 9 Tf 50 720 Td
+(Object) Tj
+120 0 Td
+(Distance) Tj
+120 0 Td
+(Error) Tj
+-240 0 Td
+0 -18 Td
+(M42) Tj
+120 0 Td
+(1344 ly) Tj
+120 0 Td
+(12 ly) Tj
+-240 0 Td
+0 -18 Td
+(M31) Tj
+120 0 Td
+(2.54 Mly) Tj
+120 0 Td
+(0.04 Mly) Tj
+-240 0 Td
+0 -18 Td
+(M33) Tj
+120 0 Td
+(2.73 Mly) Tj
+120 0 Td
+(0.05 Mly) Tj
+-240 0 Td
+0 -18 Td
+(M51) Tj
+120 0 Td
+(23.1 Mly) Tj
+120 0 Td
+(1.2 Mly) Tj
+-240 0 Td
+0 -18 Td
+(M101) Tj
+120 0 Td
+(20.9 Mly) Tj
+120 0 Td
+(1.1 Mly) Tj
+-240 0 Td
+0 -40 Td
+(The table lists distances and errors for five nearby galaxies.) Tj
+0 -14 Td
+(Each row keeps its object name and measurement traceable in the text layer.) Tj
+ET
+endstream
+endobj
+7 0 obj
+<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]/Resources<</Font<</F1 5 0 R>>>>/Contents 6 0 R>>
+endobj
+trailer
+<</Size 8>>
+%%EOF

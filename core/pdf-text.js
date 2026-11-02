@@ -115,6 +115,165 @@
     return /\/FlateDecode/.test(dict);
   }
 
+  /* 读取 << ... >> 子字典；可能是直接字典，也可能是指向对象的引用。 */
+  function subDictOf(body, key) {
+    var ref = body.match(new RegExp('/' + key + '\\s+(\\d+)\\s+(\\d+)\\s+R'));
+    if (ref) return { ref: ref[1] + ' ' + ref[2], body: null };
+    var idx = body.search(new RegExp('/' + key + '\\s*<<'));
+    if (idx < 0) return null;
+    var start = body.indexOf('<<', idx) + 2;
+    var depth = 1, i = start;
+    while (i < body.length && depth > 0) {
+      if (body.substr(i, 2) === '<<') { depth++; i += 2; }
+      else if (body.substr(i, 2) === '>>') { depth--; i += 2; }
+      else i++;
+    }
+    return { ref: null, body: body.slice(start, Math.max(start, i - 2)) };
+  }
+
+  /* 页面资源可能继承自父节点（Pages 树）。 */
+  function pageResources(pageId, map) {
+    var cur = pageId, seen = {};
+    for (var depth = 0; depth < 4 && cur; depth++) {
+      if (seen[cur]) break;
+      seen[cur] = 1;
+      var o = map[cur];
+      if (!o) break;
+      var r = subDictOf(o.body, 'Resources');
+      if (r) return r.ref ? (map[r.ref] ? map[r.ref].body : null) : r.body;
+      var p = refOf(o.body, 'Parent');
+      cur = p;
+    }
+    return null;
+  }
+
+  function fontMapOf(resBody, map) {
+    var fd = subDictOf(resBody || '', 'Font');
+    if (!fd) return {};
+    var body = fd.ref ? (map[fd.ref] ? map[fd.ref].body : '') : (fd.body || '');
+    var out = {}, re = /\/([A-Za-z0-9_.+-]+)\s+(\d+)\s+(\d+)\s+R/g, m;
+    while ((m = re.exec(body))) out[m[1]] = m[2] + ' ' + m[3];
+    return out;
+  }
+
+  function utf16beHex(hex) {
+    var out = '';
+    for (var i = 0; i + 3 < hex.length; i += 4) {
+      out += String.fromCharCode(parseInt(hex.substr(i, 4), 16));
+    }
+    return out;
+  }
+
+  function parseCMap(text) {
+    var cmap = { bytes: 1, map: {} };
+    var cs = String(text || '').match(/begincodespacerange([\s\S]*?)endcodespacerange/);
+    if (cs) {
+      var c = cs[1].match(/<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>/);
+      if (c) cmap.bytes = Math.max(1, Math.ceil(c[1].length / 2));
+    }
+    var bc = /beginbfchar([\s\S]*?)endbfchar/g, m;
+    while ((m = bc.exec(text))) {
+      var pair = /<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>/g, p;
+      while ((p = pair.exec(m[1]))) cmap.map[parseInt(p[1], 16)] = utf16beHex(p[2]);
+    }
+    var br = /beginbfrange([\s\S]*?)endbfrange/g;
+    while ((m = br.exec(text))) {
+      var item = /<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>\s*(<([0-9A-Fa-f]+)>|\[((?:<[0-9A-Fa-f]+>\s*)+)\])/g, q;
+      while ((q = item.exec(m[1]))) {
+        var lo = parseInt(q[1], 16), hi = parseInt(q[2], 16);
+        if (hi - lo > 65535) continue;
+        if (q[4]) {
+          var base = utf16beHex(q[4]);
+          var code = base.charCodeAt(0);
+          for (var k = lo; k <= hi; k++) cmap.map[k] = String.fromCharCode(code + (k - lo));
+        } else {
+          var arr = q[5].match(/<[0-9A-Fa-f]+>/g) || [];
+          for (var a = 0; a < arr.length && lo + a <= hi; a++) {
+            cmap.map[lo + a] = utf16beHex(arr[a].slice(1, -1));
+          }
+        }
+      }
+    }
+    return cmap;
+  }
+
+  async function toUnicodeOf(fontId, map) {
+    var o = map[fontId];
+    if (!o) return null;
+    var ref = refOf(o.body, 'ToUnicode');
+    var t = ref && map[ref];
+    if (!t) return null;
+    var raw = streamBytes(t.body);
+    if (!raw) return null;
+    try {
+      var dec = isFlate(t.body) ? await inflate(raw) : raw;
+      return parseCMap(latin1(dec));
+    } catch (e) { return null; }
+  }
+
+  async function pageFontInfo(pageId, map) {
+    var res = pageResources(pageId, map);
+    var refs = fontMapOf(res, map);
+    var out = {}, names = Object.keys(refs);
+    for (var i = 0; i < names.length; i++) {
+      var name = names[i], id = refs[name], o = map[id];
+      var cid = !!o && (/\/Subtype\s*\/Type0/.test(o.body) ||
+        /\/Encoding\s*\/Identity-H/.test(o.body) || /\/CIDFont/.test(o.body));
+      var cmap = null;
+      if (cid) {
+        try { cmap = await toUnicodeOf(id, map); } catch (e) { cmap = null; }
+      }
+      out[name] = { cid: cid, cmap: cmap };
+    }
+    return out;
+  }
+
+  function decodeHexCmap(tok, cmap, stats) {
+    var hex = tok.slice(1, -1).replace(/[^0-9a-f]/gi, '');
+    var step = (cmap.bytes || 1) * 2, out = '';
+    for (var i = 0; i + step <= hex.length; i += step) {
+      var code = parseInt(hex.substr(i, step), 16);
+      var ch = cmap.map[code];
+      if (ch != null) {
+        out += ch;
+        if (stats) stats.cidMapped += ch.length;
+      } else {
+        out += '\uFFFD';
+        if (stats) stats.cidUnmapped++;
+      }
+    }
+    if (hex.length % step) out += decodeHex('<' + hex.slice(hex.length - (hex.length % step)) + '>');
+    return out;
+  }
+
+  function decodeLiteralCmap(str, cmap, stats) {
+    var n = cmap.bytes || 1, out = '';
+    for (var i = 0; i + n <= str.length; i += n) {
+      var code = 0;
+      for (var k = 0; k < n; k++) code = (code << 8) | (str.charCodeAt(i + k) & 0xFF);
+      var ch = cmap.map[code];
+      if (ch != null) {
+        out += ch;
+        if (stats) stats.cidMapped += ch.length;
+      } else {
+        out += '\uFFFD';
+        if (stats) stats.cidUnmapped++;
+      }
+    }
+    return out;
+  }
+
+  function decodeTokenWith(tok, font, stats) {
+    if (!font) return decodeToken(tok);
+    if (font.cid && !font.cmap) {
+      if (stats) stats.cidUnmapped++;
+      return decodeToken(tok);
+    }
+    if (!font.cmap) return decodeToken(tok);
+    if (tok.charAt(0) === '<') return decodeHexCmap(tok, font.cmap, stats);
+    return decodeLiteralCmap(decodePdfLiteral(tok), font.cmap, stats);
+  }
+
   async function objectMap(bytes) {
     var text = latin1(bytes);
     var map = {}, m, re = /(\d+)\s+(\d+)\s+obj\s*([\s\S]*?)\s*endobj/g;
@@ -169,32 +328,43 @@
     return out;
   }
 
-  function extractText(content) {
+  function extractText(content, fonts, stats) {
     var s = String(content || '').replace(/\r/g, '\n');
-    s = s.replace(/\b(Td|TD|Tm|T\*|ET)\b/g, '\u0001');
-    var segments = s.split('\u0001');
-    var lines = segments.map(function (seg) {
-      var out = [], re = /(\((?:\\\\.|[^\\()])*\)|<[0-9A-Fa-f\s]+>)\s*(Tj|TJ|'|")/g, m;
-      while ((m = re.exec(seg))) out.push(decodeToken(m[1]));
-      re = /\[((?:\((?:\\\\.|[^\\()])*\)|<[0-9A-Fa-f\s]+>|[^\]])*)\]\s*TJ/g;
-      while ((m = re.exec(seg))) {
-        var arr = m[1];
-        var ire = /(\((?:\\\\.|[^\\()])*\)|<[0-9A-Fa-f\s]+>|[-+]?\d+(?:\.\d+)?)/g, im;
-        var parts = [];
+    var lines = [], cur = [], curFont = null;
+    var re = /\/([A-Za-z0-9_.+-]+)\s+[-\d.]+\s+Tf|(\((?:\\.|[^\\()])*\)|<[0-9A-Fa-f\s]+>)\s*(Tj|'|")|\[((?:\((?:\\.|[^\\()])*\)|<[0-9A-Fa-f\s]+>|[^\]])*)\]\s*TJ|(?:^|[^A-Za-z0-9*])(Td|TD|Tm|ET|T\*)(?![A-Za-z0-9*])/g;
+    /* 上面字符串分支中的 \\. 表示“反斜杠 + 任意字符”，只吞一个反斜杠；
+     * PDF 文本里的 \( 与 \) 正是这种单反斜杠转义。 */
+    var m;
+    function flush() { lines.push(cur.join('')); cur = []; }
+    while ((m = re.exec(s))) {
+      if (m[1]) {
+        curFont = fonts ? (fonts[m[1]] || null) : null;
+        continue;
+      }
+      if (m[2]) {
+        if (m[3] === "'" || m[3] === '"') flush();
+        var piece = decodeTokenWith(m[2], curFont, stats);
+        if (piece) cur.push(piece);
+        continue;
+      }
+      if (m[4] != null) {
+        var arr = m[4];
+        var ire = /(\((?:\\.|[^\\()])*\)|<[0-9A-Fa-f\s]+>|[-+]?\d+(?:\.\d+)?)/g, im;
         while ((im = ire.exec(arr))) {
           var tok = im[1];
           if (tok.charAt(0) === '(' || tok.charAt(0) === '<') {
-            var piece = decodeToken(tok);
-            if (piece) parts.push(piece);
+            var p = decodeTokenWith(tok, curFont, stats);
+            if (p) cur.push(p);
           } else {
             var kern = Number(tok);
-            if (isFinite(kern) && kern <= -100) parts.push(' ');
+            if (isFinite(kern) && kern <= -100) cur.push(' ');
           }
         }
-        if (parts.length) out.push(parts.join(''));
+        continue;
       }
-      return out.join('');
-    });
+      if (m[5]) flush();
+    }
+    flush();
     return lines.join('\n').replace(/\s+\n\s+/g, '\n').replace(/[ \t]+/g, ' ').trim();
   }
 
@@ -211,7 +381,12 @@
     var t = String(line || '').trim();
     if (!t || t.length > 90) return null;
     if (/^(abstract|references|bibliography|acknowledg|appendix)/i.test(t)) return t;
-    if (/^\d+(\.\d+)*\s+[A-Z][A-Za-z0-9 ,:;()\-]{2,80}$/.test(t)) return t;
+    var m = t.match(/^\d+(?:\.\d+)*[.)]?\s+([A-Z][A-Za-z0-9 ,:;()\-]{2,80})$/);
+    if (m) {
+      /* 拒绝 “1.1 Mly” 这类测量值行：首个单词过短或带单位后缀。 */
+      var first = m[1].split(/\s+/)[0] || '';
+      if (first.length >= 4 && !/(?:^|\s)(?:ly|pc|kpc|Mpc|Gyr|Myr|km|AU|mag|deg)$/i.test(t)) return t;
+    }
     if (/^(introduction|methods?|results?|discussion|conclusions?|background|data and methods)$/i.test(t)) return t;
     return null;
   }
@@ -256,6 +431,10 @@
 
     var built = await objectMap(bytes);
     var map = built.map, textAll = built.text;
+    if (/\/Encrypt\s+\d+\s+\d+\s+R/.test(textAll)) {
+      return fail('pdf_encrypted', 'PDF 已加密，无法解析');
+    }
+    var fontStats = { cidMapped: 0, cidUnmapped: 0 };
     var pages = pageRefs(map);
     if (!pages.length) warnings.push('未找到页面对象，尝试全文文本提取');
     if (pages.length > opts.maxPages) {
@@ -269,6 +448,7 @@
       if (!page) continue;
       var refs = refsOf(page.body, 'Contents');
       var pieces = [];
+      var fonts = await pageFontInfo(pages[i], map);
       for (var j = 0; j < refs.length; j++) {
         var obj = map[refs[j]];
         if (!obj) continue;
@@ -276,7 +456,7 @@
         if (!raw) continue;
         try {
           var dec = isFlate(obj.body) ? await inflate(raw) : raw;
-          pieces.push(extractText(latin1(dec)));
+          pieces.push(extractText(latin1(dec), fonts, fontStats));
         } catch (e) {
           warnings.push('第 ' + (i + 1) + ' 页内容流解码失败');
         }
@@ -307,6 +487,12 @@
     if (!/%%EOF/.test(textAll.slice(-2048))) warnings.push('PDF 可能被截断（缺少 %%EOF）');
     var text = pageTexts.map(function (p) { return p.text; }).join('\n\n');
     text = text.slice(0, opts.maxChars);
+    if (fontStats.cidUnmapped > 0) {
+      return fail('pdf_cid_unsupported',
+        'PDF 使用 CID/Identity-H 字体且缺少可用的 ToUnicode 映射，拒绝输出可能乱码的正文',
+        warnings.concat(['检测到 ' + fontStats.cidUnmapped + ' 处 CID 文本无法映射到 Unicode']));
+    }
+    if (fontStats.cidMapped > 0) warnings.push('CID/Identity-H 字体已按 ToUnicode 解码');
     if (text.length < opts.minChars) {
       return fail('pdf_no_text', '未能从 PDF 提取到可读正文（可能是扫描件或特殊编码）', warnings);
     }

@@ -45,12 +45,14 @@ var CORE_TESTS = [
   'tools/v1-3-paper-e2e-test.js', 'tools/v1-3-compatibility-test.js',
   'tools/v1-4-paper-attachment-test.js', 'tools/v1-4-cloud-control-test.js',
   'tools/v1-5-perf-test.js', 'tools/v1-5-concurrency-test.js', 'tools/v1-5-store-stress-test.js',
-  'tools/v1-5-research-loop-test.js'
+  'tools/v1-5-research-loop-test.js', 'tools/v1-6-legacy-test.js',
+  'tools/v1-6-pdf-fixtures-test.js', 'tools/v1-6-provider-test.js'
 ];
 var BROWSER_TESTS = [
   'tools/selftest.js', 'tools/store-test.js', 'tools/skill-test.js', 'tools/consistency-test.js',
   'tools/a11y-test.js', 'tools/rail-test.js', 'tools/settings-test.js', 'tools/ctx-isolation-test.js',
-  'tools/v1-1-browser-test.js', 'tools/v1-4-pages-test.js', 'tools/v1-5-idb-stress-test.js'
+  'tools/v1-1-browser-test.js', 'tools/v1-4-pages-test.js', 'tools/v1-5-idb-stress-test.js',
+  'tools/v1-5-resource-test.js', 'tools/v1-5-cache-test.js', 'tools/v1-6-browser-test.js'
 ];
 
 caseRun('C1', '测试文件真实存在', function () {

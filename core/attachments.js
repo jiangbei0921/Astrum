@@ -47,13 +47,33 @@
     return m ? m[1].toLowerCase() : '';
   }
 
-  function kindOf(file) {
-    var name = file.name || '';
+  function extKindOf(name) {
+    name = name || '';
     if (FITS_EXT.test(name)) return 'fits';
-    if (PDF_EXT.test(name) || /^application\/pdf/i.test(file.type || '')) return 'paper';
-    if (IMAGE_MIME.test(file.type || '') || IMAGE_EXT.test(name)) return 'image';
-    if (TEXT_MIME.test(file.type || '') || TEXT_EXT.test(name)) return 'text';
-    return 'other';
+    if (PDF_EXT.test(name)) return 'paper';
+    if (IMAGE_EXT.test(name)) return 'image';
+    if (TEXT_EXT.test(name)) return 'text';
+    return '';
+  }
+
+  function mimeKindOf(type) {
+    type = String(type || '').toLowerCase();
+    if (!type) return '';
+    if (/^application\/pdf/.test(type)) return 'paper';
+    if (IMAGE_MIME.test(type)) return 'image';
+    if (TEXT_MIME.test(type)) return 'text';
+    return '';
+  }
+
+  /* 扩展名与 MIME 都属于已知类别且互相冲突时，拒绝解析。
+   * 例如 look.txt 声明 image/png，或 photo.png 声明 text/plain：
+   * 两边都不可信，不能按其中一边“猜”出一个可执行路径。 */
+  function kindOf(file) {
+    var ext = extKindOf(file.name || '');
+    var mime = mimeKindOf(file.type || '');
+    if (ext === 'fits' || ext === 'paper') return ext; /* 容器格式以扩展名为准，解析器还会校验字节头 */
+    if (ext && mime && ext !== mime) return 'mismatch';
+    return ext || mime || 'other';
   }
 
   /* ---------- FITS 头解析 ----------
@@ -157,6 +177,17 @@
     });
   }
 
+  /* 声称是文本、实际是二进制/错误编码时，明确失败，不把乱码当正文。 */
+  function looksBinaryText(t) {
+    if (!t || t.length < 8) return false;
+    var bad = 0;
+    for (var i = 0; i < t.length; i++) {
+      var c = t.charCodeAt(i);
+      if (c === 0xFFFD || c < 9 || (c > 13 && c < 32)) bad++;
+    }
+    return bad / t.length > 0.15;
+  }
+
   function readSlice(file, bytes) {
     return new Promise(function (resolve) {
       var rd = new FileReader();
@@ -218,6 +249,12 @@
       fits: null,
       paper: null
     };
+
+    if (kind === 'mismatch') {
+      item.status = 'unparsed';
+      item.note = '扩展名与 MIME 类型不一致，已拒绝解析';
+      return Promise.resolve(item);
+    }
 
     if (kind === 'image') {
       if (item.size > LIMITS.imageBytes) {
@@ -318,6 +355,12 @@
       return readAsText(file, LIMITS.textChars).then(function (t) {
         item.text = t;
         if (!t) { item.status = 'error'; item.note = '文本为空或编码无法识别'; return item; }
+        if (looksBinaryText(t)) {
+          item.status = 'error';
+          item.text = '';
+          item.note = '文本编码异常或包含二进制内容，未作为正文';
+          return item;
+        }
         item.status = 'ready';
         item.note = '已读取 ' + t.length + ' 字';
         return item;
