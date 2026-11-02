@@ -90,7 +90,8 @@
 | Node 离线全量 | 全部通过（含 v1-6 legacy 23/23、PDF fixtures 39/39） |
 | 真实 arXiv 全文 | 28/28（185,574 B，5 页，22 chunks） |
 | Chrome 全量 | 全部通过（selftest 156/156、v1-6 browser 33/33 等） |
-| 构建 | `_site` 58 文件 / 1,680,982 B；standalone 53 脚本 / 1,616 KB |
+| 构建 | `_site` 58 文件 / 1,680,983 B；standalone 53 脚本 / 1,616 KB |
+| 发布 | commit `47a3dee`；test `41425289027`、pages `41425684667` 均 success |
 | Provider | 分类 4/4；`BLOCKED_API_KEY` |
 | 外部网络 | 79/82；Wikipedia/Semantic 主机不可达，未伪造结果 |
 

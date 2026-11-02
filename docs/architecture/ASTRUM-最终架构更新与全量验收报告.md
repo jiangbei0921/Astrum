@@ -145,15 +145,15 @@ B12 文本进入上下文
 
 | 项 | 值 |
 |---|---|
-| 代码提交 | `5aa644a150448de9da1685862aec3fc47f0ef6b9` |
-| commit message | `test: verify browser recovery, attachments and rollback drill` |
+| **最终代码提交** | `47a3dee04a07a609cdc55f66963658ae7520790a`（代码 `e289676` + 文档 `47a3dee`） |
+| 最终 commit message | `docs: finalize architecture acceptance and release runbooks` |
 | push | 正常 push，无 force |
-| 本地/远端 | 一致 `5aa644a` |
-| Actions test | Run `41411083290` success（5aa644a） |
-| Actions pages | Run `41411228469` success（5aa644a） |
-| 线上 version.json | commit `5aa644a`、dirty=false、runId 41411228469 |
-| 线上浏览器验证 | 首页/13 Agent/核心问答/无 console/CSP/404 全 PASS |
-| 线上开发文件隔离 | tools/docs 均 404 |
+| 本地/远端 | 一致 `47a3dee` |
+| Actions test | Run `41425289027` success（47a3dee） |
+| Actions pages | Run `41425684667` success（47a3dee） |
+| 线上 version.json | commit `47a3dee`、dirty=false、runId 41425684667 |
+| 线上浏览器验证 | 首页 200 / 13 Agent / “M42 是什么” / console 无消息 / 57 请求无失败 / CSP 0 / tools/docs 404 |
+| 上一轮发布（历史） | `5aa644a`；test 41411083290、pages 41411228469 |
 
 ---
 
@@ -170,7 +170,8 @@ B12 文本进入上下文
 | 窄屏 | B30 375px 无横向溢出 |
 | Node 全量 | 全部通过；PDF fixtures 39/39；legacy 23/23 |
 | Chrome 全量 | 全部通过；selftest 156/156、v1-6 33/33 |
-| 构建 | `_site` 58 文件 / 1,680,982 B；standalone 1,616 KB |
+| 构建 | `_site` 58 文件 / 1,680,983 B；standalone 1,616 KB |
+| 最终发布 | commit `47a3dee`；test 41425289027、pages 41425684667 success；线上 13 Agent/问答/CSP/404 PASS |
 | Provider | 分类 4/4；`BLOCKED_API_KEY` |
 | 外部网络 | 79/82；Wikipedia/Semantic 不可达，未伪造 |
 

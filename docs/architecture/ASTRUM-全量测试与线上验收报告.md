@@ -67,7 +67,7 @@ selftest 内置 20 问回归：`diffBytes=0`，13 Agent 名称/职责未变；�
 |---|---|
 | 语法检查 | `core/*.js`、`data/*.js`、`tools/*.js` 全部通过 |
 | standalone | 53 内联脚本 / 126 KB CSS / 1,616 KB |
-| `_site` | 58 文件 / 1,680,982 B（core 45 / data 8） |
+| `_site` | 58 文件 / 1,680,983 B（core 45 / data 8） |
 | 资源引用 | 54 个全部存在且大小写一致 |
 | 安全扫描 | 密钥 0、绝对路径 0 |
 | 开发文件隔离 | `_site` 无 tools/docs/dev/worker/standalone |
@@ -78,19 +78,21 @@ selftest 内置 20 问回归：`diffBytes=0`，13 Agent 名称/职责未变；�
 
 ## 6. GitHub Actions 与线上
 
-推送后回填：
-
 | 项 | 值 |
 |---|---|
-| 功能提交 | 待回填 |
-| test Run | 待回填 |
-| pages Run | 待回填 |
+| 功能提交 | `47a3dee04a07a609cdc55f66963658ae7520790a` |
+| test Run | `41425289027` success（static / offline-core / offline-browser） |
+| pages Run | `41425684667` success（build 28s / deploy 10s） |
 | 线上 URL | `https://jiangbei0921.github.io/Astrum/` |
-| 首页 HTTP | 待回填 |
-| `version.json` commit | 待回填 |
-| 线上 13 Agent / 核心问答 / CSP / 404 | 待回填 |
+| 首页 HTTP | 200 |
+| `version.json` commit | `47a3dee`、dirty=false、runId 41425684667 |
+| 核心资源 | `core/app.js` 200、`assets/app.css` 200、`privacy.html` 200 |
+| 开发文件隔离 | `tools/selftest.js` 404、`docs/architecture/00-README.md` 404 |
+| 线上 13 Agent | PASS（Muse—Navigator 全部可见） |
+| 线上核心问答 | PASS（“M42 是什么”返回距离/直径/视星等答案） |
+| 线上 CSP/console | PASS（console 无消息；57 个请求无失败） |
 
-本地等价验收已完成：`v1-4-pages` 32/32、`v1-6-browser` 33/33、`selftest` 156/156。
+本地等价验收：`v1-4-pages` 32/32、`v1-6-browser` 33/33、`selftest` 156/156。
 
 ## 7. 未执行与外部条件
 

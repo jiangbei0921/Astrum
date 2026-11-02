@@ -8,17 +8,18 @@
 
 ---
 
-## 1. 当前发布信息（推送后回填）
+## 1. 当前发布信息
 
 | 项 | 值 |
 |---|---|
-| 最新功能提交 | 待回填 |
-| test Workflow | 待回填 |
-| pages Workflow | 待回填 |
-| 线上 `version.json.commit` | 待回填 |
-| 线上 `dirty` | 待回填 |
+| 最新功能提交 | `47a3dee04a07a609cdc55f66963658ae7520790a` |
+| test Workflow | `41425289027` success |
+| pages Workflow | `41425684667` success |
+| 线上 `version.json.commit` | `47a3dee` |
+| 线上 `dirty` | false |
 | Pages Source | `build_type=workflow` |
-| 本地/远端 | 待回填（应一致） |
+| 本地/远端 | 一致 `47a3dee` |
+| 线上验收 | 首页 200、13 Agent、核心问答、console/CSP、tools/docs 404 全 PASS |
 
 历史发布：`7e50227`（V1.4 首次 Actions 发布）、`5aa644a`（V1.5 浏览器/回滚补齐）。
 
