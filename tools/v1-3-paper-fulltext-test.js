@@ -14,6 +14,12 @@ global.localStorage = {
   setItem: function (k, v) { this._d[k] = v; },
   removeItem: function (k) { delete this._d[k]; }
 };
+global.sessionStorage = {
+  _d: {},
+  getItem: function (k) { return this._d[k] || null; },
+  setItem: function (k, v) { this._d[k] = v; },
+  removeItem: function (k) { delete this._d[k]; }
+};
 
 [
   'data/catalog.js', 'data/knowledge.js', 'data/places.js', 'data/bodies.js',
@@ -71,8 +77,17 @@ var CTX = { y: 2026, mo: 10, d: 31, h: 21, mi: 0, lat: 39.9, lon: 116.4, tz: 8, 
   await runCase('P2', '资源限制/类型/取消', async function () {
     var big = await FT.fetchPdf(FT.resolveUrl(REAL_PAPER), { maxBytes: 1000 });
     ok('P2.1 大小限制', big.ok === false && big.code === 'pdf_too_large', big.code);
-    var html = await FT.fetchPdf('https://arxiv.org/abs/astro-ph/9901001', { maxBytes: 10 * 1024 * 1024 });
-    ok('P2.2 非 PDF 拒绝', html.ok === false && html.code === 'not_pdf', html.code);
+    var oldFetch2 = global.fetch;
+    global.fetch = function () {
+      return Promise.resolve(new Response('<html><body>not a pdf article</body></html>',
+        { headers: { 'content-type': 'text/html' } }));
+    };
+    var html;
+    try { html = await FT.fetchPdf('https://example.org/article', { maxBytes: 10 * 1024 * 1024 }); }
+    finally { global.fetch = oldFetch2; }
+    ok('P2.2 非 PDF 响应被识别', (html.ok === true && html.kind === 'html') ||
+      (html.ok === false && (html.code === 'html_error_page' || html.code === 'not_pdf')),
+      html.ok ? ('html kind=' + html.kind) : ('code=' + html.code));
     var ac = new AbortController(); ac.abort();
     var cancel = await FT.fetchPdf(FT.resolveUrl(REAL_PAPER), { signal: ac.signal });
     ok('P2.3 取消分类', cancel.ok === false && cancel.code === 'cancelled', cancel.code);
@@ -112,6 +127,71 @@ var CTX = { y: 2026, mo: 10, d: 31, h: 21, mi: 0, lat: 39.9, lon: 116.4, tz: 8, 
     ok('P3.5 全文结论 evidenceScope', report.conclusions.some(function (c) { return c.evidenceScope === 'fulltext'; }));
   });
 
+  await runCase('P5', '全文缓存会话持久化', async function () {
+    var paper = { title: 'Cache Paper', content: { arxivId: '2401.00001' }, url: 'https://arxiv.org/abs/2401.00001' };
+    var pid = FT.paperIdOf(paper);
+    var url = FT.resolveUrl(paper);
+    var key = pid + '|' + url;
+    var cachedValue = {
+      ok: true, code: 'fulltext_ok', paperId: pid, url: url, size: 100,
+      chunks: [{ chunkId: 'ft_cached', section: 'RESULTS', content: 'cached text', pageStart: 1 }],
+      evidence: [], parse: { pageCount: 1, sections: [] }, pageCount: 1, sections: [], warnings: []
+    };
+    FT.clearCache();
+    global.sessionStorage.setItem(FT.CACHE_KEY, JSON.stringify({}));
+    var map = {}; map[key] = { at: Date.now(), value: cachedValue };
+    global.sessionStorage.setItem(FT.CACHE_KEY, JSON.stringify(map));
+    FT.clearMemory();
+    var oldFetch = global.fetch;
+    var fetched = 0;
+    global.fetch = function () { fetched++; return Promise.reject(new Error('should-not-fetch')); };
+    try {
+      var hit = await FT.get(paper, {});
+      ok('P5.1 刷新后命中会话缓存', hit && hit.ok === true && hit.code === 'fulltext_ok' &&
+        hit.chunks[0].chunkId === 'ft_cached', hit && hit.code);
+      ok('P5.2 命中不重复下载', fetched === 0, 'fetch=' + fetched);
+      map[key].at = Date.now() - 8 * 24 * 3600 * 1000;
+      global.sessionStorage.setItem(FT.CACHE_KEY, JSON.stringify(map));
+      FT.clearMemory();
+      var expired = await FT.get(paper, {});
+      ok('P5.3 过期缓存不复用', expired.ok === false && expired.code === 'network', expired.code);
+      ok('P5.4 过期后会尝试下载', fetched >= 1, 'fetch=' + fetched);
+    } finally {
+      global.fetch = oldFetch;
+    }
+    FT.clearCache();
+    ok('P5.5 主动清理会话缓存', !global.sessionStorage.getItem(FT.CACHE_KEY));
+    ok('P5.6 缓存统计接口', typeof FT.cacheStats === 'function' && FT.cacheStats().key === FT.CACHE_KEY);
+  });
+
+  await runCase('P6', 'HTML 全文与错误页分类', async function () {
+    var paper = { title: 'HTML Paper', content: { arxivId: '2401.00002' }, url: 'https://arxiv.org/abs/2401.00002' };
+    var article = '<html><head><title>HTML Paper</title></head><body><h1>RESULTS</h1><p>' +
+      'We measure the distance to M42 as 1344 light years with a calibrated parallax. '.repeat(8) +
+      '</p></body></html>';
+    var blocked = '<html><head><title>Access Denied</title></head><body>Enable JavaScript and cookies to continue. captcha</body></html>';
+    var oldFetch = global.fetch;
+    global.fetch = function () {
+      return Promise.resolve(new Response(article, { headers: { 'content-type': 'text/html' } }));
+    };
+    FT.clearCache(); FT.clearMemory();
+    try {
+      var r = await FT.get(paper, {});
+      ok('P6.1 HTML 正文可提取', r.ok === true && r.contentType === 'html' && r.chunks.length >= 1,
+        r.ok ? 'chunks=' + r.chunks.length + ' method=' + r.parse.extractionMethod : r.code);
+      ok('P6.2 HTML 不冒充 PDF', r.ok === true && r.parse.extractionMethod === 'html-text-v1', r.parse && r.parse.extractionMethod);
+      global.fetch = function () {
+        return Promise.resolve(new Response(blocked, { headers: { 'content-type': 'text/html' } }));
+      };
+      FT.clearCache(); FT.clearMemory();
+      var b = await FT.get(paper, {});
+      ok('P6.3 反爬/错误页明确失败', b.ok === false && b.code === 'html_error_page', b.code);
+      ok('P6.4 错误页不生成全文证据', !b.evidence || b.evidence.length === 0);
+    } finally {
+      global.fetch = oldFetch;
+    }
+  });
+
   await runCase('P4', '真实全文 + Adapter 报告链路', async function () {
     if (OFFLINE) { ok('P4.0 离线跳过', true, 'OFFLINE'); return; }
     var ft = await FT.get(REAL_PAPER, { timeoutMs: 60000, maxBytes: 5 * 1024 * 1024, maxEvidenceChunks: 4 });
@@ -147,5 +227,5 @@ var CTX = { y: 2026, mo: 10, d: 31, h: 21, mi: 0, lat: 39.9, lon: 116.4, tz: 8, 
   console.log('CASES ' + cases.filter(function (c) { return c.failed === 0; }).length + '/' + cases.length);
   console.log('ASSERTIONS ' + pass + '/' + results.length);
   console.log('RESULT ' + pass + '/' + results.length);
-  process.exit(pass === results.length ? 0 : 1);
+  process.exitCode = pass === results.length ? 0 : 1;
 })();

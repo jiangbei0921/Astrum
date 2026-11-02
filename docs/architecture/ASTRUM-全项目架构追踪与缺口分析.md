@@ -139,3 +139,17 @@ Router → Planner → TaskState → Orchestrator → Runner → Tools
 - 不新增第 8 模板、不新增工具、不改变 13 Agent；
 - 默认旧调用不受 researchLoop 影响；
 - Replan 2 次可执行、第 3 次拒绝（由 ADR 与预算覆盖）。
+
+---
+
+## 7. 2026-11-02 最新状态修正
+
+| ID | 旧状态 | 最新状态 | 证据 |
+|---|---|---|---|
+| ARCH-03/07 实时进度 | DEFERRED | PARTIAL | step 事件已发并被 UI 步骤条消费；新浏览器脚本未执行 |
+| ARCH-27 云端 Control | PARTIAL（外部） | PARTIAL（外部） | 真实 Provider 仍 BLOCKED_API_KEY |
+| ARCH-28 Pages 发布 | EXTERNAL_BLOCKED | COMPLETE | commit 7e50227、Pages Source=Actions、Run 41398780587 |
+| ARCH-29 长时/IDB | COMPLETE | COMPLETE | 30/60/180m + IDB 1000 |
+| ARCH-30 V1.6 | DEFERRED | DEFERRED | 12 候选未启动 |
+
+补充：L03 T-B/T-D 复用、L12 搜索依赖、L16 边界、L20 SEM、L25 HTML 全文、L29 chunk 粒度、L37 会话缓存已补齐；复杂 PDF/页码、附件、浏览器 UI 仍 PARTIAL。

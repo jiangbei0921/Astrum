@@ -178,7 +178,7 @@
       return [
         makeStep('t1', 'simbad.tap', { query: first }, [], true, false, true),
         makeStep('t2', 'paper.search', { query: b.query }, [], true, true, false),
-        makeStep('t3', 'evidence.search', { query: b.query, direction: 'counter' }, ['t2'], false, true, false),
+        makeStep('t3', 'evidence.search', { query: b.query, direction: 'counter' }, [], false, true, false),
         makeStep('t4', 'compose.domain', { query: b.query, intent: b.intent, from: ['t1', 't2', 't3'] }, ['t1', 't2', 't3'], false, true, false)
       ];
     },

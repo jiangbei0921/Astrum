@@ -165,3 +165,17 @@
 | 未提交成果 | 全部保留在工作区 |
 
 说明：GitHub Pages 仍为 legacy branch，V1.4 未正式上线；本次工作只做本地代码、测试与文档。
+
+## 2026-11-02 发布后状态修正
+
+| 项 | 最新状态 |
+|---|---|
+| V1.4 正式发布 | **RELEASED**：commit `7e50227`，test 41398644528，pages 41398780587 |
+| GitHub Pages | **GitHub Actions**（build_type=workflow） |
+| 线上 URL | https://jiangbei0921.github.io/Astrum/ |
+| V1.5 稳定性 | PASS（30/60/180 分钟；180m 采样 178/180） |
+| V1.6 | NOT STARTED；启动条件 2/5 满足，仍不启动 |
+| 跨版本补齐 | T-B/T-D、搜索依赖、边界、SEM、HTML 全文、chunk 粒度、会话缓存已补；复杂 PDF/附件/浏览器 UI 仍 PARTIAL |
+| 真实云端 | BLOCKED_API_KEY |
+
+旧表 §5 第 18 项与 §6 “V1.4 未完成”已被本节覆盖。

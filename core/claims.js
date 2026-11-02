@@ -744,7 +744,7 @@
         var uncertainty = {
           kind: 'measurement',
           value: std / Math.sqrt(Math.max(1, st.count)),
-          basis: '样本标准差 / sqrt(n)'
+          basis: '样本均值的标准误（SEM）= 样本标准差 / sqrt(n)；不是原始像素的离散程度'
         };
         c = makeClaim({
           id: 'c_fits_' + hashShort({ id: ev.evidenceId, q: 'mean' }),

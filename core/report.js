@@ -202,6 +202,17 @@
           claimRef: c.id
         });
       }
+      var chunks = refs.map(function (eid) {
+        var ev = evidenceById[eid];
+        if (!ev || !ev.content || !ev.content.chunkId) return null;
+        return {
+          evidenceId: eid,
+          chunkId: ev.content.chunkId,
+          section: ev.content.section || '',
+          pageStart: ev.content.pageStart == null ? null : ev.content.pageStart,
+          pageEnd: ev.content.pageEnd == null ? null : ev.content.pageEnd
+        };
+      }).filter(Boolean);
       return {
         claimId: c.id,
         text: c.text,
@@ -211,6 +222,12 @@
         rule: v ? v.rule : null,
         evidenceRefs: refs,
         evidenceScope: scopeOfRefs(refs, evidenceById),
+        supportGranularity: chunks.length ? 'fulltext_chunk'
+          : (refs.some(function (eid) {
+            var ev = evidenceById[eid];
+            return ev && ev.sourceType === 'paper' && ev.abstractOnly;
+          }) ? 'abstract_sentence' : 'evidence_item'),
+        sourceChunks: chunks,
         required: c.required === true
       };
     }).filter(Boolean);

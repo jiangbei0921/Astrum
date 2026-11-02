@@ -2811,7 +2811,36 @@
     return d;
   }
 
+  /* 任务步骤面板：数据来自真实 TaskState.steps，不是模拟百分比。
+   * 刷新恢复后同样由持久化 state 重建。 */
+  var STEP_STATUS_LABEL = {
+    pending: '等待', ready: '就绪', running: '运行中', ok: '完成',
+    failed: '失败', skipped: '跳过', blocked: '阻塞', aborted: '取消'
+  };
+
+  function stepPanel(steps) {
+    if (!steps || !steps.length) return null;
+    var done = steps.filter(function (s) { return s.status === 'ok'; }).length;
+    var box = el('details', 'step-panel');
+    box.open = false;
+    var sum = el('summary', 'step-summary',
+      '执行步骤 · ' + done + '/' + steps.length + ' 完成');
+    box.appendChild(sum);
+    steps.forEach(function (s) {
+      var st = s.status || 'pending';
+      var row = el('div', 'step-row ' + (STEP_STATUS_LABEL[st] ? 'st-' + st : ''));
+      row.appendChild(el('span', 'step-tool', esc(s.tool || s.id || '步骤')));
+      row.appendChild(el('span', 'step-state', esc(STEP_STATUS_LABEL[st] || st)));
+      if (s.error && s.error.message) {
+        row.appendChild(el('span', 'step-err', esc(String(s.error.message).slice(0, 80))));
+      }
+      box.appendChild(row);
+    });
+    return box;
+  }
+
   function renderAnswer(ans, extra) {
+    extra = extra || {};
     /* 术语双轨按「本条答案实际使用的语体」决定，而不是全局设置 */
     CURRENT_REG = (ans.meta && ans.meta.register === 'pro') ? 'pro' : 'pop';
     /* 契约一：档位由答案自身构成判定，渲染前统一标注 */
@@ -2855,6 +2884,10 @@
         var rp = window.AstroResearchUI.render(ans.research);
         if (rp) card.appendChild(rp);
       } catch (e) { console.warn('research render failed', e); }
+    }
+    if (extra.state && Array.isArray(extra.state.steps)) {
+      var sp = stepPanel(extra.state.steps);
+      if (sp) card.appendChild(sp);
     }
     if (ans.meta && ans.meta.styleSwitch) {
       var sw = el('div', 'recall');
@@ -3787,6 +3820,28 @@
     var store = null;
     try { store = window.AstroTaskStore ? window.AstroTaskStore.create({}) : null; } catch (e) { store = null; }
 
+    /* 实时步骤进度：只消费 Control 发出的真实事件，不生成模拟百分比。 */
+    var progress = el('div', 'run-progress');
+    var stepMarks = {};
+    think.appendChild(progress);
+    function onEvent(ev) {
+      if (!ev || !ev.type) return;
+      var sid = ev.stepId || '';
+      var key = sid || ev.type;
+      var label = '';
+      if (ev.type === 'step.started') label = '运行 ' + sid;
+      else if (ev.type === 'step.ok') label = '完成 ' + sid;
+      else if (ev.type === 'step.failed') label = '失败 ' + sid;
+      else if (ev.type === 'step.skipped') label = '跳过 ' + sid;
+      else if (ev.type === 'plan.expanded') label = '追加定向检索';
+      else if (ev.type === 'task.replanned') label = '重规划';
+      else if (ev.type === 'task.cancelled') label = '已取消';
+      if (!label) return;
+      stepMarks[key] = label;
+      var lines = Object.keys(stepMarks).slice(-6).map(function (k) { return stepMarks[k]; });
+      progress.textContent = lines.join(' · ');
+    }
+
     function fail(text) {
       think.remove(); busy(false);
       renderAnswer({
@@ -3802,6 +3857,7 @@
       attachmentsEvidence: attachmentsEvidence || null,
       fulltext: info.route.mode === 'research',
       researchLoop: info.route.mode === 'research',
+      onEvent: onEvent,
       forceCompare: state.settings.mode === 'compare'
     }).then(function (r) {
       taskEnd(tAgent, r && r.cancelled ? new Error('cancelled') : null);
@@ -3813,7 +3869,10 @@
 
       function finish() {
         think.remove(); busy(false);
-        renderAnswer(r.answer, { control: true, verdict: r.verdict });
+        renderAnswer(r.answer, {
+          control: true, verdict: r.verdict,
+          state: r.control && r.control.state ? r.control.state : null
+        });
       }
 
       /* V1.5：云端/设备模型表述进入 Control 研究链路。
@@ -7097,38 +7156,53 @@
     if (!window.AstroTaskStore || !window.AstroControlBridge) return;
     var store = null;
     try { store = window.AstroTaskStore.create({}); } catch (e) { return; }
-    store.init().then(function () { return store.list({ limit: 5 }); }).then(function (list) {
-      var hit = (list || []).filter(function (x) { return x.resumable; })[0];
-      if (!hit) return;
-      var box = el('div', 'msg bot research-resume');
-      var card = el('div', 'answer');
-      card.appendChild(el('div', 'sec-title', esc(L('有未完成的研究任务'))));
-      card.appendChild(el('div', 'sec-note', esc(hit.question)));
-      var btn = el('button', 'btn-ghost', L('继续任务'));
-      btn.type = 'button';
-      btn.addEventListener('click', function () {
-        btn.disabled = true;
-        btn.textContent = L('研究任务执行中');
-        var ctx = readCtx();
-        var cfgRun = JSON.parse(JSON.stringify(cfg));
-        window.AstroControlBridge.resume(hit.id, ctx, cfgRun, { store: store }).then(function (r) {
-          box.remove();
-          if (!r || !r.answer) { toast(L('任务恢复失败')); return; }
-          r.answer.query = hit.question;
-          renderAnswer(r.answer, { control: true, resumed: true });
-        }).catch(function (e) {
-          btn.disabled = false;
-          btn.textContent = L('继续任务');
-          toast(L('任务恢复失败'));
-          console.warn('task resume failed', e);
+    store.init().then(function () { return store.list({ limit: 10 }); }).then(function (list) {
+      var hits = (list || []).filter(function (x) { return x.resumable; }).slice(0, 5);
+      if (!hits.length) return null;
+      return Promise.all(hits.map(function (h) {
+        return store.get(h.id).then(function (s) { return { meta: h, state: s }; }).catch(function () { return null; });
+      })).then(function (items) {
+        items = (items || []).filter(Boolean);
+        if (!items.length) return;
+        var box = el('div', 'msg bot research-resume');
+        var card = el('div', 'answer');
+        card.appendChild(el('div', 'sec-title', esc(L('有未完成的研究任务'))));
+        items.forEach(function (item) {
+          var st = item.state || {};
+          var steps = Array.isArray(st.steps) ? st.steps : [];
+          var done = steps.filter(function (s) { return s.status === 'ok'; }).length;
+          var row = el('div', 'resume-row');
+          row.appendChild(el('span', 'resume-q', esc(item.meta.question || '')));
+          row.appendChild(el('span', 'resume-meta', esc(done + '/' + steps.length + ' 步 · ' + (st.phase || ''))));
+          var btn = el('button', 'btn-ghost', L('继续任务'));
+          btn.type = 'button';
+          btn.addEventListener('click', function () {
+            btn.disabled = true;
+            btn.textContent = L('研究任务执行中');
+            var ctx = readCtx();
+            var cfgRun = JSON.parse(JSON.stringify(cfg));
+            window.AstroControlBridge.resume(item.meta.id, ctx, cfgRun, { store: store }).then(function (r) {
+              row.remove();
+              if (!card.querySelector('.resume-row')) box.remove();
+              if (!r || !r.answer) { toast(L('任务恢复失败')); return; }
+              r.answer.query = item.meta.question;
+              renderAnswer(r.answer, { control: true, resumed: true, state: r.state || null });
+            }).catch(function (e) {
+              btn.disabled = false;
+              btn.textContent = L('继续任务');
+              toast(L('任务恢复失败'));
+              console.warn('task resume failed', e);
+            });
+          });
+          row.appendChild(btn);
+          card.appendChild(row);
         });
+        box.appendChild(card);
+        var th = $('#thread');
+        if (th) th.insertBefore(box, th.firstChild);
+        state.asked = true;
+        mountComposer('dock');
       });
-      card.appendChild(btn);
-      box.appendChild(card);
-      var th = $('#thread');
-      if (th) th.insertBefore(box, th.firstChild);
-      state.asked = true;
-      mountComposer('dock');
     }).catch(function (e) { console.warn('task list failed', e); });
   }
 

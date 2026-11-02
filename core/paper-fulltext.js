@@ -13,10 +13,38 @@
     maxChunks: 40,
     maxEvidenceChunks: 6,
     chunkChars: 1400,
-    cacheMax: 8
+    cacheMax: 8,
+    cacheTtlMs: 7 * 24 * 3600 * 1000,
+    cacheMaxBytes: 2 * 1024 * 1024
   };
 
   var CACHE = {};
+  /* 会话级持久化：刷新同一标签页仍有效，关闭标签页即清除；
+   * 不写入跨会话 localStorage，避免全文片段长期驻留。 */
+  var CACHE_KEY = 'astrum.fulltext.cache.v1';
+
+  function nowMs() { return Date.now(); }
+  function cacheKeyOf(pid, url) { return pid + '|' + url; }
+  function readStore() {
+    try {
+      var raw = root.sessionStorage && root.sessionStorage.getItem(CACHE_KEY);
+      var map = raw ? JSON.parse(raw) : {};
+      return map && typeof map === 'object' ? map : {};
+    } catch (e) { return {}; }
+  }
+  function writeStore(map, opts) {
+    try {
+      var keys = Object.keys(map);
+      if (keys.length > opts.cacheMax) {
+        keys.sort(function (a, b) { return (map[a].at || 0) - (map[b].at || 0); });
+        keys.slice(0, keys.length - opts.cacheMax).forEach(function (k) { delete map[k]; });
+      }
+      var text = JSON.stringify(map);
+      if (text.length > opts.cacheMaxBytes) return false;
+      root.sessionStorage.setItem(CACHE_KEY, text);
+      return true;
+    } catch (e) { return false; }
+  }
 
   function hash(value) {
     var T = root.AstroTask;
@@ -73,8 +101,15 @@
       if (len && len > opts.maxBytes) {
         return { ok: false, code: 'pdf_too_large', reason: 'PDF 超过 ' + opts.maxBytes + ' B', url: url };
       }
-      if (ct && (!/pdf|octet-stream/.test(ct))) {
-        return { ok: false, code: 'not_pdf', reason: '返回内容不是 PDF（' + ct + '）', url: url };
+      if (ct && (!/pdf|octet-stream|html|text\/plain/.test(ct))) {
+        return { ok: false, code: 'not_pdf', reason: '返回内容不是 PDF/HTML（' + ct + '）', url: url };
+      }
+      if (/html|text\/plain/.test(ct)) {
+        var html = await r.text();
+        if (html.length > opts.maxBytes) {
+          return { ok: false, code: 'pdf_too_large', reason: '返回内容超过大小上限', url: url };
+        }
+        return { ok: true, kind: 'html', text: html, url: r.url || url, size: html.length };
       }
       var buf = await r.arrayBuffer();
       if (buf.byteLength > opts.maxBytes) {
@@ -183,13 +218,71 @@
     });
   }
 
+  function decodeHtml(s) {
+    return String(s || '')
+      .replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&').replace(/&lt;/gi, '<')
+      .replace(/&gt;/gi, '>').replace(/&quot;/gi, '"').replace(/&#39;/gi, "'")
+      .replace(/&#(\d+);/g, function (m, n) { return String.fromCharCode(Number(n)); });
+  }
+
+  function htmlToText(html) {
+    var t = String(html || '')
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/(p|div|h[1-6]|li|section|article|abstract|table|tr)>/gi, '\n')
+      .replace(/<[^>]+>/g, ' ');
+    t = decodeHtml(t).replace(/[ \t\f\v]+/g, ' ').replace(/\n\s*\n+/g, '\n').trim();
+    return t;
+  }
+
+  function parseHtml(html, url) {
+    var low = String(html || '').toLowerCase();
+    var head = low.slice(0, 4000);
+    if (/captcha|access denied|403 forbidden|sign in to continue|login required|enable javascript and cookies/.test(head)) {
+      return { ok: false, code: 'html_error_page', error: '出版社返回错误/反爬页面，未作为全文', url: url };
+    }
+    var tm = String(html || '').match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+    var title = tm ? decodeHtml(tm[1]).replace(/\s+/g, ' ').trim() : '';
+    var text = htmlToText(html);
+    if (text.length < 120) {
+      return { ok: false, code: 'html_no_text', error: 'HTML 页面没有可提取的正文', url: url };
+    }
+    var sections = [];
+    var re = /<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/gi, m;
+    while ((m = re.exec(html))) {
+      var name = htmlToText(m[1]).replace(/\s+/g, ' ').trim();
+      if (name && name.length <= 80) sections.push({ name: name, pageStart: null, pageEnd: null });
+    }
+    if (!sections.length) sections = [{ name: '正文', pageStart: null, pageEnd: null }];
+    var chunks = [], buf = '', size = 0;
+    text.split(/(?<=[。！？.!?])\s+/).forEach(function (sentence) {
+      if (size + sentence.length > 1400 && buf) {
+        chunks.push({ content: buf.trim(), pageStart: null, pageEnd: null });
+        buf = ''; size = 0;
+      }
+      buf += sentence + ' '; size += sentence.length + 1;
+    });
+    if (buf.trim()) chunks.push({ content: buf.trim(), pageStart: null, pageEnd: null });
+    return {
+      ok: true, title: title, pageCount: null, sections: sections, chunks: chunks,
+      textLength: text.length, warnings: ['HTML 响应，非 PDF 全文；按可读正文提取，页码不可用'],
+      extractionMethod: 'html-text-v1', url: url
+    };
+  }
+
   async function get(paper, opts) {
     opts = Object.assign({}, DEFAULTS, opts || {});
     var pid = paperIdOf(paper);
     var url = fulltextUrlOf(paper);
     if (!url) return { ok: false, code: 'fulltext_unavailable', reason: '没有公开全文地址', paperId: pid, url: '' };
-    var key = pid + '|' + url;
+    var key = cacheKeyOf(pid, url);
     if (CACHE[key]) return CACHE[key];
+    var stored = readStore()[key];
+    if (stored && stored.value && nowMs() - (stored.at || 0) <= opts.cacheTtlMs) {
+      CACHE[key] = stored.value;
+      return stored.value;
+    }
 
     var res = await fetchPdf(url, opts);
     if (!res.ok) {
@@ -198,8 +291,13 @@
       return fail;
     }
     var P = root.AstroPdfText;
-    if (!P) return { ok: false, code: 'pdf_parser_missing', reason: 'PDF 解析模块未加载', paperId: pid, url: url };
-    var parsed = await P.parse(res.bytes, opts);
+    var parsed = null;
+    if (res.kind === 'html') {
+      parsed = parseHtml(res.text, res.url || url);
+    } else {
+      if (!P) return { ok: false, code: 'pdf_parser_missing', reason: 'PDF 解析模块未加载', paperId: pid, url: url };
+      parsed = await P.parse(res.bytes, opts);
+    }
     if (!parsed.ok) {
       var pf = { ok: false, code: parsed.code, reason: parsed.error, paperId: pid, url: url, warnings: parsed.warnings };
       CACHE[key] = pf;
@@ -209,6 +307,7 @@
     var evidence = buildEvidence(paper, parsed, chunks, opts);
     var out = {
       ok: true, code: 'fulltext_ok', paperId: pid, url: url, size: res.size,
+      contentType: res.kind === 'html' ? 'html' : 'pdf',
       parse: {
         title: parsed.title, doi: parsed.doi, textLength: parsed.textLength,
         pageCount: parsed.pageCount, sections: parsed.sections, warnings: parsed.warnings,
@@ -224,10 +323,19 @@
     CACHE[key] = out;
     var keys = Object.keys(CACHE);
     while (keys.length > opts.cacheMax) { delete CACHE[keys[0]]; keys.shift(); }
+    var map = readStore();
+    map[key] = { at: nowMs(), value: out };
+    writeStore(map, opts);
     return out;
   }
 
-  function clearCache() { CACHE = {}; }
+  function clearMemory() { CACHE = {}; }
+  function cacheStats() {
+    var map = readStore();
+    return { memory: Object.keys(CACHE).length, stored: Object.keys(map).length, key: CACHE_KEY };
+  }
+
+  function clearCache() { CACHE = {}; try { root.sessionStorage.removeItem(CACHE_KEY); } catch (e) {} }
 
   root.AstroPaperFulltext = {
     get: get,
@@ -238,6 +346,9 @@
     buildEvidence: buildEvidence,
     DEFAULTS: DEFAULTS,
     clearCache: clearCache,
+    clearMemory: clearMemory,
+    cacheStats: cacheStats,
+    CACHE_KEY: CACHE_KEY,
     version: '1.0.0'
   };
 })(typeof window !== 'undefined' ? window : global);
