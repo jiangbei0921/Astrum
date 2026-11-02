@@ -97,6 +97,8 @@ function ok(n, p, x) { results.push({ n: n, p: !!p, x: x == null ? '' : String(x
         a.status='ok';a.outputHash='test';
         var b=T.makeStep({id:'s2',tool:'compose.simple',args:{query:'M42',from:[]},deps:[],parallel:false,critical:false,optional:false});
         st.steps=[a,b];
+        st.plan={id:'p_browser_'+i,template:'T-B',steps:[a,b]};
+        st.mode='single';
         await store.save(st);
       }
       return 'seeded';
@@ -130,6 +132,35 @@ function ok(n, p, x) { results.push({ n: n, p: !!p, x: x == null ? '' : String(x
     ok('B6 步骤面板不是固定百分比', /执行步骤 · \d+\/\d+ 完成/.test(sum), sum);
     var left = await cdp.eval("document.querySelectorAll('.resume-row').length", 10000);
     ok('B7 恢复后只移除对应任务', left && left.result && left.result.value === 1, 'left=' + (left && left.result && left.result.value));
+
+    var att = await cdp.eval(`(async function(){
+      var A=window.Attachments, out={};
+      var t=new File(['\\ufeffM42 是猎户座大星云'], 'note.txt', {type:'text/plain'});
+      var ti=await A.process(t);
+      out.text={status:ti.status,kind:ti.kind,chars:ti.text.length,bom:ti.text.indexOf('\\ufeff')<0};
+      var e=new File([''], 'empty.txt', {type:'text/plain'});
+      var ei=await A.process(e);
+      out.empty={status:ei.status,kind:ei.kind,note:ei.note};
+      var bin=atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=');
+      var u=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+      var p=new File([u], 'one.png', {type:'image/png'});
+      var pi=await A.process(p);
+      out.png={status:pi.status,kind:pi.kind,w:pi.width,h:pi.height,thumb:!!pi.thumb};
+      var bad=new File(['x'], 'bad.exe', {type:'application/octet-stream'});
+      var bi=await A.process(bad);
+      out.bad={status:bi.status,kind:bi.kind,note:bi.note};
+      out.prompt=A.forPrompt([ti]);
+      return out;
+    })()`, 60000);
+    var av = att && att.result && att.result.value;
+    ok('B8 UTF-8 BOM 文本可读', av && av.text && av.text.status === 'ready' && av.text.chars > 0 && av.text.bom === true,
+      av && JSON.stringify(av.text));
+    ok('B9 空文本明确失败', av && av.empty && av.empty.status === 'error', av && JSON.stringify(av.empty));
+    ok('B10 PNG 图片生成预览', av && av.png && av.png.status === 'ready' && av.png.w === 1 && av.png.thumb === true,
+      av && JSON.stringify(av.png));
+    ok('B11 不支持类型明确标注', av && av.bad && av.bad.status === 'unparsed', av && JSON.stringify(av.bad));
+    ok('B12 文本进入任务上下文', av && av.prompt && av.prompt.length === 1 && av.prompt[0].excerpt.indexOf('M42') >= 0,
+      av && JSON.stringify(av.prompt));
   } catch (e) {
     ok('浏览器异常', false, String(e && e.stack || e).slice(0, 240));
   } finally {
