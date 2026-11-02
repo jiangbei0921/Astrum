@@ -125,7 +125,18 @@
 | 真实 Provider Key | BLOCKED_API_KEY | 未执行真实模型调用 |
 | 真实扫描/CID 样本 | BLOCKED_SAMPLE | 合成 13 类已通过 |
 
-## 6. 结论
+## 6. 发布与线上验收
+
+| 项 | 结果 |
+|---|---|
+| 代码提交 | `1b1be97`（修复）+ `fffc128`（文档/基线） |
+| test Run | `41443340306` success |
+| pages Run | `41443735631` success |
+| 线上 `version.json` | commit `fffc128`、dirty=false |
+| 线上对比 UI | “比较 M31 和 M33”两个目标卡，含距离/类型/可见性 |
+| 线上拍摄参数 | 200mm 口径、259mm 理论焦距、38s 曝光上限、赤道仪/导星 |
+| 线上 console | 无消息，无 CSP 违规 |
+
+## 7. 结论
 
 本轮不是“发现后写报告”，而是完成了真实场景 → 根因 → 代码修改 → 测试 → 基线授权更新 → 回归的闭环。所有修改均有对应测试；旧接口/13 Agent/Tool-Centric/ADR-001 预算未改变。
-</content>

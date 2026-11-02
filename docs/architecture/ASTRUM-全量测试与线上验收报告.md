@@ -83,19 +83,21 @@ selftest 内置 20 问回归：`diffBytes=0`，13 Agent 名称/职责未变；�
 
 | 项 | 值 |
 |---|---|
-| 功能提交 | `47a3dee04a07a609cdc55f66963658ae7520790a` |
-| test Run | `41425289027` success（static / offline-core / offline-browser） |
-| pages Run | `41425684667` success（build 28s / deploy 10s） |
+| 功能提交 | `fffc12847552fb18a7461af95d3c28676d1c731f` |
+| test Run | `41443340306` success（static / offline-core / offline-browser） |
+| pages Run | `41443735631` success（build 6s / deploy 20s） |
 | 线上 URL | `https://jiangbei0921.github.io/Astrum/` |
 | 首页 HTTP | 200 |
-| `version.json` commit | `47a3dee`、dirty=false、runId 41425684667 |
+| `version.json` commit | `fffc128`、dirty=false、runId 41443735631 |
 | 核心资源 | `core/app.js` 200、`assets/app.css` 200、`privacy.html` 200 |
 | 开发文件隔离 | `tools/selftest.js` 404、`docs/architecture/00-README.md` 404 |
 | 线上 13 Agent | PASS（Muse—Navigator 全部可见） |
 | 线上核心问答 | PASS（“M42 是什么”返回距离/直径/视星等答案） |
-| 线上 CSP/console | PASS（console 无消息；57 个请求无失败） |
+| 线上对比 UI | PASS（“比较 M31 和 M33” 两个目标、距离/类型/可见性） |
+| 线上拍摄参数 | PASS（200mm 口径、259mm 理论焦距、曝光/跟踪） |
+| 线上 CSP/console | PASS（console 无消息；无 CSP 违规） |
 
-本地等价验收：`v1-4-pages` 32/32、`v1-6-browser` 33/33、`selftest` 156/156。
+本地等价验收：`v1-4-pages` 32/32、`v1-6-browser` 36/36、`selftest` 156/156。
 
 ## 7. 未执行与外部条件
 
