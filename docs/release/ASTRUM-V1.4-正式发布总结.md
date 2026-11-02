@@ -11,7 +11,7 @@
 
 | 项 | 结果 |
 |---|---|
-| Git main 与远端同步 | PASS（本地/远端均为 `7e50227`，0/0） |
+| Git main 与远端同步 | PASS（release `7e50227` + 文档跟进提交均已同步，0/0） |
 | 普通推送 | PASS（`git push` 返回 `Everything up-to-date`；未 force push） |
 | test workflow | PASS（Run `41398644528`，static/offline-core/offline-browser 全成功） |
 | pages workflow | PASS（Run `41398780587`，build/deploy 全成功） |
@@ -84,8 +84,9 @@
 ## 7. 最终状态
 
 ```text
-ASTRUM V1.4：RELEASED
-Commit: 7e50227c97a76c41285bc2b902929bed26741487
+ASTRUM V1.4: RELEASED
+Release Commit: 7e50227c97a76c41285bc2b902929bed26741487
+Docs Follow-up: 最新 main HEAD（[skip ci]，不改变部署产物）
 Test Run: 41398644528
 Pages Run: 41398780587
 URL: https://jiangbei0921.github.io/Astrum/
