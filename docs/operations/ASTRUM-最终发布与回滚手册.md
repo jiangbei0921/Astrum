@@ -12,14 +12,14 @@
 
 | 项 | 值 |
 |---|---|
-| 最新功能提交 | `55fe9dba161eba8da1ffa7dd43f17eea94d127dc`（V1.8 问题反馈） |
-| test Workflow | `41588104481` success |
-| pages Workflow | `41588501459` success |
-| 线上 `version.json.commit` | `55fe9db` |
+| 最新功能提交 | `0640f6f6b0afb796df19951ecbea25a4f3ca87bc`（V1.9 科研强化 + 日常数据合并） |
+| test Workflow | `41603946113` success |
+| pages Workflow | `41604395159` success |
+| 线上 `version.json.commit` | `0640f6f` |
 | 线上 `dirty` | false |
 | Pages Source | `build_type=workflow` |
-| 本地/远端 | 一致 `55fe9db` |
-| 线上验收 | 帮助页反馈入口、主动提示、回答反馈、确认页/收件人/不自动发送、诊断下载、console/CSP、无额外外发资源全 PASS |
+| 本地/远端 | 一致 `0640f6f` |
+| 线上验收 | 帮助页反馈、主动提示、回答反馈、诊断科研字段、路由修复、console/CSP 全 PASS（27/27） |
 
 历史发布：`7e50227`（V1.4 首次 Actions 发布）、`5aa644a`（V1.5 浏览器/回滚补齐）、`9eb0439`（V1.7 研究质量/基准）、`66bfdb6`（defer 并行加载）、`e0e7842`（Pages-only defer 与 CI 等待修复）。
 
@@ -228,3 +228,27 @@ V1.7 仍使用 §3.1 的标准回滚：回滚到上一个成功 Pages 的 commit
 4. `node tools/v1-2-deploy-test.js`、`v1-4-ci-test.js`、`csptest.js`；
 5. `sync-csp-hash` / `build-standalone` / `build-pages`，确认 `_site/core/feedback.js` 存在、密钥 0、绝对路径 0；
 6. 线上确认 `version.json.commit` 为本次提交，三入口与“不自动发送”提示可见。
+
+### 7.5 V1.9 发布记录（2026-11-03）
+
+| 项 | 值 |
+|---|---|
+| 功能提交 | `8b7b8aa` |
+| 合并日常数据 | `0640f6f` |
+| test Workflow | `41603946113` success（static / offline-core / offline-browser） |
+| pages Workflow | `41604395159` success |
+| 线上 `version.json.commit` | `0640f6f` |
+| 线上 `dirty` | false |
+| 新增 CI 步骤 | V1.9 反馈诊断、独立盲测离线、Provider 验证（无 Key 接受 exit 2） |
+| 线上验收 | 27/27；反馈三入口、研究路由、诊断科研字段、console/CSP |
+| 回滚 | 若 V1.9 出问题，回滚到 `0d0d444`（V1.8 文档提交）或 `55fe9db`；正常提交 + 重新触发 test/pages，不使用 force push / reset --hard |
+
+V1.9 发布前检查：
+
+1. `node tools/v1-9-provider-test.js`（无 Key 时 exit 2，不得当 PASS）；
+2. `node tools/v1-9-blind-research-benchmark.js --offline`；有网络时执行全量；
+3. `node tools/v1-9-real-pdf-test.js`（样本缺失时 BLOCKED_SAMPLE）；
+4. `node tools/v1-9-e2e-test.js`；
+5. `node tools/v1-9-feedback-diagnostic-test.js`；
+6. 全量 Node/Chrome/静态/i18n；
+7. `build-pages` 安全扫描密钥 0、绝对路径 0。

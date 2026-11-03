@@ -221,3 +221,38 @@ openMailClient()（只尝试唤起，不代表发送成功）
 `submitFeedback(feedback)` 按 `CONFIG.feedbackChannel` 分发，`registerChannel(name, handler)` 可注册未来 GitHub Issues / 产品 API / 工单渠道；更换邮箱或渠道只需改配置，不改三入口 UI 与诊断逻辑。
 
 详细说明见 `docs/feedback/FEEDBACK.md`。
+
+## 11. V1.9 真实科研强化（2026-11-03）
+
+### 11.1 架构边界
+
+- 13 Agent、Muse、Tool-Centric、7 模板、MEMORY/Thread/TaskStore、旧接口、ADR-001、静态部署全部保留。
+- 未新增 Agent、后端、数据库、模型框架；Provider 仍走 `Sources` + `ControlBridge`。
+- 反馈模块仍是 `core/feedback.js` + 三入口，不重写。
+
+### 11.2 能力增强
+
+| 模块 | 变化 |
+|---|---|
+| Router | 研究词表扩展；unknown 但有研究信号不再强制 LEGACY |
+| Agents | 缺省 ctx 回填 bortle/lat/lon/tz；知识别名补光谱类型 |
+| Sources / Bridge | 结构化 Provider 错误：auth/rate_limit/timeout/server/notfound/parse/empty/network |
+| PDF | 页码映射、refsStartPage、参考文献不进入 evidence chunks、乱码拒绝、24MB、尾部垃圾容忍 |
+| Paper Fulltext | 全文 Evidence ID 按 chunk 唯一 |
+| Feedback | 诊断增加论文/证据/Claim/evidenceRefs/PDF/工具/Provider/gaps/limitations |
+
+### 11.3 数据流
+
+```text
+用户问题 → Router（研究/比较/单目标） → Planner（T-E/T-F/T-D）
+  → Registry/Runner（paper.search / evidence.search / fulltext）
+  → Evidence（含全文 chunk/page）→ Claims（support.eid）
+  → Reducer/Report → Compose → Answer
+  → 反馈：Analyze → Diagnostic → 用户确认 → mailto
+```
+
+### 11.4 测试与线上
+
+- 独立盲测 56/56；真实 PDF 79/79；反馈诊断 27/27；E2E 31/31；V1.7 基准 46/46。
+- 功能提交 `8b7b8aa`；线上 commit `0640f6f`；test `41603946113` / pages `41604395159` success。
+- 剩余外部条件：真实 Provider Key、真实扫描/CID PDF、真实邮件客户端发送。

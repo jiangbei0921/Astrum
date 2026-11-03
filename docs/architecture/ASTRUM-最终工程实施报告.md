@@ -179,3 +179,40 @@
 | 线上反馈验收 | 24/24（帮助入口、主动提示、回答入口、确认页、下载、无 JS/CSP 错误） |
 
 详细见 `docs/feedback/FEEDBACK.md` 与 `ASTRUM-全量测试与线上验收报告.md` §10。
+
+## 10. 2026-11-03：V1.9 真实科研能力强化
+
+### 10.1 实际完成
+
+- **Provider**：修复 HTTP 500/坏 JSON/空响应/404 分类；新增 `v1-9-provider-test`（20/20 离线协议）；真实调用因无 Key 为 `BLOCKED_API_KEY`，未伪造成 PASS。
+- **独立盲测**：新增 56 题 / 15 类 / 10 维评分，真实网络 21 案例、59 篇论文，结果 56/56 PASS，0 坏引用/0 虚构/0 NaN。
+- **真实 PDF**：6 个 arXiv 样本（29/11/6/9/28 页，含 14.3MB 长论文），5 解析成功、1 乱码明确拒绝；79/79 断言。
+- **反馈诊断**：增加论文/证据/Claim/evidenceRefs/PDF 状态/工具状态/Provider/gaps/limitations；27/27 + E2E 31/31。
+- **路由**：WASP-39b、21cm、FRB 宿主星系、星系团冲压剥离等研究主题从 legacy 修复为 T-E/T-F；unknown + 研究信号不再强制旧兜底。
+- **回答质量**：修复 `Bortle undefined`；补光谱类型别名。
+
+### 10.2 关键修复
+
+1. PDF 页码按页面文本偏移映射，`referencesStartPage` 不再恒为 null；
+2. 参考文献章节不进入全文 chunks/Claim；
+3. 两栏粘行不再误判为章节标题；
+4. 容忍 zlib 压缩流尾部垃圾；
+5. 乱码不再当成功，返回 `pdf_unsupported_encoding`；
+6. 解析/下载上限统一提升到 24MB；
+7. 全文 Evidence ID 按 chunk 唯一，修复 `ev_f` 重复；
+8. Provider 错误码细化 `server/parse/empty/notfound`；
+9. 反馈诊断补齐科研定位字段；
+10. 缺省 ctx 回填 bortle，消除 `Bortle undefined`。
+
+### 10.3 上线
+
+| 项 | 值 |
+|---|---|
+| 功能提交 | `8b7b8aa` |
+| 合并日常数据 | `0640f6f` |
+| test Run | `41603946113` success |
+| pages Run | `41604395159` success |
+| 线上 version | app 4.8、commit `0640f6f`、dirty=false、runId `41604395159` |
+| 线上验收 | 27/27 |
+
+详细见四份 V1.9 专项报告与 `ASTRUM-全量测试与线上验收报告.md` §11。

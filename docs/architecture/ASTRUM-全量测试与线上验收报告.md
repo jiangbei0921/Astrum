@@ -226,3 +226,61 @@ selftest 内置 20 问回归：`diffBytes=0`，13 Agent 名称/职责未变；�
 | 控制台/网络 | 无 JS 错误、无 CSP 违规、无额外外发资源 |
 
 > 线上 24/24 使用工作区临时 CDP 脚本 `online-feedback-check.js`，未提交到仓库。`mailto` 的真实客户端唤起需人工在配置邮件客户端的设备上完成，自动化只能验证不自动发送与降级路径。
+
+## 11. V1.9 真实科研强化：全量测试与线上验收（2026-11-03）
+
+### 11.1 新增测试
+
+| 套件 | 命令 | 结果 |
+|---|---|---:|
+| Provider 协议/分类 | `node tools/v1-9-provider-test.js` | 20/20；BLOCKED_API_KEY |
+| 独立盲测（真实网络） | `node tools/v1-9-blind-research-benchmark.js --json` | 56/56 PASS |
+| 真实 PDF | `node tools/v1-9-real-pdf-test.js` | 79/79 |
+| 反馈诊断联动 | `node tools/v1-9-feedback-diagnostic-test.js` | 27/27 |
+| 跨任务 E2E | `node tools/v1-9-e2e-test.js` | 31/31 |
+| 线上验收 | 临时 CDP 脚本 | 27/27 |
+
+独立盲测：15 类 56 题，21 个真实网络案例，59 篇论文；PASS 56 / FAIL 0 / BLOCKED_EXTERNAL 0 / SKIP 0；关键失败（虚构论文、坏引用、NaN）0。
+
+真实 PDF：6 个 arXiv 样本，5 成功，1 乱码明确拒绝；页数 29/11/6/9/28；参考文献起始页 25/9/6/8/25；不存在参考文献污染正文块。
+
+### 11.2 原套件回归
+
+| 层 | 结果 |
+|---|---|
+| V1.7 真实基准 | 46/46 PASS |
+| V1.8 反馈核心 | 149/149 |
+| V1.8 反馈浏览器 | 49/49 |
+| selftest | 156/156，CSP 违规 0 |
+| v1-6 browser | 36/36 |
+| v1-4 pages | 32/32 |
+| 其余 Node/Chrome/静态 | 全部 PASS |
+| i18n-scan `--max=0` | 通过，界面残留 0 |
+| v1-2-deploy / v1-4-ci / csptest | 20/20 / 22/22 / 6/6 |
+
+### 11.3 构建与线上
+
+| 项 | 结果 |
+|---|---|
+| standalone | 54 脚本、131KB CSS、1723KB |
+| Pages 产物 | 59 文件（core 46 / data 8）、1750KB |
+| 安全扫描 | 密钥 0、绝对路径 0 |
+| 功能提交 | `8b7b8aa` |
+| 合并日常数据 | `0640f6f` |
+| test Run | `41603946113` success |
+| pages Run | `41604395159` success |
+| 线上 `version.json` | app 4.8、commit `0640f6f`、dirty=false、runId `41604395159` |
+| 线上反馈/路由/诊断 | 27/27 PASS |
+| 首屏性能 | DOMContentLoaded 2.9–9.0s（Pages CDN 冷启动波动），最佳 2.9s；脚本数仍 54，体积 +1.9% |
+
+> 性能差异主要来自 GitHub Pages 冷连接与 54 个独立脚本的 6 连接并发上限，不是本轮新增代码导致的结构性退化。V1.7 的 3.07s 仍在实测范围内（本轮最佳 2.9s）。
+
+### 11.4 线上验收明细
+
+- 设置 → 帮助 → 问题反馈：入口、邮箱 `2185428966@qq.com`、表单、确认页正常。
+- 回答操作条「反馈问题」：关联任务与 `m-` 消息 ID。
+- 主动异常提示：注入失败 TaskState 后可触发、可忽略、同 Task+类别去重。
+- 诊断：新增论文/证据/Claim/PDF/Provider 字段，脱敏后导出。
+- 路由：WASP-39b 透射光谱问题线上为 `research / T-E`。
+- 控制台：无 JS 错误、无 CSP 违规；除既有 `ipwho.is` IP 定位外无额外外发资源。
+- `mailto`：确认前不打开；真实客户端/发送仍需人工验收。

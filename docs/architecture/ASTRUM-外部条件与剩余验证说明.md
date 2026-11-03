@@ -176,3 +176,18 @@ node tools/v1-5-longrun-test.js --minutes=180 --label=LR-03 --out=lr-03.log
 | 反馈渠道扩展 | NOT_IMPLEMENTED_BY_DESIGN | 本轮只实现 `mailto`；GitHub Issues / 产品 API / 工单系统需未来配置与后端条件，未伪装为已完成 |
 | 线上主动异常注入 | TEST_INJECTION | 线上 24/24 通过 `__astrum.renderAnswer` 注入失败 TaskState 验证提示；真实外部服务故障需自然发生或由 network CI 产生，不能人为伪造为线上故障 |
 | 真实 Provider Key | BLOCKED_API_KEY | 本轮不涉及模型调用；反馈中的模型失败分类以现有错误码验证，未写入任何密钥 |
+
+## 9. V1.9 真实科研强化新增外部条件（2026-11-03）
+
+| 项 | 状态 | 实际观测与处理 |
+|---|---|---|
+| 真实 Provider Key | BLOCKED_API_KEY | 未设置 `ASTRUM_LIVE_API_KEY/BASE_URL/MODEL`；离线协议与错误分类 20/20 PASS；真实调用 0 次，不伪造 PASS |
+| 真实 Provider 429/配额 | BLOCKED_QUOTA（未触发） | 无真实 Key/额度，无法触发真实 429 |
+| Provider 服务不可用 | BLOCKED_PROVIDER（未触发） | 无真实端点，未伪造服务故障 |
+| 真实扫描版 PDF | BLOCKED_SAMPLE | 当前没有合法公开的真实扫描样本；合成扫描件只验证 `pdf_no_text`，不冒充真实 |
+| 真实 CID 成功解析 | BLOCKED_SAMPLE | 2208 真实样本编码异常，本轮正确拒绝 `pdf_unsupported_encoding`；未取得可正确 ToUnicode 的真实 CID 成功样本 |
+| OCR | 未实现 | 不引入大型依赖；仅分类 `pdf_ocr_required` |
+| 真实邮件客户端/发送 | BLOCKED_MAIL_CLIENT / BLOCKED_USER_ACTION | mailto 草稿与降级已验证；真实客户端弹出/发送需人工 |
+| 21 个真实网络研究案例 | 本轮可达 | OpenAlex/arXiv 正常，SIMBAD 偶发不可达；本轮 56/56 PASS，未来可能变化 |
+| `network.yml` V1.9 步骤 | 已配置未触发 | 可手动运行 `gh workflow run network.yml` 验证真实 PDF + E2E |
+| 首屏 CDN 波动 | ENV_LIMITATION | 本轮 2.9–9.0s；脚本数 54、体积 +1.9%，最佳 2.9s 与 V1.7 3.07s 同量级 |
