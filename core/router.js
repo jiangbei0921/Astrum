@@ -16,6 +16,9 @@
   var RESEARCH_WORDS = /综述|研究|最新进展|进展|争议|证据|论文|文献|JWST|韦伯|早期宇宙|系外行星|测量方法|测量结果|不同结果|是否一致|一致性|随红移|红移演化|并合|21cm|中性氢|潮汐锁定|宿主星系|冲压剥离|矮星系|恒星形成|透射光谱|凌星|径向速度|金属丰度|年龄测定|光度函数|再电离|卫星星系|缺失卫星|失败超新星|探测现状|观测现状|研究现状|现有资料/;
   var COMPARE_WORDS = /对比|比较|区别|哪个更|分别|同时|以及/;
   var WHY_WORDS = /为什么|机制|原理/;
+  /* 定量参数：当目标没有系统内置条目时，本地星表不足以回答，
+   * 应交给 Planner 调 SIMBAD/论文等外部来源，而不是直接落到“本地没有依据”。 */
+  var PARAM_WORDS = /距离|质量|年龄|温度|半径|直径|金属丰度|视差|自行|光度|不确定|误差|测量值/;
 
   function includes(list, v) {
     return list.indexOf(v) >= 0;
@@ -98,6 +101,20 @@
     return 1;
   }
 
+  function hasLocalEntry(targets) {
+    for (var i = 0; i < (targets || []).length; i++) {
+      var it = targets[i] && targets[i].item ? targets[i].item : targets[i];
+      if (!it) continue;
+      if (it.kind === 'kb' || it.kind === 'planet' || it.kind === 'sun' || it.kind === 'moon') return true;
+    }
+    return false;
+  }
+
+  /* 目标存在、但问的是定量参数、且没有系统内置条目/行星参数 → 外部检索。 */
+  function needsExternalParam(query, targets) {
+    return PARAM_WORDS.test(String(query || '')) && (targets || []).length > 0 && !hasLocalEntry(targets);
+  }
+
   /* 05 §1 的复杂度公式；当前 MuseResult 只有单 intent，故「意图数 > 1」计 0。 */
   function complexityOf(query, intent, targets) {
     var q = String(query || '');
@@ -107,6 +124,7 @@
     if (COMPARE_WORDS.test(q)) score += 1;
     if (WHY_WORDS.test(q) && hasObservationCalc(intent, targets)) score += 1;
     if (RESEARCH_WORDS.test(q)) score += 2;
+    if (needsExternalParam(q, targets)) score += 2;
 
     if (score >= 4) return { complexity: 4, level: 'L4' };
     if (score >= 2) return { complexity: 3, level: 'L3' };
@@ -117,7 +135,7 @@
   function modeOf(query, intent, targets, complexity) {
     var q = String(query || '');
     var count = mentionCount(q, targets);
-    if (RESEARCH_WORDS.test(q) || complexity === 4) return 'research';
+    if (RESEARCH_WORDS.test(q) || complexity === 4 || needsExternalParam(q, targets)) return 'research';
     if (COMPARE_WORDS.test(q) || count > 1) return 'compare';
     return 'single';
   }
@@ -145,7 +163,8 @@
       mentions: mentionCount(query, filtered),
       compare: COMPARE_WORDS.test(query),
       why: WHY_WORDS.test(query),
-      research: RESEARCH_WORDS.test(query)
+      research: RESEARCH_WORDS.test(query),
+      targetParam: needsExternalParam(query, filtered)
     };
 
     /* smalltalk 始终 LEGACY；unknown 若明确在问研究/文献，允许进入 T-E/T-F，

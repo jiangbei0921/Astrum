@@ -291,6 +291,15 @@
   }
 
   function sysPrompt(payload) {
+    if (payload && payload.task === 'translate') {
+      return [
+        '你是科研论文展示层的翻译器，只负责把英文论文标题/摘要翻译成简体中文。',
+        '规则：保留所有数字、单位、数学公式、物理量符号、误差表达、参考文献编号、DOI、arXiv ID 与作者姓名；',
+        '不得改变论文的科学结论，不得添加原文没有的推断；',
+        '天文专业术语采用天文学常见译法；',
+        '只输出译文，不要解释、不要加标题、不要输出原文。'
+      ].join('\n');
+    }
     var tone = payload.tone === 'academic' ? '克制、精确' : payload.tone === 'poetic' ? '带有轻微诗意，但不过度' : '友好、口语';
     var hasEvidence = !!(payload.evidence && payload.evidence.length);
     var lines = [
@@ -305,10 +314,25 @@
       lines.push('若证据之间对同一数值存在差异，必须说明差异，不要只取其中一个。');
       lines.push('证据标注为「待核验」的，不得作为确定结论陈述。');
     }
-    /* 结构放开：允许「结论 + 要点」，但事实边界一条都不放松 */
-    lines.push('输出格式：先给 1–2 句结论（直接回答问题），然后最多 4 条要点，每条以「· 」开头、独立成行。');
-    lines.push('不要使用 Markdown 记号（#、**、- 列表符、代码块），不要自造小标题，不要中英标点混排。');
-    lines.push('总长度 80–180 字；要点只展开结论里最关键的信息，不要复述上面已给出的全部事实。');
+    /* 结构随问题复杂度变化：简单事实保持短答；科研/对比问题给自然段结构，
+     * 但仍只允许使用已有事实与证据，不新增数字或结论。 */
+    var mode = payload.answerMode || '';
+    if (mode === 'C' || mode === 'D' || mode === 'E') {
+      lines.push('输出格式：用 2–4 个自然段回答，不要用列表。');
+      lines.push('第一段直接给核心结论；第二段说明证据来源与关键数据；' +
+        (mode === 'D' ? '第三段比较不同论文的测量结果与方法差异；' : '第三段解释差异、机制或不确定性；') +
+        '最后一段说明限制与仍缺失的信息。');
+      lines.push('段落之间必须有明确衔接（例如“在此基础上”“需要注意的是”“综合来看”），不要突然换话题。');
+      lines.push('不得把摘要信息写成已读全文；不得把模型推断写成科研事实。');
+      lines.push('总长度 180–420 字。');
+    } else if (mode === 'B') {
+      lines.push('输出格式：先给 1–2 句直接回答，再用 2–3 个自然段解释物理机制、因果过程与观测证据，最后一句说明认知边界。');
+      lines.push('段落之间要有因果或递进关系；总长度 120–300 字。');
+    } else {
+      lines.push('输出格式：先给 1–2 句结论（直接回答问题），然后最多 4 条要点，每条以「· 」开头、独立成行。');
+      lines.push('不要使用 Markdown 记号（#、**、- 列表符、代码块），不要自造小标题，不要中英标点混排。');
+      lines.push('总长度 80–180 字；要点只展开结论里最关键的信息，不要复述上面已给出的全部事实。');
+    }
     lines.push('语气：' + tone + '。');
     return lines.join('\n');
   }
@@ -337,6 +361,14 @@
   }
 
   function userPrompt(payload) {
+    if (payload && payload.task === 'translate') {
+      return [
+        '翻译类型：' + (payload.kind === 'title' ? '论文标题' : '论文摘要'),
+        '目标语言：简体中文',
+        '原文：',
+        String(payload.text || '').slice(0, 1600)
+      ].join('\n');
+    }
     var mem = (payload.memory || []).slice(-3);
     var memLines = mem.length
       ? ['对话记忆（仅供指代与一致性参考，不得作为新事实来源）：']
@@ -493,7 +525,7 @@
     return null;
   }
 
-  function clean(text) {
+  function clean(text, max) {
     return String(text || '')
       .replace(/```[\s\S]*?```/g, '')
       .replace(/^#+\s*/gm, '')
@@ -505,7 +537,7 @@
       .replace(/^\s*[•▪]\s*/gm, '· ')
       .replace(/\n{2,}/g, '\n')
       .trim()
-      .slice(0, 360);
+      .slice(0, max || 360);
   }
 
   /* ---------- 设备端模型（Chrome 内置 Gemini Nano） ----------
@@ -732,7 +764,7 @@
         });
       }
       return r.json().then(function (d) {
-        var text = clean(parseResponse(base.shape, d));
+        var text = clean(parseResponse(base.shape, d), payload.maxChars);
         if (!text) {
           var empty = new Error('模型返回空内容');
           empty.cls = { kind: 'empty', msg: ERR_KIND.empty, retryable: false };

@@ -199,6 +199,19 @@ jobs:
       - name: V1.9 研究目标 v1-9-research-target-test
         run: node tools/v1-9-research-target-test.js
 
+      # V1.10：最终回答整合、知识来源路由、动态论文国际化
+      - name: V1.10 回答整合 v1-10-answer-composer-test
+        run: node tools/v1-10-answer-composer-test.js
+
+      - name: V1.10 知识来源 v1-10-knowledge-sources-test
+        run: node tools/v1-10-knowledge-sources-test.js
+
+      - name: V1.10 动态内容国际化 v1-10-content-i18n-test
+        run: node tools/v1-10-content-i18n-test.js
+
+      - name: V1.10 集成 v1-10-integration-test
+        run: node tools/v1-10-integration-test.js
+
       # V1.9：Provider 协议/错误分类；无 Key 时返回 BLOCKED_API_KEY(exit 2)
       - name: V1.9 Provider 验证 v1-9-provider-test
         run: |

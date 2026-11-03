@@ -104,7 +104,9 @@ var EXPECTED = [
   { intent: 'observe-target', sha: '877a8b00133d3718b88ca24188229d243d46b8298f47def48adcbda81c3c3516', bytes: 2678 },
   { intent: 'knowledge-target', sha: '8572b0d5c150b480c544f8a8f1e97a501e62170c45bd6477e57ddf8453632544', bytes: 2560 },
   { intent: 'intro-target', sha: '4b0d8b0d4fb17690aeb382a0ac8dd584fc700e6cbf3a8d19845377eb1617807e', bytes: 2641 },
-  { intent: 'unknown', sha: 'd81dff842c03d300246f1041dc723bac812d39321fdd435006a5de931f113ad1', bytes: 939 },
+  /* 2026-11-03 V1.10 有意变更：第 15 问 unknown 的结论从“本地没有这个问题的依据”
+   * 改为“系统内置知识中暂未找到相关内容，尚未完成外部科研资料核验”。其余 19 问不变。 */
+  { intent: 'unknown', sha: '3e26c46c15ff1ceab0e8c1d93a601f68af1c5d05e1910d9e238a0b4ba4c33979', bytes: 990 },
   { intent: 'observe-target', sha: '877a8b00133d3718b88ca24188229d243d46b8298f47def48adcbda81c3c3516', bytes: 2678 },
   { intent: 'observe-target', sha: '4832825eed3324153aa7018bb642f2f8201b9b7b9f10c36a59a8ddb72f6d57e3', bytes: 2904 },
   { intent: 'cosmos', sha: '39517ba478a0c3606c6e030892d0bba6b261e3bf712723af71c623de62632dff', bytes: 3372 },

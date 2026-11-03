@@ -2134,6 +2134,39 @@
     if (s.kind === 'verdict') {
       wrap.className = 'sec sec-verdict' + (CURRENT_TIER === 'unknown' ? ' quiet' : '');
       wrap.innerHTML = '<p class="head">' + esc(s.head) + '</p>' + (s.sub ? '<p class="sub">' + esc(s.sub) + '</p>' : '');
+    } else if (s.kind === 'analysis') {
+      /* V1.10：Muse 综合研判。先给结论，再按“证据 → 差异 → 限制”的顺序展开；
+       * 模型表述与证据链在同一段结构里，不再作为孤立卡片插在中间。 */
+      wrap.className = 'sec sec-analysis';
+      wrap.innerHTML = '<div class="sec-title">' + esc(tn(s.title || '综合研判')) +
+        '<span class="st ' + (s.mode === 'A' ? 'st-established' : 'st-emerging') + '">' +
+        esc(tn((window.AstroAnswerComposer && AstroAnswerComposer.MODE_LABEL[s.mode]) || s.mode || '')) + '</span></div>';
+      var abox = el('div', 'analysis-body');
+      (s.paragraphs || []).forEach(function (p) {
+        var line = el('p', 'analysis-p' + (p.role === 'limitation' ? ' limit' : ''));
+        line.textContent = String(p.text || '');
+        abox.appendChild(line);
+      });
+      if (s.source && s.source.name) {
+        abox.appendChild(el('div', 'sec-note',
+          L('表述来源：') + s.source.name + (s.source.latency ? ' · ' + s.source.latency + ' ms' : '') +
+          L('。模型只组织已有材料，不构成新的科研证据。')));
+      }
+      wrap.appendChild(abox);
+    } else if (s.kind === 'sources') {
+      /* V1.10：四类知识来源与真实执行状态；未调用的工具不得写成已执行。 */
+      wrap.className = 'sec sec-sources';
+      wrap.innerHTML = '<div class="sec-title">' + esc(tn(s.title || '知识来源与执行状态')) + '</div>';
+      var srows = el('div', 'src-rows');
+      (s.items || []).forEach(function (it) {
+        var row = el('div', 'src-row src-' + esc(it.status || ''));
+        var k = el('div', 'src-k', tn(it.label));
+        var st = el('div', 'src-st', tn((window.AstroKnowledgeSources && AstroKnowledgeSources.STATUS_LABEL[it.status]) || it.status));
+        var d = el('div', 'src-d', tn(it.detail || ''));
+        row.appendChild(k); row.appendChild(st); row.appendChild(d);
+        srows.appendChild(row);
+      });
+      wrap.appendChild(srows);
     } else if (s.kind === 'evidence') {
       wrap.innerHTML = '<div class="sec-title">' + esc(s.title || '依据') +
         (s.status ? '<span class="st st-' + s.status + '">' + statusLabel(s.status) + '</span>' : '') + '</div>';
@@ -2472,7 +2505,27 @@
         row.innerHTML = head + metaHtml +
           '<div class="ws">' + esc(it.excerpt || it.snippet || '') + '</div>' +
           '<div class="wh">' + esc(it.host || '') + (it.url ? ' · 原文链接' : ' · 无原文链接') + '</div>' + badge;
-        if (it.url) {
+        /* V1.10：论文类证据卡与论文列表共用动态国际化展示规则。
+         * 译文只用于展示；Evidence ID、DOI、原文链接保持原样。 */
+        var paperLike = it.sourceType === 'paper' || it.doi || (it.authors && it.authors.length);
+        if (paperLike && window.AstroContentI18n && typeof window.AstroContentI18n.renderCard === 'function') {
+          row.innerHTML = (it.id ? '<div class="wt"><span class="ev-id">' + esc(it.id) + '</span></div>' : '') + badge;
+          row.appendChild(window.AstroContentI18n.renderCard({
+            originalTitle: it.title, originalAbstract: it.excerpt || it.snippet || '',
+            authors: it.authors, date: it.date, doi: it.doi, arxivId: it.arxivId,
+            url: it.url, source: it.host, version: it.version
+          }, {
+            variant: 'evidence',
+            onAsk: function (p) {
+              var ta = $('#input');
+              if (!ta) return;
+              ta.value = '核对「' + (p.originalTitle || p.title || '') + '」中的测量结果';
+              ta.dispatchEvent(new Event('input'));
+              ta.focus();
+            }
+          }));
+        }
+        if (it.url && !paperLike) {
           row.style.cursor = 'pointer';
           row.addEventListener('click', function () { window.open(it.url, '_blank', 'noopener'); });
         }
@@ -2586,13 +2639,16 @@
     if (!ans.meta || ans.meta.tier === 'unknown' || ans.meta.tier === 'chat') return null;
     if (ans.intent === 'smalltalk') return null;
 
-    var vIdx = -1, eIdx = -1, bIdx = -1, hasWeb = false;
+    var vIdx = -1, eIdx = -1, bIdx = -1, hasWeb = false, hasAnalysis = false;
     ans.sections.forEach(function (s, i) {
       if (s.kind === 'synthesis' || s.kind === 'web') hasWeb = true;
+      if (s.kind === 'analysis') hasAnalysis = true;
       if (vIdx < 0 && s.kind === 'verdict') vIdx = i;
       if (eIdx < 0 && s.kind === 'evidence' && (s.items || []).length) eIdx = i;
       if (bIdx < 0 && s.kind === 'boundary') bIdx = i;
     });
+    /* 有 Muse 综合研判时，由 analysis 承担完整叙述；再跑旧叙述层会重复结论与限制。 */
+    if (hasAnalysis) return null;
     /* 走检索的答案证据以引文为主，硬编成散文会丢原文，交给原渲染 */
     if (hasWeb) return null;
     if (vIdx < 0 || eIdx < 0) return null;
@@ -2849,6 +2905,11 @@
         Math.random().toString(36).slice(2, 6);
     }
     if (extra.state && extra.state.id) ans.meta.taskId = extra.state.id;
+    /* V1.10：所有入口在渲染前统一走一次最终回答整合。适配器/Control 已整理过时
+     * finalize 幂等，不会重复。质量检查结果写入 meta.quality，供反馈诊断使用。 */
+    if (window.AstroAnswerComposer && typeof window.AstroAnswerComposer.finalize === 'function') {
+      try { window.AstroAnswerComposer.finalize(ans, { question: ans.query || '' }); } catch (e) { console.warn('answer compose failed', e); }
+    }
     /* 术语双轨按「本条答案实际使用的语体」决定，而不是全局设置 */
     CURRENT_REG = (ans.meta.register === 'pro') ? 'pro' : 'pop';
     /* 契约一：档位由答案自身构成判定，渲染前统一标注 */
@@ -3286,6 +3347,32 @@
     };
   }
 
+  /* V1.10：把真实执行状态写进答案。工具是否调用、失败还是成功，只从
+   * state.steps / research 记录读取；没有调用的工具显示“未调用”。 */
+  function attachSources(ans, opts) {
+    if (!ans || !window.AstroKnowledgeSources) return ans;
+    opts = opts || {};
+    try {
+      var KS = window.AstroKnowledgeSources;
+      var steps = opts.steps || [];
+      var external = opts.external || KS.externalStatus(steps);
+      if (opts.research && !external.attempted) external = KS.externalFromResearch(opts.research);
+      KS.attach(ans, {
+        plan: KS.decide({
+          query: opts.query || ans.query || '',
+          intent: opts.intent || ans.intent,
+          targets: opts.targets || ans.targets || [],
+          attachments: opts.attachments || []
+        }),
+        attachments: opts.attachments || [],
+        external: external,
+        steps: steps,
+        model: opts.model || null
+      });
+    } catch (e) { console.warn('source plan failed', e); }
+    return ans;
+  }
+
   /* 引用编号核验：模型输出里出现的 [E1]/【E2】必须存在于本轮证据。
    * 只检查编号是否真实存在，不臆断编号与陈述的语义对应关系 ——
    * 后者无法自动判定，交给「引用核验」章节如实标注。 */
@@ -3596,6 +3683,17 @@
         });
       }
     });
+    /* Control 研究链路的论文在 answer.research.report.papers 里；补进模型证据池，
+     * 让模型可以按论文/DOI 组织表述，而不是只看到 facts。 */
+    if (ans.research && Array.isArray(ans.research.papers)) {
+      ans.research.papers.slice(0, 4).forEach(function (p, i) {
+        out.push({
+          id: 'E' + (i + 1), title: p.title, host: p.doi ? 'DOI' : '',
+          date: p.date || '', sourceType: 'paper', status: p.abstractOnly ? 'abstract-only' : 'supported',
+          excerpt: String(p.excerpt || '').slice(0, 320), url: p.url || ''
+        });
+      });
+    }
     return out.slice(0, 8);
   }
 
@@ -3881,12 +3979,21 @@
       if (!r.answer) { fail(L('研究任务未能完成，未生成结论。缺失数据不会被当作事实。')); return; }
       r.answer.query = q;
       bumpStat('ask', r.answer.intent || info.intent);
+      var ctrlState = r.control && r.control.state ? r.control.state : null;
+      function syncSources(model) {
+        attachSources(r.answer, {
+          query: qForAns, intent: info.intent, targets: r.answer.targets || [],
+          attachments: atts, steps: ctrlState && ctrlState.steps ? ctrlState.steps : [],
+          research: r.answer.research || null, model: model || null
+        });
+      }
+      syncSources(null);
 
       function finish() {
         think.remove(); busy(false);
         renderAnswer(r.answer, {
           control: true, verdict: r.verdict,
-          state: r.control && r.control.state ? r.control.state : null
+          state: ctrlState
         });
       }
 
@@ -3896,19 +4003,22 @@
       var canExpress = src && (src.type === 'cloud' || src.type === 'device') &&
         (src.type === 'device' || src.hasKey) &&
         window.AstroControlBridge && typeof window.AstroControlBridge.modelGenerate === 'function';
-      if (!canExpress) { finish(); return; }
+      if (!canExpress) { syncSources({ code: 'not-used', ok: false }); finish(); return; }
       var pay = factsFromAnswer(r.answer);
       var ev = evidenceForPrompt(r.answer);
       /* 与旧契约一致：没有任何可核实事实/证据时不外发模型。 */
-      if (!pay.facts.length && !ev.length) { finish(); return; }
+      if (!pay.facts.length && !ev.length) { syncSources({ code: 'not-used', ok: false }); finish(); return; }
       var ctxLine2 = ctx.city + ' · ' + ctx.y + '-' + pad(ctx.mo) + '-' + pad(ctx.d) + ' ' +
         pad(ctx.h) + ':' + pad(ctx.mi);
+      var answerMode = window.AstroAnswerComposer
+        ? window.AstroAnswerComposer.modeFor(r.answer, { question: qForAns }) : '';
       window.AstroControlBridge.modelGenerate(src.id, {
         question: qForAns, facts: pay.facts, para: pay.para, evidence: ev,
         attachments: A_ATT.forPrompt(atts || []),
         images: src.vision ? A_ATT.imagesForPrompt(atts || []) : [],
         tone: state.settings.register === 'pro' ? 'academic' : 'warm', context: ctxLine2,
-        memory: memoryForPrompt()
+        memory: memoryForPrompt(), answerMode: answerMode,
+        maxChars: (answerMode === 'C' || answerMode === 'D' || answerMode === 'E') ? 520 : 360
       }, { signal: ac.signal }).then(function (m) {
         r.answer.meta = r.answer.meta || {};
         r.answer.meta.cloudExpression = {
@@ -3916,17 +4026,29 @@
           latency: m && m.latency || 0, tokens: m && m.tokens != null ? m.tokens : null
         };
         if (m && m.ok && m.text) {
-          r.answer.sections.splice(sectionIndexAfterVerdict(r.answer), 0,
-            noteFor(src, m.text, m.latency, false));
+          if (window.AstroAnswerComposer && typeof window.AstroAnswerComposer.finalize === 'function') {
+            try {
+              window.AstroAnswerComposer.finalize(r.answer, {
+                question: qForAns, modelText: m.text,
+                modelSource: { name: src.name, vendor: src.vendor, latency: m.latency || 0 }
+              });
+            } catch (e) {
+              r.answer.sections.splice(sectionIndexAfterVerdict(r.answer), 0, noteFor(src, m.text, m.latency, false));
+            }
+          } else {
+            r.answer.sections.splice(sectionIndexAfterVerdict(r.answer), 0, noteFor(src, m.text, m.latency, false));
+          }
         } else if (!(m && m.code === 'cancelled')) {
           r.answer.sections.splice(sectionIndexAfterVerdict(r.answer), 0,
             noteFor(src, '云端表述失败（' + (m && m.code || 'unknown') + '）：' +
               (m && m.reason || '未知原因') + '。研究结论仍按证据链保留，未用模型输出替代。', 0, true));
         }
+        syncSources({ code: m && m.code || 'unknown', ok: !!(m && m.ok) });
         finish();
       }).catch(function (e) {
         r.answer.meta = r.answer.meta || {};
         r.answer.meta.cloudExpression = { sourceId: src.id, code: 'exception', reason: String(e && e.message || e).slice(0, 120) };
+        syncSources({ code: 'exception', ok: false });
         finish();
       });
     }).catch(function (e) {
@@ -4099,6 +4221,7 @@
         }).then(function (rec) {
           taskEnd(tWeb);
           applyResearch(ans, rec, q, cfgRun);
+          attachSources(ans, { query: q, intent: ans.intent, targets: ans.targets, attachments: atts, research: rec });
           think.remove(); busy(false); renderAnswer(ans, {});
         }).catch(function (err) {
           taskEnd(tWeb, err);
@@ -4110,6 +4233,10 @@
               '。以下为本地索引命中。'
           });
           ans.meta.research = { error: String(err && err.message || err) };
+          attachSources(ans, {
+            query: q, intent: ans.intent, targets: ans.targets, attachments: atts,
+            external: { status: 'failed', attempted: true, ok: 0, failed: 1, tools: [], failures: ['检索链路异常'] }
+          });
           think.remove(); busy(false); renderAnswer(ans, {});
         });
         return;
@@ -4119,6 +4246,7 @@
         if (!src.hasKey) {
           ans.sections.splice(idx, 0, noteFor(src,
             '该来源尚未配置密钥，本次表述仍由本地内核生成。在「设置 → 来源与密钥」填入密钥后可切换为真实调用。', 0, true));
+          attachSources(ans, { query: q, intent: ans.intent, targets: ans.targets, attachments: atts, model: { code: 'auth', ok: false } });
           think.remove(); busy(false); renderAnswer(ans, {});
           return;
         }
@@ -4139,6 +4267,7 @@
           if (window.AstroRuntime && window.AstroRuntime.classify(ans).key === 'unknown') {
             ans.sections.splice(sectionIndexAfterEvidence(ans), 0, noteFor(src,
               '本轮没有可核实的事实，未调用模型——避免它在无依据时生成看起来像结论的表述。', 0, true));
+            attachSources(ans, { query: q, intent: ans.intent, targets: ans.targets, attachments: atts, research: rec, model: { code: 'not-used', ok: false } });
             think.remove(); busy(false); renderAnswer(ans, {});
             return;
           }
@@ -4151,7 +4280,10 @@
             attachments: A_ATT.forPrompt(atts),
             images: src.vision ? A_ATT.imagesForPrompt(atts) : [],
             tone: state.settings.register === 'pro' ? 'academic' : 'warm', context: ctxLine,
-            memory: memoryForPrompt()
+            memory: memoryForPrompt(),
+            answerMode: window.AstroAnswerComposer
+              ? window.AstroAnswerComposer.modeFor(ans, { question: q }) : '',
+            maxChars: 520
           }).then(function (r) {
             taskEnd(tModel);
             var txt = r.text || '模型返回为空，已保留本地表述。';
@@ -4168,13 +4300,23 @@
               if (fake.length) extra.push('文中引用的 ' + fake.join('、') + ' 不在本轮检索结果中，已标为无效引用。');
             }
             var insertAt = sectionIndexAfterVerdict(ans);
-            ans.sections.splice(insertAt, 0, noteFor(src, txt + (extra.length ? '\n（' + extra.join(' ') + '）' : ''), r.latency, !r.text));
+            var modelText = txt + (extra.length ? '\n（' + extra.join(' ') + '）' : '');
+            if (window.AstroAnswerComposer && typeof window.AstroAnswerComposer.finalize === 'function' && r.text) {
+              window.AstroAnswerComposer.finalize(ans, {
+                question: q, modelText: modelText,
+                modelSource: { name: src.name, vendor: src.vendor, latency: r.latency || 0 }
+              });
+            } else {
+              ans.sections.splice(insertAt, 0, noteFor(src, modelText, r.latency, !r.text));
+            }
+            attachSources(ans, { query: q, intent: ans.intent, targets: ans.targets, attachments: atts, research: rec, model: { code: r && r.code || 'ok', ok: !!(r && r.text) } });
             think.remove(); busy(false); renderAnswer(ans, { latency: r.latency });
           });
         }).catch(function (err) {
           taskEnd(tModel, err);
           ans.sections.splice(sectionIndexAfterVerdict(ans), 0, noteFor(src,
             '调用失败：' + err.message + '。已回退本地表述，数值未受影响。', 0, true));
+          attachSources(ans, { query: q, intent: ans.intent, targets: ans.targets, attachments: atts, research: rec, model: { code: 'exception', ok: false } });
           think.remove(); busy(false); renderAnswer(ans, {});
         });
         return;
@@ -4237,6 +4379,7 @@
         return;
       }
 
+      attachSources(ans, { query: q, intent: ans.intent, targets: ans.targets, attachments: atts });
       think.remove(); busy(false); renderAnswer(ans, {});
     }, 520);
   }
@@ -6692,7 +6835,7 @@
   }
 
   /* ================= 版本 / 统计 / 答案操作 ================= */
-  var APP_VERSION = '4.8';
+  var APP_VERSION = '4.9';
 
   /* 更新提示：只在「之前来过且版本变了」时提示一次，首次访问不打扰 */
   function checkVersion() {
@@ -7615,6 +7758,20 @@
   }
 
   function frPaper(it) {
+    /* V1.10：每日前沿与科研报告共用同一套论文展示规则（中文优先 + 英文原文）。 */
+    if (window.AstroContentI18n && typeof window.AstroContentI18n.renderCard === 'function') {
+      return window.AstroContentI18n.renderCard({
+        originalTitle: it.title, originalAbstract: it.summary || '',
+        authors: it.authors, date: it.published || '',
+        arxivId: it.id, url: it.url,
+        source: it.cat ? 'arXiv · ' + it.cat : 'arXiv'
+      }, {
+        variant: 'frontier',
+        onAsk: function (p) {
+          frAsk('介绍一下「' + (p.originalTitle || p.title || it.title) + '」相关的研究背景');
+        }
+      });
+    }
     var box = el('div', 'fr-item');
     var a = el('a', 'fr-t');
     a.href = it.url;

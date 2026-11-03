@@ -385,6 +385,30 @@
       };
     }
 
+    function finalizeAnswer(answer, question, research) {
+      if (!answer) return answer;
+      if (root.AstroAnswerComposer && typeof root.AstroAnswerComposer.finalize === 'function') {
+        try { root.AstroAnswerComposer.finalize(answer, { question: question || argsQuestion(answer) }); } catch (e) { /* 质量整理失败不阻断交付 */ }
+      }
+      if (root.AstroKnowledgeSources && typeof root.AstroKnowledgeSources.attach === 'function') {
+        try {
+          var ext = research && root.AstroKnowledgeSources.externalFromResearch
+            ? root.AstroKnowledgeSources.externalFromResearch({ evidence: research.evidence })
+            : { status: 'skipped', attempted: false, ok: 0, failed: 0, tools: [], failures: [] };
+          root.AstroKnowledgeSources.attach(answer, {
+            plan: root.AstroKnowledgeSources.decide({
+              query: question || answer.query || '',
+              intent: answer.intent,
+              targets: answer.targets || []
+            }),
+            external: ext
+          });
+        } catch (e) { /* 来源状态失败不影响答案 */ }
+      }
+      return answer;
+    }
+    function argsQuestion(answer) { return (answer && answer.query) || ''; }
+
     function compose(args, ctx, cfg, depResults) {
       args = args || {};
       try {
@@ -392,6 +416,7 @@
         var pre = buildPreloaded(depResults, ids);
         var answer = build(args.query, ctx, cfg, pre);
         var research = augment(answer, args, depResults, ids);
+        finalizeAnswer(answer, args.query, research);
         return {
           ok: true, answer: answer,
           delivery: deliveryOf(pre, ids, research, depResults),
@@ -419,6 +444,7 @@
           answer.compare = cs.items;
         }
       }
+      finalizeAnswer(answer, query, research);
       return {
         answer: answer,
         delivery: deliveryOf(pre, ids, research, deps)

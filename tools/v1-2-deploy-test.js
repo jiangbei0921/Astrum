@@ -58,6 +58,8 @@ caseRun('D3', 'standalone 重建', function () {
     html.indexOf('AstroResearchUI') >= 0 && html.indexOf('AstroControlBridge') >= 0);
   ok('D3.3 无外链 core 脚本', !/<script[^>]*\ssrc="core\//.test(html));
   ok('D3.4 构建日志包含内联脚本数', /内联脚本/.test(out), out.split('\n').slice(-3).join(' | '));
+  ok('D3.5 V1.10 模块已内联', html.indexOf('AstroAnswerComposer') >= 0 &&
+    html.indexOf('AstroKnowledgeSources') >= 0 && html.indexOf('AstroContentI18n') >= 0);
 });
 
 caseRun('D4', 'file:// 与数据路径', function () {

@@ -971,7 +971,7 @@
    * 把算出来的事实写成副标题，这里会换回来——顺序不会被写反。
    * 这类问题已经出现过三次（未收录+罗列能力 / 未知档改写 / 结论首句），
    * 与其每处各修一遍，不如在出口拦一次。 */
-  var KB_GAP = /(?:本地)?知识库(?:没有|未收录)|没有可引用的条目|查不到|无法确证/;
+  var KB_GAP = /(?:本地|系统内置)?知识库(?:没有|未收录)|系统内置知识(?:没有|未收录)|没有可引用的条目|查不到|无法确证/;
   function settleVerdict(head, sub) {
     var h = String(head == null ? '' : head).trim();
     var s = String(sub == null ? '' : sub).trim();
@@ -1077,11 +1077,11 @@
         sub = posLine || ('来源：NASA Planetary Fact Sheet · 数据更新 ' + (binfo.updated || '2025-06'));
       } else if (posLine) {
         head = posLine;
-        sub = (attr ? '你问的是' + attr.label + '，本地没有对应条目' : '你问的是成因，本地没有对应条目') +
-          '；以上是当前可确证的观测状态。';
+        sub = (attr ? '你问的是' + attr.label + '，系统内置知识没有对应条目' : '你问的是成因，系统内置知识没有对应条目') +
+          '；以上是当前可确证的观测状态，尚未完成外部科研资料核验。';
       } else {
         var missing = attr ? attr.label : '成因';
-        head = '关于「' + (target ? target.name : answer.query) + '」的' + missing + '，本地没有可引用的条目。';
+        head = '关于「' + (target ? target.name : answer.query) + '」的' + missing + '，系统内置知识没有可引用的条目，尚未完成外部科研资料核验。';
         sub = '我能确证的是它的位置与亮度；' + missing + '这类问题需要外部文献，我可以给你可复跑的检索。';
       }
     } else if (entry && intent === 'intro-target' && /怎么|如何|怎样|指|辨认|认星/.test(answer.query)) {
@@ -2034,7 +2034,7 @@
     var s = String(q || '');
     if (/论文|文献|研究|最新|测量|发现|期刊|doi/i.test(s)) {
       return {
-        gap: L('本地知识库只有 160 条通用条目，没有收录具体论文的最新测量值。'),
+        gap: L('系统内置知识只有 160 条通用条目，没有收录具体论文的最新测量值。'),
         where: L('NASA ADS（ui.adsabs.harvard.edu）按关键词检索，或 arXiv astro-ph 预印本；拿到 DOI 后可回来核对数值与单位。'),
         alt: L('贴一段论文摘要或数据表给我，我可以按已有事实做比对，并标出与本地数据的差异。')
       };
@@ -2061,7 +2061,7 @@
       };
     }
     return {
-      gap: L('本地知识库与星表都没有命中这个问法。'),
+      gap: L('系统内置知识与本地星表都没有命中这个问法。'),
       where: L('换一个更具体的问法（给出天体名、时间、地点或坐标）通常就能命中；涉及专业结论时需要外部文献库。'),
       alt: L('告诉我你想解决的具体问题（比如「想拍什么」「想核对哪个数值」），我按可算/可查的路径拆一遍。')
     };
@@ -2307,7 +2307,7 @@
     }));
     answer.sections.push({
       kind: 'verdict',
-      head: L('本地没有这个问题的依据。'),
+      head: L('系统内置知识中暂未找到相关内容，尚未完成外部科研资料核验。'),
       sub: ''
     });
     /* 缺口用紧凑的三行结构，不套科普表述卡片——

@@ -456,6 +456,17 @@
           message: pdfStep.error ? pdfStep.error.message : ''
         } : null,
         toolStatus: steps.map(function (s) { return s.tool + ':' + s.status; }).filter(Boolean).slice(0, 20),
+        quality: answer && answer.meta && answer.meta.quality ? {
+          mode: String(answer.meta.quality.mode || ''),
+          passed: !!answer.meta.quality.passed,
+          badRefs: Array.isArray(answer.meta.quality.badRefs) ? answer.meta.quality.badRefs.slice(0, 5) : [],
+          issues: Array.isArray(answer.meta.quality.issues)
+            ? answer.meta.quality.issues.map(function (i) { return String(i && i.kind || ''); }).slice(0, 8) : []
+        } : null,
+        sources: answer && answer.meta && answer.meta.sourcePlan && Array.isArray(answer.meta.sourcePlan.rows)
+          ? answer.meta.sourcePlan.rows.map(function (r) {
+            return { key: String(r.key || ''), status: String(r.status || '') };
+          }) : [],
         provider: provider ? {
           id: String(provider.id || ''),
           name: String(provider.name || ''),
