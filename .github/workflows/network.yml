@@ -31,6 +31,14 @@ jobs:
       - name: 真实外部主机与套件
         run: node tools/v1-4-network-ci.js
 
+      # V1.9 真实 PDF：按 manifest 下载 arXiv 样本到 gitignore 目录后验证
+      - name: V1.9 真实 PDF v1-9-real-pdf-test
+        run: node tools/v1-9-real-pdf-test.js
+
+      # V1.9 真实 PDF → 分块 → Evidence → Claim → 报告 → 反馈诊断
+      - name: V1.9 跨任务 E2E v1-9-e2e-test
+        run: node tools/v1-9-e2e-test.js
+
       - name: 保存运行摘要
         if: always()
         run: |

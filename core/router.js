@@ -11,7 +11,9 @@
   'use strict';
 
   var OBSERVE_INTENTS = ['tonight', 'observe-target', 'photo-target', 'gear-fit', 'chart'];
-  var RESEARCH_WORDS = /综述|研究|最新进展|争议|证据|论文|JWST|韦伯|早期宇宙|系外行星|测量方法|测量结果|是否一致|一致性/;
+  /* 研究类词表只收「明确需要文献/证据」的信号。
+   * 不收裸「测量」：否则“比较 M31 和 M33 的观测难度与距离测量”会从 T-D 误跳 T-E。 */
+  var RESEARCH_WORDS = /综述|研究|最新进展|进展|争议|证据|论文|文献|JWST|韦伯|早期宇宙|系外行星|测量方法|测量结果|不同结果|是否一致|一致性|随红移|红移演化|并合|21cm|中性氢|潮汐锁定|宿主星系|冲压剥离|矮星系|恒星形成|透射光谱|凌星|径向速度|金属丰度|年龄测定|光度函数|再电离|卫星星系|缺失卫星|失败超新星|探测现状|观测现状|研究现状|现有资料/;
   var COMPARE_WORDS = /对比|比较|区别|哪个更|分别|同时|以及/;
   var WHY_WORDS = /为什么|机制|原理/;
 
@@ -146,8 +148,9 @@
       research: RESEARCH_WORDS.test(query)
     };
 
-    /* unknown / smalltalk 无领域执行路径，始终 LEGACY */
-    var forceLegacy = intent === 'unknown' || intent === 'smalltalk';
+    /* smalltalk 始终 LEGACY；unknown 若明确在问研究/文献，允许进入 T-E/T-F，
+     * 否则 WASP-39b、星系团冲压剥离这类未收录主题会被旧兜底答成“不知道”。 */
+    var forceLegacy = intent === 'smalltalk' || (intent === 'unknown' && mode !== 'research');
     var legacy = forceLegacy || (mode === 'single' && c.complexity === 1);
     var reason;
     if (forceLegacy) reason = 'intent=' + intent + ' 走旧兜底路径';

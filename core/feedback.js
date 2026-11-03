@@ -383,6 +383,24 @@
       });
     }
 
+    /* 科研问题定位：只取计数、范围与缺口，不把整份报告塞进诊断。 */
+    var research = (answer && answer.research) || {};
+    var metaResearch = (answer && answer.meta && answer.meta.research) || {};
+    var papers = Array.isArray(research.papers) ? research.papers : [];
+    var conclusions = Array.isArray(research.conclusions) ? research.conclusions : [];
+    var claims = Array.isArray(research.claims) ? research.claims : [];
+    var evidenceList = Array.isArray(research.evidence) ? research.evidence : [];
+    var gaps = Array.isArray(research.gaps) ? research.gaps : [];
+    var limits = Array.isArray(research.limitations) ? research.limitations : [];
+    var evidenceRefCount = 0;
+    conclusions.forEach(function (cl) {
+      evidenceRefCount += Array.isArray(cl && cl.evidenceRefs) ? cl.evidenceRefs.length : 0;
+    });
+    var pdfStep = steps.filter(function (s) {
+      return /pdf|fulltext|paper\.attachment/i.test(s.tool || '') && (s.status === 'failed' || s.status === 'ok');
+    })[0] || null;
+    var provider = context.provider || null;
+
     var events = [];
     if (state && Array.isArray(state.events)) {
       events = state.events.slice(-30).map(function (e) {
@@ -422,6 +440,35 @@
         label: String(err.label || CATEGORY_LABELS[err.category] || ''),
         summary: clip(String(err.summary || err.message || ''), 300)
       } : null,
+      research: {
+        paperCount: papers.length,
+        evidenceCount: evidenceList.length,
+        claimCount: claims.length,
+        conclusionCount: conclusions.length,
+        evidenceRefCount: evidenceRefCount,
+        abstractOnlyCount: papers.filter(function (p) { return !!p.abstractOnly; }).length,
+        fulltextCount: papers.filter(function (p) { return !!p.fulltextAvailable; }).length,
+        gaps: uniqueList(gaps, 5, 120),
+        limitations: uniqueList(limits, 5, 140),
+        pdf: pdfStep ? {
+          tool: pdfStep.tool, status: pdfStep.status,
+          code: pdfStep.error ? pdfStep.error.code : '',
+          message: pdfStep.error ? pdfStep.error.message : ''
+        } : null,
+        toolStatus: steps.map(function (s) { return s.tool + ':' + s.status; }).filter(Boolean).slice(0, 20),
+        provider: provider ? {
+          id: String(provider.id || ''),
+          name: String(provider.name || ''),
+          type: String(provider.type || ''),
+          status: String(provider.status || '')
+        } : null,
+        metadata: metaResearch && Object.keys(metaResearch).length ? {
+          profile: String(metaResearch.profile || ''),
+          stopReason: String(metaResearch.stopReason || ''),
+          evidence: metaResearch.evidence == null ? null : metaResearch.evidence,
+          conflicts: metaResearch.conflicts == null ? null : metaResearch.conflicts
+        } : null
+      },
       context: {
         messageId: String(context.messageId || ''),
         answerExcerpt: clip(String(context.answerText || ''), 300),

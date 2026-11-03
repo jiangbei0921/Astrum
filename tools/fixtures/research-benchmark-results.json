@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-03T02:18:48.133Z",
+  "generatedAt": "2026-11-03T08:14:20.649Z",
   "ctx": {
     "y": 2026,
     "mo": 11,
@@ -28,7 +28,7 @@
         "orion"
       ],
       "tools": [],
-      "ms": 37,
+      "ms": 19,
       "pass": true,
       "reason": "",
       "checked": [
@@ -67,7 +67,7 @@
         "lyra"
       ],
       "tools": [],
-      "ms": 4,
+      "ms": 1,
       "pass": true,
       "reason": "",
       "checked": [
@@ -99,7 +99,7 @@
         "critic"
       ],
       "tools": [],
-      "ms": 2,
+      "ms": 1,
       "pass": true,
       "reason": "",
       "checked": [
@@ -132,7 +132,7 @@
         "lyra"
       ],
       "tools": [],
-      "ms": 3,
+      "ms": 1,
       "pass": true,
       "reason": "",
       "checked": [
@@ -166,7 +166,7 @@
         "lyra"
       ],
       "tools": [],
-      "ms": 2,
+      "ms": 1,
       "pass": true,
       "reason": "",
       "checked": [
@@ -201,7 +201,7 @@
         "orion"
       ],
       "tools": [],
-      "ms": 12,
+      "ms": 6,
       "pass": true,
       "reason": "",
       "checked": [
@@ -236,7 +236,7 @@
         "orion"
       ],
       "tools": [],
-      "ms": 10,
+      "ms": 5,
       "pass": true,
       "reason": "",
       "checked": [
@@ -271,7 +271,7 @@
         "orion"
       ],
       "tools": [],
-      "ms": 10,
+      "ms": 5,
       "pass": true,
       "reason": "",
       "checked": [
@@ -310,7 +310,7 @@
         "kepler.ephemeris:ok",
         "compare.curate:ok"
       ],
-      "ms": 41,
+      "ms": 19,
       "pass": true,
       "reason": "",
       "checked": [
@@ -350,7 +350,7 @@
         "orion"
       ],
       "tools": [],
-      "ms": 11,
+      "ms": 5,
       "pass": true,
       "reason": "",
       "checked": [
@@ -395,7 +395,7 @@
         "orion"
       ],
       "tools": [],
-      "ms": 11,
+      "ms": 5,
       "pass": true,
       "reason": "",
       "checked": [
@@ -430,7 +430,7 @@
         "orion"
       ],
       "tools": [],
-      "ms": 11,
+      "ms": 5,
       "pass": true,
       "reason": "",
       "checked": [
@@ -464,7 +464,7 @@
         "lyra"
       ],
       "tools": [],
-      "ms": 2,
+      "ms": 1,
       "pass": true,
       "reason": "",
       "checked": [
@@ -499,7 +499,7 @@
         "orion"
       ],
       "tools": [],
-      "ms": 10,
+      "ms": 5,
       "pass": true,
       "reason": "",
       "checked": [
@@ -534,7 +534,7 @@
         "orion"
       ],
       "tools": [],
-      "ms": 11,
+      "ms": 5,
       "pass": true,
       "reason": "",
       "checked": [
@@ -573,7 +573,7 @@
         "kepler.ephemeris:ok",
         "compare.curate:ok"
       ],
-      "ms": 20,
+      "ms": 10,
       "pass": true,
       "reason": "",
       "checked": [
@@ -617,7 +617,7 @@
         "kepler.ephemeris:ok",
         "compare.curate:ok"
       ],
-      "ms": 22,
+      "ms": 11,
       "pass": true,
       "reason": "",
       "checked": [
@@ -666,7 +666,7 @@
         "kepler.ephemeris:ok",
         "compare.curate:ok"
       ],
-      "ms": 23,
+      "ms": 10,
       "pass": true,
       "reason": "",
       "checked": [
@@ -715,7 +715,7 @@
         "kepler.ephemeris:ok",
         "compare.curate:ok"
       ],
-      "ms": 23,
+      "ms": 11,
       "pass": true,
       "reason": "",
       "checked": [
@@ -760,7 +760,7 @@
         "orion"
       ],
       "tools": [],
-      "ms": 11,
+      "ms": 4,
       "pass": true,
       "reason": "",
       "checked": [
@@ -795,7 +795,7 @@
         "orion"
       ],
       "tools": [],
-      "ms": 11,
+      "ms": 6,
       "pass": true,
       "reason": "",
       "checked": [
@@ -829,7 +829,7 @@
       "category": "复杂拆解",
       "question": "M42 为什么是红色的，并且应该怎么拍？",
       "expected": "verdict",
-      "actual": "control / verdict+evidence+observe+followup+review",
+      "actual": "control / verdict+evidence+observe+boundary+followup+review",
       "evidence": [],
       "agents": [
         "muse",
@@ -842,14 +842,14 @@
         "kb.lookup:ok",
         "compose.domain:ok"
       ],
-      "ms": 14,
+      "ms": 7,
       "pass": true,
       "reason": "",
       "checked": [
         {
           "name": "包含章节 verdict",
           "ok": true,
-          "detail": "verdict,evidence,observe,followup,review"
+          "detail": "verdict,evidence,observe,boundary,followup,review"
         },
         {
           "name": "包含任一关键词 红/拍摄",
@@ -881,7 +881,7 @@
         "kepler.ephemeris:ok",
         "compare.curate:ok"
       ],
-      "ms": 52,
+      "ms": 27,
       "pass": true,
       "reason": "",
       "checked": [
@@ -937,7 +937,7 @@
         "evidence.search:ok",
         "evidence.search:ok"
       ],
-      "ms": 5135,
+      "ms": 5076,
       "pass": true,
       "reason": "",
       "checked": [
@@ -1104,7 +1104,7 @@
         "lyra"
       ],
       "tools": [],
-      "ms": 456,
+      "ms": 261,
       "pass": true,
       "reason": "",
       "checked": [
@@ -1150,7 +1150,7 @@
         "vega"
       ],
       "tools": [],
-      "ms": 4,
+      "ms": 2,
       "pass": true,
       "reason": "",
       "checked": [
@@ -1184,7 +1184,7 @@
         "lyra"
       ],
       "tools": [],
-      "ms": 2,
+      "ms": 1,
       "pass": true,
       "reason": "",
       "checked": [
@@ -1239,7 +1239,7 @@
         "evidence.search:ok",
         "compose.domain:ok"
       ],
-      "ms": 25062,
+      "ms": 25055,
       "pass": true,
       "reason": "",
       "checked": [
@@ -1454,7 +1454,7 @@
         "evidence.search:ok",
         "compose.domain:ok"
       ],
-      "ms": 6286,
+      "ms": 7232,
       "pass": true,
       "reason": "",
       "checked": [
@@ -1675,7 +1675,7 @@
         "evidence.search:ok",
         "compose.domain:ok"
       ],
-      "ms": 7161,
+      "ms": 6679,
       "pass": true,
       "reason": "",
       "checked": [
@@ -1877,7 +1877,7 @@
         "evidence.search:ok",
         "compose.domain:ok"
       ],
-      "ms": 1560,
+      "ms": 1490,
       "pass": true,
       "reason": "",
       "checked": [
@@ -2085,7 +2085,7 @@
         "evidence.search:ok",
         "compose.domain:ok"
       ],
-      "ms": 20034,
+      "ms": 20018,
       "pass": true,
       "reason": "",
       "checked": [
@@ -2297,7 +2297,7 @@
         "evidence.search:ok",
         "compose.domain:ok"
       ],
-      "ms": 20611,
+      "ms": 21801,
       "pass": true,
       "reason": "",
       "checked": [
@@ -2496,7 +2496,7 @@
       "evidence": [],
       "agents": [],
       "tools": [],
-      "ms": 9,
+      "ms": 41,
       "pass": true,
       "reason": "",
       "checked": [
@@ -2551,7 +2551,7 @@
         "lyra"
       ],
       "tools": [],
-      "ms": 8,
+      "ms": 10,
       "pass": true,
       "reason": "",
       "checked": [
@@ -2577,7 +2577,7 @@
         "vega"
       ],
       "tools": [],
-      "ms": 1,
+      "ms": 4,
       "pass": true,
       "reason": "",
       "checked": [
@@ -2610,7 +2610,7 @@
         "lyra"
       ],
       "tools": [],
-      "ms": 1,
+      "ms": 2,
       "pass": true,
       "reason": "",
       "checked": [
@@ -2645,7 +2645,7 @@
         "lyra"
       ],
       "tools": [],
-      "ms": 458,
+      "ms": 1217,
       "pass": true,
       "reason": "",
       "checked": [
@@ -2685,7 +2685,7 @@
         "lyra"
       ],
       "tools": [],
-      "ms": 446,
+      "ms": 923,
       "pass": true,
       "reason": "",
       "checked": [
@@ -2725,7 +2725,7 @@
         "lyra"
       ],
       "tools": [],
-      "ms": 459,
+      "ms": 782,
       "pass": true,
       "reason": "",
       "checked": [
@@ -2770,7 +2770,7 @@
         "kepler.ephemeris:ok",
         "compare.curate:ok"
       ],
-      "ms": 27,
+      "ms": 35,
       "pass": true,
       "reason": "",
       "checked": [
@@ -2835,7 +2835,7 @@
         "evidence.search:ok",
         "compose.domain:ok"
       ],
-      "ms": 25039,
+      "ms": 25026,
       "pass": true,
       "reason": "",
       "checked": [
@@ -3093,7 +3093,7 @@
         "kepler.ephemeris:ok",
         "compare.curate:ok"
       ],
-      "ms": 19,
+      "ms": 18,
       "pass": true,
       "reason": "",
       "checked": [
@@ -3134,7 +3134,7 @@
         "kepler.ephemeris:ok",
         "compare.curate:ok"
       ],
-      "ms": 34,
+      "ms": 37,
       "pass": true,
       "reason": "",
       "checked": [

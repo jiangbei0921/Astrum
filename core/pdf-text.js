@@ -8,10 +8,12 @@
   'use strict';
 
   var DEFAULTS = {
-    maxBytes: 12 * 1024 * 1024,
-    maxPages: 40,
-    maxChars: 200000,
-    maxChunks: 60,
+    /* 真实天文论文常见 10–20 MB（含图版、附录）。12 MB 会直接拒绝
+     * 14.3 MB 的正式调查论文；24 MB 仍低于浏览器常见 Blob/内存上限。 */
+    maxBytes: 24 * 1024 * 1024,
+    maxPages: 60,
+    maxChars: 400000,
+    maxChunks: 120,
     chunkChars: 1400,
     minChars: 120
   };
@@ -27,8 +29,25 @@
   async function inflate(bytes) {
     if (typeof DecompressionStream === 'undefined') throw new Error('no DecompressionStream');
     var stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate'));
-    var buf = await new Response(stream).arrayBuffer();
-    return new Uint8Array(buf);
+    var reader = stream.getReader();
+    var chunks = [], total = 0, failure = null;
+    /* 真实 PDF 常在压缩流末尾追加多余字节（换行、增量更新残留）。
+     * DecompressionStream 会因此报 “Trailing junk found after the end of the compressed stream”，
+     * 但有效数据已经全部产出。逐块读取，遇到这类尾部垃圾即停止；其它损坏仍抛错。 */
+    while (true) {
+      var step;
+      try { step = await reader.read(); }
+      catch (e) {
+        var msg = String(e && e.message || e);
+        if (/trailing junk|junk found after/i.test(msg) && total > 0) { failure = msg; break; }
+        throw e;
+      }
+      if (step.done) break;
+      if (step.value && step.value.length) { chunks.push(step.value); total += step.value.length; }
+    }
+    var out = new Uint8Array(total), at = 0;
+    chunks.forEach(function (c) { out.set(c, at); at += c.length; });
+    return out;
   }
 
   function pdfString(s) {
@@ -380,12 +399,17 @@
   function sectionOf(line) {
     var t = String(line || '').trim();
     if (!t || t.length > 90) return null;
-    if (/^(abstract|references|bibliography|acknowledg|appendix)/i.test(t)) return t;
+    /* 标题必须是短行：真实 PDF 的两栏抽取常把正文粘在标题后面
+     * （如 “References. | Sources of data are ...”），不能因为前缀命中就当章节。 */
+    if (/^(abstract|references|bibliography|acknowledg|appendix)$/i.test(t)) return t;
+    if (/^(abstract|references|bibliography|acknowledg|appendix)\b/i.test(t) &&
+      t.length <= 40 && !/[|]/.test(t) && !/[.!?]\s+\S/.test(t)) return t;
     var m = t.match(/^\d+(?:\.\d+)*[.)]?\s+([A-Z][A-Za-z0-9 ,:;()\-]{2,80})$/);
     if (m) {
       /* 拒绝 “1.1 Mly” 这类测量值行：首个单词过短或带单位后缀。 */
       var first = m[1].split(/\s+/)[0] || '';
-      if (first.length >= 4 && !/(?:^|\s)(?:ly|pc|kpc|Mpc|Gyr|Myr|km|AU|mag|deg)$/i.test(t)) return t;
+      if (first.length >= 4 && !/[|]/.test(t) &&
+        !/(?:^|\s)(?:ly|pc|kpc|Mpc|Gyr|Myr|km|AU|mag|deg)$/i.test(t)) return t;
     }
     if (/^(introduction|methods?|results?|discussion|conclusions?|background|data and methods)$/i.test(t)) return t;
     return null;
@@ -417,6 +441,70 @@
     return chunks;
   }
 
+  /* 页码定位：按页面文本累计偏移映射，而不是按段落数猜。
+   * 真实论文常见“图表页文本很少、正文跨页”，按段落数会把后面所有
+   * 章节都标到最后一页（实测 29 页论文的 References 全被标成 p29）。 */
+  function pageRangesOf(pageTexts) {
+    var ranges = [], acc = 0;
+    pageTexts.forEach(function (p) {
+      var len = String(p.text || '').length;
+      ranges.push({ page: p.page, start: acc, end: acc + len });
+      acc += len + 2;
+    });
+    return ranges;
+  }
+
+  function pageAtOffset(ranges, offset) {
+    if (!ranges.length) return null;
+    var off = Math.max(0, offset || 0);
+    for (var i = 0; i < ranges.length; i++) {
+      if (off >= ranges[i].start && off <= ranges[i].end) return ranges[i].page;
+    }
+    return off < ranges[0].start ? ranges[0].page : ranges[ranges.length - 1].page;
+  }
+
+  function plausibleTitle(t) {
+    return !!t && t.length >= 10 &&
+      !/^\d+(?:\.\d+)*[.)]?\s+/.test(t) &&
+      !/^(introduction|abstract|references|untitled|contents)$/i.test(t) &&
+      !/^(arxiv:|microsoft word|\.docx|\.pdf$)/i.test(t) &&
+      !/\.(?:docx?|pdf|tex)\s*$/i.test(t);
+  }
+
+  /* 真实 PDF 可能“解析成功但全是乱码”：字体给了 ToUnicode 却映射到错误码位。
+   * 用字母比例、标点比例和常见英文词共同判定，宁可明确失败，也不把乱码当全文。 */
+  function looksGarbled(text) {
+    var t = String(text || '');
+    if (t.length < 1000) return false;
+    var alpha = (t.match(/[A-Za-z\u4e00-\u9fff]/g) || []).length;
+    var punct = (t.match(/[!"#$%&'()*+,\-./:;<=>?@[\]^_{|}~]/g) || []).length;
+    var common = (t.match(/\b(the|and|of|to|in|is|we|with|for|from|that|this|are|as|on|by)\b/gi) || []).length;
+    return (alpha / t.length) < 0.22 && (punct / t.length) > 0.2 && common < 8;
+  }
+
+  /* 从首页正文猜标题：过滤 arXiv/期刊/日期/版权行，遇到作者或机构行停止。
+   * 标题换行常以小写开头（“…new HST/ACS / imaging of 6…”），继续拼接。 */
+  function guessTitle(pageTexts) {
+    if (!pageTexts || !pageTexts[0]) return '';
+    var lines = String(pageTexts[0].text || '').split('\n').map(function (x) {
+      return x.replace(/[ \t]+/g, ' ').trim();
+    }).filter(Boolean);
+    var meta = /^(arxiv:|accepted|submitted|preprint|published|copyright|©|doi:|subject headings|key words|keywords|draft|version|raft version|typeset|latex|twocolumn|style in aastex|aastex|comm\.|proceedings|symposium|jenam|the astrophysical|astronomy & astrophysics|mnras|apj\b|aj\b|a&a\b|(?:january|february|march|april|may|june|july|august|september|october|november|december)\b)/i;
+    var head = [];
+    for (var i = 0; i < lines.length; i++) {
+      var l = lines[i];
+      if (/^abstract\b/i.test(l)) break;
+      if (meta.test(l)) continue;
+      if (!/[A-Za-z\u4e00-\u9fff]/.test(l) || /^\d+:\s/.test(l)) continue;
+      if (head.length && (/@/.test(l) || /\b(University|Institute|Center|Centre|Observatory|Department|Laboratory|Telescope)\b/i.test(l))) break;
+      if (head.length && !/^[a-z]/.test(l) && !/^(of|and|the|for|in|with|from|to|on|at|by|de|la)\b/i.test(l)) break;
+      if (l.length < 8) continue;
+      head.push(l);
+      if (head.length >= 3 || /[.!?]$/.test(l)) break;
+    }
+    return head.join(' ').replace(/\s+/g, ' ').trim().slice(0, 260);
+  }
+
   async function parse(bytes, opts) {
     opts = Object.assign({}, DEFAULTS, opts || {});
     var warnings = [], errors = [];
@@ -429,7 +517,12 @@
       return fail('pdf_encrypted', 'PDF 已加密，无法解析');
     }
 
-    var built = await objectMap(bytes);
+    var built;
+    try {
+      built = await objectMap(bytes);
+    } catch (e) {
+      return fail('pdf_corrupt', 'PDF 对象结构损坏，无法解析：' + String(e && e.message || e).slice(0, 120));
+    }
     var map = built.map, textAll = built.text;
     if (/\/Encrypt\s+\d+\s+\d+\s+R/.test(textAll)) {
       return fail('pdf_encrypted', 'PDF 已加密，无法解析');
@@ -458,7 +551,7 @@
           var dec = isFlate(obj.body) ? await inflate(raw) : raw;
           pieces.push(extractText(latin1(dec), fonts, fontStats));
         } catch (e) {
-          warnings.push('第 ' + (i + 1) + ' 页内容流解码失败');
+          warnings.push('第 ' + (i + 1) + ' 页内容流解码失败：' + String(e && e.message || e).slice(0, 60));
         }
       }
       pageTexts.push({ page: i + 1, text: cleanText(pieces.join('\n')) });
@@ -487,6 +580,11 @@
     if (!/%%EOF/.test(textAll.slice(-2048))) warnings.push('PDF 可能被截断（缺少 %%EOF）');
     var text = pageTexts.map(function (p) { return p.text; }).join('\n\n');
     text = text.slice(0, opts.maxChars);
+    if (looksGarbled(text)) {
+      return fail('pdf_unsupported_encoding',
+        'PDF 字体编码无法正确还原为可读文本，拒绝把乱码当作有效全文',
+        warnings.concat(['检测到高比例符号/低比例字母，疑似编码映射错误']));
+    }
     if (fontStats.cidUnmapped > 0) {
       return fail('pdf_cid_unsupported',
         'PDF 使用 CID/Identity-H 字体且缺少可用的 ToUnicode 映射，拒绝输出可能乱码的正文',
@@ -494,35 +592,55 @@
     }
     if (fontStats.cidMapped > 0) warnings.push('CID/Identity-H 字体已按 ToUnicode 解码');
     if (text.length < opts.minChars) {
-      return fail('pdf_no_text', '未能从 PDF 提取到可读正文（可能是扫描件或特殊编码）', warnings);
+      var noText = fail('pdf_no_text', '未能从 PDF 提取到可读正文（可能是扫描件或特殊编码）', warnings);
+      /* 保留旧错误码兼容，同时明确告诉上层「这是需要 OCR 的扫描件」还是普通无文本。 */
+      if (/\/Subtype\s*\/Image/.test(textAll)) {
+        noText.detailCode = 'pdf_ocr_required';
+        noText.ocrRequired = true;
+      }
+      return noText;
     }
 
     var lines = text.split('\n').filter(Boolean);
-    var sections = [], current = { name: '正文', pageStart: pageTexts[0] ? pageTexts[0].page : null, text: [] };
+    var sections = [], current = {
+      name: '正文', isReferences: false,
+      pageStart: pageTexts[0] ? pageTexts[0].page : null, text: []
+    };
     lines.forEach(function (line) {
       var sec = sectionOf(line);
       if (sec && (current.text.join('').length > 0)) {
         sections.push(current);
-        current = { name: sec, pageStart: null, text: [line] };
+        current = {
+          name: sec, isReferences: /^(references|bibliography)\b/i.test(sec),
+          pageStart: null, text: [line]
+        };
       } else current.text.push(line);
     });
     sections.push(current);
+
+    var ranges = pageRangesOf(pageTexts);
+    var cursor = 0;
     sections.forEach(function (s) {
       s.text = s.text.join('\n').trim();
       s.name = s.name || '正文';
-      if (s.pageStart == null) {
-        var idx = text.indexOf(s.text.slice(0, 80));
-        if (idx >= 0) {
-          var before = text.slice(0, idx).split(/\n\n/).length;
-          s.pageStart = pageTexts[Math.min(before, pageTexts.length - 1)] ? pageTexts[Math.min(before, pageTexts.length - 1)].page : null;
-        }
-      }
-      s.pageEnd = s.pageStart;
+      if (!s.text) return;
+      var probe = s.text.slice(0, Math.min(120, s.text.length));
+      var idx = text.indexOf(probe, cursor);
+      if (idx < 0) idx = text.indexOf(probe);
+      if (idx < 0) idx = cursor;
+      cursor = Math.max(cursor, idx);
+      s.pageStart = pageAtOffset(ranges, idx);
+      s.pageEnd = pageAtOffset(ranges, Math.max(idx, idx + s.text.length - 1));
     });
     sections = sections.filter(function (s) { return s.text && s.text.length > 20; });
 
+    var refSection = sections.filter(function (s) { return s.isReferences; })[0] || null;
+    var referencesStartPage = refSection ? refSection.pageStart : null;
+
     var chunks = [];
     sections.forEach(function (s) {
+      /* 参考文献不进入全文证据块：它们不是论文结论，混入后会污染 Claim。 */
+      if (s.isReferences) return;
       chunkText(s.text, s.pageStart, s.pageEnd).forEach(function (c) {
         chunks.push(c);
       });
@@ -531,24 +649,36 @@
       warnings.push('分块数量超过上限，仅保留前 ' + opts.maxChunks + ' 块');
       chunks = chunks.slice(0, opts.maxChunks);
     }
-    var title = '';
+
+    var rawTitle = '';
     var tm = textAll.match(/\/Title\s*(\((?:\\.|[^\\)])*\)|<[0-9A-Fa-f]+>)/);
-    if (tm) title = cleanText(decodeToken(tm[1])).slice(0, 200);
-    var doiM = text.match(/\b10\.\d{4,9}\/[-._;()/:A-Za-z0-9]+\b/);
-    var refIdx = text.search(/\n\s*(References|Bibliography)\s*\n/i);
+    if (tm) rawTitle = cleanText(decodeToken(tm[1])).slice(0, 220);
+    var title = plausibleTitle(rawTitle) ? rawTitle : guessTitle(pageTexts);
+    var frontText = pageTexts.slice(0, 2).map(function (p) { return p.text; }).join('\n');
+    var doiM = frontText.match(/\b10\.\d{4,9}\/[-._;()/:A-Za-z0-9]+\b/);
+    var arxivM = frontText.match(/arXiv:\s*([0-9]{4}\.[0-9]{4,5}(?:v[0-9]+)?)/i);
+    if (!title) warnings.push('未能可靠识别论文标题');
+    if (!doiM && !arxivM) warnings.push('首页未识别到 DOI/arXiv 标识');
+
     return {
       ok: true,
       title: title,
       doi: doiM ? doiM[0].replace(/[.,;]$/, '') : '',
+      arxivId: arxivM ? arxivM[1] : '',
       text: text,
       textLength: text.length,
       pageCount: pageTexts.length,
       pages: pageTexts.map(function (p) { return { page: p.page, chars: p.text.length }; }),
       sections: sections.map(function (s) {
-        return { name: s.name, pageStart: s.pageStart, pageEnd: s.pageEnd, chars: s.text.length };
+        return {
+          name: s.name, pageStart: s.pageStart, pageEnd: s.pageEnd,
+          chars: s.text.length, isReferences: !!s.isReferences
+        };
       }),
       chunks: chunks,
-      referencesStartPage: refIdx > 0 ? null : null,
+      referencesStartPage: referencesStartPage,
+      hasReferences: !!refSection,
+      ocrRequired: false,
       warnings: warnings,
       errors: errors,
       extractionMethod: 'pdf-text-v1'

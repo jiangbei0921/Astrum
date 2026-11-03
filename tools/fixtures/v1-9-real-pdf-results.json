@@ -1,0 +1,136 @@
+{
+  "generatedAt": "2026-11-03T08:02:30.716Z",
+  "environment": {
+    "node": "v24.19.0",
+    "os": "win32",
+    "offline": false
+  },
+  "samples": [
+    {
+      "id": "1106.4307v1",
+      "status": "PASS",
+      "traits": [
+        "long",
+        "two-column",
+        "tables",
+        "references"
+      ],
+      "url": "https://arxiv.org/pdf/1106.4307v1",
+      "bytes": 1668771,
+      "ms": 194,
+      "ok": true,
+      "code": "",
+      "title": "Globular clusters in the outer Galactic halo: new HST/ACS imaging of 6 globular clusters and the Galactic globular clu age-metallicity relation",
+      "pages": 29,
+      "sections": 13,
+      "chunks": 40,
+      "referencesStartPage": 25,
+      "warnings": []
+    },
+    {
+      "id": "0901.4842v1",
+      "status": "PASS",
+      "traits": [
+        "proceedings",
+        "equations",
+        "references"
+      ],
+      "url": "https://arxiv.org/pdf/0901.4842v1",
+      "bytes": 180888,
+      "ms": 48,
+      "ok": true,
+      "code": "",
+      "title": "Challenges for stellar pulsation and evolution theory",
+      "pages": 11,
+      "sections": 7,
+      "chunks": 31,
+      "referencesStartPage": 9,
+      "warnings": []
+    },
+    {
+      "id": "1512.06519v1",
+      "status": "PASS",
+      "traits": [
+        "equations",
+        "multi-column",
+        "references"
+      ],
+      "url": "https://arxiv.org/pdf/1512.06519v1",
+      "bytes": 47982,
+      "ms": 20,
+      "ok": true,
+      "code": "",
+      "title": "Collision between Neutron Stars and Asteroids as a Mechanis",
+      "pages": 6,
+      "sections": 15,
+      "chunks": 21,
+      "referencesStartPage": 6,
+      "warnings": []
+    },
+    {
+      "id": "2302.11645v1",
+      "status": "PASS",
+      "traits": [
+        "equations",
+        "references"
+      ],
+      "url": "https://arxiv.org/pdf/2302.11645v1",
+      "bytes": 794893,
+      "ms": 36,
+      "ok": true,
+      "code": "",
+      "title": "Axion-mediated Transport of Fast Radio Bursts Originating in Inner Magnetospheres of Magnetars",
+      "pages": 9,
+      "sections": 5,
+      "chunks": 24,
+      "referencesStartPage": 8,
+      "warnings": [
+        "首页未识别到 DOI/arXiv 标识"
+      ]
+    },
+    {
+      "id": "2206.14908v1",
+      "status": "PASS",
+      "traits": [
+        "large-14MB",
+        "long",
+        "two-column",
+        "tables",
+        "references"
+      ],
+      "url": "https://arxiv.org/pdf/2206.14908v1",
+      "bytes": 14697260,
+      "ms": 245,
+      "ok": true,
+      "code": "",
+      "title": "The Prime Focus Spectrograph Galaxy Evolution Survey",
+      "pages": 28,
+      "sections": 5,
+      "chunks": 93,
+      "referencesStartPage": 25,
+      "warnings": [
+        "首页未识别到 DOI/arXiv 标识"
+      ]
+    },
+    {
+      "id": "2208.11692v1",
+      "status": "PASS_REJECTED",
+      "traits": [
+        "real-cid-encoding",
+        "garbled-must-reject"
+      ],
+      "url": "https://arxiv.org/pdf/2208.11692v1",
+      "bytes": 2238213,
+      "ms": 255,
+      "ok": false,
+      "code": "pdf_unsupported_encoding",
+      "title": "",
+      "pages": 0,
+      "sections": 0,
+      "chunks": 0,
+      "warnings": [
+        "检测到高比例符号/低比例字母，疑似编码映射错误"
+      ]
+    }
+  ]
+}

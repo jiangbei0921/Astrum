@@ -1,0 +1,6068 @@
+{
+  "generatedAt": "2026-11-03T08:21:30.780Z",
+  "ctx": {
+    "y": 2026,
+    "mo": 11,
+    "d": 3,
+    "h": 21,
+    "mi": 0,
+    "lat": 39.9,
+    "lon": 116.4,
+    "tz": 8,
+    "city": "北京"
+  },
+  "offline": false,
+  "summary": {
+    "total": 56,
+    "pass": 56,
+    "fail": 0,
+    "blockedExternal": 0,
+    "skipped": 0
+  },
+  "categories": {
+    "天体物理参数": {
+      "total": 4,
+      "pass": 4,
+      "fail": 0,
+      "blocked": 0,
+      "skip": 0
+    },
+    "名称编号消歧": {
+      "total": 4,
+      "pass": 4,
+      "fail": 0,
+      "blocked": 0,
+      "skip": 0
+    },
+    "天体物理关系": {
+      "total": 4,
+      "pass": 4,
+      "fail": 0,
+      "blocked": 0,
+      "skip": 0
+    },
+    "多目标比较": {
+      "total": 4,
+      "pass": 4,
+      "fail": 0,
+      "blocked": 0,
+      "skip": 0
+    },
+    "论文测量比较": {
+      "total": 4,
+      "pass": 4,
+      "fail": 0,
+      "blocked": 0,
+      "skip": 0
+    },
+    "学术争议": {
+      "total": 4,
+      "pass": 4,
+      "fail": 0,
+      "blocked": 0,
+      "skip": 0
+    },
+    "早期宇宙": {
+      "total": 3,
+      "pass": 3,
+      "fail": 0,
+      "blocked": 0,
+      "skip": 0
+    },
+    "系外行星": {
+      "total": 4,
+      "pass": 4,
+      "fail": 0,
+      "blocked": 0,
+      "skip": 0
+    },
+    "恒星演化": {
+      "total": 3,
+      "pass": 3,
+      "fail": 0,
+      "blocked": 0,
+      "skip": 0
+    },
+    "星系形成演化": {
+      "total": 4,
+      "pass": 4,
+      "fail": 0,
+      "blocked": 0,
+      "skip": 0
+    },
+    "设备规划": {
+      "total": 4,
+      "pass": 4,
+      "fail": 0,
+      "blocked": 0,
+      "skip": 0
+    },
+    "观测条件": {
+      "total": 4,
+      "pass": 4,
+      "fail": 0,
+      "blocked": 0,
+      "skip": 0
+    },
+    "复杂拆解": {
+      "total": 4,
+      "pass": 4,
+      "fail": 0,
+      "blocked": 0,
+      "skip": 0
+    },
+    "多轮上下文": {
+      "total": 3,
+      "pass": 3,
+      "fail": 0,
+      "blocked": 0,
+      "skip": 0
+    },
+    "不确定性": {
+      "total": 3,
+      "pass": 3,
+      "fail": 0,
+      "blocked": 0,
+      "skip": 0
+    }
+  },
+  "results": [
+    {
+      "id": "B01",
+      "category": "天体物理参数",
+      "question": "M13 的距离和年龄是多少？",
+      "expected": "answer",
+      "actual": "control / verdict+evidence+observe+visual+boundary+mapref+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 53,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=8"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "B02",
+      "category": "天体物理参数",
+      "question": "草帽星系 M104 的距离和类型是什么？",
+      "expected": "answer",
+      "actual": "control / verdict+evidence+observe+visual+boundary+mapref+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 12,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=8"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "B03",
+      "category": "天体物理参数",
+      "question": "天狼星的视星等和距离是多少？",
+      "expected": "answer",
+      "actual": "control / verdict+evidence+compare+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 14,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / kepler.ephemeris:ok,kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+compare+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=5"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "B04",
+      "category": "天体物理参数",
+      "question": "环状星云 M57 的中心星温度和距离是多少？",
+      "expected": "answer",
+      "actual": "control / verdict+evidence+observe+visual+boundary+mapref+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 12,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=8"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "N01",
+      "category": "名称编号消歧",
+      "question": "NGC 5139 和半人马ω星团是同一个天体吗？",
+      "expected": "answer",
+      "actual": "control / verdict+evidence+observe+visual+boundary+mapref+compare+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 14,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / kepler.ephemeris:ok,kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+compare+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=9"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "N02",
+      "category": "名称编号消歧",
+      "question": "M45 是昴星团还是蜂巢星团？",
+      "expected": "answer",
+      "actual": "legacy / verdict+evidence+observe+visual+boundary+mapref+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [],
+      "ms": 11,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "single/L1"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / "
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=8"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "N03",
+      "category": "名称编号消歧",
+      "question": "M8 礁湖星云和 M20 三叶星云分别在哪里？",
+      "expected": "answer",
+      "actual": "control / verdict+evidence+observe+visual+boundary+mapref+compare+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 22,
+      "pass": true,
+      "status": "PASS",
+      "reason": "data：缺少 5200",
+      "score": 9,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / kepler.ephemeris:ok,kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": false,
+          "detail": "缺少 5200"
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+compare+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=9"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "N04",
+      "category": "名称编号消歧",
+      "question": "M82 雪茄星系和 M81 波德星系是什么关系？",
+      "expected": "answer",
+      "actual": "control / verdict+evidence+observe+visual+boundary+mapref+compare+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 22,
+      "pass": true,
+      "status": "PASS",
+      "reason": "data：缺少 1200",
+      "score": 9,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / kepler.ephemeris:ok,kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": false,
+          "detail": "缺少 1200"
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+compare+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=9"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "R01",
+      "category": "天体物理关系",
+      "question": "比较 M13 和 M5 的年龄、距离与星团类型",
+      "expected": "T-D",
+      "actual": "control / verdict+evidence+observe+visual+boundary+mapref+compare+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 20,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-D / kepler.ephemeris:ok,kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+compare+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=9"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "R02",
+      "category": "天体物理关系",
+      "question": "造父变星为什么能用作标准烛光？",
+      "expected": "answer",
+      "actual": "legacy / verdict+evidence+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "vega",
+        "lyra"
+      ],
+      "tools": [],
+      "ms": 2,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "single/L1"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / "
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=4"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "R03",
+      "category": "天体物理关系",
+      "question": "恒星光谱类型与表面温度有什么关系？",
+      "expected": "answer",
+      "actual": "control / verdict+evidence+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 2,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=4"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "R04",
+      "category": "天体物理关系",
+      "question": "星系红移与距离的关系是如何建立的？",
+      "expected": "answer",
+      "actual": "control / verdict+evidence+consensus+observe+boundary+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "cosmos",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 3,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+consensus+observe+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,cosmos,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=7"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "C01",
+      "category": "多目标比较",
+      "question": "比较 M13、M5 和 M15 的观测难度与物理性质",
+      "expected": "T-D",
+      "actual": "control / verdict+evidence+observe+visual+boundary+mapref+compare+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 30,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-D / kepler.ephemeris:ok,kepler.ephemeris:ok,kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+compare+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=9"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "C02",
+      "category": "多目标比较",
+      "question": "比较 M51 和 M104 哪个更适合业余望远镜拍摄？",
+      "expected": "T-D",
+      "actual": "control / verdict+evidence+observe+visual+boundary+mapref+compare+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 20,
+      "pass": true,
+      "status": "PASS",
+      "reason": "answer：sections=verdict+evidence+observe+visual+boundary+mapref+compare+followup+review",
+      "score": 9,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-D / kepler.ephemeris:ok,kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": false,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+compare+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=9"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "C03",
+      "category": "多目标比较",
+      "question": "M8 和 M20 在亮度和观测条件上有什么差异？",
+      "expected": "T-D",
+      "actual": "control / verdict+evidence+compare+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 20,
+      "pass": true,
+      "status": "PASS",
+      "reason": "answer：sections=verdict+evidence+compare+followup+review",
+      "score": 9,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-D / kepler.ephemeris:ok,kepler.ephemeris:ok,kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": false,
+          "detail": "sections=verdict+evidence+compare+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=5"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "C04",
+      "category": "多目标比较",
+      "question": "天狼星和参宿四在光谱类型、亮度与演化阶段上有何不同？",
+      "expected": "T-D",
+      "actual": "control / verdict+evidence+compare+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 30,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-D / kepler.ephemeris:ok,kepler.ephemeris:ok,kepler.ephemeris:ok,kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+compare+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=5"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "S01",
+      "category": "论文测量比较",
+      "question": "M13 的年龄和金属丰度测量在不同论文中是否一致？",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+observe+visual+boundary+mapref+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "Radio and Optical Observations of the Hercules Cluster of Galaxies",
+          "date": "1968-08-01",
+          "doi": "10.1086/180239",
+          "arxivId": "",
+          "url": "https://doi.org/10.1086/180239",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Deep spectroscopy of nearby galaxy clusters – II. The Hercules cluster",
+          "date": "2017-02-14",
+          "doi": "10.1093/mnras/stx371",
+          "arxivId": "",
+          "url": "https://doi.org/10.1093/mnras/stx371",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Lensing in the Hercules Supercluster",
+          "date": "2001-01-01",
+          "doi": "10.1086/318021",
+          "arxivId": "",
+          "url": "https://doi.org/10.1086/318021",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_fe728624796facee",
+          "type": "paper",
+          "title": "Radio and Optical Observations of the Hercules Cluster of Galaxies",
+          "uri": "https://doi.org/10.1086/180239",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_aa37bc9f63568408",
+          "type": "paper",
+          "title": "Deep spectroscopy of nearby galaxy clusters – II. The Hercules cluster",
+          "uri": "https://doi.org/10.1093/mnras/stx371",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_58fd7ed450ceb596",
+          "type": "paper",
+          "title": "Lensing in the Hercules Supercluster",
+          "uri": "https://doi.org/10.1086/318021",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "Radio scans across the Hercules Cluster of galaxies (Abell 2151) were compared with optical counts of numbers of galaxies per unit solid angle",
+          "evidenceRefs": [
+            "ev_fe728624796facee"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "The caustic technique enables us to identify 360 members brighter than Mr = −16 and within 1.3R200. We separated the members into subsamples according to photometrical and dynamical properties such as colour, local environment and infall time",
+          "evidenceRefs": [
+            "ev_aa37bc9f63568408"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "The object is about 15'' in total length and has a reddening-corrected R -band magnitude of m R = 18.55 ± 0.03",
+          "evidenceRefs": [
+            "ev_58fd7ed450ceb596"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "simbad.tap:failed",
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 25083,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L4"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / simbad.tap:failed,paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "papers=3 research=true topic=M13|globular|cluster|metallicity|age"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=3 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=3"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=3 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=11"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "S02",
+      "category": "论文测量比较",
+      "question": "M51 距离测量方法（造父变星、TRGB、SN Ia）的结果差异",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+observe+visual+boundary+mapref+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "Reeling in the Whirlpool galaxy: Distance to M 51 clarified through Cepheids and the type IIP supernova 2005cs",
+          "date": "2023-08-22",
+          "doi": "10.1051/0004-6361/202346971",
+          "arxivId": "",
+          "url": "https://doi.org/10.1051/0004-6361/202346971",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "The progenitor of SN 2005cs in the Whirlpool Galaxy",
+          "date": "2005-09-16",
+          "doi": "10.1111/j.1745-3933.2005.00100.x",
+          "arxivId": "",
+          "url": "https://doi.org/10.1111/j.1745-3933.2005.00100.x",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_1a353158a7ebcc88",
+          "type": "paper",
+          "title": "Reeling in the Whirlpool galaxy: Distance to M 51 clarified through Cepheids and the type IIP supernova 2005cs",
+          "uri": "https://doi.org/10.1051/0004-6361/202346971",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_b39d4a4d751baced",
+          "type": "paper",
+          "title": "The progenitor of SN 2005cs in the Whirlpool Galaxy",
+          "uri": "https://doi.org/10.1111/j.1745-3933.2005.00100.x",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "The two resulting distance estimates are DCep = 7.59 ± 0.30 Mpc and D2005cs = 7.34 ± 0.39 Mpc using the Cepheid period-luminosity relation and the spectral modelling of SN 2005cs, respectively",
+          "evidenceRefs": [
+            "ev_1a353158a7ebcc88"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "摘要测量值：9.09 mpc（Reeling in the Whirlpool galaxy: Distance to M 51 clarified through Cepheids and the type IIP supernova 2005cs）",
+          "evidenceRefs": [
+            "ev_1a353158a7ebcc88"
+          ],
+          "scope": "abstract-only",
+          "level": "unknown"
+        },
+        {
+          "text": "The progenitor was detected in the F814W pre-explosion image with I= 23.3 ± 0.2, but was below the detection thresholds of the F435W and F555W images, with B < 24.8 and V < 25 at 5σ",
+          "evidenceRefs": [
+            "ev_b39d4a4d751baced"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "simbad.tap:failed",
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 25049,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L4"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / simbad.tap:failed,paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "papers=2 research=true topic=M51|Whirlpool|distance|Cepheid|TRGB"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=2 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=2"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=3 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=11"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "S03",
+      "category": "论文测量比较",
+      "question": "NGC 5139 的距离与质量测量有哪些不同结果？",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+observe+visual+boundary+mapref+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "Binary Star Yields Distance to Omega Centauri",
+          "date": "2002-03-01",
+          "doi": "",
+          "arxivId": "",
+          "url": "https://openalex.org/W3130296298",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "oMEGACat. VI. Analysis of the Overall Kinematics of Omega Centauri in 3D: Velocity Dispersion, Kinematic Distance, Anisotropy, and Energy Equipartition",
+          "date": "2025-04-10",
+          "doi": "10.3847/1538-4357/adbe67",
+          "arxivId": "",
+          "url": "https://doi.org/10.3847/1538-4357/adbe67",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "The abundance spread among giants and subgiants in the globular cluster Omega Centauri",
+          "date": "1996-01-04",
+          "doi": "",
+          "arxivId": "",
+          "url": "https://openalex.org/W3098656264",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_09d7bebe3bfba165",
+          "type": "paper",
+          "title": "Binary Star Yields Distance to Omega Centauri",
+          "uri": "https://openalex.org/W3130296298",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_18727f09e4b8ac36",
+          "type": "paper",
+          "title": "oMEGACat. VI. Analysis of the Overall Kinematics of Omega Centauri in 3D: Velocity Dispersion, Kinematic Distance, Anisotropy, and Energy Equipartition",
+          "uri": "https://doi.org/10.3847/1538-4357/adbe67",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_68299df900728bd2",
+          "type": "paper",
+          "title": "The abundance spread among giants and subgiants in the globular cluster Omega Centauri",
+          "uri": "https://openalex.org/W3098656264",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "We find good agreement between proper motions and line-of-sight velocity dispersion, and we measure a kinematic distance of 5494 ± 61 pc, the most precise kinematic distance to ω Cen available",
+          "evidenceRefs": [
+            "ev_18727f09e4b8ac36"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "摘要测量值：5494 ± 61 pc（oMEGACat. VI. Analysis of the Overall Kinematics of Omega Centauri in 3D: Velocity Dispersion, Kinematic Distance, Anisotropy, and Energy Equipartition）",
+          "evidenceRefs": [
+            "ev_18727f09e4b8ac36"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "Two samples of stars were observed: 234 stars at M_V = 1.25 on the lower giant branch at radial distances between 8 and 23arcmin, and 145 stars at M_V = -1.3 at radial distances between 3 and 22arcmin",
+          "evidenceRefs": [
+            "ev_68299df900728bd2"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "simbad.tap:failed",
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 25049,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L4"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / simbad.tap:failed,paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "papers=3 research=true topic=NGC 5139|Omega Centauri|distance|mass"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=3 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=3"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=3 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=11"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "S04",
+      "category": "论文测量比较",
+      "question": "天狼星半径测量在不同文献中的差异",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+observe+visual+mapref+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "Sirius B and the Measurement of the Gravitational Redshift",
+          "date": "2010-02-01",
+          "doi": "10.1177/002182861004100102",
+          "arxivId": "",
+          "url": "https://doi.org/10.1177/002182861004100102",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Rediscovery and measurement of the companion of Sirius",
+          "date": "1896-10-01",
+          "doi": "10.1086/102534",
+          "arxivId": "",
+          "url": "https://doi.org/10.1086/102534",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Advantages of Sirius Red Staining for Quantitative Morphometric Collagen Measurements in Lungs",
+          "date": "1995-01-01",
+          "doi": "10.3109/01902149509031745",
+          "arxivId": "",
+          "url": "https://doi.org/10.3109/01902149509031745",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_04fd12ac54b8fc53",
+          "type": "paper",
+          "title": "Sirius B and the Measurement of the Gravitational Redshift",
+          "uri": "https://doi.org/10.1177/002182861004100102",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_e39d5a0c7829e378",
+          "type": "paper",
+          "title": "Rediscovery and measurement of the companion of Sirius",
+          "uri": "https://doi.org/10.1086/102534",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_5b3dcf1bf41372ca",
+          "type": "paper",
+          "title": "Advantages of Sirius Red Staining for Quantitative Morphometric Collagen Measurements in Lungs",
+          "uri": "https://doi.org/10.3109/01902149509031745",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "wildcard: * exact match: = All Search Terms Your search returned 0 results Your search returned 0 results",
+          "evidenceRefs": [
+            "ev_e39d5a0c7829e378"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "Histologic lung and lymph node sections from female Wistar rats injected intratracheally with differing quantities of quartz dust (0.03, 0.1, 0.5, 1.75 mg) were stained with Sirius Red, and the collagen fibers measured with a quantitative image analysis",
+          "evidenceRefs": [
+            "ev_5b3dcf1bf41372ca"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "simbad.tap:failed",
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 20653,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / simbad.tap:failed,paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "papers=3 research=true topic=Sirius|radius|interferometry"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=3 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=3"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=2 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+mapref+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=10"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "D01",
+      "category": "学术争议",
+      "question": "快速射电暴的起源是磁星还是其他机制？主要争议点",
+      "expected": "T-F",
+      "actual": "control / verdict+evidence+boundary+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "Managing tensions in coopetition",
+          "date": "2013-12-23",
+          "doi": "10.1016/j.indmarman.2013.12.001",
+          "arxivId": "",
+          "url": "https://doi.org/10.1016/j.indmarman.2013.12.001",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Embracing Tensions in Corporate Sustainability",
+          "date": "2015-03-01",
+          "doi": "10.1177/1086026615575047",
+          "arxivId": "",
+          "url": "https://doi.org/10.1177/1086026615575047",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Tensions in Corporate Sustainability: Towards an Integrative Framework",
+          "date": "2014-01-08",
+          "doi": "10.1007/s10551-014-2047-5",
+          "arxivId": "",
+          "url": "https://doi.org/10.1007/s10551-014-2047-5",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_51382c6cdb8a64f9",
+          "type": "paper",
+          "title": "Managing tensions in coopetition",
+          "uri": "https://doi.org/10.1016/j.indmarman.2013.12.001",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_c7e220eafb7f129f",
+          "type": "paper",
+          "title": "Embracing Tensions in Corporate Sustainability",
+          "uri": "https://doi.org/10.1177/1086026615575047",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_c8917911d2f0f7f9",
+          "type": "paper",
+          "title": "Tensions in Corporate Sustainability: Towards an Integrative Framework",
+          "uri": "https://doi.org/10.1007/s10551-014-2047-5",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "To assess how tensions have been addressed in past research and to identify promising areas for pushing the literature forward, we conduct a comprehensive review of research in corporate sustainability from the past 11 years",
+          "evidenceRefs": [
+            "ev_c7e220eafb7f129f"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "Corporate sustainability、Sustainability、Business ethics、Sustainability organizations、Context (archaeology)、Social sustainability、Corporate social responsibility、Corporate governan…",
+          "evidenceRefs": [
+            "ev_c8917911d2f0f7f9"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "evidence.search:ok",
+        "evidence.search:ok"
+      ],
+      "ms": 2448,
+      "pass": true,
+      "status": "PASS",
+      "reason": "retrieval：papers=3 research=true topic=fast radio burst|FRB|magnetar|origin",
+      "score": 9,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-F / evidence.search:ok,evidence.search:ok"
+        },
+        "retrieval": {
+          "ok": false,
+          "detail": "papers=3 research=true topic=fast radio burst|FRB|magnetar|origin"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=3 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=3"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=2 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+boundary+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=8"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "D02",
+      "category": "学术争议",
+      "question": "哈勃张力与不同宇宙学测量结果是否一致？",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+consensus+observe+boundary+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "cosmos",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 4,
+      "pass": true,
+      "status": "PASS",
+      "reason": "retrieval：papers=0 research=false",
+      "score": 8,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L4"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": false,
+          "detail": "papers=0 research=false"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": false,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+consensus+observe+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,cosmos,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=7"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "D03",
+      "category": "学术争议",
+      "question": "大质量恒星如何产生超新星与黑洞：失败超新星争议",
+      "expected": "T-F",
+      "actual": "control / verdict+evidence+observe+boundary+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "dark matter, Hubble tension, black hole, dark energy, Big Bang, JWST early galaxies`Every problem has a solution with the Pitipong Kasuri model.",
+          "date": "2026-06-10",
+          "doi": "10.5281/zenodo.20618213",
+          "arxivId": "",
+          "url": "https://doi.org/10.5281/zenodo.20618213",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Angular tension of black holes",
+          "date": "2012-10-02",
+          "doi": "10.1103/physrevd.86.081501",
+          "arxivId": "",
+          "url": "https://doi.org/10.1103/physrevd.86.081501",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Black holes and instabilities of negative tension branes",
+          "date": "2001-08-27",
+          "doi": "10.1103/physrevd.64.065019",
+          "arxivId": "",
+          "url": "https://doi.org/10.1103/physrevd.64.065019",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_b47d3b68981cea2f",
+          "type": "paper",
+          "title": "dark matter, Hubble tension, black hole, dark energy, Big Bang, JWST early galaxies`Every problem has a solution with the Pitipong Kasuri model.",
+          "uri": "https://doi.org/10.5281/zenodo.20618213",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_3be60d6f7802bd65",
+          "type": "paper",
+          "title": "Angular tension of black holes",
+          "uri": "https://doi.org/10.1103/physrevd.86.081501",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_fa7f25bfd6e83d62",
+          "type": "paper",
+          "title": "Black holes and instabilities of negative tension branes",
+          "uri": "https://doi.org/10.1103/physrevd.64.065019",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "dark matter, Hubble tension, black hole, dark energy, Big Bang, JWST early galaxies`Every problem has a solution with the Pitipong Kasuri model.(PKM)",
+          "evidenceRefs": [
+            "ev_b47d3b68981cea2f"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "A phase diagram for singly spinning $D=5$ black holes shows that angular tension resolves the degeneracies between spherical black holes and (dipole) black rings and captures the physics of the black ring balance condition",
+          "evidenceRefs": [
+            "ev_3be60d6f7802bd65"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "We consider the collision in $2+1$ dimensions of a black hole and a negative tension brane on an orbifold",
+          "evidenceRefs": [
+            "ev_fa7f25bfd6e83d62"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "nova",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "evidence.search:ok",
+        "evidence.search:ok"
+      ],
+      "ms": 910,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L4"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-F / evidence.search:ok,evidence.search:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "papers=3 research=true topic=supernova|black hole|failed|massive star"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=3 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=3"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=3 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+boundary+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,nova,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=9"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "D04",
+      "category": "学术争议",
+      "question": "银河系卫星星系数量与冷暗物质模型的缺失卫星问题",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+consensus+observe+boundary+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "EVOLUTION OF THE GALAXY–DARK MATTER CONNECTION AND THE ASSEMBLY OF GALAXIES IN DARK MATTER HALOS",
+          "date": "2012-05-23",
+          "doi": "10.1088/0004-637x/752/1/41",
+          "arxivId": "",
+          "url": "https://doi.org/10.1088/0004-637x/752/1/41",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Mass discrepancies in galaxies: dark matter and alternatives",
+          "date": "1990-01-01",
+          "doi": "10.1007/bf00873540",
+          "arxivId": "",
+          "url": "https://doi.org/10.1007/bf00873540",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Properties of Galaxy Dark Matter Halos from Weak Lensing",
+          "date": "2004-04-19",
+          "doi": "10.1086/382726",
+          "arxivId": "",
+          "url": "https://doi.org/10.1086/382726",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_26a5443c558c5fb6",
+          "type": "paper",
+          "title": "EVOLUTION OF THE GALAXY–DARK MATTER CONNECTION AND THE ASSEMBLY OF GALAXIES IN DARK MATTER HALOS",
+          "uri": "https://doi.org/10.1088/0004-637x/752/1/41",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_70cc7f0fd4c59bb3",
+          "type": "paper",
+          "title": "Mass discrepancies in galaxies: dark matter and alternatives",
+          "uri": "https://doi.org/10.1007/bf00873540",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_78b69fb537b76901",
+          "type": "paper",
+          "title": "Properties of Galaxy Dark Matter Halos from Weak Lensing",
+          "uri": "https://doi.org/10.1086/382726",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "Using observations of galaxy stellar mass functions out to $z \\sim 4$, the conditional stellar mass function at $z\\sim 0.1$ obtained from SDSS galaxy group catalogues, and the two-point correlation function (2PCF) of galaxies at $z \\sim 0.1$ as function of stellar mass, we constrain the relation between galaxies and da",
+          "evidenceRefs": [
+            "ev_26a5443c558c5fb6"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "We define a sample of lenses with 19.5 < R C < 21 and a sample of background galaxies with 21.5 < R C < 24",
+          "evidenceRefs": [
+            "ev_78b69fb537b76901"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "cosmos",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 933,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L4"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "papers=3 research=true topic=satellite|galaxy|dark matter|missing"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=3 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=3"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=2 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+consensus+observe+boundary+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,cosmos,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=10"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "E01",
+      "category": "早期宇宙",
+      "question": "JWST 高红移星系候选体的光度函数测量结果",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+consensus+observe+boundary+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "The cosmic timeline implied by the JWST high-redshift galaxies",
+          "date": "2023-02-14",
+          "doi": "10.1093/mnrasl/slad025",
+          "arxivId": "",
+          "url": "https://doi.org/10.1093/mnrasl/slad025",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "JWST high-redshift galaxy constraints on warm and cold dark matter models",
+          "date": "2023-02-23",
+          "doi": "10.1051/0004-6361/202345851",
+          "arxivId": "",
+          "url": "https://doi.org/10.1051/0004-6361/202345851",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "JWST high redshift galaxy observations have a strong tension with Planck CMB measurements",
+          "date": "2023-01-01",
+          "doi": "10.48550/arxiv.2301.00347",
+          "arxivId": "",
+          "url": "https://doi.org/10.48550/arxiv.2301.00347",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_bbbb00ae30899496",
+          "type": "paper",
+          "title": "The cosmic timeline implied by the JWST high-redshift galaxies",
+          "uri": "https://doi.org/10.1093/mnrasl/slad025",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_8edf7d98b8f0bc47",
+          "type": "paper",
+          "title": "JWST high-redshift galaxy constraints on warm and cold dark matter models",
+          "uri": "https://doi.org/10.1051/0004-6361/202345851",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_80ebc400a9bdef00",
+          "type": "paper",
+          "title": "JWST high redshift galaxy observations have a strong tension with Planck CMB measurements",
+          "uri": "https://doi.org/10.48550/arxiv.2301.00347",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "The so-called impossibly early galaxy problem, first identified via the Hubble Space Telescope’s observation of galaxies at redshifts z > 10, appears to have been exacerbated by the more recent JWST discovery of galaxy candidates at even higher redshifts (z ∼ 17) which, however, are yet to be confirmed spectroscopicall",
+          "evidenceRefs": [
+            "ev_bbbb00ae30899496"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "We compare properties of high-redshift galaxies observed by JWST with hydrodynamical simulations, in the standard cold dark matter model and in warm dark matter models with a suppressed linear matter power spectrum We find that current data are neither in tension with cold dark matter nor with warm dark matter models w",
+          "evidenceRefs": [
+            "ev_8edf7d98b8f0bc47"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "The true situation is that the Planck CMB measurement has a strong tension with JWST high redshift galaxy observations",
+          "evidenceRefs": [
+            "ev_80ebc400a9bdef00"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "cosmos",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 639,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "papers=3 research=true topic=JWST|high-redshift|luminosity function|galaxy"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=3 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=3"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=3 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+consensus+observe+boundary+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,cosmos,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=10"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "E02",
+      "category": "早期宇宙",
+      "question": "宇宙黎明时期中性氢 21cm 信号探测现状",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+consensus+observe+boundary+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "Dust formation in early galaxies",
+          "date": "2003-07-22",
+          "doi": "10.1046/j.1365-8711.2003.06681.x",
+          "arxivId": "",
+          "url": "https://doi.org/10.1046/j.1365-8711.2003.06681.x",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Nucleosynthesis in the Early Galaxy",
+          "date": "2007-12-20",
+          "doi": "10.1086/523084",
+          "arxivId": "",
+          "url": "https://doi.org/10.1086/523084",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Ther‐Process in the Early Galaxy",
+          "date": "2002-11-04",
+          "doi": "10.1086/342829",
+          "arxivId": "",
+          "url": "https://doi.org/10.1086/342829",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_bf0c8bf8681dce06",
+          "type": "paper",
+          "title": "Dust formation in early galaxies",
+          "uri": "https://doi.org/10.1046/j.1365-8711.2003.06681.x",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_c37ea089a2447054",
+          "type": "paper",
+          "title": "Nucleosynthesis in the Early Galaxy",
+          "uri": "https://doi.org/10.1086/523084",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_e878087e49a6858b",
+          "type": "paper",
+          "title": "Ther‐Process in the Early Galaxy",
+          "uri": "https://doi.org/10.1086/342829",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "We find the visual optical depth for individual star-forming clouds can reach values greater than 1 at very low metallicity (1/100 solar) provided that the mass–radius exponent of molecular clouds is less than 2",
+          "evidenceRefs": [
+            "ev_bf0c8bf8681dce06"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "It is suggested that scenarios with neutron densities n n ⩽ 10 13 cm −3 or in the range n n ⩾ 10 24 cm −3 best explain the observations.",
+          "evidenceRefs": [
+            "ev_c37ea089a2447054"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "The [Y/Zr] and [Pd/Ag] abundance ratios are similar to those measured for the r -process-rich stars CS 22892-052 and CS 31082-001",
+          "evidenceRefs": [
+            "ev_e878087e49a6858b"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "cosmos",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 741,
+      "pass": true,
+      "status": "PASS",
+      "reason": "retrieval：papers=3 research=true topic=21cm|neutral hydrogen|cosmic dawn|reionization",
+      "score": 9,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": false,
+          "detail": "papers=3 research=true topic=21cm|neutral hydrogen|cosmic dawn|reionization"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=3 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=3"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=3 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+consensus+observe+boundary+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,cosmos,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=10"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "E03",
+      "category": "早期宇宙",
+      "question": "早期宇宙星系紫外光度密度与再电离历史",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+consensus+observe+boundary+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "The nature of high-redshift galaxies",
+          "date": "2001-02-01",
+          "doi": "10.1046/j.1365-8711.2001.03975.x",
+          "arxivId": "",
+          "url": "https://doi.org/10.1046/j.1365-8711.2001.03975.x",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "The Size Evolution of High-Redshift Galaxies",
+          "date": "2004-01-09",
+          "doi": "10.1086/378578",
+          "arxivId": "",
+          "url": "https://doi.org/10.1086/378578",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Dust in High‐Redshift Galaxies",
+          "date": "1997-04-01",
+          "doi": "10.1086/303826",
+          "arxivId": "",
+          "url": "https://doi.org/10.1086/303826",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_ddb0125c67567d76",
+          "type": "paper",
+          "title": "The nature of high-redshift galaxies",
+          "uri": "https://doi.org/10.1046/j.1365-8711.2001.03975.x",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_d2227a79c941e382",
+          "type": "paper",
+          "title": "The Size Evolution of High-Redshift Galaxies",
+          "uri": "https://doi.org/10.1086/378578",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_c6e34bb162f8bb43",
+          "type": "paper",
+          "title": "Dust in High‐Redshift Galaxies",
+          "uri": "https://doi.org/10.1086/303826",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "Using semi-analytic models of galaxy formation set within the cold dark matter (CDM) merging hierarchy, we investigate several scenarios for the nature of the high-redshift ) Lyman-break galaxies (LBGs)",
+          "evidenceRefs": [
+            "ev_ddb0125c67567d76"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "Hubble Space Telescope images of high-redshift galaxies selected via color and photometric redshifts are used to examine the size and axial ratio distribution of galaxies as a function of redshift at look-back times t > 8 Gyr",
+          "evidenceRefs": [
+            "ev_d2227a79c941e382"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "Typically, [Zn/H] ≃ -1.2; as Zn tracks Fe closely in Galactic stars of all metallicities and is only lightly depleted onto interstellar grains, we conclude that the overall degree of metal enrichment of damped Lyα galaxies ≈ 13.5 Gyr ago ( H 0 = 50 km s -1 Mpc -1 , q 0 = 0.05) was ~1/15 solar",
+          "evidenceRefs": [
+            "ev_c6e34bb162f8bb43"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "cosmos",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 828,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L4"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "papers=3 research=true topic=ultraviolet|luminosity|reionization|galaxy"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=3 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=3"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=3 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+consensus+observe+boundary+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,cosmos,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=10"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "X01",
+      "category": "系外行星",
+      "question": "TRAPPIST-1 七颗行星的密度与大气损失研究进展",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "Long-Term Trends in the Upper Atmosphere – Recent Progress",
+          "date": "2011-01-01",
+          "doi": "10.1007/978-94-007-0326-1_30",
+          "arxivId": "",
+          "url": "https://doi.org/10.1007/978-94-007-0326-1_30",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Gravity waves in the middle atmosphere: Recent progress and needed studies",
+          "date": "1986-06-01",
+          "doi": "",
+          "arxivId": "",
+          "url": "https://openalex.org/W1562120531",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Gravity Wave Interactions and Effects in the Middle and Upper Atmosphere: Recent Progress and Outstanding Issues",
+          "date": "2005-12-01",
+          "doi": "",
+          "arxivId": "",
+          "url": "https://openalex.org/W3164820441",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_6394f3946974201d",
+          "type": "paper",
+          "title": "Long-Term Trends in the Upper Atmosphere – Recent Progress",
+          "uri": "https://doi.org/10.1007/978-94-007-0326-1_30",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_44777df3c4b97b8f",
+          "type": "paper",
+          "title": "Gravity waves in the middle atmosphere: Recent progress and needed studies",
+          "uri": "https://openalex.org/W1562120531",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_68bfc967f4c2e8a8",
+          "type": "paper",
+          "title": "Gravity Wave Interactions and Effects in the Middle and Upper Atmosphere: Recent Progress and Outstanding Issues",
+          "uri": "https://openalex.org/W3164820441",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "The recent recognition of the important role played by gravity waves in the large-scale circulation and thermal structure of the mesosphere and lower thermosphere has stimulated considerable research on their properties and their middle atmosphere effects",
+          "evidenceRefs": [
+            "ev_44777df3c4b97b8f"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 938,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L4"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "papers=3 research=true topic=TRAPPIST-1|planet|density|atmosphere"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=3 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=3"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=1 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=7"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "X02",
+      "category": "系外行星",
+      "question": "WASP-39b 大气成分的透射光谱结果",
+      "expected": "T-E",
+      "actual": "control / verdict+gap+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "The effect of condensates on the characterization of transiting planet atmospheres with transmission spectroscopy",
+          "date": "2005-10-13",
+          "doi": "10.1111/j.1365-2966.2005.09587.x",
+          "arxivId": "",
+          "url": "https://doi.org/10.1111/j.1365-2966.2005.09587.x",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "PROBING THE TERMINATOR REGION ATMOSPHERE OF THE HOT-JUPITER XO-1b WITH TRANSMISSION SPECTROSCOPY",
+          "date": "2010-03-11",
+          "doi": "10.1088/2041-8205/712/2/l139",
+          "arxivId": "",
+          "url": "https://doi.org/10.1088/2041-8205/712/2/l139",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "ON THE DETECTION OF MOLECULES IN THE ATMOSPHERE OF HD 189733b USINGHSTNICMOS TRANSMISSION SPECTROSCOPY",
+          "date": "2014-03-14",
+          "doi": "10.1088/0004-637x/784/2/133",
+          "arxivId": "",
+          "url": "https://doi.org/10.1088/0004-637x/784/2/133",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_bcd347456c4fbbcc",
+          "type": "paper",
+          "title": "The effect of condensates on the characterization of transiting planet atmospheres with transmission spectroscopy",
+          "uri": "https://doi.org/10.1111/j.1365-2966.2005.09587.x",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_9cffa5cde8c87ed0",
+          "type": "paper",
+          "title": "PROBING THE TERMINATOR REGION ATMOSPHERE OF THE HOT-JUPITER XO-1b WITH TRANSMISSION SPECTROSCOPY",
+          "uri": "https://doi.org/10.1088/2041-8205/712/2/l139",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_a01a93fca67fb65f",
+          "type": "paper",
+          "title": "ON THE DETECTION OF MOLECULES IN THE ATMOSPHERE OF HD 189733b USINGHSTNICMOS TRANSMISSION SPECTROSCOPY",
+          "uri": "https://doi.org/10.1088/0004-637x/784/2/133",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "Through a simple physical argument we show that the slant optical depth through the atmosphere of a ‘hot Jupiter’ planet is ~35-90 times greater than the normal optical depth",
+          "evidenceRefs": [
+            "ev_bcd347456c4fbbcc"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "Finally, we note the similarity between the 1.2–1.8 μm transmission spectra of XO-1b and HD 209458b, suggesting that in addition to having similar stellar/orbital and planetary parameters the two systems may also have a similar exoplanetary atmospheric composition.",
+          "evidenceRefs": [
+            "ev_9cffa5cde8c87ed0"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "The Hubble Space Telescope /NICMOS transmission spectrum measurements of HD 189733b that suggest the detection of methane (CH 4 ) in an exoplanet atmosphere have been a source of significant controversy",
+          "evidenceRefs": [
+            "ev_a01a93fca67fb65f"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "vega"
+      ],
+      "tools": [
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 738,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "papers=3 research=true topic=WASP-39b|transmission|spectrum|atmosphere"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=3 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=3"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=3 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+gap+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,vega"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=7"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "X03",
+      "category": "系外行星",
+      "question": "凌星法与径向速度法测得的系外行星质量差异",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+boundary+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "The Exoplanet Handbook",
+          "date": "2011-05-26",
+          "doi": "10.1017/9781108304160",
+          "arxivId": "",
+          "url": "https://doi.org/10.1017/9781108304160",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "The Exoplanet Orbit Database",
+          "date": "2011-04-01",
+          "doi": "10.1086/659427",
+          "arxivId": "",
+          "url": "https://doi.org/10.1086/659427",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "The NASA Exoplanet Archive: Data and Tools for Exoplanet Research",
+          "date": "2013-07-19",
+          "doi": "10.1086/672273",
+          "arxivId": "",
+          "url": "https://doi.org/10.1086/672273",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_965b74b1f05a72c2",
+          "type": "paper",
+          "title": "The Exoplanet Handbook",
+          "uri": "https://doi.org/10.1017/9781108304160",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_191bcbf5dc251669",
+          "type": "paper",
+          "title": "The Exoplanet Orbit Database",
+          "uri": "https://doi.org/10.1086/659427",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_5b0a88a9e31e4b09",
+          "type": "paper",
+          "title": "The NASA Exoplanet Archive: Data and Tools for Exoplanet Research",
+          "uri": "https://doi.org/10.1086/672273",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "More than 500 exoplanets are now known, and groups world-wide are actively involved in a broad range of observational and theoretical efforts",
+          "evidenceRefs": [
+            "ev_965b74b1f05a72c2"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "This database comprises spectroscopic orbital elements measured for 427 planets orbiting 363 stars from radial velocity and transit measurements as reported in the literature",
+          "evidenceRefs": [
+            "ev_191bcbf5dc251669"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "We describe the contents and functionality of the NASA Exoplanet Archive, a database and toolset funded by NASA to support astronomers in the exoplanet community",
+          "evidenceRefs": [
+            "ev_5b0a88a9e31e4b09"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 568,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L4"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "papers=3 research=true topic=transit|radial velocity|planet|mass"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=3 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=3"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=3 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+boundary+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=8"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "X04",
+      "category": "系外行星",
+      "question": "宜居带行星的潮汐锁定与大气逃逸",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "Affective atmospheres",
+          "date": "2009-09-20",
+          "doi": "10.1016/j.emospa.2009.08.005",
+          "arxivId": "",
+          "url": "https://doi.org/10.1016/j.emospa.2009.08.005",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Atmosphere",
+          "date": "2019-01-15",
+          "doi": "10.4324/9781351039260-7",
+          "arxivId": "",
+          "url": "https://doi.org/10.4324/9781351039260-7",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Evaporation into the Atmosphere",
+          "date": "1982-01-01",
+          "doi": "10.1007/978-94-017-1497-6",
+          "arxivId": "",
+          "url": "https://doi.org/10.1007/978-94-017-1497-6",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_13f4e1f4eab90c51",
+          "type": "paper",
+          "title": "Affective atmospheres",
+          "uri": "https://doi.org/10.1016/j.emospa.2009.08.005",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_0146b8205aaddfed",
+          "type": "paper",
+          "title": "Atmosphere",
+          "uri": "https://doi.org/10.4324/9781351039260-7",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_257f87e9a9fe17c5",
+          "type": "paper",
+          "title": "Evaporation into the Atmosphere",
+          "uri": "https://doi.org/10.1007/978-94-017-1497-6",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "The state of research on atmospheres is briefly summarized and an overview is offered of the various definitions of the term in different disciplines",
+          "evidenceRefs": [
+            "ev_0146b8205aaddfed"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 723,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L4"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "papers=3 research=true topic=habitable zone|tidal locking|atmosphere|escape"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=3 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=3"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=1 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=7"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "H01",
+      "category": "恒星演化",
+      "question": "参宿四现在处于生命周期的哪个阶段，什么时候可能超新星爆发？",
+      "expected": "answer",
+      "actual": "legacy / verdict+evidence+observe+boundary+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "nova",
+        "vega",
+        "lyra"
+      ],
+      "tools": [],
+      "ms": 41,
+      "pass": true,
+      "status": "PASS",
+      "reason": "data：缺少 15",
+      "score": 9,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "single/L1"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / "
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": false,
+          "detail": "缺少 15"
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,nova,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=6"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "H02",
+      "category": "恒星演化",
+      "question": "赫罗图上主序星、红巨星和白矮星如何分布？",
+      "expected": "answer",
+      "actual": "control / verdict+evidence+consensus+observe+boundary+compare+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "cosmos",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 2,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / kepler.ephemeris:ok,kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+consensus+observe+boundary+compare+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,cosmos,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=8"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "H03",
+      "category": "恒星演化",
+      "question": "大质量恒星与太阳的最终归宿有什么不同？",
+      "expected": "answer",
+      "actual": "control / verdict+evidence+observe+boundary+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "helios",
+        "vega",
+        "horizon",
+        "lyra"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 4,
+      "pass": true,
+      "status": "PASS",
+      "reason": "data：缺少 1.4",
+      "score": 8,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": false,
+          "detail": "缺少 1.4"
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": false,
+          "detail": "sections=verdict+evidence+observe+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,helios,vega,horizon,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=6"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "G01",
+      "category": "星系形成演化",
+      "question": "银河系与仙女座星系的并合历史研究",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+observe+visual+mapref+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "A vast, thin plane of corotating dwarf galaxies orbiting the Andromeda galaxy",
+          "date": "2013-01-01",
+          "doi": "10.1038/nature11717",
+          "arxivId": "",
+          "url": "https://doi.org/10.1038/nature11717",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "The mass of the Andromeda galaxy",
+          "date": "2000-08-21",
+          "doi": "10.1046/j.1365-8711.2000.03645.x",
+          "arxivId": "",
+          "url": "https://doi.org/10.1046/j.1365-8711.2000.03645.x",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Unidentified Line in X-Ray Spectra of the Andromeda Galaxy and Perseus Galaxy Cluster",
+          "date": "2014-12-15",
+          "doi": "10.1103/physrevlett.113.251301",
+          "arxivId": "",
+          "url": "https://doi.org/10.1103/physrevlett.113.251301",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_0b3c69066928ca3b",
+          "type": "paper",
+          "title": "A vast, thin plane of corotating dwarf galaxies orbiting the Andromeda galaxy",
+          "uri": "https://doi.org/10.1038/nature11717",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_3dbb28c93a97bb02",
+          "type": "paper",
+          "title": "The mass of the Andromeda galaxy",
+          "uri": "https://doi.org/10.1046/j.1365-8711.2000.03645.x",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_78aa2f4e2bbc26da",
+          "type": "paper",
+          "title": "Unidentified Line in X-Ray Spectra of the Andromeda Galaxy and Perseus Galaxy Cluster",
+          "uri": "https://doi.org/10.1103/physrevlett.113.251301",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "Using 100 globular clusters at projected radii 20≲R≲50 kpc with both radial velocities and proper motions, it will b…",
+          "evidenceRefs": [
+            "ev_3dbb28c93a97bb02"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "We report a weak line at 3.52±0.02 keV in x-ray spectra of the Andromeda galaxy and the Perseus galaxy cluster observed by the metal-oxide-silicon (MOS) and p-n (PN) CCD cameras of the XMM-Newton telescope",
+          "evidenceRefs": [
+            "ev_78aa2f4e2bbc26da"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "simbad.tap:failed",
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 20035,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L4"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / simbad.tap:failed,paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "papers=3 research=true topic=Milky Way|Andromeda|merger|M31"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=3 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=3"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=2 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+mapref+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=10"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "G02",
+      "category": "星系形成演化",
+      "question": "星系形态如何随红移演化？",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+consensus+observe+boundary+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "cosmos",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 3,
+      "pass": true,
+      "status": "PASS",
+      "reason": "retrieval：papers=0 research=false",
+      "score": 8,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": false,
+          "detail": "papers=0 research=false"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": false,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+consensus+observe+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,cosmos,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=7"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "G03",
+      "category": "星系形成演化",
+      "question": "星系团中冲压剥离气体对星系演化的影响",
+      "expected": "T-E",
+      "actual": "control / verdict+gap+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "Galaxy harassment and the evolution of clusters of galaxies",
+          "date": "1996-02-01",
+          "doi": "10.1038/379613a0",
+          "arxivId": "",
+          "url": "https://doi.org/10.1038/379613a0",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Catalogue of Galaxies and of Clusters of Galaxies",
+          "date": "1968-01-01",
+          "doi": "",
+          "arxivId": "",
+          "url": "https://openalex.org/W2010949465",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_746fa9b7ef89cf92",
+          "type": "paper",
+          "title": "Galaxy harassment and the evolution of clusters of galaxies",
+          "uri": "https://doi.org/10.1038/379613a0",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_a587d752958bbc1d",
+          "type": "paper",
+          "title": "Catalogue of Galaxies and of Clusters of Galaxies",
+          "uri": "https://openalex.org/W2010949465",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "Covering the Palomar survey fields of the declination zones +24°, +30°, +36°, +42°, +48°, +54° in the southern galactic cap.",
+          "evidenceRefs": [
+            "ev_a587d752958bbc1d"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "vega"
+      ],
+      "tools": [
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 1516,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "papers=2 research=true topic=ram pressure|stripping|cluster|galaxy"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=2 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=2"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=1 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+gap+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,vega"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=7"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "G04",
+      "category": "星系形成演化",
+      "question": "本地星系群中矮星系的恒星形成历史",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 2,
+      "pass": true,
+      "status": "PASS",
+      "reason": "retrieval：papers=0 research=false",
+      "score": 7,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": false,
+          "detail": "papers=0 research=false"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": false,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": false,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=4"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "P01",
+      "category": "设备规划",
+      "question": "用 150mm 马卡镜和 ASI 相机拍 M13 球状星团，如何选择曝光和增益？",
+      "expected": "answer",
+      "actual": "control / verdict+evidence+observe+boundary+compare+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "horizon",
+        "lyra"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 16,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / kepler.ephemeris:ok,kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+boundary+compare+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,horizon,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=7"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "P02",
+      "category": "设备规划",
+      "question": "在 8 级光污染下用 80mm 折射镜拍 M8，需要什么滤镜？",
+      "expected": "answer",
+      "actual": "legacy / verdict+evidence+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "vega",
+        "lyra"
+      ],
+      "tools": [],
+      "ms": 2,
+      "pass": true,
+      "status": "PASS",
+      "reason": "answer：sections=verdict+evidence+followup+review",
+      "score": 9,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "single/L1"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / "
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": false,
+          "detail": "sections=verdict+evidence+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=4"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "P03",
+      "category": "设备规划",
+      "question": "全画幅相机配 500mm 焦距拍 M51，视场能装下吗？",
+      "expected": "answer",
+      "actual": "legacy / verdict+gearfit+query+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "horizon",
+        "vega"
+      ],
+      "tools": [],
+      "ms": 3,
+      "pass": true,
+      "status": "PASS",
+      "reason": "answer：sections=verdict+gearfit+query+followup+review",
+      "score": 9,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "single/L1"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / "
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": false,
+          "detail": "sections=verdict+gearfit+query+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "horizon,vega"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=5"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "P04",
+      "category": "设备规划",
+      "question": "新手用双筒望远镜观测 M45，选 7×50 还是 10×50？",
+      "expected": "answer",
+      "actual": "legacy / verdict+evidence+observe+boundary+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "vega",
+        "horizon",
+        "lyra"
+      ],
+      "tools": [],
+      "ms": 1,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "single/L1"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / "
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,vega,horizon,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=6"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "O01",
+      "category": "观测条件",
+      "question": "今晚在北京观测 M13，月光和高度条件如何？",
+      "expected": "answer",
+      "actual": "control / verdict+evidence+observe+visual+boundary+mapref+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 11,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=8"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "O02",
+      "category": "观测条件",
+      "question": "上海梅雨季观测 M8 的可行性",
+      "expected": "answer",
+      "actual": "legacy / verdict+evidence+observe+visual+boundary+mapref+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [],
+      "ms": 10,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "single/L1"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / "
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=8"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "O03",
+      "category": "观测条件",
+      "question": "在波特尔 4 级地点拍摄银河，曝光参数如何调整？",
+      "expected": "answer",
+      "actual": "legacy / verdict+evidence+observe+boundary+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "horizon",
+        "lyra"
+      ],
+      "tools": [],
+      "ms": 1,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "single/L1"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / "
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,horizon,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=6"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "O04",
+      "category": "观测条件",
+      "question": "冬季在北京观测参宿四的最佳时间和方位",
+      "expected": "answer",
+      "actual": "control / verdict+evidence+observe+visual+mapref+compare+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 19,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / kepler.ephemeris:ok,kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+mapref+compare+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=8"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "Q01",
+      "category": "复杂拆解",
+      "question": "为什么 M13 的年龄测定依赖距离和金属丰度？并给出观测验证方案",
+      "expected": "answer",
+      "actual": "control / verdict+evidence+observe+visual+boundary+mapref+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "simbad.tap:ok",
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 10,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L4"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / simbad.tap:ok,paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=8"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "Q02",
+      "category": "复杂拆解",
+      "question": "设计一个比较 M51 和 M104 星系结构的观测与研究方案",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+observe+visual+boundary+mapref+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "Sombrero Galaxy",
+          "date": "2004-07-30",
+          "doi": "10.1888/0333750888/4836",
+          "arxivId": "",
+          "url": "https://doi.org/10.1888/0333750888/4836",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Diamonds on the Hat: globular clusters in the Sombrero galaxy (M104)",
+          "date": "2009-11-10",
+          "doi": "10.1111/j.1365-2966.2009.15783.x",
+          "arxivId": "",
+          "url": "https://doi.org/10.1111/j.1365-2966.2009.15783.x",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "New dwarf galaxy candidates in the sphere of influence of the Sombrero galaxy",
+          "date": "2023-11-27",
+          "doi": "10.1093/mnras/stad3741",
+          "arxivId": "",
+          "url": "https://doi.org/10.1093/mnras/stad3741",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_f85356a107c65c5b",
+          "type": "paper",
+          "title": "Sombrero Galaxy",
+          "uri": "https://doi.org/10.1888/0333750888/4836",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_9916d3c6d62a6f27",
+          "type": "paper",
+          "title": "Diamonds on the Hat: globular clusters in the Sombrero galaxy (M104)",
+          "uri": "https://doi.org/10.1111/j.1365-2966.2009.15783.x",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_f0809c2ea14bb2da",
+          "type": "paper",
+          "title": "New dwarf galaxy candidates in the sphere of influence of the Sombrero galaxy",
+          "uri": "https://doi.org/10.1093/mnras/stad3741",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "Geography",
+          "evidenceRefs": [
+            "ev_f85356a107c65c5b"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "We find that the observed SDF shape can be accurately predicted by a simple model in which the protocluster clouds had characteristic sizes of 0.9 ± 0.1 pc and SFEs of 0.3 ± 0.07",
+          "evidenceRefs": [
+            "ev_9916d3c6d62a6f27"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "Visual inspection of the deep images and galfit modelling yielded a galaxy sample highly complete down to Mg ∼ −9 ($L_{g}\\sim 3\\times 10^{5}\\ \\mathrm{ L}_\\odot$) and spanning magnitudes −16.4 < Mg < −8 and half-light radii 50 pc < re < 1600 pc assuming the distance of M104",
+          "evidenceRefs": [
+            "ev_f0809c2ea14bb2da"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "simbad.tap:failed",
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 25062,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L4"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / simbad.tap:failed,paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "papers=3 research=true topic=M51|M104|structure|galaxy"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=3 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=3"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=3 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=11"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "Q03",
+      "category": "复杂拆解",
+      "question": "从光谱、光变和视差三方面判断天狼星是否双星系统",
+      "expected": "answer",
+      "actual": "control / verdict+evidence+observe+visual+mapref+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 10,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+mapref+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=7"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "Q04",
+      "category": "复杂拆解",
+      "question": "如果要验证系外行星大气中的水，需要哪些观测和数据处理步骤？",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+boundary+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "Rapid characterization of exoplanet atmospheres with the Exoplanet Transmission Spectroscopy Imager",
+          "date": "2024-12-08",
+          "doi": "10.1117/1.jatis.10.4.045005",
+          "arxivId": "",
+          "url": "https://doi.org/10.1117/1.jatis.10.4.045005",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Effect of centrifugal force on transmission spectroscopy of exoplanet atmospheres",
+          "date": "2023-04-27",
+          "doi": "10.1093/mnrasl/slad058",
+          "arxivId": "",
+          "url": "https://doi.org/10.1093/mnrasl/slad058",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Ground-based Reconnaissance Observations of 21 Exoplanet Atmospheres with the Exoplanet Transmission Spectroscopy Imager",
+          "date": "2025-02-11",
+          "doi": "10.3847/1538-3881/ada557",
+          "arxivId": "",
+          "url": "https://doi.org/10.3847/1538-3881/ada557",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_d666926c9ca5da37",
+          "type": "paper",
+          "title": "Rapid characterization of exoplanet atmospheres with the Exoplanet Transmission Spectroscopy Imager",
+          "uri": "https://doi.org/10.1117/1.jatis.10.4.045005",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_b3205b30e5197aca",
+          "type": "paper",
+          "title": "Effect of centrifugal force on transmission spectroscopy of exoplanet atmospheres",
+          "uri": "https://doi.org/10.1093/mnrasl/slad058",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_550ccd3b86a22d5b",
+          "type": "paper",
+          "title": "Ground-based Reconnaissance Observations of 21 Exoplanet Atmospheres with the Exoplanet Transmission Spectroscopy Imager",
+          "uri": "https://doi.org/10.3847/1538-3881/ada557",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "The Exoplanet Transmission Spectroscopy Imager (ETSI) amalgamates a low-resolution slitless prism spectrometer with custom multi-band filters to simultaneously image 15 spectral bandpasses between 430 and 975 nm with an average spectral resolution of R=λ/δλ∼20",
+          "evidenceRefs": [
+            "ev_d666926c9ca5da37"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "We recommend that the correction to the atmospheric scale height due to this effect be taken into account for the analysis of high-precision transmission spectra of exoplanets in the future, most immediately JWST Cycle 1 targets WASP-19b and WASP-121b.",
+          "evidenceRefs": [
+            "ev_b3205b30e5197aca"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "Here we present reconnaissance observations of 21 exoplanet atmospheres measured with the Exoplanet Transmission Spectroscopy Imager (ETSI), a recently deployed spectrophotometer on the McDonald Observatory Otto Struve 2.1 m telescope",
+          "evidenceRefs": [
+            "ev_550ccd3b86a22d5b"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 6134,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L4"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "papers=3 research=true topic=exoplanet|water|transmission|spectroscopy"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=3 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=3"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=3 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+boundary+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=8"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "M01",
+      "category": "多轮上下文",
+      "question": "M13 是什么？",
+      "expected": "answer",
+      "actual": "legacy / verdict+evidence+observe+visual+boundary+mapref+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [],
+      "ms": 11,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "single/L1"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / "
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=8"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "M02",
+      "category": "多轮上下文",
+      "question": "它有多远？",
+      "expected": "answer",
+      "actual": "legacy / verdict+evidence+observe+visual+boundary+mapref+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [],
+      "ms": 10,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "single/L1"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "undefined / "
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": "ok"
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=8"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "M03",
+      "category": "多轮上下文",
+      "question": "它和 M5 哪个更容易观测？",
+      "expected": "T-D",
+      "actual": "control / verdict+evidence+observe+visual+boundary+mapref+followup+review",
+      "papers": [],
+      "evidence": [],
+      "conclusions": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 12,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "compare/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-D / kepler.ephemeris:ok,compare.curate:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "local"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=0 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=0"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=0 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=0 limits=0"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=8"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "U01",
+      "category": "不确定性",
+      "question": "M13 中是否存在中等质量黑洞？目前证据如何？",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+consensus+observe+boundary+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "The Powerful Outburst in Hercules A",
+          "date": "2005-04-28",
+          "doi": "10.1086/430945",
+          "arxivId": "",
+          "url": "https://doi.org/10.1086/430945",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "The Feedback‐regulated Growth of Black Holes and Bulges through Gas Accretion and Starbursts in Cluster Central Dominant Galaxies",
+          "date": "2006-11-15",
+          "doi": "10.1086/507672",
+          "arxivId": "",
+          "url": "https://doi.org/10.1086/507672",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Targeted Search for Eccentric Supermassive Binary Black Holes in OJ 287 and nearby Galaxy Clusters with PPTA DR3",
+          "date": "2026-04-15",
+          "doi": "10.1088/0256-307x/43/5/051102",
+          "arxivId": "",
+          "url": "https://doi.org/10.1088/0256-307x/43/5/051102",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_1f190ced174f0b3d",
+          "type": "paper",
+          "title": "The Powerful Outburst in Hercules A",
+          "uri": "https://doi.org/10.1086/430945",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_844e7e714902b10b",
+          "type": "paper",
+          "title": "The Feedback‐regulated Growth of Black Holes and Bulges through Gas Accretion and Starbursts in Cluster Central Dominant Galaxies",
+          "uri": "https://doi.org/10.1086/507672",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_7395ed51f4162ea4",
+          "type": "paper",
+          "title": "Targeted Search for Eccentric Supermassive Binary Black Holes in OJ 287 and nearby Galaxy Clusters with PPTA DR3",
+          "uri": "https://doi.org/10.1088/0256-307x/43/5/051102",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "The age of the outburst is ≃5.9 × 10 7 yr, its energy ~3 × 10 61 ergs, and its mean power ~1.6 × 10 46 ergs s -1",
+          "evidenceRefs": [
+            "ev_1f190ced174f0b3d"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "Using the cavity (jet) powers, we place strong lower limits on the rate of growth of the central black holes, and we find that they are growing at an average rate of ~0.1 M ☉ yr -1 , with some systems growing as quickly as ~1 M ☉ yr -1",
+          "evidenceRefs": [
+            "ev_844e7e714902b10b"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "For OJ 287, by explicitly incorporating orbital eccentricity (up to e 0 = 0.8) to robustly capture signal power spread across multiple harmonics, we constrain the total binary mass to M tot < 5.25 × 10 10 M ⊙ (95% credible level)",
+          "evidenceRefs": [
+            "ev_7395ed51f4162ea4"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "cosmos",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "simbad.tap:failed",
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 25020,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / simbad.tap:failed,paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "papers=3 research=true topic=M13|black hole|intermediate"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=3 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=3"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=3 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+consensus+observe+boundary+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,cosmos,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=10"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "U02",
+      "category": "不确定性",
+      "question": "快速射电暴的宿主星系类型是否已确定？",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+boundary+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "Galaxy harassment and the evolution of clusters of galaxies",
+          "date": "1996-02-01",
+          "doi": "10.1038/379613a0",
+          "arxivId": "",
+          "url": "https://doi.org/10.1038/379613a0",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Catalogue of Galaxies and of Clusters of Galaxies",
+          "date": "1968-01-01",
+          "doi": "",
+          "arxivId": "",
+          "url": "https://openalex.org/W2010949465",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_746fa9b7ef89cf92",
+          "type": "paper",
+          "title": "Galaxy harassment and the evolution of clusters of galaxies",
+          "uri": "https://doi.org/10.1038/379613a0",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_a587d752958bbc1d",
+          "type": "paper",
+          "title": "Catalogue of Galaxies and of Clusters of Galaxies",
+          "uri": "https://openalex.org/W2010949465",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "Covering the Palomar survey fields of the declination zones +24°, +30°, +36°, +42°, +48°, +54° in the southern galactic cap.",
+          "evidenceRefs": [
+            "ev_a587d752958bbc1d"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 724,
+      "pass": true,
+      "status": "PASS",
+      "reason": "retrieval：papers=2 research=true topic=FRB|host galaxy|fast radio burst",
+      "score": 9,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": false,
+          "detail": "papers=2 research=true topic=FRB|host galaxy|fast radio burst"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=2 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=2"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=1 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+boundary+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,vega,lyra"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=8"
+        }
+      },
+      "critical": []
+    },
+    {
+      "id": "U03",
+      "category": "不确定性",
+      "question": "用现有资料能否确定 M51 的精确年龄？",
+      "expected": "T-E",
+      "actual": "control / verdict+evidence+observe+visual+boundary+mapref+evidence+list+boundary+followup+review",
+      "papers": [
+        {
+          "title": "SPATIALLY RESOLVED STELLAR, DUST, AND GAS PROPERTIES OF THE POST-INTERACTING WHIRLPOOL GALAXY SYSTEM",
+          "date": "2012-08-07",
+          "doi": "10.1088/0004-637x/755/2/165",
+          "arxivId": "",
+          "url": "https://doi.org/10.1088/0004-637x/755/2/165",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Ultraviolet Colors and Extinctions of H ii Regions in the Whirlpool Galaxy (M51)",
+          "date": "1997-03-10",
+          "doi": "10.1086/303753",
+          "arxivId": "",
+          "url": "https://doi.org/10.1086/303753",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_046197cadb6975f0",
+          "type": "paper",
+          "title": "SPATIALLY RESOLVED STELLAR, DUST, AND GAS PROPERTIES OF THE POST-INTERACTING WHIRLPOOL GALAXY SYSTEM",
+          "uri": "https://doi.org/10.1088/0004-637x/755/2/165",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_56693dd8221a7945",
+          "type": "paper",
+          "title": "Ultraviolet Colors and Extinctions of H ii Regions in the Whirlpool Galaxy (M51)",
+          "uri": "https://doi.org/10.1086/303753",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "The resulting average dust-to-stellar mass ratios are comparable to other spiral and spheroidal galaxies studied with Herschel , with NGC 5194 at log ( M dust / M ⋆ ) = −2.5 ± 0.2 and NGC 5195 at log ( M dust / M ⋆ ) = −3.5 ± 0.3",
+          "evidenceRefs": [
+            "ev_046197cadb6975f0"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        },
+        {
+          "text": "Far-UV (wavelength 1520 Å), U , Hα, and R images of the interacting Sbc spiral galaxy M51 were obtained by the Ultraviolet Imaging Telescope (UIT) during the Astro-2 Spacelab mission of 1995 March and at Mount Laguna Observatory",
+          "evidenceRefs": [
+            "ev_56693dd8221a7945"
+          ],
+          "scope": "abstract-only",
+          "level": "inferred"
+        }
+      ],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "simbad.tap:failed",
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 20022,
+      "pass": true,
+      "status": "PASS",
+      "reason": "",
+      "score": 10,
+      "dimensions": {
+        "intent": {
+          "ok": true,
+          "detail": "research/L3"
+        },
+        "decomposition": {
+          "ok": true,
+          "detail": "T-E / simbad.tap:failed,paper.search:ok,evidence.search:ok,compose.domain:ok"
+        },
+        "retrieval": {
+          "ok": true,
+          "detail": "papers=2 research=true topic=M51|age|galaxy"
+        },
+        "source": {
+          "ok": true,
+          "detail": "papers=2 duplicate=false id=true"
+        },
+        "critical_论文可追溯": {
+          "ok": true,
+          "detail": "papers=2"
+        },
+        "data": {
+          "ok": true,
+          "detail": ""
+        },
+        "critical_无 NaN/undefined": {
+          "ok": true,
+          "detail": ""
+        },
+        "evidence": {
+          "ok": true,
+          "detail": "conclusions=2 badRefs=0"
+        },
+        "critical_结论引用可追溯": {
+          "ok": true,
+          "detail": ""
+        },
+        "uncertainty": {
+          "ok": true,
+          "detail": "gaps=3 limits=3"
+        },
+        "answer": {
+          "ok": true,
+          "detail": "sections=verdict+evidence+observe+visual+boundary+mapref+evidence+list+boundary+followup+review"
+        },
+        "agents": {
+          "ok": true,
+          "detail": "muse,kepler,vega,lyra,horizon,orion"
+        },
+        "output": {
+          "ok": true,
+          "detail": "sections=11"
+        }
+      },
+      "critical": []
+    }
+  ]
+}

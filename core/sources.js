@@ -694,14 +694,24 @@
       if (!r.ok) {
         return r.text().then(function (t) {
           var msg = 'HTTP ' + r.status;
-          if (r.status === 401 || r.status === 403) msg = '密钥无效';
+          if (r.status === 401 || r.status === 403) msg = '密钥无效或无权访问';
+          if (r.status === 404) msg = '模型名或地址不正确';
           if (r.status === 429) msg = '触发限流';
+          if (r.status >= 500) msg = '服务端错误';
           setStatus(id, 'error', msg);
-          throw new Error(msg + (t ? '：' + t.slice(0, 90) : ''));
+          var err = httpError(r.status, t);
+          err.message = msg + (t ? '：' + t.slice(0, 90) : '');
+          err.cls = classifyError(err);
+          throw err;
         });
       }
       return r.json().then(function (d) {
         var text = clean(parseResponse(base.shape, d));
+        if (!text) {
+          var empty = new Error('模型返回空内容');
+          empty.cls = { kind: 'empty', msg: ERR_KIND.empty, retryable: false };
+          throw empty;
+        }
         var latency = Date.now() - t0;
         var tk = tokensOf(base.shape, d);
         state.metrics[id] = { latency: latency, chars: text.length, tokens: tk };
@@ -711,12 +721,23 @@
       });
     }).catch(function (e) {
       timer.done();
-      var raw = e.name === 'AbortError' ? '请求超时（20s）' : (e.message || '网络错误');
-      if (!looksLikeFetchFailure(raw)) throw new Error(raw);
+      if (e && e.cls) throw e;
+      var raw = e && e.name === 'AbortError' ? '请求超时（20s）' : (e && e.message || '网络错误');
+      var cls = classifyError(e && e.name === 'AbortError'
+        ? { name: 'AbortError', message: raw } : e);
+      if (!looksLikeFetchFailure(raw) || cls.kind === 'parse') {
+        var err = new Error(raw);
+        err.cls = cls;
+        throw err;
+      }
       return defer(80, function () {
-        throw new Error(cspBlocked(req.url, 2000)
-          ? cspMessage(req.url)
+        var blocked = cspBlocked(req.url, 2000);
+        var e2 = new Error(blocked ? cspMessage(req.url)
           : '网络不可达或该服务未开放浏览器直连（CORS）');
+        e2.cls = blocked
+          ? { kind: 'csp', msg: ERR_KIND.csp, retryable: false }
+          : { kind: 'network', msg: ERR_KIND.network, retryable: true };
+        throw e2;
       });
     });
   }
@@ -1373,6 +1394,7 @@
     limits: LIMITS,
     health: healthReport,
     errorKinds: ERR_KIND,
+    classifyError: classifyError,
     clearSearchCache: function () {
       searchCache = {};
       try { localStorage.removeItem(CACHE_KEY); } catch (e) { }

@@ -687,6 +687,17 @@
     /* B8：preloaded 只在本次同步调用内生效；旧 ask() 不传该参数，行为完全不变。 */
     ACTIVE_PRELOADED = preloaded || null;
     try {
+    /* 调用方不一定带 bortle（Node 测试、外部集成）。缺失时按城市回退，
+     * 不能让 “Bortle undefined” 进入结论、执行记录或观测建议。 */
+    ctx = Object.assign({}, ctx || {});
+    if (ctx.bortle == null) {
+      var ctxCity = findCity(ctx.city || '') || CITIES[0];
+      ctx.bortle = ctxCity && ctxCity.bortle != null ? ctxCity.bortle : 6;
+      if (ctx.city == null) ctx.city = ctxCity ? ctxCity.n : '北京';
+      if (ctx.lat == null) ctx.lat = ctxCity ? ctxCity.lat : 39.9;
+      if (ctx.lon == null) ctx.lon = ctxCity ? ctxCity.lon : 116.4;
+      if (ctx.tz == null) ctx.tz = ctxCity ? ctxCity.tz : 8;
+    }
     var tStart = (typeof performance !== 'undefined' ? performance.now() : 0);
     buildAlias();
     cfg = JSON.parse(JSON.stringify(cfg));

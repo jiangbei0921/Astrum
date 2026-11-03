@@ -62,12 +62,35 @@
       };
     } catch (e) {
       var msg = String(e && e.message || e);
-      var code = /限流|429|rate/i.test(msg) ? 'rate_limit'
-        : /超时|timeout|abort/i.test(msg) ? 'timeout'
-          : /密钥|401|403|无权/i.test(msg) ? 'auth'
-            : 'network';
+      var cls = (S && typeof S.classifyError === 'function') ? S.classifyError(e) : null;
+      var code = cls && cls.kind ? ({
+        auth: 'auth',
+        rate_limit: 'rate_limit',
+        timeout: 'timeout',
+        server: 'server',
+        notfound: 'notfound',
+        parse: 'parse',
+        empty: 'empty',
+        network: 'network',
+        cors: 'network',
+        csp: 'network'
+      })[cls.kind] : null;
+      /* 兼容旧调用方直接抛字符串：classifyError 得到 unknown 时沿用原有正则。 */
+      if (!code || cls.kind === 'unknown') {
+        code = /限流|429|rate/i.test(msg) ? 'rate_limit'
+          : /超时|timeout|abort/i.test(msg) ? 'timeout'
+            : /密钥|401|403|无权/i.test(msg) ? 'auth'
+              : 'network';
+      }
       if (opts.signal && opts.signal.aborted) code = 'cancelled';
-      return { ok: false, code: code, reason: msg.slice(0, 160), modelId: id, latency: Date.now() - t0 };
+      return {
+        ok: false, code: code,
+        kind: cls ? cls.kind || code : code,
+        status: e && e.status ? e.status : null,
+        retryable: !!(cls && cls.retryable),
+        reason: msg.slice(0, 160),
+        modelId: id, latency: Date.now() - t0
+      };
     }
   }
 

@@ -300,6 +300,7 @@
     '反馈邮件已生成，请确认后再发送': 'Feedback email generated. Review and confirm before sending.',
     '反馈邮件生成失败：{0}': 'Could not generate the feedback email: {0}',
     '{0} 个失败步骤 / {1} 条事件': '{0} failed steps / {1} events',
+    '论文 {0} · 证据 {1} · Claim {2} · 缺口 {3}': 'Papers {0} · evidence {1} · claims {2} · gaps {3}',
     '任务异常反馈': 'Task anomaly report',
     '请填写问题标题': 'Enter an issue title',
     '问题标题不能超过 80 字': 'Issue title must be 80 characters or fewer',

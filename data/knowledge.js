@@ -3046,7 +3046,7 @@
     },
     {
       id: 'spectral-class', type: 'concept', cn: '恒星光谱分类', en: 'Stellar Spectral Classification',
-      aliases: ['光谱分类', 'spectral class', 'obaFGKM', 'o型星', 'm型星', '巴尔末线'],
+      aliases: ['光谱分类', '光谱类型', '光谱型', 'spectral class', 'obaFGKM', 'o型星', 'm型星', '巴尔末线'],
       tag: '概念',
       summary: '按吸收线特征把恒星分为 O、B、A、F、G、K、M 七型（及褐矮星的 L、T、Y），本质是温度序列。',
       facts: [

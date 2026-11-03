@@ -187,6 +187,22 @@ jobs:
       - name: V1.8 反馈核心 v1-8-feedback-test
         run: node tools/v1-8-feedback-test.js
 
+      # V1.9：反馈诊断与科研问题联动（论文/证据/Claim/PDF/Provider 字段）
+      - name: V1.9 反馈诊断 v1-9-feedback-diagnostic-test
+        run: node tools/v1-9-feedback-diagnostic-test.js
+
+      # V1.9：独立盲测离线子集（真实网络案例标 SKIPPED_OFFLINE）
+      - name: V1.9 独立盲测 v1-9-blind-research-benchmark（offline）
+        run: node tools/v1-9-blind-research-benchmark.js --offline
+
+      # V1.9：Provider 协议/错误分类；无 Key 时返回 BLOCKED_API_KEY(exit 2)
+      - name: V1.9 Provider 验证 v1-9-provider-test
+        run: |
+          set +e
+          node tools/v1-9-provider-test.js
+          code=$?
+          if [ "$code" -ne 0 ] && [ "$code" -ne 2 ]; then exit "$code"; fi
+
       # 无 Key 时脚本以 exit 2 返回 BLOCKED_API_KEY；有 Key 时只校验配置并提示手动运行真实调用。
       - name: V1.6 真实 Provider 配置检查
         run: |

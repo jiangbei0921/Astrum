@@ -22,6 +22,9 @@ __*.png
 node_modules/
 .cache/
 
+# 真实论文 PDF 样本：按 manifest 下载到本地，不在仓库分发本体
+tools/fixtures/pdf-real/
+
 # 本地环境变量与私钥（勿提交任何 key）
 .env
 .env.*

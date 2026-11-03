@@ -8,7 +8,8 @@
   'use strict';
 
   var DEFAULTS = {
-    maxBytes: 12 * 1024 * 1024,
+    /* 与 core/pdf-text.js 的 24 MB 上限对齐，避免下载成功后被解析层再次拒绝。 */
+    maxBytes: 24 * 1024 * 1024,
     timeoutMs: 30000,
     maxChunks: 40,
     maxEvidenceChunks: 6,
@@ -181,6 +182,10 @@
       : ('src_pdf_' + hash(url || paper.title || '').slice(0, 12));
     return chunks.slice(0, opts.maxEvidenceChunks).map(function (ch) {
       return E.make({
+        /* 同一论文的多个全文块必须拥有各自 evidenceId。
+         * 旧实现只按 sourceId/uri/title 生成，同章节的多块会得到同一个 ID，
+         * 导致 Claim 的 evidenceRefs 无法定位到具体章节/页码。 */
+        evidenceId: 'ev_ft_' + hash(sourceId + '|' + ch.chunkId),
         sourceId: sourceId,
         sourceType: 'paper',
         title: (paper.title || parse.title || '论文全文') + ' · ' + ch.section,

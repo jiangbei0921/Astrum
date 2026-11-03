@@ -7015,6 +7015,7 @@
         }
       });
     });
+    var src = sourceById(state.settings.sourceId);
     return {
       query: String(ans.query || ''),
       answerText: card ? answerText(card) : '',
@@ -7026,7 +7027,11 @@
       agent: '',
       agents: fbCollectList(agents, 5),
       tools: fbCollectList(tools, 5),
-      sources: fbCollectList(sources, 5)
+      sources: fbCollectList(sources, 5),
+      provider: {
+        id: String(src.id || ''), name: String(src.name || ''), type: String(src.type || ''),
+        status: S && S.statusOf ? String((S.statusOf(src.id) || {}).msg || '') : ''
+      }
     };
   }
 
@@ -7132,6 +7137,12 @@
     }).length;
     box.appendChild(el('div', 'fb-diag-head',
       esc(L('将附加以下脱敏信息')) + ' · ' + esc(T('{0} 个失败步骤 / {1} 条事件', failed, (diag.task.events || []).length))));
+    if (diag.research && (diag.research.paperCount || diag.research.claimCount || diag.research.evidenceCount)) {
+      box.appendChild(el('div', 'fb-diag-sum',
+        esc(T('论文 {0} · 证据 {1} · Claim {2} · 缺口 {3}',
+          diag.research.paperCount || 0, diag.research.evidenceCount || 0,
+          diag.research.claimCount || 0, (diag.research.gaps || []).length))));
+    }
     box.appendChild(el('div', 'fb-diag-sum',
       esc(L('任务 ID、错误代码、执行步骤、版本、浏览器与操作系统；已过滤密钥、Token、Cookie、Session 与本地路径。'))));
 
