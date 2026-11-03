@@ -171,3 +171,58 @@ selftest 内置 20 问回归：`diffBytes=0`，13 Agent 名称/职责未变；�
 | 首屏性能 | 3.07 s（本网络）；53 个外部脚本在 Pages 产物中 `defer` 并行下载，源码/CI 保持阻塞加载 |
 
 > `defer` 只写入 Pages 产物 `_site/index.html`；源码 `index.html`、file://、standalone 与 CI selftest 仍按阻塞脚本顺序执行。`build-standalone.js`、`build-pages.js`、`v1-2-deploy-test`、`v1-4-pages-test` 已兼容带属性的 script 标签。
+
+## 10. V1.8 问题反馈：全量测试与线上验收（2026-11-03）
+
+### 10.1 新增测试
+
+| 套件 | 命令 | 结果 |
+|---|---|---:|
+| 反馈核心 | `node tools/v1-8-feedback-test.js` | 149/149 |
+| 反馈浏览器 | `node tools/v1-8-feedback-browser-test.js` | 49/49 |
+| 线上反馈验收 | 临时 CDP 脚本（未入库） | 24/24 |
+
+反馈核心覆盖：配置唯一邮箱、九类类型、六类错误分类、成功任务不误触发、取消不触发、同 Task+类别去重、忽略、诊断最小上下文/截断、脱敏（api_key/authorization/bearer/token/password/secret/cookie/session/JWT/绝对路径）、草稿校验、邮件主题/正文/收件人、中文编码、超长降级、`submitFeedback` 无发送副作用。
+
+反馈浏览器覆盖：失败任务主动提示、文案/两按钮、打开弹窗预填、任务上下文、草稿恢复、忽略、去重、成功任务不触发、回答操作条入口与消息 ID/Task ID、必填校验、诊断预览脱敏、确认页主题/收件人/不自动发送、下载反馈、帮助入口、390px 窄屏、无 JS/CSP 错误。
+
+### 10.2 全量回归（本轮实际执行）
+
+| 层 | 套件数 | 断言/结果 |
+|---|---:|---:|
+| Node 离线（含 V1.8） | 34 | 1046/1046 通过；v1-7 基准 PASS 38 / FAIL 0 / SKIP 8（SKIP 为真实网络外部条件） |
+| Chrome 浏览器（含 selftest、V1.8） | 15 | 431/431 通过 |
+| 静态/构建 | 5 | v1-2-deploy 20/20、v1-4-ci 22/22、csptest 6/6、i18n-scan 0 残留、standalone/Pages 构建成功 |
+| 线上验收 | 1 | 24/24 |
+
+关键原套件结果：selftest 156/156、v1-6-browser 36/36、v1-4-pages 32/32、P0-03 53/53、B8 33/33、v1-1-browser 27/27、settings 18/18、a11y 13/13、store 17/17、v1-5 IDB/resource/cache 7/7、13/13、15/15。
+
+没有删除测试、降低断言或跳过失败用例；`i18n-scan --max=0` 通过；`v1-5-perf`、`v1-5-store-stress` 退出码 0。
+
+### 10.3 构建与安全检查
+
+| 项 | 结果 |
+|---|---|
+| CSP 同步 | 2 个内联哈希已最新 |
+| standalone | 54 个内联脚本、CSS 131 KB、1710 KB |
+| Pages 产物 | 59 文件（core 46 / data 8）、1737 KB、资源引用 55 个全部存在 |
+| 敏感扫描 | 密钥 0、本地绝对路径 0 |
+| 反馈模块打包 | `_site/core/feedback.js` 200，含统一邮箱 |
+| 邮箱唯一性 | `core/feedback.js` 1 处；`core/app.js`、`index.html` 0 处 |
+
+### 10.4 部署与线上验收
+
+| 项 | 值 |
+|---|---|
+| 功能提交 | `55fe9dba161eba8da1ffa7dd43f17eea94d127dc` |
+| test Run | `41588104481` success（static / offline-core / offline-browser） |
+| pages Run | `41588501459` success |
+| 线上 `version.json` | app 4.8、commit `55fe9db`、dirty=false、runId `41588501459` |
+| 线上帮助入口 | 设置 → 帮助 → 问题反馈可打开，邮箱 `2185428966@qq.com` |
+| 线上主动提示 | 注入失败任务后出现 `.fb-offer`，两按钮、上下文 `task-online-err`、类型 `search_paper` |
+| 线上回答入口 | 回答操作条「反馈问题」可打开，关联 `task-online-ok` 与 `m-` 消息 ID |
+| 线上邮件确认页 | 主题 `[ASTRUM Feedback][搜索或论文检索问题] 线上验收反馈`、收件人正确、不自动发送 |
+| 线上复制/下载 | 复制入口存在；下载触发“诊断报告已下载（已脱敏）” |
+| 控制台/网络 | 无 JS 错误、无 CSP 违规、无额外外发资源 |
+
+> 线上 24/24 使用工作区临时 CDP 脚本 `online-feedback-check.js`，未提交到仓库。`mailto` 的真实客户端唤起需人工在配置邮件客户端的设备上完成，自动化只能验证不自动发送与降级路径。

@@ -184,3 +184,40 @@ File → kindOf（扩展名 + MIME 双向校验）
   - Reducer：数值与不确定性同单位换算，1σ 内不虚构冲突；
   - Compose Adapter：跨 Provider 标题去重、可信论文门槛、研究口径 verdict。
 - 新增 `tools/v1-7-research-benchmark.js`（46 案例 / 15 类），不改变生产模块职责。
+
+## 10. V1.8 问题反馈（2026-11-03）
+
+### 10.1 模块边界
+
+- 新增 `core/feedback.js`：纯逻辑，无 DOM、无网络；负责配置、错误分类、主动提示去重、诊断、脱敏、草稿与邮件。
+- UI 仍在 `core/app.js`：三入口共用 `#feedback` 浮层（`.sheet wide`），不新增后端或独立页面。
+- 不新增 Agent、模板、数据库；13 Agent、Muse、Tool-Centric、7 模板、MEMORY/Thread/TaskStore、旧接口、ADR-001 不变。
+
+### 10.2 数据流
+
+```text
+TaskState / answer.meta / 用户输入
+        ↓
+AstroFeedback.analyze()
+        ↓  needed + primary
+maybeOfferFeedback() → .fb-offer（同 Task+类别去重）
+        ↓ 用户点「反馈问题」
+openFeedback() → 表单（当前问题/回答最小上下文）
+        ↓ 生成
+buildDraft() → 脱敏 → subject/body/mailto
+        ↓ 用户确认
+openMailClient()（只尝试唤起，不代表发送成功）
+```
+
+### 10.3 隐私边界
+
+- 诊断只取当前任务与当前回答；不取历史对话、完整 MEMORY、其他任务。
+- 导出前执行键名黑名单与字符串模式脱敏；绝对路径替换为 `[LOCAL_PATH]`。
+- 默认不附加诊断；用户必须主动勾选并在确认页查看。
+- `mailto` 仅生成草稿；不自动发送，不读取发送结果。
+
+### 10.4 扩展点
+
+`submitFeedback(feedback)` 按 `CONFIG.feedbackChannel` 分发，`registerChannel(name, handler)` 可注册未来 GitHub Issues / 产品 API / 工单渠道；更换邮箱或渠道只需改配置，不改三入口 UI 与诊断逻辑。
+
+详细说明见 `docs/feedback/FEEDBACK.md`。

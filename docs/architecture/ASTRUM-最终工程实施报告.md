@@ -142,3 +142,40 @@
 新增 `tools/v1-7-research-benchmark.js`（46 案例 / 15 类，结果 JSON `tools/fixtures/research-benchmark-results.json`），并纳入 CI 离线层；`v1-6-research-quality-test` 从 22 项扩展到 30 项。真实 arXiv 全文 28/28，3 分钟长跑 997 任务 18/18，构建 `_site` 58 文件、密钥 0、绝对路径 0。详细见 `ASTRUM-真实天文研究基准集与执行结果.md`。
 
 性能优化：线上首屏 53 个外部脚本原先串行阻塞，本网络实测 >220s；改为仅在 Pages 产物 `_site/index.html` 中加 `defer`，并行下载并保持执行顺序，源码 `index.html`、file://、CI selftest 仍阻塞。线上复测首屏可交互 3.07s，M31/M33 对比两目标均渲染。`build-pages.js`、`build-standalone.js`、`v1-2-deploy-test.js`、`v1-4-pages-test.js` 已兼容带属性 script 标签；`store-test`、`skill-test`、`v1-5-idb-stress-test`、`selftest` 增加启动就绪等待，避免 defer 与测试注入脚本竞态。
+
+## 9. 2026-11-03：V1.8 问题反馈与反馈中心
+
+### 9.1 实际新增
+
+| 文件 | 内容 |
+|---|---|
+| `core/feedback.js` | 统一配置、9 类反馈类型、六类错误分类、主动提示去重、最小诊断、脱敏、草稿校验、mailto 生成、`submitFeedback` / `registerChannel` |
+| `core/app.js` | 对话内主动提示 `.fb-offer`、回答操作条「反馈问题」、设置帮助入口、表单/确认页/草稿恢复/诊断下载、用户指认错误提示 |
+| `index.html` | `core/feedback.js` 脚本与 `#feedback` 浮层 |
+| `assets/app.css` | `.fb-*` 样式（桌面 + 390px 窄屏） |
+| `core/i18n.en-settings.js` | 新增界面文案英文词条，i18n 门禁保持 0 |
+| `tools/v1-8-feedback-test.js` | 149 条断言 |
+| `tools/v1-8-feedback-browser-test.js` | 49 条断言 |
+| `.github/workflows/test.yml` | offline-core / offline-browser 新增 V1.8 步骤 |
+| `docs/feedback/FEEDBACK.md` | 反馈模块架构、三入口、诊断、隐私、邮件与扩展说明 |
+
+### 9.2 关键设计
+
+- 收件邮箱只在 `core/feedback.js` 配置一次：`2185428966@qq.com`；渠道 `mailto`，版本 1。
+- 外部服务失败归 `external`，PDF/编码归 `data_parse`，缺密钥归 `config`，Agent 编排归 `agent`，研究零证据/用户指认归 `research_quality`，系统状态/参数错误归 `system`；用户主动取消不提示。
+- 去重键为 Task ID + 错误类别；忽略后持久化，恢复历史不回放提示。
+- 诊断只取当前任务；步骤/事件各 ≤30、单字符串 ≤400、总量 ≤20000；导出前递归脱敏密钥、Token、Cookie、Session、JWT 与本地绝对路径。
+- 邮件仅在确认页点击「确认并打开邮件客户端」后唤起；超长时禁用打开并提示复制/下载；不显示发送成功。
+- 不新增 Agent/模板/后端；13 Agent、Muse、Tool-Centric、7 模板、MEMORY/Thread/TaskStore、旧接口、ADR-001 全部保留。
+
+### 9.3 上线结果
+
+| 项 | 值 |
+|---|---|
+| 提交 | `55fe9dba161eba8da1ffa7dd43f17eea94d127dc` |
+| test Run | `41588104481` success（static / offline-core / offline-browser） |
+| pages Run | `41588501459` success |
+| 线上 version | app 4.8、commit `55fe9db`、dirty=false、runId `41588501459` |
+| 线上反馈验收 | 24/24（帮助入口、主动提示、回答入口、确认页、下载、无 JS/CSP 错误） |
+
+详细见 `docs/feedback/FEEDBACK.md` 与 `ASTRUM-全量测试与线上验收报告.md` §10。

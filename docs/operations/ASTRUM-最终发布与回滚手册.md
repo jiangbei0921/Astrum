@@ -12,14 +12,14 @@
 
 | 项 | 值 |
 |---|---|
-| 最新功能提交 | `e0e7842ce288ad1231ccb57d970578ff61fec241` |
-| test Workflow | `41571532062` success |
-| pages Workflow | `41571802143` success |
-| 线上 `version.json.commit` | `e0e7842` |
+| 最新功能提交 | `55fe9dba161eba8da1ffa7dd43f17eea94d127dc`（V1.8 问题反馈） |
+| test Workflow | `41588104481` success |
+| pages Workflow | `41588501459` success |
+| 线上 `version.json.commit` | `55fe9db` |
 | 线上 `dirty` | false |
 | Pages Source | `build_type=workflow` |
-| 本地/远端 | 一致 `e0e7842` |
-| 线上验收 | 首页 200、13 Agent、M42 观测、木星直径 139,820 km、M31/M33 对比两目标、console/CSP、tools/docs 404 全 PASS |
+| 本地/远端 | 一致 `55fe9db` |
+| 线上验收 | 帮助页反馈入口、主动提示、回答反馈、确认页/收件人/不自动发送、诊断下载、console/CSP、无额外外发资源全 PASS |
 
 历史发布：`7e50227`（V1.4 首次 Actions 发布）、`5aa644a`（V1.5 浏览器/回滚补齐）、`9eb0439`（V1.7 研究质量/基准）、`66bfdb6`（defer 并行加载）、`e0e7842`（Pages-only defer 与 CI 等待修复）。
 
@@ -205,3 +205,26 @@ node tools/v1-5-bigfile-test.js
 ### 7.3 回滚
 
 V1.7 仍使用 §3.1 的标准回滚：回滚到上一个成功 Pages 的 commit，重新触发 test/pages；不使用 `reset --hard`、不 force push。回滚前记录目标 commit 与本次 Run ID。
+
+### 7.4 V1.8 发布记录（2026-11-03）
+
+| 项 | 值 |
+|---|---|
+| 功能提交 | `55fe9dba161eba8da1ffa7dd43f17eea94d127dc` |
+| test Workflow | `41588104481` success（static / offline-core / offline-browser） |
+| pages Workflow | `41588501459` success |
+| 线上 `version.json.commit` | `55fe9db` |
+| 线上 `dirty` | false |
+| 线上 `runId` | `41588501459` |
+| 新增 CI 步骤 | `V1.8 反馈核心 v1-8-feedback-test`、`V1.8 反馈浏览器 v1-8-feedback-browser-test` |
+| 线上验收 | 24/24；帮助入口、主动提示、回答入口、确认页、复制/下载、无 JS/CSP 错误 |
+| 回滚 | 若反馈模块导致线上异常，回滚到 `0110626`（V1.7 文档提交，功能等价 `e0e7842`），重新触发 test/pages；不使用 force push / reset --hard |
+
+发布前检查（V1.8 增补）：
+
+1. `node tools/v1-8-feedback-test.js` 149/149；
+2. `node tools/v1-8-feedback-browser-test.js` 49/49；
+3. `node tools/i18n-scan.js --quiet --max=0`；
+4. `node tools/v1-2-deploy-test.js`、`v1-4-ci-test.js`、`csptest.js`；
+5. `sync-csp-hash` / `build-standalone` / `build-pages`，确认 `_site/core/feedback.js` 存在、密钥 0、绝对路径 0；
+6. 线上确认 `version.json.commit` 为本次提交，三入口与“不自动发送”提示可见。

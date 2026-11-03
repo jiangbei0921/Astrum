@@ -164,3 +164,15 @@ node tools/v1-5-longrun-test.js --minutes=180 --label=LR-03 --out=lr-03.log
 | 主题研究无坐标目标 | 设计处理 | T-E/T-F 对 JWST/系外行星/星系形成等主题跳过可选 SIMBAD，避免无意义 10s 等待 |
 | 真实 Provider Key | BLOCKED_API_KEY | 未执行真实模型调用；配置路径与错误分类已验证 |
 | 180 分钟长跑 | 历史完成 | 本轮执行 3 分钟 / 997 任务 smoke（18/18）；未重跑 180 分钟 |
+
+## 8. V1.8 问题反馈新增外部条件（2026-11-03）
+
+| 项 | 状态 | 实际观测与处理 |
+|---|---|---|
+| 真实邮件客户端唤起 | BLOCKED_MAIL_CLIENT | 自动化可验证确认前不打开、`mailto:` 主题/收件人/正文正确、超长降级；无法在无邮件客户端的 headless 环境确认真实客户端弹出。需在配置了 Thunderbird/Outlook/系统邮件应用的设备上人工点一次「确认并打开邮件客户端」 |
+| 真实邮件发送 | BLOCKED_USER_ACTION | 按设计不自动发送，也不读取发送结果；邮件内容与附件由用户在客户端确认后发送 |
+| 诊断报告落盘 | BROWSER_DOWNLOAD_LIMITATION | 浏览器测试验证点击后 toast「诊断报告已下载（已脱敏）」与 Blob 生成；headless 未配置文件保存目录，无法检查磁盘文件。Node 测试验证 JSON 内容、脱敏与长度 |
+| 联系邮箱真实可达性 | EXTERNAL_UNKNOWN | 用户选填邮箱只进入邮件正文，不做验证码或送达校验；维护团队回信依赖该邮箱真实有效 |
+| 反馈渠道扩展 | NOT_IMPLEMENTED_BY_DESIGN | 本轮只实现 `mailto`；GitHub Issues / 产品 API / 工单系统需未来配置与后端条件，未伪装为已完成 |
+| 线上主动异常注入 | TEST_INJECTION | 线上 24/24 通过 `__astrum.renderAnswer` 注入失败 TaskState 验证提示；真实外部服务故障需自然发生或由 network CI 产生，不能人为伪造为线上故障 |
+| 真实 Provider Key | BLOCKED_API_KEY | 本轮不涉及模型调用；反馈中的模型失败分类以现有错误码验证，未写入任何密钥 |
