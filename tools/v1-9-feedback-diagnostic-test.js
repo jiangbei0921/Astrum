@@ -39,7 +39,11 @@ function makeAnswer() {
     },
     meta: {
       research: { profile: 'papers', stopReason: 'done', evidence: 2, conflicts: 0 },
-      cloudExpression: { sourceId: 'deepseek', code: 'ok', latency: 320 }
+      cloudExpression: { sourceId: 'deepseek', code: 'ok', latency: 320 },
+      stream: {
+        id: 'deepseek', stream: true, fallback: false, code: 'ok',
+        ttft: 480, latency: 2600, tokens: 240, aborted: false, completed: true, partial: false
+      }
     }
   };
 }
@@ -138,6 +142,11 @@ function makeState() {
   });
   ok('D25 草稿生成成功', draft.ok === true);
   ok('D26 草稿诊断含科研字段', draft.ok && draft.draft.diagnostic.research.paperCount === 2);
+  /* V1.11：流式诊断字段存在且不含 Key/提示词。 */
+  var dstream = draft.ok ? draft.draft.diagnostic.research.stream : null;
+  ok('D26b 诊断含流式字段', !!dstream && dstream.requested === true && dstream.ttft === 480 &&
+    dstream.tokens === 240 && dstream.completed === true, JSON.stringify(dstream));
+  ok('D26c 流式诊断不含敏感字段', !/api[_-]?key|authorization|prompt/i.test(JSON.stringify(dstream || {})));
   ok('D27 草稿正文不含完整报告', draft.ok && F.body(draft.draft).indexOf('reportId') < 0);
 
   var failed = results.filter(function (r) { return !r.pass; });

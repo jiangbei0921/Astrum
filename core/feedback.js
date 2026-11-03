@@ -473,6 +473,28 @@
           type: String(provider.type || ''),
           status: String(provider.status || '')
         } : null,
+        /* V1.11：流式诊断（不含 Key/Authorization/提示词正文）。 */
+        stream: answer && answer.meta && answer.meta.stream ? {
+          requested: !!answer.meta.stream.stream,
+          fallback: !!answer.meta.stream.fallback,
+          code: String(answer.meta.stream.code || ''),
+          ttft: answer.meta.stream.ttft == null ? null : Number(answer.meta.stream.ttft),
+          latency: answer.meta.stream.latency == null ? null : Number(answer.meta.stream.latency),
+          tokens: answer.meta.stream.tokens == null ? null : Number(answer.meta.stream.tokens),
+          aborted: !!answer.meta.stream.aborted,
+          completed: !!answer.meta.stream.completed,
+          partial: !!answer.meta.stream.partial
+        } : (answer && answer.meta && answer.meta.cloudExpression ? {
+          requested: !!answer.meta.cloudExpression.stream,
+          fallback: !!answer.meta.cloudExpression.fallback,
+          code: String(answer.meta.cloudExpression.code || ''),
+          ttft: answer.meta.cloudExpression.ttft == null ? null : Number(answer.meta.cloudExpression.ttft),
+          latency: answer.meta.cloudExpression.latency == null ? null : Number(answer.meta.cloudExpression.latency),
+          tokens: answer.meta.cloudExpression.tokens == null ? null : Number(answer.meta.cloudExpression.tokens),
+          aborted: !!answer.meta.cloudExpression.aborted,
+          completed: null,
+          partial: null
+        } : null),
         metadata: metaResearch && Object.keys(metaResearch).length ? {
           profile: String(metaResearch.profile || ''),
           stopReason: String(metaResearch.stopReason || ''),

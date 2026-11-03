@@ -30,6 +30,12 @@ var OUT = path.join(ROOT, 'data', 'daily.js');
 var MAX_PAPERS = 20;
 var MAX_NEWS = 12;
 var SUMMARY_CHARS = 220;
+/* 增量保留窗口：页面只展示最近 30 天，数据文件保留更久以便回溯。
+ * 上限同时约束文件体积，避免静态页面被历史数据拖慢。 */
+var PAPER_KEEP_DAYS = 90;
+var MAX_PAPER_HISTORY = 900;
+var NEWS_KEEP_DAYS = 30;
+var MAX_NEWS_HISTORY = 80;
 
 /* 预印本分类：银河/宇宙学/行星/高能/恒星。
  * 不用 cat:astro-ph.* 通配（arXiv API 的 OR 语法更可靠），也不取 gr-qc 等相邻领域——
@@ -153,6 +159,8 @@ function parseArxiv(xml, cat) {
 
     /* 日期只取 YYYY-MM-DD：clean 的截断会加省略号，这里不能复用它 */
     var pub = clean(tag(e, 'published'), 0).slice(0, 10);
+    var upd = clean(tag(e, 'updated'), 0).slice(0, 10);
+    var doi = clean(tag(e, 'arxiv:doi'), 0);
     var catTerm = '';
     var cm = e.match(/<arxiv:primary_category[^>]*term="([^"]+)"/);
     if (cm) catTerm = cm[1];
@@ -164,6 +172,10 @@ function parseArxiv(xml, cat) {
       summary: clean(tag(e, 'summary'), SUMMARY_CHARS),
       cat: catTerm || cat,
       published: pub,
+      /* updated：arXiv 版本更新时间，与首次发布、抓取时间分开保存 */
+      updated: upd || '',
+      doi: doi || '',
+      source: 'arXiv',
       url: 'https://arxiv.org/abs/' + id
     });
   });
@@ -173,6 +185,7 @@ function parseArxiv(xml, cat) {
 async function fetchPapers() {
   var all = [];
   var okCats = [];
+  var failures = [];
   for (var i = 0; i < ARXIV_CATS.length; i++) {
     var cat = ARXIV_CATS[i];
     var url = 'https://export.arxiv.org/api/query?search_query=' + encodeURIComponent('cat:' + cat) +
@@ -187,6 +200,7 @@ async function fetchPapers() {
       await new Promise(function (r) { setTimeout(r, 3200); });
     } catch (e) {
       console.warn('  ! arXiv ' + cat + ' 失败：' + e.message);
+      failures.push({ source: 'arXiv', category: cat, msg: String(e && e.message || e).slice(0, 120) });
     }
   }
 
@@ -199,7 +213,7 @@ async function fetchPapers() {
   });
   uniq.sort(function (a, b) { return String(b.published).localeCompare(String(a.published)); });
 
-  return { items: uniq.slice(0, MAX_PAPERS), total: uniq.length, okCats: okCats };
+  return { items: uniq.slice(0, MAX_PAPERS), total: uniq.length, okCats: okCats, failures: failures };
 }
 
 /* ---------------- 报道 ---------------- */
@@ -232,6 +246,7 @@ function parseRss(xml, source) {
 async function fetchNews() {
   var all = [];
   var okFeeds = [];
+  var failures = [];
   for (var i = 0; i < NEWS_FEEDS.length; i++) {
     var f = NEWS_FEEDS[i];
     try {
@@ -241,27 +256,370 @@ async function fetchNews() {
       okFeeds.push(f.name + '(' + rows.length + ')');
     } catch (e) {
       console.warn('  ! ' + f.name + ' 失败：' + e.message);
+      failures.push({ source: f.name, msg: String(e && e.message || e).slice(0, 120) });
     }
   }
   all.sort(function (a, b) { return String(b.date).localeCompare(String(a.date)); });
-  return { items: all.slice(0, MAX_NEWS), total: all.length, okFeeds: okFeeds };
+  return { items: all.slice(0, MAX_NEWS), total: all.length, okFeeds: okFeeds, failures: failures };
 }
 
 /* ---------------- 输出 ---------------- */
 
+/* ---------------- 增量合并（V1.11） ----------------
+ * 每日抓取只追加新论文、更新已有元数据，**不覆盖历史**。
+ * 同一论文按 arXiv ID → DOI → 归一化标题合并；多来源命中时保留来源清单。
+ * firstSeen（首次被抓取）与 published（论文首次发布）严格分开。 */
+
+function normTitle(s) {
+  return String(s == null ? '' : s)
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim();
+}
+
+function cleanArxivId(v) {
+  return String(v == null ? '' : v)
+    .replace(/^https?:\/\/arxiv\.org\/abs\//i, '')
+    .replace(/^arxiv:/i, '')
+    .replace(/v\d+$/i, '')
+    .trim();
+}
+
+function cleanDoi(v) {
+  return String(v == null ? '' : v)
+    .toLowerCase()
+    .replace(/^https?:\/\/(dx\.)?doi\.org\//, '')
+    .replace(/^doi:\s*/, '')
+    .replace(/\/pdf\/?$/, '')
+    .trim();
+}
+
+function aliasKeys(p) {
+  var out = [];
+  var id = cleanArxivId(p && (p.id || p.arxivId));
+  if (id) out.push('arxiv:' + id);
+  var doi = cleanDoi(p && p.doi);
+  if (doi) out.push('doi:' + doi);
+  var t = normTitle(p && (p.originalTitle || p.title));
+  if (t.length >= 12) out.push('title:' + t);
+  return out;
+}
+
+function primaryKey(p) {
+  var a = aliasKeys(p);
+  return a.length ? a[0] : '';
+}
+
+function uniqStrings(list) {
+  var seen = {};
+  return (list || []).filter(function (x) {
+    var k = String(x == null ? '' : x);
+    if (!k || seen[k]) return false;
+    seen[k] = 1;
+    return true;
+  });
+}
+
+function mergePaper(old, fresh, nowIso, today) {
+  var out = Object.assign({}, old || {});
+  ['id', 'title', 'summary', 'cat', 'published', 'updated', 'url', 'doi', 'source'].forEach(function (k) {
+    var v = fresh && fresh[k];
+    if (v != null && String(v).trim() !== '') out[k] = v;
+  });
+  if (fresh && Array.isArray(fresh.authors) && fresh.authors.length) out.authors = fresh.authors.slice();
+  out.id = cleanArxivId(out.id || out.arxivId);
+  out.doi = cleanDoi(out.doi) || (out.doi || '');
+  var sources = (old && (old.sources || (old.source ? [old.source] : [])) || [])
+    .concat(fresh && fresh.source ? [fresh.source] : [])
+    .concat(fresh && Array.isArray(fresh.sources) ? fresh.sources : []);
+  out.sources = uniqStrings(sources);
+  out.source = out.source || out.sources[0] || 'arXiv';
+  out.firstSeen = (old && old.firstSeen) || (old && old.published) || today;
+  out.fetchedAt = nowIso;
+  return out;
+}
+
+function newPaperRecord(p, nowIso, today) {
+  var out = Object.assign({}, p || {});
+  out.id = cleanArxivId(out.id || out.arxivId);
+  out.doi = cleanDoi(out.doi) || (out.doi || '');
+  out.source = out.source || 'arXiv';
+  out.sources = uniqStrings((out.sources || []).concat([out.source]));
+  out.published = out.published || '';
+  out.updated = out.updated || '';
+  out.firstSeen = today;
+  out.fetchedAt = nowIso;
+  return out;
+}
+
+function dateMs(v) {
+  var s = String(v || '');
+  if (!s) return null;
+  var t = Date.parse(s.length === 10 ? s + 'T00:00:00Z' : s);
+  return isNaN(t) ? null : t;
+}
+
+function sortPapers(a, b) {
+  return String(b.published || '').localeCompare(String(a.published || '')) ||
+    String(b.firstSeen || '').localeCompare(String(a.firstSeen || '')) ||
+    String(a.id || '').localeCompare(String(b.id || ''));
+}
+
+function newsKey(n) {
+  var u = String(n && n.url || '').replace(/#.*$/, '').replace(/\/$/, '').toLowerCase();
+  return u || ('title:' + normTitle(n && n.title));
+}
+
+function mergeNews(old, fresh, nowIso, today) {
+  var out = Object.assign({}, old || {});
+  ['title', 'summary', 'source', 'date', 'url'].forEach(function (k) {
+    var v = fresh && fresh[k];
+    if (v != null && String(v).trim() !== '') out[k] = v;
+  });
+  var sources = (old && (old.sources || (old.source ? [old.source] : [])) || [])
+    .concat(fresh && fresh.source ? [fresh.source] : []);
+  out.sources = uniqStrings(sources);
+  out.source = out.source || out.sources[0] || '';
+  out.firstSeen = (old && old.firstSeen) || (old && old.date) || today;
+  out.fetchedAt = nowIso;
+  return out;
+}
+
+function mergeDaily(existing, fresh, now, opts) {
+  opts = opts || {};
+  var nowD = (now instanceof Date) ? now : new Date(now || Date.now());
+  var nowIso = nowD.toISOString();
+  var today = nowIso.slice(0, 10);
+  var oldPapers = Array.isArray(existing && existing.papers) ? existing.papers : [];
+  var oldNews = Array.isArray(existing && existing.news) ? existing.news : [];
+  var freshPapers = Array.isArray(fresh && fresh.papers) ? fresh.papers : [];
+  var freshNews = Array.isArray(fresh && fresh.news) ? fresh.news : [];
+
+  var index = {};
+  var slots = [];
+  function findSlot(item) {
+    var keys = aliasKeys(item);
+    for (var i = 0; i < keys.length; i++) if (index[keys[i]]) return index[keys[i]];
+    return null;
+  }
+  function register(slot) {
+    aliasKeys(slot.item).forEach(function (k) { index[k] = slot; });
+    if (!slot.key) slot.key = primaryKey(slot.item);
+  }
+  oldPapers.forEach(function (p) {
+    var hit = findSlot(p);
+    /* 旧数据内部重复：合并到同一实体，但不伪造“今天重新抓取”。 */
+    if (hit) { hit.item = mergePaper(hit.item, p, hit.item.fetchedAt || nowIso, today); register(hit); return; }
+    var slot = { key: primaryKey(p), item: p, isNew: false, touched: false };
+    register(slot);
+    slots.push(slot);
+  });
+
+  var newPapers = 0;
+  var updatedPapers = 0;
+  freshPapers.forEach(function (p) {
+    var hit = findSlot(p);
+    if (hit) {
+      hit.item = mergePaper(hit.item, p, nowIso, today);
+      hit.touched = true;
+      updatedPapers++;
+      register(hit);
+    } else {
+      var item = newPaperRecord(p, nowIso, today);
+      var slot = { key: primaryKey(item), item: item, isNew: true, touched: true };
+      register(slot);
+      slots.push(slot);
+      newPapers++;
+    }
+  });
+
+  var cutoff = nowD.getTime() - PAPER_KEEP_DAYS * 86400000;
+  var seenKey = {};
+  var papers = slots.map(function (s) { return s.item; }).filter(function (p) {
+    var t = dateMs(p.published || p.firstSeen);
+    return t == null || t >= cutoff;
+  }).filter(function (p) {
+    var k = primaryKey(p) || normTitle(p.title);
+    if (!k || seenKey[k]) return false;
+    seenKey[k] = 1;
+    return true;
+  }).sort(sortPapers).slice(0, opts.maxPapers || MAX_PAPER_HISTORY);
+
+  var newsIndex = {};
+  var newsSlots = [];
+  function registerNews(slot) {
+    var k = newsKey(slot.item);
+    if (k) newsIndex[k] = slot;
+    newsSlots.push(slot);
+  }
+  oldNews.forEach(function (n) {
+    var k = newsKey(n);
+    if (k && newsIndex[k]) {
+      newsIndex[k].item = mergeNews(newsIndex[k].item, n, newsIndex[k].item.fetchedAt || nowIso, today);
+      return;
+    }
+    registerNews({ key: k, item: n, isNew: false });
+  });
+  var newNews = 0;
+  freshNews.forEach(function (n) {
+    var k = newsKey(n);
+    var hit = k ? newsIndex[k] : null;
+    if (hit) {
+      hit.item = mergeNews(hit.item, n, nowIso, today);
+    } else {
+      var item = mergeNews(null, n, nowIso, today);
+      registerNews({ key: k, item: item, isNew: true });
+      newNews++;
+    }
+  });
+  var newsCutoff = nowD.getTime() - NEWS_KEEP_DAYS * 86400000;
+  var seenNews = {};
+  var news = newsSlots.map(function (s) { return s.item; }).filter(function (n) {
+    var t = dateMs(n.date || n.firstSeen);
+    return t == null || t >= newsCutoff;
+  }).filter(function (n) {
+    var k = newsKey(n);
+    if (!k || seenNews[k]) return false;
+    seenNews[k] = 1;
+    return true;
+  }).sort(function (a, b) {
+    return String(b.date || '').localeCompare(String(a.date || '')) ||
+      String(b.firstSeen || '').localeCompare(String(a.firstSeen || ''));
+  }).slice(0, opts.maxNews || MAX_NEWS_HISTORY);
+
+  return {
+    papers: papers, news: news, community: COMMUNITY,
+    newPapers: newPapers, updatedPapers: updatedPapers, newNews: newNews
+  };
+}
+
+function buildStatus(existing, merged, info, now) {
+  var t = (now instanceof Date) ? now : new Date(now || Date.now());
+  var nowIso = t.toISOString();
+  var prev = (existing && existing.sync) || {};
+  var failures = (info && info.failures) || [];
+  var paperOk = !!(info && info.paperOk);
+  var newsOk = !!(info && info.newsOk);
+  var ok = paperOk || newsOk;
+  return {
+    lastAttemptAt: nowIso,
+    lastSuccessAt: ok ? nowIso : (prev.lastSuccessAt || null),
+    newPapers: merged.newPapers || 0,
+    updatedPapers: merged.updatedPapers || 0,
+    newNews: merged.newNews || 0,
+    totalPapers: merged.papers.length,
+    totalNews: merged.news.length,
+    sources: {
+      papers: (info && info.paperSources) || [],
+      news: (info && info.newsSources) || []
+    },
+    failures: failures,
+    ok: ok,
+    partial: ok && failures.length > 0,
+    status: !ok ? 'failed' : (failures.length ? 'partial' : 'ok')
+  };
+}
+
+function validatePayload(payload) {
+  var errors = [];
+  if (!payload || typeof payload !== 'object') return { ok: false, errors: ['payload 不是对象'] };
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(payload.updated || ''))) errors.push('updated 不是 YYYY-MM-DD');
+  ['papers', 'news', 'community'].forEach(function (k) {
+    if (!Array.isArray(payload[k])) errors.push(k + ' 不是数组');
+  });
+  var keys = {};
+  (payload.papers || []).forEach(function (p, i) {
+    if (!p || !String(p.id || '').trim()) errors.push('papers[' + i + '] 缺少 arXiv ID');
+    if (!p || !String(p.title || '').trim()) errors.push('papers[' + i + '] 缺少标题');
+    if (!p || !String(p.url || '').trim()) errors.push('papers[' + i + '] 缺少原文链接');
+    if (p && p.published && !/^\d{4}-\d{2}-\d{2}$/.test(String(p.published))) {
+      errors.push('papers[' + i + '] published 格式错误');
+    }
+    var k = primaryKey(p);
+    if (k && keys[k]) errors.push('papers 重复：' + k);
+    if (k) keys[k] = 1;
+  });
+  (payload.news || []).forEach(function (n, i) {
+    if (!n || !String(n.title || '').trim()) errors.push('news[' + i + '] 缺少标题');
+    if (!n || !String(n.url || '').trim()) errors.push('news[' + i + '] 缺少链接');
+  });
+  var total = (payload.papers || []).length + (payload.news || []).length;
+  if (!total) errors.push('空数据：papers 与 news 均为空');
+  return { ok: errors.length === 0, errors: errors.slice(0, 10) };
+}
+
+function readExisting(file) {
+  if (!fs.existsSync(file)) return { ok: true, data: null, missing: true };
+  try {
+    var code = fs.readFileSync(file, 'utf8');
+    var sandbox = {};
+    new Function('window', code)(sandbox);
+    var data = sandbox.ASTRUM_DAILY;
+    if (!data || typeof data !== 'object') {
+      return { ok: false, data: null, error: 'ASTRUM_DAILY 未定义或不是对象' };
+    }
+    return { ok: true, data: data };
+  } catch (e) {
+    return { ok: false, data: null, error: String(e && e.message || e).slice(0, 160) };
+  }
+}
+
+function writeAtomic(file, code) {
+  var tmp = file + '.tmp-' + process.pid;
+  fs.writeFileSync(tmp, code, 'utf8');
+  fs.renameSync(tmp, file);
+}
+
+/* 无变化时不产生无意义提交：忽略 generatedAt / lastAttemptAt 这类每次都会变的时间戳。 */
+function comparableOf(d) {
+  if (!d || typeof d !== 'object') return null;
+  var s = d.sync || null;
+  /* 忽略每次抓取都会变的 fetchedAt / generatedAt / lastAttemptAt：
+   * 只要内容与成功日期没变，就不应产生无意义提交。 */
+  function strip(items) {
+    return (items || []).map(function (x) {
+      var o = Object.assign({}, x || {});
+      delete o.fetchedAt;
+      return o;
+    });
+  }
+  return {
+    updated: d.updated,
+    papers: strip(d.papers),
+    news: strip(d.news),
+    community: d.community,
+    sync: s ? {
+      lastSuccessAt: String(s.lastSuccessAt || '').slice(0, 10),
+      newPapers: s.newPapers, updatedPapers: s.updatedPapers,
+      newNews: s.newNews, totalPapers: s.totalPapers, totalNews: s.totalNews,
+      sources: s.sources, failures: s.failures, ok: s.ok, partial: s.partial, status: s.status
+    } : null
+  };
+}
+
+function shouldWrite(existing, next) {
+  if (!existing) return true;
+  return JSON.stringify(comparableOf(existing)) !== JSON.stringify(comparableOf(next));
+}
+
 /* 顶层结构是前端 core/app.js「每日前沿」面板的契约：
  * updated 显示在标题行，papers/news/community 必须都是数组，缺一个就是空白面板。
  * 单独抽出来是为了能在离线测试里验证字段名与日期格式，不必真的联网跑一次。 */
-function buildPayload(papers, news, now) {
+function buildPayload(papers, news, now, existing, status) {
   var t = now || new Date();
-  return {
-    updated: t.toISOString().slice(0, 10),
+  var items = Array.isArray(papers) ? papers : ((papers && papers.items) || []);
+  var newsItems = Array.isArray(news) ? news : ((news && news.items) || []);
+  var last = status && status.lastSuccessAt ? String(status.lastSuccessAt).slice(0, 10) : '';
+  var payload = {
+    updated: last || t.toISOString().slice(0, 10),
     generatedAt: t.toISOString(),
-    note: '每日自动同步一次（UTC 01:00）。内容未经本项目核验，不参与答案推理。',
-    papers: papers.items,
-    news: news.items,
+    note: '每日 UTC 01:00 增量同步；内容未经本项目核验，不参与答案推理。',
+    papers: items,
+    news: newsItems,
     community: COMMUNITY
   };
+  if (status) payload.sync = status;
+  return payload;
 }
 
 function render(data) {
@@ -296,22 +654,59 @@ async function main() {
   var dry = process.argv.indexOf('--dry-run') >= 0;
   console.log('ASTRUM 每日前沿同步 ' + new Date().toISOString());
 
+  /* 先读旧数据：读不懂就停止，绝不用新文件覆盖可能仍然有效的历史。 */
+  var existingRead = readExisting(OUT);
+  if (!existingRead.ok) {
+    console.error('\n× 现有 data/daily.js 无法解析，停止写入以免破坏历史数据：' + existingRead.error);
+    process.exit(1);
+  }
+  var existing = existingRead.data;
+
   console.log('- 抓取预印本（arXiv）…');
   var papers = await fetchPapers();
   console.log('- 抓取机构报道（RSS）…');
   var news = await fetchNews();
 
-  var payload = buildPayload(papers, news, new Date());
+  var failures = (papers.failures || []).concat(news.failures || []);
+  var allFailed = !papers.okCats.length && !news.okFeeds.length;
+  var now = new Date();
 
   console.log('');
-  console.log('  论文 ' + papers.items.length + ' 条' + (papers.okCats.length ? '（' + papers.okCats.join(' ') + '）' : ''));
-  console.log('  报道 ' + news.items.length + ' 条' + (news.okFeeds.length ? '（' + news.okFeeds.join(' ') + '）' : ''));
-  console.log('  社区 ' + COMMUNITY.length + ' 个入口');
+  console.log('  本次抓取论文 ' + papers.items.length + ' 条' +
+    (papers.okCats.length ? '（' + papers.okCats.join(' ') + '）' : '（全部失败）'));
+  console.log('  本次抓取报道 ' + news.items.length + ' 条' +
+    (news.okFeeds.length ? '（' + news.okFeeds.join(' ') + '）' : '（全部失败）'));
 
-  /* 一条都没抓到：不写文件，用非零退出让 Action 报红。
-   * 若此时覆盖，等于用空数据抹掉昨天仍然有效的内容。 */
-  if (!papers.items.length && !news.items.length) {
+  /* 所有来源都失败：保留旧文件并非零退出让 Action 报红。 */
+  if (allFailed) {
     console.error('\n× 所有来源均失败，保留现有 data/daily.js 不变');
+    failures.forEach(function (f) { console.error('  - ' + f.source + (f.category ? '/' + f.category : '') + '：' + f.msg); });
+    process.exit(1);
+  }
+
+  var merged = mergeDaily(existing, { papers: papers.items, news: news.items }, now);
+  var status = buildStatus(existing, merged, {
+    paperOk: papers.okCats.length > 0,
+    newsOk: news.okFeeds.length > 0,
+    paperSources: papers.okCats,
+    newsSources: news.okFeeds,
+    failures: failures
+  }, now);
+  var payload = buildPayload({ items: merged.papers }, { items: merged.news }, now, existing, status);
+
+  console.log('  新增论文 ' + merged.newPapers + ' 条，更新已有 ' + merged.updatedPapers +
+    ' 条，保留总计 ' + merged.papers.length + ' 条');
+  console.log('  新增报道 ' + merged.newNews + ' 条，保留总计 ' + merged.news.length + ' 条');
+  console.log('  社区 ' + COMMUNITY.length + ' 个入口');
+  if (failures.length) {
+    console.log('  部分来源失败 ' + failures.length + ' 个（已保留历史数据）');
+    failures.forEach(function (f) { console.log('    - ' + f.source + (f.category ? '/' + f.category : '') + '：' + f.msg); });
+  }
+
+  var check = validatePayload(payload);
+  if (!check.ok) {
+    console.error('\n× 数据结构校验失败，未写入 data/daily.js：');
+    check.errors.forEach(function (e) { console.error('  - ' + e); });
     process.exit(1);
   }
 
@@ -320,21 +715,35 @@ async function main() {
     console.log('\n--dry-run：未写入，预计 ' + Buffer.byteLength(code, 'utf8') + ' 字节');
     return;
   }
-  fs.writeFileSync(OUT, code, 'utf8');
+  if (!shouldWrite(existing, payload)) {
+    console.log('\n无新增内容且状态未变化，跳过写入（避免无意义提交）');
+    return;
+  }
+  writeAtomic(OUT, code);
   console.log('\n已写入 data/daily.js（' + Buffer.byteLength(code, 'utf8') + ' 字节）');
 }
 
-/* 供测试与调试复用：解析函数是纯函数，应当能被单独验证 */
+/* 供测试与调试复用：解析与合并函数是纯函数，应当能被单独验证 */
 module.exports = {
   parseArxiv: parseArxiv,
   parseRss: parseRss,
   clean: clean,
   buildPayload: buildPayload,
   render: render,
+  mergeDaily: mergeDaily,
+  buildStatus: buildStatus,
+  validatePayload: validatePayload,
+  readExisting: readExisting,
+  writeAtomic: writeAtomic,
+  shouldWrite: shouldWrite,
+  primaryKey: primaryKey,
+  aliasKeys: aliasKeys,
   COMMUNITY: COMMUNITY,
   ARXIV_CATS: ARXIV_CATS,
   MAX_PAPERS: MAX_PAPERS,
-  MAX_NEWS: MAX_NEWS
+  MAX_NEWS: MAX_NEWS,
+  PAPER_KEEP_DAYS: PAPER_KEEP_DAYS,
+  NEWS_KEEP_DAYS: NEWS_KEEP_DAYS
 };
 
 if (require.main === module) {

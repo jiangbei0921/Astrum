@@ -525,6 +525,418 @@
     return null;
   }
 
+  /* ---------- 流式调用（V1.11） ----------
+   * 与 generate() 并列，不改变非流式契约。
+   * 只输出模型增量正文；不把思考过程、工具记录混进流里。
+   * 失败必须可分类、可中止、可降级；部分内容不得当作完成。 */
+  function streamBase(id) {
+    return REGISTRY.filter(function (r) { return r.id === id; })[0] || null;
+  }
+
+  function streamCapable(id) {
+    var base = streamBase(id);
+    if (!base || base.type === 'local' || base.type === 'web') return false;
+    if (base.type === 'device') return false;
+    return base.shape === 'openai' || base.shape === 'anthropic' || base.shape === 'gemini';
+  }
+
+  /* 在 buildRequest 的基础上追加流式参数。
+   * Gemini 用 :streamGenerateContent?alt=sse；其余两种用 body.stream。
+   * 只有确认支持 stream_options 的端点才请求 usage，其它端点由上层按 400 去掉重试一次。 */
+  function buildStreamRequest(id, payload) {
+    var base = streamBase(id);
+    var req = buildRequest(id, payload);
+    var usageOption = false;
+    if (!base) return { req: req, base: null, usageOption: false };
+    if (base.shape === 'gemini') {
+      req.url = req.url.replace(/:generateContent/, ':streamGenerateContent?alt=sse');
+    } else {
+      req.body.stream = true;
+      if (base.shape === 'openai' && (id === 'openai' || id === 'deepseek')) {
+        req.body.stream_options = { include_usage: true };
+        usageOption = true;
+      }
+    }
+    return { req: req, base: base, usageOption: usageOption };
+  }
+
+  function textParts(x) {
+    if (!x) return '';
+    if (typeof x === 'string') return x;
+    if (Array.isArray(x)) {
+      return x.map(function (p) {
+        if (typeof p === 'string') return p;
+        if (!p) return '';
+        return p.text != null ? String(p.text) : (p.content != null ? String(p.content) : '');
+      }).join('');
+    }
+    return '';
+  }
+
+  function streamDelta(shape, obj) {
+    if (!obj) return '';
+    if (shape === 'anthropic') {
+      if (obj.type === 'content_block_delta' && obj.delta) return String(obj.delta.text || '');
+      if (obj.type === 'content_block_start' && obj.content_block) return String(obj.content_block.text || '');
+      return '';
+    }
+    if (shape === 'gemini') {
+      var cand = (obj.candidates || [])[0];
+      if (!cand) return '';
+      return ((cand.content && cand.content.parts) || []).map(function (p) {
+        return p && p.text != null ? String(p.text) : '';
+      }).join('');
+    }
+    var ch = (obj.choices || [])[0];
+    if (!ch) return '';
+    /* reasoning_content 属内部思考，不进入正文 */
+    if (ch.delta) return textParts(ch.delta.content);
+    return textParts(ch.text);
+  }
+
+  function readNum() {
+    for (var i = 0; i < arguments.length; i++) {
+      var v = arguments[i];
+      if (v != null && typeof v === 'number' && isFinite(v)) return v;
+    }
+    return null;
+  }
+
+  /* 把不同 shape 的 usage 累加成一个统一结构；缺失字段保持 null，不估算。 */
+  function mergeUsage(acc, shape, obj) {
+    var u = null;
+    if (shape === 'anthropic') {
+      if (obj.type === 'message_start' && obj.message && obj.message.usage) u = obj.message.usage;
+      else if (obj.type === 'message_delta' && obj.usage) u = obj.usage;
+    } else if (shape === 'gemini') {
+      u = obj.usageMetadata || null;
+    } else {
+      u = obj.usage || null;
+    }
+    if (!u) return false;
+    var p = readNum(u.prompt_tokens, u.input_tokens, u.promptTokenCount);
+    var c = readNum(u.completion_tokens, u.output_tokens, u.candidatesTokenCount);
+    var t = readNum(u.total_tokens, u.totalTokenCount);
+    if (p != null) acc.usage.prompt = p;
+    if (c != null) acc.usage.completion = c;
+    if (t != null) acc.usage.total = t;
+    else if (acc.usage.prompt != null && acc.usage.completion != null) {
+      acc.usage.total = acc.usage.prompt + acc.usage.completion;
+    }
+    return true;
+  }
+
+  /* SSE 增量读取。
+   * 兼容三种真实格式：OpenAI data-only、Anthropic event+data、Gemini data。
+   * 某些代理不发送空行分隔，因此在遇到下一条 data 且上一条已是完整 JSON 时先派发。 */
+  function readSSE(res, shape, acc, onDelta) {
+    return new Promise(function (resolve, reject) {
+      var reader = res.body.getReader();
+      var dec = new TextDecoder('utf-8');
+      var buffer = '';
+      var dataLines = [];
+      var done = false;
+      var finished = false;
+
+      function emit(data) {
+        if (finished || done) return;
+        data = String(data || '').trim();
+        if (!data) return;
+        if (data === '[DONE]') { done = true; return; }
+        var obj;
+        try { obj = JSON.parse(data); } catch (e) { acc.parseErrors++; return; }
+        if (obj && obj.error) { acc.streamError = obj.error; return; }
+        var delta = streamDelta(shape, obj);
+        if (delta) onDelta(delta);
+        mergeUsage(acc, shape, obj);
+      }
+      function flushEvent() {
+        if (!dataLines.length) return;
+        var data = dataLines.join('\n');
+        dataLines = [];
+        emit(data);
+      }
+      function handleLine(line) {
+        if (done) return;
+        if (!line) { flushEvent(); return; }
+        if (line.charAt(0) === ':') return;
+        var idx = line.indexOf(':');
+        var field = idx < 0 ? line : line.slice(0, idx);
+        var value = idx < 0 ? '' : line.slice(idx + 1);
+        if (value.charAt(0) === ' ') value = value.slice(1);
+        if (field === 'data') {
+          if (dataLines.length) {
+            var prev = dataLines.join('\n').trim();
+            if (prev === '[DONE]') { done = true; dataLines = []; }
+            else {
+              try { JSON.parse(prev); flushEvent(); } catch (e) { /* 多行 data 继续累积 */ }
+            }
+          }
+          if (!done) dataLines.push(value);
+        }
+      }
+      function drain() {
+        var m;
+        while ((m = buffer.match(/\r?\n/))) {
+          var line = buffer.slice(0, m.index);
+          buffer = buffer.slice(m.index + m[0].length);
+          handleLine(line);
+          if (done) break;
+        }
+      }
+      function finish() {
+        if (finished) return;
+        finished = true;
+        resolve();
+      }
+      function pump() {
+        if (done) { finish(); return; }
+        return reader.read().then(function (r) {
+          if (r.done) {
+            buffer += dec.decode();
+            if (buffer) { handleLine(buffer); buffer = ''; }
+            flushEvent();
+            finish();
+            return;
+          }
+          buffer += dec.decode(r.value, { stream: true });
+          drain();
+          return pump();
+        }).catch(function (e) {
+          if (finished) return;
+          finished = true;
+          try { reader.cancel(); } catch (x) { /* 忽略 */ }
+          reject(e);
+        });
+      }
+      pump();
+    });
+  }
+
+  function streamChat(id, payload, handlers) {
+    handlers = handlers || {};
+    payload = payload || {};
+    var base = streamBase(id);
+    if (!base || base.type === 'local' || base.type === 'web') {
+      return Promise.reject(new Error('该来源不提供模型流式输出'));
+    }
+    /* 设备端模型走本机推理；此处如实降级为一次性返回，不伪造逐字效果。 */
+    if (base.type === 'device') {
+      return generateDevice(payload).then(function (r) {
+        if (handlers.onToken && r.text) handlers.onToken(r.text);
+        if (handlers.onUsage) handlers.onUsage(r.usage || null);
+        if (handlers.onDone) handlers.onDone({ fallback: true });
+        return {
+          text: r.text, raw: r.text, latency: r.latency, ttft: r.latency,
+          tokens: r.tokens || 0, usage: r.usage || null,
+          stream: false, fallback: true, completed: true, aborted: false
+        };
+      });
+    }
+    var c = conf(id);
+    if (needsKey(base) && !c.key) return Promise.reject(new Error('未配置密钥'));
+    var gate = allow('cloud');
+    if (!gate.ok) return Promise.reject(new Error(gate.msg));
+    if (payload.signal && payload.signal.aborted) {
+      return Promise.resolve({
+        text: '', raw: '', latency: 0, ttft: 0, tokens: 0, usage: null,
+        stream: true, fallback: false, completed: false, aborted: true
+      });
+    }
+
+    var sr = buildStreamRequest(id, payload);
+    var t0 = Date.now();
+    var firstAt = null;
+    var timedOut = false;
+    var external = false;
+    var acc = {
+      text: '',
+      usage: { prompt: null, completion: null, total: null },
+      parseErrors: 0,
+      streamError: null
+    };
+    var ctl = new AbortController();
+    var firstTimer = setTimeout(function () {
+      if (firstAt == null) { timedOut = true; ctl.abort(); }
+    }, payload.firstTokenMs || 25000);
+    var totalTimer = setTimeout(function () {
+      timedOut = true; ctl.abort();
+    }, payload.timeoutMs || 90000);
+    function onExternalAbort() { external = true; ctl.abort(); }
+    if (payload.signal) {
+      if (payload.signal.aborted) onExternalAbort();
+      else if (payload.signal.addEventListener) payload.signal.addEventListener('abort', onExternalAbort);
+    }
+    function cleanup() {
+      clearTimeout(firstTimer);
+      clearTimeout(totalTimer);
+      if (payload.signal && payload.signal.removeEventListener) {
+        payload.signal.removeEventListener('abort', onExternalAbort);
+      }
+    }
+    function onDelta(d) {
+      if (!d) return;
+      if (firstAt == null) {
+        firstAt = Date.now();
+        clearTimeout(firstTimer);
+      }
+      acc.text += d;
+      if (handlers.onToken) {
+        try { handlers.onToken(d); } catch (e) { /* UI 异常不阻断流 */ }
+      }
+    }
+
+    function partialOf() {
+      var raw = acc.text;
+      return {
+        raw: raw,
+        text: clean(raw, payload.maxChars),
+        latency: Date.now() - t0,
+        ttft: firstAt ? firstAt - t0 : (Date.now() - t0),
+        usage: acc.usage,
+        tokens: acc.usage && typeof acc.usage.total === 'number' ? acc.usage.total : 0,
+        stream: true,
+        fallback: false
+      };
+    }
+
+    function httpErr(r, body) {
+      var msg = 'HTTP ' + r.status;
+      if (r.status === 401 || r.status === 403) msg = '密钥无效或无权访问';
+      if (r.status === 404) msg = '模型名或地址不正确';
+      if (r.status === 429) msg = '触发限流';
+      if (r.status >= 500) msg = '服务端错误';
+      setStatus(id, 'error', msg);
+      var err = httpError(r.status, body);
+      err.message = msg + (body ? '：' + body.slice(0, 90) : '');
+      err.cls = classifyError(err);
+      var ra = r.headers && r.headers.get ? r.headers.get('retry-after') : null;
+      if (ra) err.retryAfter = ra;
+      return err;
+    }
+
+    function doFetch(retried) {
+      return fetch(sr.req.url, {
+        method: 'POST', headers: sr.req.headers, body: JSON.stringify(sr.req.body), signal: ctl.signal
+      }).then(function (r) {
+        if (!r.ok) {
+          return r.text().then(function (t) {
+            /* 部分 OpenAI 兼容服务不认识 stream_options：去掉该字段重试一次。
+             * 这是协议兼容处理，不是失败重试；总请求次数仍为两次上限。 */
+            if (r.status === 400 && !retried && sr.usageOption &&
+              /stream_options|include_usage|unknown|unrecognized|extra/i.test(t)) {
+              delete sr.req.body.stream_options;
+              return doFetch(true);
+            }
+            throw httpErr(r, t);
+          });
+        }
+        var ctype = (r.headers && r.headers.get ? (r.headers.get('content-type') || '') : '');
+        /* 服务端忽略 stream 且直接返回完整 JSON：按一次性响应处理，不假装流式。 */
+        if (/application\/json/i.test(ctype) && !/event-stream/i.test(ctype)) {
+          return r.json().then(function (d) {
+            var txt = clean(parseResponse(base.shape, d), payload.maxChars);
+            if (!txt) {
+              var emptyErr = new Error('模型返回空内容');
+              emptyErr.cls = { kind: 'empty', msg: ERR_KIND.empty, retryable: false };
+              throw emptyErr;
+            }
+            onDelta(txt);
+            var usage = usageOf(base.shape, d);
+            if (usage) {
+              acc.usage.prompt = usage.prompt;
+              acc.usage.completion = usage.completion;
+              acc.usage.total = usage.total;
+            }
+            return { jsonFallback: true };
+          });
+        }
+        if (!r.body || typeof r.body.getReader !== 'function') {
+          var noBody = new Error('当前环境不支持读取流式响应');
+          noBody.cls = { kind: 'stream', msg: ERR_KIND.stream, retryable: false };
+          throw noBody;
+        }
+        return readSSE(r, base.shape, acc, onDelta).then(function () {
+          if (acc.streamError) {
+            var se = new Error(String(acc.streamError.message || '流式响应返回错误'));
+            se.cls = classifyError({ status: 500, message: se.message });
+            throw se;
+          }
+          return { sse: true };
+        });
+      });
+    }
+
+    return doFetch(false).then(function (mode) {
+      cleanup();
+      if (external) {
+        var pa = partialOf();
+        if (handlers.onAbort) handlers.onAbort(pa);
+        return Object.assign({}, pa, { completed: false, aborted: true, code: 'cancelled' });
+      }
+      var raw = acc.text;
+      if (!raw.trim()) {
+        var empty = new Error('模型返回空内容');
+        empty.cls = { kind: 'empty', msg: ERR_KIND.empty, retryable: false };
+        throw empty;
+      }
+      var text = clean(raw, payload.maxChars);
+      if (!text) {
+        var blank = new Error('流式响应没有可展示文本');
+        blank.cls = { kind: 'stream', msg: ERR_KIND.stream, retryable: false };
+        throw blank;
+      }
+      var latency = Date.now() - t0;
+      var ttft = firstAt ? firstAt - t0 : latency;
+      var usage = acc.usage;
+      var tk = usage && typeof usage.total === 'number' ? usage.total : 0;
+      state.metrics[id] = { latency: latency, chars: text.length, tokens: tk, ttft: ttft };
+      setStatus(id, 'ready', '已连通');
+      save();
+      var out = {
+        text: text, raw: raw, latency: latency, ttft: ttft, tokens: tk, usage: usage,
+        stream: true, fallback: false, completed: true, aborted: false,
+        jsonFallback: !!(mode && mode.jsonFallback), parseErrors: acc.parseErrors
+      };
+      if (handlers.onUsage) handlers.onUsage(usage);
+      if (handlers.onDone) handlers.onDone(out);
+      return out;
+    }).catch(function (e) {
+      cleanup();
+      if (external && !timedOut) {
+        var pa2 = partialOf();
+        if (handlers.onAbort) handlers.onAbort(pa2);
+        return Object.assign({}, pa2, { completed: false, aborted: true, code: 'cancelled' });
+      }
+      var rawMsg = e && e.name === 'AbortError'
+        ? (timedOut ? '请求超时' : '请求被中止')
+        : (e && e.message || String(e));
+      var cls = (e && e.cls) ? e.cls : classifyError(
+        (e && e.name === 'AbortError') ? { name: 'AbortError', message: rawMsg } : e);
+      if (firstAt == null && acc.parseErrors && (cls.kind === 'unknown' || cls.kind === 'empty')) {
+        cls = { kind: 'parse', msg: ERR_KIND.parse, retryable: false };
+      }
+      var err = new Error(rawMsg);
+      err.cls = cls;
+      if (e && e.status) err.status = e.status;
+      err.code = ({
+        auth: 'auth', rate_limit: 'rate_limit', timeout: 'timeout', server: 'server',
+        notfound: 'notfound', parse: 'parse', stream: 'stream', empty: 'empty',
+        network: 'network', cors: 'network', csp: 'network'
+      })[cls.kind] || 'stream';
+      var part = partialOf();
+      err.partial = !!part.raw.trim();
+      err.text = part.text;
+      err.raw = part.raw;
+      err.ttft = part.ttft;
+      err.usage = part.usage;
+      err.retryAfter = e && e.retryAfter ? e.retryAfter : null;
+      setStatus(id, 'error', cls.msg || rawMsg);
+      if (handlers.onError) handlers.onError(err);
+      throw err;
+    });
+  }
+
   function clean(text, max) {
     return String(text || '')
       .replace(/```[\s\S]*?```/g, '')
@@ -824,6 +1236,7 @@
     notfound: '接口地址或模型名不正确',
     server: '服务端错误',
     parse: '返回内容无法解析',
+    stream: '流式响应不可用或已中断',
     empty: '无匹配结果',
     unknown: '未知错误'
   };
@@ -1458,7 +1871,10 @@
 
   root.Sources = {
     list: list, cloudProviders: cloudProviders, conf: conf, setConfig: setConfig, statusOf: statusOf,
-    test: test, generate: generate, metrics: function (id) { return state.metrics[id] || null; },
+    test: test, generate: generate,
+    /* V1.11：流式入口与能力判断（不改变 generate 契约） */
+    streamChat: streamChat, streamCapable: streamCapable, buildStreamRequest: buildStreamRequest,
+    metrics: function (id) { return state.metrics[id] || null; },
     hasKey: function (id) { var c = conf(id); return !!(c && c.key); },
     maskKey: function (id) {
       var c = conf(id);

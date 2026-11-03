@@ -212,6 +212,16 @@ jobs:
       - name: V1.10 集成 v1-10-integration-test
         run: node tools/v1-10-integration-test.js
 
+      # V1.11：流式协议、答案质量、每日增量更新
+      - name: V1.11 流式协议 v1-11-stream-test
+        run: node tools/v1-11-stream-test.js
+
+      - name: V1.11 答案质量 v1-11-answer-quality-test
+        run: node tools/v1-11-answer-quality-test.js
+
+      - name: V1.11 每日增量 v1-11-daily-test
+        run: node tools/v1-11-daily-test.js
+
       # V1.9：Provider 协议/错误分类；无 Key 时返回 BLOCKED_API_KEY(exit 2)
       - name: V1.9 Provider 验证 v1-9-provider-test
         run: |
@@ -297,3 +307,10 @@ jobs:
       # V1.8：三反馈入口、主动提示去重/忽略、诊断预览、确认页、帮助入口、390px 窄屏
       - name: V1.8 反馈浏览器 v1-8-feedback-browser-test
         run: node tools/v1-8-feedback-browser-test.js
+
+      # V1.11：真实浏览器内流式增量/停止/保存；设置页测试连接 + 本地 mock SSE
+      - name: V1.11 流式浏览器 v1-11-stream-browser-test
+        run: node tools/v1-11-stream-browser-test.js
+
+      - name: V1.11 Provider 设置页浏览器 v1-11-provider-browser-test
+        run: node tools/v1-11-provider-browser-test.js

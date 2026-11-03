@@ -3347,6 +3347,280 @@
     };
   }
 
+  /* ================= V1.11 流式回答 =================
+   * 原则：
+   *  - 只展示模型正文，不展示 Agent/工具/规划日志；
+   *  - 首段到达即显示，后续增量追加；不整页重绘；
+   *  - 用户上滚时不强制拉回底部；
+   *  - 停止保留已生成内容，不算系统故障；
+   *  - 完成后才做结构化整理与持久化，避免未经核实的中间结论入库。 */
+  var streamScrollWatch = false;
+  var streamFollowBottom = true;
+
+  function watchStreamScroll() {
+    if (streamScrollWatch) return;
+    var sc = $('#scroll');
+    if (!sc) return;
+    streamScrollWatch = true;
+    sc.addEventListener('scroll', function () {
+      streamFollowBottom = (sc.scrollHeight - sc.scrollTop - sc.clientHeight) < 80;
+    }, { passive: true });
+  }
+
+  /* 流式阶段只做展示级清理：不解析未完成 Markdown，避免闪烁与结构抖动。
+   * 结束后由 Sources.clean + AnswerComposer 统一成产品既有纯文本风格。 */
+  function streamDisplay(t) {
+    return String(t || '')
+      .replace(/\r\n/g, '\n')
+      .replace(/^```[^\n]*$/gm, '')
+      .replace(/^#{1,6}\s*/gm, '')
+      .replace(/\*\*/g, '');
+  }
+
+  function makeStreamCard(src) {
+    watchStreamScroll();
+    var msg = el('div', 'msg bot stream-msg');
+    var card = el('div', 'answer stream-answer');
+    var head = el('div', 'stream-head');
+    var status = el('div', 'stream-status');
+    status.innerHTML = '<span class="wave"><i></i><i></i><i></i></span><span class="txt">' +
+      esc(T('正在生成回答 · {0}', src.name)) + '</span>';
+    var stop = el('button', 'stream-stop', L('停止生成'));
+    stop.type = 'button';
+    head.appendChild(status);
+    head.appendChild(stop);
+    var body = el('div', 'stream-body');
+    card.appendChild(head);
+    card.appendChild(body);
+    msg.appendChild(card);
+    $('#thread').appendChild(msg);
+    var sc = $('#scroll');
+    if (sc && streamFollowBottom) sc.scrollTop = sc.scrollHeight;
+
+    var raw = '', raf = null, dead = false;
+    function paint() {
+      raf = null;
+      if (dead) return;
+      body.textContent = streamDisplay(raw);
+      if (streamFollowBottom) {
+        var s = $('#scroll');
+        if (s) s.scrollTop = s.scrollHeight;
+      }
+    }
+    function push(d) {
+      if (dead || !d) return;
+      raw += d;
+      if (raf != null) return;
+      if (typeof requestAnimationFrame === 'function') raf = requestAnimationFrame(paint);
+      else paint();
+    }
+    function flush() {
+      if (raf != null && typeof cancelAnimationFrame === 'function') cancelAnimationFrame(raf);
+      raf = null;
+      paint();
+    }
+    function setStatus(text, tone) {
+      var t = status.querySelector('.txt');
+      if (t) t.textContent = text;
+      status.className = 'stream-status' + (tone ? ' ' + tone : '');
+    }
+    function remove() {
+      dead = true;
+      if (raf != null && typeof cancelAnimationFrame === 'function') cancelAnimationFrame(raf);
+      raf = null;
+      msg.remove();
+    }
+    return {
+      msg: msg, body: body, stop: stop,
+      push: push, flush: flush, remove: remove, setStatus: setStatus,
+      text: function () { return raw; }
+    };
+  }
+
+  /* 统一流式收尾：
+   * - 成功：模型正文进入 analysis（经 AnswerComposer 统一整合），再渲染完整答案；
+   * - 停止：保留部分内容并明确标注，不写成系统故障；
+   * - 中断/失败：保留部分，或如实说明失败，研究结论仍以证据链为准；
+   * - 零 token 且流式解析不可用：只降级一次非流式。 */
+  function streamAnswer(opts) {
+    opts = opts || {};
+    var src = opts.src;
+    var ans = opts.answer;
+    var q = opts.question || '';
+    var payload = opts.payload || {};
+    var ac = new AbortController();
+    var card = makeStreamCard(src);
+    var t0 = Date.now();
+    var firstAt = null;
+    var usage = null;
+    var settled = false;
+    var removedThink = false;
+    var ext = opts.signal || null;
+
+    if (opts.think) {
+      var lb = opts.think.querySelector('span:not(.wave)');
+      if (lb) lb.textContent = L('正在生成回答');
+    }
+    function onExt() { ac.abort(); }
+    if (ext) {
+      if (ext.aborted) ac.abort();
+      else if (ext.addEventListener) ext.addEventListener('abort', onExt);
+    }
+    function cleanup() {
+      if (ext && ext.removeEventListener) ext.removeEventListener('abort', onExt);
+    }
+    function dropThink() {
+      if (!removedThink && opts.think) {
+        removedThink = true;
+        try { opts.think.remove(); } catch (e) { /* 忽略 */ }
+      }
+    }
+    card.stop.addEventListener('click', function () {
+      if (settled) return;
+      card.stop.disabled = true;
+      card.setStatus(L('正在停止…'), 'stopping');
+      try { ac.abort(); } catch (e) { /* 忽略 */ }
+    });
+
+    function settle(m) {
+      if (settled) return Promise.resolve(m);
+      settled = true;
+      cleanup();
+      dropThink();
+      card.flush();
+      card.remove();
+      busy(false);
+      var p = Promise.resolve();
+      if (opts.onFinish) {
+        try { p = Promise.resolve(opts.onFinish(m)); }
+        catch (e) { console.warn('stream finish failed', e); }
+      }
+      return p.then(function () { return m; });
+    }
+
+    function finishWithText(text, m, note, streamMeta) {
+      var latency = m && m.latency != null ? m.latency : (Date.now() - t0);
+      var modelSource = { name: src.name, vendor: src.vendor, latency: latency };
+      var body = text || '';
+      if (body && opts.audit) {
+        try { body = opts.audit(body) || body; } catch (e) { /* 审计失败不丢正文 */ }
+      }
+      ans.meta = ans.meta || {};
+      ans.meta.stream = streamMeta;
+      if (body) {
+        if (window.AstroAnswerComposer && typeof window.AstroAnswerComposer.finalize === 'function') {
+          try {
+            window.AstroAnswerComposer.finalize(ans, {
+              question: q, modelText: body, modelSource: modelSource
+            });
+          } catch (e) {
+            ans.sections.splice(sectionIndexAfterVerdict(ans), 0, noteFor(src, body, latency, false));
+          }
+        } else {
+          ans.sections.splice(sectionIndexAfterVerdict(ans), 0, noteFor(src, body, latency, false));
+        }
+      }
+      if (note) {
+        ans.sections.splice(sectionIndexAfterVerdict(ans), 0, {
+          kind: 'boundary', mode: 'uncertain', text: note
+        });
+      }
+      var out = Object.assign({}, m || {}, { text: body, latency: latency });
+      return settle(out);
+    }
+
+    function failNote(m) {
+      var msg = T('云端表述失败（{0}）：{1}。研究结论仍按证据链保留，未用模型输出替代。',
+        (m && m.code) || 'unknown', (m && m.reason) || '未知原因');
+      if (m && m.code === 'rate_limit' && m.retryAfter) {
+        msg += T('服务端建议 {0} 秒后重试。', m.retryAfter);
+      } else if (m && m.retryable) {
+        msg += L('可重新发送本条问题重试。');
+      }
+      return msg;
+    }
+
+    return window.AstroControlBridge.modelStream(src.id, payload, {
+      onToken: function (d) {
+        if (firstAt == null) {
+          firstAt = Date.now() - t0;
+          dropThink();
+        }
+        card.push(d);
+      },
+      onUsage: function (u) { if (u) usage = u; },
+      onAbort: function () { card.setStatus(L('已停止生成'), 'stopped'); }
+    }, { signal: ac.signal, timeoutMs: 90000, firstTokenMs: 25000 }).then(function (m) {
+      var streamMeta = {
+        id: src.id, stream: !!(m && m.stream), fallback: !!(m && m.fallback),
+        code: (m && m.code) || (m && m.ok ? 'ok' : 'unknown'),
+        ttft: m && m.ttft != null ? m.ttft : firstAt,
+        latency: (m && m.latency != null) ? m.latency : (Date.now() - t0),
+        tokens: m && m.tokens != null ? m.tokens : null,
+        usage: (m && m.usage) || usage || null,
+        aborted: !!(m && m.aborted), partial: !!(m && m.partial),
+        completed: !!(m && m.completed)
+      };
+      if (m && m.ok && m.text) return finishWithText(m.text, m, '', streamMeta);
+      if (m && m.aborted) {
+        card.setStatus(L('已停止生成'), 'stopped');
+        var partial = m.text || card.text();
+        if (partial) {
+          return finishWithText(partial, m,
+            L('已由用户停止生成；以上为已生成的部分内容，研究结论仍以证据链为准。'),
+            Object.assign({}, streamMeta, { aborted: true, completed: false }));
+        }
+        return finishWithText('', m,
+          L('已停止生成，未得到模型表述。研究结论仍按证据链保留。'),
+          Object.assign({}, streamMeta, { aborted: true, completed: false }));
+      }
+      if (m && m.code === 'cancelled') {
+        card.setStatus(L('已停止生成'), 'stopped');
+        return finishWithText(m.text || '', m,
+          L('已停止生成，未得到模型表述。研究结论仍按证据链保留。'),
+          Object.assign({}, streamMeta, { aborted: true, completed: false }));
+      }
+      if (m && m.text) {
+        card.setStatus(L('输出中断'), 'error');
+        return finishWithText(m.text, m,
+          T('流式输出中断（{0}）：已保留已生成的部分，未重复生成。研究结论仍以证据链为准。',
+            (m.code || 'unknown')),
+          Object.assign({}, streamMeta, { completed: false }));
+      }
+      /* 零 token 且明确不支持流式/解析异常：降级一次非流式（不重试 401/429/超时/网络）。 */
+      if (m && (m.code === 'stream' || m.code === 'parse') && !settled) {
+        card.setStatus(L('正在切换非流式模式'), 'fallback');
+        return window.AstroControlBridge.modelGenerate(src.id, payload, { signal: ac.signal }).then(function (r) {
+          if (r && r.ok && r.text) {
+            card.push(r.text);
+            card.flush();
+            var sm = Object.assign({}, streamMeta, {
+              stream: false, fallback: true, code: 'ok',
+              ttft: r.latency, latency: r.latency, tokens: r.tokens,
+              usage: r.usage || null, completed: true, aborted: false
+            });
+            return finishWithText(r.text, r, '', sm);
+          }
+          card.setStatus(L('生成失败'), 'error');
+          return finishWithText('', r || m, failNote(r || m),
+            Object.assign({}, streamMeta, { stream: false, fallback: true, completed: false }));
+        });
+      }
+      card.setStatus(L('生成失败'), 'error');
+      return finishWithText('', m, failNote(m), Object.assign({}, streamMeta, { completed: false }));
+    }).catch(function (e) {
+      if (settled) throw e;
+      card.setStatus(L('生成失败'), 'error');
+      return finishWithText('', {
+        code: 'exception', reason: String(e && e.message || e), latency: Date.now() - t0,
+        stream: true, completed: false
+      }, T('云端表述失败：{0}。研究结论仍按证据链保留，未用模型输出替代。',
+        String(e && e.message || e).slice(0, 100)), {
+        code: 'exception', stream: true, completed: false
+      });
+    });
+  }
+
   /* V1.10：把真实执行状态写进答案。工具是否调用、失败还是成功，只从
    * state.steps / research 记录读取；没有调用的工具显示“未调用”。 */
   function attachSources(ans, opts) {
@@ -4012,42 +4286,34 @@
         pad(ctx.h) + ':' + pad(ctx.mi);
       var answerMode = window.AstroAnswerComposer
         ? window.AstroAnswerComposer.modeFor(r.answer, { question: qForAns }) : '';
-      window.AstroControlBridge.modelGenerate(src.id, {
-        question: qForAns, facts: pay.facts, para: pay.para, evidence: ev,
-        attachments: A_ATT.forPrompt(atts || []),
-        images: src.vision ? A_ATT.imagesForPrompt(atts || []) : [],
-        tone: state.settings.register === 'pro' ? 'academic' : 'warm', context: ctxLine2,
-        memory: memoryForPrompt(), answerMode: answerMode,
-        maxChars: (answerMode === 'C' || answerMode === 'D' || answerMode === 'E') ? 520 : 360
-      }, { signal: ac.signal }).then(function (m) {
-        r.answer.meta = r.answer.meta || {};
-        r.answer.meta.cloudExpression = {
-          sourceId: src.id, code: m && m.code || 'unknown',
-          latency: m && m.latency || 0, tokens: m && m.tokens != null ? m.tokens : null
-        };
-        if (m && m.ok && m.text) {
-          if (window.AstroAnswerComposer && typeof window.AstroAnswerComposer.finalize === 'function') {
-            try {
-              window.AstroAnswerComposer.finalize(r.answer, {
-                question: qForAns, modelText: m.text,
-                modelSource: { name: src.name, vendor: src.vendor, latency: m.latency || 0 }
-              });
-            } catch (e) {
-              r.answer.sections.splice(sectionIndexAfterVerdict(r.answer), 0, noteFor(src, m.text, m.latency, false));
-            }
-          } else {
-            r.answer.sections.splice(sectionIndexAfterVerdict(r.answer), 0, noteFor(src, m.text, m.latency, false));
-          }
-        } else if (!(m && m.code === 'cancelled')) {
-          r.answer.sections.splice(sectionIndexAfterVerdict(r.answer), 0,
-            noteFor(src, '云端表述失败（' + (m && m.code || 'unknown') + '）：' +
-              (m && m.reason || '未知原因') + '。研究结论仍按证据链保留，未用模型输出替代。', 0, true));
+      streamAnswer({
+        answer: r.answer, src: src, question: qForAns, think: think, signal: ac.signal,
+        payload: {
+          question: qForAns, facts: pay.facts, para: pay.para, evidence: ev,
+          attachments: A_ATT.forPrompt(atts || []),
+          images: src.vision ? A_ATT.imagesForPrompt(atts || []) : [],
+          tone: state.settings.register === 'pro' ? 'academic' : 'warm', context: ctxLine2,
+          memory: memoryForPrompt(), answerMode: answerMode,
+          maxChars: (answerMode === 'C' || answerMode === 'D' || answerMode === 'E') ? 520 : 360
+        },
+        onFinish: function (m) {
+          r.answer.meta = r.answer.meta || {};
+          r.answer.meta.cloudExpression = {
+            sourceId: src.id, code: m && m.code || 'unknown',
+            latency: m && m.latency || 0, tokens: m && m.tokens != null ? m.tokens : null,
+            ttft: m && m.ttft != null ? m.ttft : null,
+            stream: !!(m && m.stream), fallback: !!(m && m.fallback),
+            aborted: !!(m && m.aborted), usage: m && m.usage || null
+          };
+          syncSources({ code: m && m.code || 'unknown', ok: !!(m && m.text) && !(m && m.aborted) });
+          finish();
         }
-        syncSources({ code: m && m.code || 'unknown', ok: !!(m && m.ok) });
-        finish();
       }).catch(function (e) {
         r.answer.meta = r.answer.meta || {};
-        r.answer.meta.cloudExpression = { sourceId: src.id, code: 'exception', reason: String(e && e.message || e).slice(0, 120) };
+        r.answer.meta.cloudExpression = {
+          sourceId: src.id, code: 'exception',
+          reason: String(e && e.message || e).slice(0, 120)
+        };
         syncSources({ code: 'exception', ok: false });
         finish();
       });
@@ -4273,44 +4539,44 @@
           }
           var ev = evidenceForPrompt(ans);
           var pay2 = factsFromAnswer(ans);
-          return modelGenerate(src.id, {
-            question: q, facts: pay2.facts, para: pay2.para,
-            evidence: ev,
-            /* 附件：文本类作为参考材料；图片仅发给声明支持视觉的来源 */
-            attachments: A_ATT.forPrompt(atts),
-            images: src.vision ? A_ATT.imagesForPrompt(atts) : [],
-            tone: state.settings.register === 'pro' ? 'academic' : 'warm', context: ctxLine,
-            memory: memoryForPrompt(),
-            answerMode: window.AstroAnswerComposer
-              ? window.AstroAnswerComposer.modeFor(ans, { question: q }) : '',
-            maxChars: 520
-          }).then(function (r) {
-            taskEnd(tModel);
-            var txt = r.text || '模型返回为空，已保留本地表述。';
-            var extra = [];
-            if (r.text) {
+          return streamAnswer({
+            answer: ans, src: src, question: q, think: think,
+            payload: {
+              question: q, facts: pay2.facts, para: pay2.para,
+              evidence: ev,
+              /* 附件：文本类作为参考材料；图片仅发给声明支持视觉的来源 */
+              attachments: A_ATT.forPrompt(atts),
+              images: src.vision ? A_ATT.imagesForPrompt(atts) : [],
+              tone: state.settings.register === 'pro' ? 'academic' : 'warm', context: ctxLine,
+              memory: memoryForPrompt(),
+              answerMode: window.AstroAnswerComposer
+                ? window.AstroAnswerComposer.modeFor(ans, { question: q }) : '',
+              maxChars: 520
+            },
+            audit: function (text) {
+              var extra = [];
               /* 数值核验：事实层 + 本轮证据一起作为出处池 */
               var pool = pay2.facts.concat(ev.map(function (e) {
                 return { label: e.title, value: e.excerpt };
               }));
-              var bad = numericAudit(r.text, pool, pay2.para);
+              var bad = numericAudit(text, pool, pay2.para);
               if (bad.length) extra.push('输出中的数值 ' + bad.join('、') + ' 未能在事实层或本轮证据中找到出处，请以「依据」与「检索证据」章节为准。');
               /* 引用核验：文中若出现 [E#]，必须存在于本轮证据 */
-              var fake = fakeCitations(r.text, rec.evidence || []);
+              var fake = fakeCitations(text, rec.evidence || []);
               if (fake.length) extra.push('文中引用的 ' + fake.join('、') + ' 不在本轮检索结果中，已标为无效引用。');
-            }
-            var insertAt = sectionIndexAfterVerdict(ans);
-            var modelText = txt + (extra.length ? '\n（' + extra.join(' ') + '）' : '');
-            if (window.AstroAnswerComposer && typeof window.AstroAnswerComposer.finalize === 'function' && r.text) {
-              window.AstroAnswerComposer.finalize(ans, {
-                question: q, modelText: modelText,
-                modelSource: { name: src.name, vendor: src.vendor, latency: r.latency || 0 }
+              return text + (extra.length ? '\n（' + extra.join(' ') + '）' : '');
+            },
+            onFinish: function (m) {
+              taskEnd(tModel);
+              attachSources(ans, {
+                query: q, intent: ans.intent, targets: ans.targets, attachments: atts, research: rec,
+                model: {
+                  code: (m && m.code) || 'ok', ok: !!(m && m.text) && !(m && m.aborted),
+                  stream: !!(m && m.stream), aborted: !!(m && m.aborted)
+                }
               });
-            } else {
-              ans.sections.splice(insertAt, 0, noteFor(src, modelText, r.latency, !r.text));
+              renderAnswer(ans, { latency: m && m.latency });
             }
-            attachSources(ans, { query: q, intent: ans.intent, targets: ans.targets, attachments: atts, research: rec, model: { code: r && r.code || 'ok', ok: !!(r && r.text) } });
-            think.remove(); busy(false); renderAnswer(ans, { latency: r.latency });
           });
         }).catch(function (err) {
           taskEnd(tModel, err);
@@ -6835,7 +7101,7 @@
   }
 
   /* ================= 版本 / 统计 / 答案操作 ================= */
-  var APP_VERSION = '4.9';
+  var APP_VERSION = '5.0';
 
   /* 更新提示：只在「之前来过且版本变了」时提示一次，首次访问不打扰 */
   function checkVersion() {
@@ -7834,6 +8100,63 @@
     return box;
   }
 
+  /* V1.11：每日数据的时间范围筛选（今日 / 近 7 天 / 近 30 天）。
+   * 只按论文首次发布时间判断，不把「今天重新抓取」当成「今天新发表」。 */
+  var FR_RANGE = '7';
+
+  function frLocalDate(d) {
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+  function frCutoff(range) {
+    var d = new Date();
+    d.setHours(0, 0, 0, 0);
+    if (range === 'today') return frLocalDate(d);
+    d.setDate(d.getDate() - (range === '30' ? 29 : 6));
+    return frLocalDate(d);
+  }
+  function frPaperDate(p) {
+    return String((p && (p.published || p.firstSeen)) || '').slice(0, 10);
+  }
+  function frInRange(p, range) {
+    var ds = frPaperDate(p);
+    /* 日期缺失时不隐藏条目：宁可多显示，也不把未知当成「今天没有」。 */
+    if (!ds) return true;
+    return ds >= frCutoff(range);
+  }
+  function frSyncText(d) {
+    var s = d.sync || null;
+    var bits = [];
+    if (s && s.lastSuccessAt) bits.push(L('最后成功') + '：' + String(s.lastSuccessAt).slice(0, 10));
+    else if (d.updated) bits.push(L('最后成功') + '：' + d.updated);
+    else bits.push(L('尚未同步（暂无成功记录）'));
+    if (s && typeof s.newPapers === 'number') {
+      bits.push(L('本次新增') + ' ' + s.newPapers + ' ' + L('篇论文') +
+        (typeof s.newNews === 'number' ? ' · ' + s.newNews + ' ' + L('条报道') : ''));
+    }
+    var srcs = [];
+    if (s && s.sources) srcs = (s.sources.papers || []).concat(s.sources.news || []);
+    if (srcs.length) bits.push(L('来源') + '：' + srcs.join(' '));
+    if (s && s.failures && s.failures.length) {
+      bits.push(L('失败') + ' ' + s.failures.length + ' ' + L('个来源') +
+        '（' + s.failures.map(function (f) { return f.source; }).filter(Boolean).join('、') + '）');
+      bits.push(L('部分来源失败，历史数据已保留'));
+    }
+    return bits.join(' · ');
+  }
+  function frTabs() {
+    var box = el('div', 'fr-tabs');
+    [['today', L('今日')], ['7', L('近 7 天')], ['30', L('近 30 天')]].forEach(function (it) {
+      var b = el('button', 'fr-tab' + (FR_RANGE === it[0] ? ' on' : ''), it[1]);
+      b.type = 'button';
+      b.addEventListener('click', function () {
+        FR_RANGE = it[0];
+        renderFrontier();
+      });
+      box.appendChild(b);
+    });
+    return box;
+  }
+
   function renderFrontier() {
     var body = $('#frontierBody');
     if (!body) return;
@@ -7850,16 +8173,27 @@
 
     if (metaEl) metaEl.textContent = (d.updated || '') + ' · ' + L('最新论文与机构报道');
 
+    /* 状态来自真实更新记录（sync），不按当前时间伪造“今日已更新”。 */
+    body.appendChild(el('div', 'fr-note', frSyncText(d)));
     body.appendChild(el('div', 'fr-note',
       L('同步于 ') + (d.updated || '—') +
       L('。内容来自公开接口，未经本项目核验，因此不参与答案推理；引用前请打开原文核对。')));
 
-    var papers = Array.isArray(d.papers) ? d.papers : [];
+    body.appendChild(frTabs());
+
+    var papersAll = Array.isArray(d.papers) ? d.papers : [];
+    var papers = papersAll.filter(function (p) { return frInRange(p, FR_RANGE); });
     if (papers.length) {
-      body.appendChild(el('div', 'fr-h', L('预印本') + ' · arXiv（' + papers.length + '）'));
+      body.appendChild(el('div', 'fr-h', L('预印本') + ' · arXiv（' + papers.length +
+        (papers.length !== papersAll.length ? ' / ' + papersAll.length : '') + '）'));
       var pl = el('div', 'fr-list');
       papers.forEach(function (p) { pl.appendChild(frPaper(p)); });
       body.appendChild(pl);
+    } else if (papersAll.length) {
+      var last = d.sync && d.sync.lastSuccessAt ? String(d.sync.lastSuccessAt).slice(0, 10) : (d.updated || '—');
+      body.appendChild(el('div', 'fr-note',
+        L('该时间范围内没有新论文；最近一次成功同步于 ') + last +
+        L('。可切换到「近 30 天」查看更早的条目。')));
     }
 
     var news = Array.isArray(d.news) ? d.news : [];

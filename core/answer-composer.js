@@ -70,9 +70,10 @@
       if (papers > 1 && COMPARE_TERMS.test(q)) return 'D';
       if (papers > 0 || (rep && rep.evidence && rep.evidence.length)) return 'E';
     }
-    if (PARAM_TERMS.test(q) && /[0-9]/.test(q + ' ' + ((answer && answer.sections) || []).map(function (s) {
-      return (s.items || []).map(function (it) { return it.value; }).join(' ');
-    }).join(' '))) return 'C';
+    /* 数据/参数问题：问的是测量值本身或不确定度。
+     * 普通“M31 距离地球多远”仍按简单事实（A）回答，避免把单一结论包装成参数报告；
+     * 只有明确问测量结果、误差或多组数值时才进入 C。 */
+    if (/年龄|质量|金属丰度|视差|自行|光度|测量结果|测量值|不同测量|误差|不确定|测量方法|参数/.test(q)) return 'C';
     if (WHY_TERMS.test(q)) return 'B';
     return 'A';
   }

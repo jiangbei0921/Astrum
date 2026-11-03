@@ -348,6 +348,9 @@ function save(name, bytes) {
   save('scanned', scan.bytes);
   ok('F3.1 扫描件明确失败', scan.r.ok === false && scan.r.code === 'pdf_no_text', scan.r.code);
   ok('F3.2 扫描件不伪造正文', !scan.r.text || scan.r.text.length === 0, 'chars=' + ((scan.r.text || '').length));
+  /* V1.11：能力边界必须明确。扫描件只能标记 OCR 需求，绝不能宣称已识别。 */
+  ok('F3.3 扫描件标记 OCR 需求', !!(scan.r.ocrRequired || scan.r.detailCode === 'pdf_ocr_required'),
+    (scan.r.detailCode || '') + '/' + !!scan.r.ocrRequired);
 
   var cid = await parseFixture('cid-tounicode', cidPdf(true));
   save('cid-tounicode', cid.bytes);

@@ -339,6 +339,11 @@
           if (!r || !r.ok) {
             item.status = 'error';
             item.note = (r && r.reason) || 'PDF 解析失败';
+            /* OCR 能力边界必须明确：本项目只读原生文本层，不宣称支持扫描件。 */
+            if (r && (r.ocrRequired || r.detailCode === 'pdf_ocr_required') &&
+              !/OCR/i.test(item.note)) {
+              item.note += '；本项目不提供 OCR';
+            }
             item.paper = r || null;
             return item;
           }

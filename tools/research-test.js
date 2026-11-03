@@ -70,7 +70,28 @@ function testQueryPropagation() {
   return new Promise(function (resolve) {
     var seen = [];
     var realFetch = global.fetch;
-    global.fetch = function (u) { seen.push(decodeURIComponent(String(u))); return realFetch.apply(this, arguments); };
+    /* V1.11：这条断言只验证「查询词进入 URL」，不应依赖真实外网。
+     * 用本地 OpenAlex 形状的 mock 响应，让离线套件真正离线、不受限流影响。 */
+    global.fetch = function (u) {
+      seen.push(decodeURIComponent(String(u)));
+      return Promise.resolve({
+        ok: true, status: 200,
+        headers: { get: function () { return 'application/json'; } },
+        json: function () {
+          return Promise.resolve({
+            results: [{
+              title: 'Black hole physics overview',
+              abstract_inverted_index: { Black: [0], hole: [1], physics: [2] },
+              doi: 'https://doi.org/10.1000/offline.propagation',
+              publication_date: '2026-01-01', type: 'article',
+              authorships: [{ author: { display_name: 'Offline Author' } }],
+              concepts: [{ display_name: 'Black hole' }], ids: {}
+            }]
+          });
+        },
+        text: function () { return Promise.resolve(''); }
+      });
+    };
     S.search('黑洞').then(function (r) {
       global.fetch = realFetch;
       var hit = seen.some(function (u) { return /search=Black\s*Hole|q=%E9%BB%91|srsearch|query=Black/i.test(u); });

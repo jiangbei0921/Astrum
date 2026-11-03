@@ -95,6 +95,92 @@
     }
   }
 
+  /* V1.11：统一流式入口。
+   * 支持流式的 Provider 走 Sources.streamChat；本机模型/异常来源降级为一次性 generate，
+   * 并明确返回 fallback=true（不伪造逐字效果）。错误码与 modelGenerate 保持一致。 */
+  async function modelStream(id, payload, handlers, opts) {
+    opts = opts || {};
+    handlers = handlers || {};
+    var t0 = Date.now();
+    var S = root.Sources;
+    var can = !!(S && typeof S.streamChat === 'function' &&
+      (typeof S.streamCapable !== 'function' || S.streamCapable(id)));
+    if (!can) {
+      var fb = await modelGenerate(id, payload, opts);
+      if (fb && fb.ok && fb.text && typeof handlers.onToken === 'function') {
+        try { handlers.onToken(fb.text); } catch (e) { /* 观察者异常不阻断 */ }
+      }
+      if (fb && fb.ok && typeof handlers.onUsage === 'function') {
+        try { handlers.onUsage(fb.usage || null); } catch (e) { /* 忽略 */ }
+      }
+      return Object.assign({}, fb, {
+        stream: false, fallback: true,
+        ttft: fb && fb.latency != null ? fb.latency : Date.now() - t0
+      });
+    }
+    if (opts.signal && opts.signal.aborted) {
+      return {
+        ok: false, code: 'cancelled', reason: '已停止', text: '', partial: false,
+        aborted: true, completed: false, stream: true, fallback: false, modelId: id
+      };
+    }
+    try {
+      var p = Object.assign({}, payload || {});
+      if (opts.signal) p.signal = opts.signal;
+      if (opts.timeoutMs) p.timeoutMs = opts.timeoutMs;
+      if (opts.firstTokenMs) p.firstTokenMs = opts.firstTokenMs;
+      var r = await S.streamChat(id, p, handlers);
+      if (r && r.aborted) {
+        return {
+          ok: false, code: 'cancelled', reason: '已停止',
+          text: r.text || '', raw: r.raw || '', partial: true,
+          aborted: true, completed: false,
+          ttft: r.ttft || 0, usage: r.usage || null, tokens: r.tokens || 0,
+          latency: r.latency == null ? Date.now() - t0 : r.latency,
+          stream: true, fallback: false, modelId: id
+        };
+      }
+      return {
+        ok: true, code: 'ok', text: r && r.text || '', raw: r && r.raw || '',
+        latency: r && r.latency != null ? r.latency : Date.now() - t0,
+        ttft: r && r.ttft != null ? r.ttft : Date.now() - t0,
+        tokens: r && r.tokens != null ? r.tokens : null,
+        usage: r && r.usage ? r.usage : null,
+        stream: !(r && r.fallback), fallback: !!(r && r.fallback),
+        completed: true, aborted: false, modelId: id, source: 'cloud'
+      };
+    } catch (e) {
+      var msg = String(e && e.message || e);
+      var cls = (S && typeof S.classifyError === 'function') ? S.classifyError(e) : null;
+      var code = (cls && cls.kind && ({
+        auth: 'auth', rate_limit: 'rate_limit', timeout: 'timeout', server: 'server',
+        notfound: 'notfound', parse: 'parse', empty: 'empty', stream: 'stream',
+        network: 'network', cors: 'network', csp: 'network'
+      })[cls.kind]) || null;
+      if (!code || cls.kind === 'unknown') {
+        code = /限流|429|rate/i.test(msg) ? 'rate_limit'
+          : /超时|timeout|abort/i.test(msg) ? 'timeout'
+            : /密钥|401|403|无权/i.test(msg) ? 'auth'
+              : 'network';
+      }
+      if (opts.signal && opts.signal.aborted) code = 'cancelled';
+      return {
+        ok: false, code: code,
+        kind: cls ? cls.kind || code : code,
+        status: e && e.status ? e.status : null,
+        retryable: !!(cls && cls.retryable),
+        retryAfter: e && e.retryAfter ? e.retryAfter : null,
+        reason: msg.slice(0, 160),
+        text: e && e.text || '', raw: e && e.raw || '',
+        partial: !!(e && e.partial),
+        ttft: e && e.ttft != null ? e.ttft : 0,
+        usage: e && e.usage ? e.usage : null,
+        stream: true, fallback: false, completed: false,
+        modelId: id, latency: Date.now() - t0
+      };
+    }
+  }
+
   async function runWithRoute(info, queryForAnswer, ctx, cfg, opts) {
     opts = opts || {};
     if (!info || !info.control || !root.AstroControl) {
@@ -149,6 +235,7 @@
     runWithRoute: runWithRoute,
     resume: resume,
     modelGenerate: modelGenerate,
-    version: '1.5.0'
+    modelStream: modelStream,
+    version: '1.6.0'
   };
 })(typeof window !== 'undefined' ? window : global);

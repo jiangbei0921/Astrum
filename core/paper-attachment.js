@@ -60,10 +60,15 @@
       return { ok: false, code: 'pdf_parse_error', reason: String(e && e.message || e), fileName: fileName };
     }
     if (!parsed || parsed.ok !== true) {
+      var reason = (parsed && parsed.error) || 'PDF 解析失败';
+      var ocrRequired = !!(parsed && (parsed.ocrRequired || parsed.detailCode === 'pdf_ocr_required'));
+      if (ocrRequired) reason = 'PDF 没有可提取的文本层（扫描件）。本项目不提供 OCR，无法读取图像中的文字';
       return {
         ok: false,
         code: (parsed && parsed.code) || 'pdf_parse_failed',
-        reason: (parsed && parsed.error) || 'PDF 解析失败',
+        reason: reason,
+        detailCode: parsed && parsed.detailCode || '',
+        ocrRequired: ocrRequired,
         fileName: fileName,
         warnings: (parsed && parsed.warnings) || []
       };

@@ -132,6 +132,43 @@
     '同步于 ': 'Synced ',
     '。内容来自公开接口，未经本项目核验，因此不参与答案推理；引用前请打开原文核对。':
       '. Pulled from public APIs and NOT verified by this project, so it does not take part in answer reasoning. Check the original before citing.',
+    '今日': 'Today',
+    '近 7 天': 'Last 7 days',
+    '近 30 天': 'Last 30 days',
+    '最后成功': 'Last success',
+    '本次新增': 'New this run',
+    '篇论文': 'papers',
+    '条报道': 'reports',
+    '失败': 'Failures',
+    '个来源': 'sources',
+    '该时间范围内没有新论文；最近一次成功同步于 ':
+      'No new papers in this range. Last successful sync: ',
+    '。可切换到「近 30 天」查看更早的条目。':
+      '. Switch to "Last 30 days" to see earlier items.',
+    '部分来源失败，历史数据已保留': 'Some sources failed; history preserved',
+    '尚未同步（暂无成功记录）': 'Not synced yet (no successful run recorded)',
+
+    /* V1.11 流式回答 */
+    '停止生成': 'Stop',
+    '正在停止…': 'Stopping…',
+    '已停止生成': 'Stopped',
+    '输出中断': 'Output interrupted',
+    '正在切换非流式模式': 'Switching to non-streaming mode',
+    '生成失败': 'Generation failed',
+    '正在生成回答': 'Generating answer',
+    '正在生成回答 · {0}': 'Generating answer · {0}',
+    '已由用户停止生成；以上为已生成的部分内容，研究结论仍以证据链为准。':
+      'Stopped by user; the text above is partial. Research conclusions still follow the evidence chain.',
+    '已停止生成，未得到模型表述。研究结论仍按证据链保留。':
+      'Stopped before any model text. Research conclusions remain based on the evidence chain.',
+    '流式输出中断（{0}）：已保留已生成的部分，未重复生成。研究结论仍以证据链为准。':
+      'Stream interrupted ({0}). Partial output is kept and was not regenerated. Research conclusions still follow the evidence chain.',
+    '云端表述失败（{0}）：{1}。研究结论仍按证据链保留，未用模型输出替代。':
+      'Model expression failed ({0}): {1}. Research conclusions remain based on the evidence chain and were not replaced by model output.',
+    '服务端建议 {0} 秒后重试。': 'The server suggests retrying after {0} seconds.',
+    '可重新发送本条问题重试。': 'You can resend this question to retry.',
+    '云端表述失败：{0}。研究结论仍按证据链保留，未用模型输出替代。':
+      'Model expression failed: {0}. Research conclusions remain based on the evidence chain and were not replaced by model output.',
     '还没有本地数据。构建时运行 tools/sync-daily.js 可生成；GitHub Actions 每天自动执行一次。':
       'No local data yet. Run tools/sync-daily.js at build time; GitHub Actions does it daily.',
     '研究者的博客、机构精选与爱好者论坛。这些不做自动抓取：论坛内容未经筛选，混进列表反而降低信噪比。':
