@@ -125,7 +125,7 @@
 | Globular Star Clusters | 1888-08-01 | `10.1038/038365c0` | 仅摘要 |
 | Chemical composition and ages of four globular clusters in M31 | 2022-02-22 | `10.51194/vak2021.2022.1.1.186` | 仅摘要 |
 
-模型表述（1257 ms、504 tokens）把论文/证据事实与结论结合，并明确说明“两篇论文均仅有摘要，无法据此比较测量差异”，保持了证据边界。
+模型表述（1257 ms、504 tokens）基于给定事实与结论生成，并明确说明“两篇论文均仅有摘要，无法据此比较测量差异”，保持了证据边界。
 
 ## 6. 同一 Thread 多轮上下文
 
@@ -193,6 +193,16 @@ node tools/v1-9-research-target-test.js
 | 论文全文 | 仅摘要 | 3 篇均未获取全文；gaps/limitations 已如实标注 |
 | SIMBAD | 不可达 | `simbad.tap:failed`，未伪造天体参数 |
 
-## 11. 结论
+## 11. 发布状态
+
+| 项 | 值 |
+|---|---|
+| 功能提交 | `9e6d99b` |
+| test Run | `41626577600` success |
+| pages Run | `41627103167` success |
+| 线上 `version.json` | commit `9e6d99b`、dirty=false、runId `41627103167` |
+| 线上验收 | 27/27（路由、反馈、诊断、console/CSP），DOMContentLoaded 3.49s |
+
+## 12. 结论
 
 真实 Provider 基础调用 **PASS**：DeepSeek 官方端点、`deepseek-chat`、8 次真实请求（7 成功、1 次故意坏 Key 鉴权失败），Prompt/Completion/Total Token 均来自服务商 `usage`，未估算、未用 Mock。ASTRUM 的 Muse 路由、Agent/工具调用、真实论文检索、模型与证据结合、多轮指代与 evidenceRefs 链路在真实模型参与下跑通。未执行项与外部条件已逐项列明，不以离线或 Mock 结果冒充真实 Provider。

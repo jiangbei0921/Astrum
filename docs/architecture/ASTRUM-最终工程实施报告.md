@@ -212,11 +212,11 @@
 
 | 项 | 值 |
 |---|---|
-| 功能提交 | `8b7b8aa` |
+| 功能提交 | `9e6d99b` |
 | 合并日常数据 | `0640f6f` |
-| test Run | `41603946113` success |
-| pages Run | `41604395159` success |
-| 线上 version | app 4.8、commit `0640f6f`、dirty=false、runId `41604395159` |
+| test Run | `41626577600` success |
+| pages Run | `41627103167` success |
+| 线上 version | app 4.8、commit `9e6d99b`、dirty=false、runId `41627103167` |
 | 线上验收 | 27/27 |
 
 ### 10.4 真实 Provider 验收（同日）

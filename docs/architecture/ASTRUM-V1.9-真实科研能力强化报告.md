@@ -118,12 +118,12 @@
 | standalone | 54 脚本、CSS 131KB、1726KB |
 | `_site` | 59 文件（core 46 / data 8）、1752KB |
 | 安全扫描 | 密钥 0、本地绝对路径 0 |
-| 功能提交 | `8b7b8aa` |
+| 功能提交 | `9e6d99b`（真实 Provider 验收 + M13/多轮修复 + 文档） |
 | 合并日常数据 | `0640f6f` |
-| test Run | `41603946113` success（static/offline-core/offline-browser） |
-| pages Run | `41604395159` success |
-| 线上 version | app 4.8、commit `0640f6f`、dirty=false、runId `41604395159` |
-| 线上验收 | 27/27（反馈三入口、路由、诊断、确认页、无 JS/CSP、无额外反馈外发） |
+| test Run | `41626577600` success（static/offline-core/offline-browser） |
+| pages Run | `41627103167` success |
+| 线上 version | app 4.8、commit `9e6d99b`、dirty=false、runId `41627103167` |
+| 线上验收 | 27/27（反馈三入口、路由、诊断、确认页、无 JS/CSP、无额外反馈外发；DOMContentLoaded 3.49s） |
 
 首屏性能：本轮代码只增加约 1.9% 体积、脚本数量保持 54；线上 DOMContentLoaded 实测 2.9–9.0 s（GitHub Pages 冷/CDN 波动），最佳 2.9s，与 V1.7 的 3.07s 基线同量级。未发现由本轮代码引入的结构性退化。
 

@@ -233,11 +233,11 @@ V1.7 仍使用 §3.1 的标准回滚：回滚到上一个成功 Pages 的 commit
 
 | 项 | 值 |
 |---|---|
-| 功能提交 | `8b7b8aa` |
+| 功能提交 | `9e6d99b`（真实 Provider 验收 + M13/多轮修复） |
 | 合并日常数据 | `0640f6f` |
-| test Workflow | `41603946113` success（static / offline-core / offline-browser） |
-| pages Workflow | `41604395159` success |
-| 线上 `version.json.commit` | `0640f6f` |
+| test Workflow | `41626577600` success（static / offline-core / offline-browser） |
+| pages Workflow | `41627103167` success |
+| 线上 `version.json.commit` | `9e6d99b` |
 | 线上 `dirty` | false |
 | 新增 CI 步骤 | V1.9 反馈诊断、独立盲测离线、Provider 验证（CI 无 Key 接受 exit 2）、研究目标消歧 |
 | 线上验收 | 27/27；反馈三入口、研究路由、诊断科研字段、console/CSP |

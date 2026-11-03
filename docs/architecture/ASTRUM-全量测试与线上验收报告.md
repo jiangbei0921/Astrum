@@ -267,11 +267,11 @@ selftest 内置 20 问回归：`diffBytes=0`，13 Agent 名称/职责未变；�
 | standalone | 54 脚本、131KB CSS、1726KB |
 | Pages 产物 | 59 文件（core 46 / data 8）、1752KB |
 | 安全扫描 | 密钥 0、绝对路径 0 |
-| 功能提交 | `8b7b8aa` |
+| 功能提交 | `9e6d99b` |
 | 合并日常数据 | `0640f6f` |
-| test Run | `41603946113` success |
-| pages Run | `41604395159` success |
-| 线上 `version.json` | app 4.8、commit `0640f6f`、dirty=false、runId `41604395159` |
+| test Run | `41626577600` success |
+| pages Run | `41627103167` success |
+| 线上 `version.json` | app 4.8、commit `9e6d99b`、dirty=false、runId `41627103167` |
 | 线上反馈/路由/诊断 | 27/27 PASS |
 | 首屏性能 | DOMContentLoaded 2.9–9.0s（Pages CDN 冷启动波动），最佳 2.9s；脚本数仍 54，体积 +1.9% |
 
