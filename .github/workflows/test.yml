@@ -183,6 +183,10 @@ jobs:
       - name: V1.7 真实天文研究基准 v1-7-research-benchmark（offline）
         run: node tools/v1-7-research-benchmark.js --offline
 
+      # 反馈核心：配置/分类/去重/诊断/脱敏/邮件草稿
+      - name: V1.8 反馈核心 v1-8-feedback-test
+        run: node tools/v1-8-feedback-test.js
+
       # 无 Key 时脚本以 exit 2 返回 BLOCKED_API_KEY；有 Key 时只校验配置并提示手动运行真实调用。
       - name: V1.6 真实 Provider 配置检查
         run: |
@@ -256,3 +260,7 @@ jobs:
       # V1.6：多任务恢复、附件格式/冲突、真实 PDF 字节、Research UI、失败步骤、窄屏
       - name: V1.6 浏览器 v1-6-browser-test
         run: node tools/v1-6-browser-test.js
+
+      # V1.8：三反馈入口、主动提示去重/忽略、诊断预览、确认页、帮助入口、390px 窄屏
+      - name: V1.8 反馈浏览器 v1-8-feedback-browser-test
+        run: node tools/v1-8-feedback-browser-test.js

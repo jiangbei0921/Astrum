@@ -2841,8 +2841,16 @@
 
   function renderAnswer(ans, extra) {
     extra = extra || {};
+    /* 反馈关联用的稳定标识：首渲染生成，随 ans 持久化；恢复历史时复用。
+     * Task ID 也写进 meta，刷新后仍能把「回答」对应回原任务。 */
+    ans.meta = ans.meta || {};
+    if (!ans.meta.messageId) {
+      ans.meta.messageId = 'm-' + Date.now().toString(36) + '-' +
+        Math.random().toString(36).slice(2, 6);
+    }
+    if (extra.state && extra.state.id) ans.meta.taskId = extra.state.id;
     /* 术语双轨按「本条答案实际使用的语体」决定，而不是全局设置 */
-    CURRENT_REG = (ans.meta && ans.meta.register === 'pro') ? 'pro' : 'pop';
+    CURRENT_REG = (ans.meta.register === 'pro') ? 'pro' : 'pop';
     /* 契约一：档位由答案自身构成判定，渲染前统一标注 */
     if (window.AstroRuntime) {
       ans.meta = ans.meta || {};
@@ -2897,7 +2905,7 @@
     if (ans.meta && ans.meta.recall) card.appendChild(recallLine(ans.meta.recall));
     /* 恢复态同样挂操作条：否则刷新后答案就没有复制/分享/SIMBAD/云量，
      * 而这些动作不写存储，重复渲染没有副作用。 */
-    card.appendChild(answerActions(card, ans));
+    card.appendChild(answerActions(card, ans, extra));
     card.appendChild(metaBar(ans));
     msg.appendChild(card);
     $('#thread').appendChild(msg);
@@ -2927,6 +2935,13 @@
         var pB = window.Thread.appendBot(ans);
         if (pB && pB.catch) pB.catch(onSaveFail);
       } catch (e) { onSaveFail(e); }
+    }
+    if (!isRestore) {
+      LAST_ANSWER = ans;
+      LAST_STATE = extra.state || null;
+      LAST_CARD = card;
+      /* 主动反馈：只对当前这一轮、当前这个 Task ID 生效；去重与忽略在 feedback.js。 */
+      maybeOfferFeedback(ans, extra, card, msg);
     }
     if (!isRestore) renderThreadList();
     if (!isRestore && state.settings.autoScroll) {
@@ -3942,7 +3957,8 @@
       setPlace(city);
     }
 
-    $('#thread').appendChild(userBubble(q, atts));
+    var ub = userBubble(q, atts);
+    $('#thread').appendChild(ub);
     if (window.Thread) {
       try {
         var pU = window.Thread.appendUser(q, atts);
@@ -3952,6 +3968,8 @@
     $('#scroll').scrollTop = $('#scroll').scrollHeight;
     /* 附件已随消息发出，清空待发送区 */
     if (atts.length) clearAttach();
+    /* 用户明确说「答错了 / 不准确 / 没证据」：关联上一条回答提示反馈，不等新回答生成。 */
+    offerComplaintFeedback(q, ub);
 
     var src = sourceById(state.settings.sourceId);
     var think = el('div', 'thinking',
@@ -4880,7 +4898,7 @@
   }
   function closeAll() {
     closeViewer(); closeSolar();
-    closeSheet('drawer'); closeSheet('settings'); closePop();
+    closeSheet('drawer'); closeSheet('settings'); closeSheet('feedback'); closePop();
     $('#sidebar').classList.remove('on');
     $('#obsPanel').classList.remove('on');
     $('#scrim').classList.remove('on');
@@ -5884,6 +5902,29 @@
     g1.appendChild(cards);
     pushSection('能帮你做什么', g1);
 
+    /* 问题反馈：独立分类，不和「使用技巧」混在一起。
+     * 邮箱只来自 core/feedback.js 的统一配置，这里不重复硬编码。 */
+    var gFb = el('div', 'group');
+    gFb.appendChild(el('h4', '', esc(L('问题反馈'))));
+    gFb.appendChild(el('div', 'note-box',
+      esc(L('如果你在使用 ASTRUM 时遇到错误、数据异常、研究结果不准确，或者有功能改进建议，可以在这里向开发团队反馈。'))));
+    var cfgFb = fbCfg();
+    var fbRow = el('div', 'set-row');
+    fbRow.innerHTML = '<div class="txt"><div class="t">' + esc(L('反馈渠道')) + '</div>' +
+      '<div class="d">' + esc(L('当前为开源项目，暂以邮件接收反馈。内容由你确认后才会打开邮件客户端，ASTRUM 不会自动发送。')) +
+      '<br><span class="fb-mail">' + esc(cfgFb ? cfgFb.feedbackEmail : '') + '</span></div></div>';
+    var fbCtl = el('div', 'ctl');
+    var fbEntry = el('button', 'btn-primary', L('打开问题反馈'));
+    fbEntry.type = 'button';
+    fbEntry.id = 'feedbackEntry';
+    fbEntry.addEventListener('click', function () { openFeedback({ source: 'settings' }); });
+    fbCtl.appendChild(fbEntry);
+    fbRow.appendChild(fbCtl);
+    gFb.appendChild(fbRow);
+    gFb.appendChild(el('div', 'note-box',
+      esc(L('反馈不会自动上传任何内容；只有你点「生成反馈邮件」并确认后，才会生成邮件草稿。'))));
+    pushSection('问题反馈', gFb);
+
     var g2 = el('div', 'group');
     g2.appendChild(el('h4', '', '使用技巧'));
     [
@@ -6087,6 +6128,7 @@
     if ($('#btnManageSources')) $('#btnManageSources').addEventListener('click', function () { openSheet('settings'); });
     $('#btnSettings').addEventListener('click', function () { openSheet('settings'); });
     $('#settingsClose').addEventListener('click', function () { closeSheet('settings'); });
+    bindFeedbackClose();
     $('#dwClose').addEventListener('click', function () { closeSheet('drawer'); });
     $('#btnNew').addEventListener('click', newChat);
     $('#btnAddAgent').addEventListener('click', function () {
@@ -6751,7 +6793,7 @@
     return box;
   }
 
-  function answerActions(card, ans) {
+  function answerActions(card, ans, extra) {
     var bar = el('div', 'ans-acts');
 
     var cp = el('button', 'ans-act', L('复制'));
@@ -6770,22 +6812,26 @@
       copyText(head + answerText(card) + tail, sh);
     });
 
-    var fb = el('button', 'ans-act', L('反馈'));
+    /* 回答反馈：自动关联当前问题、回答、消息 ID、Task ID、Agent 与工具记录。
+     * 只带当前这一轮的最小上下文，不把整段历史对话塞进反馈。 */
+    var fb = el('button', 'ans-act', L('反馈问题'));
     fb.type = 'button';
-    fb.title = '把这条答案的问题与诊断信息打包复制，便于反馈';
+    fb.title = '反馈这条回答中的事实、引用或分析问题';
     fb.addEventListener('click', function () {
-      var m = ans.meta || {};
-      var pack = [
-        '# ASTRUM 反馈包',
-        '版本: v' + APP_VERSION,
-        '时间: ' + new Date().toISOString(),
-        '提问: ' + (ans.query || ''),
-        '意图: ' + (ans.intent || '-') + ' · 档位: ' + (m.tier || '-') + ' · 状态: ' + (m.status || '-'),
-        '存储: ' + (window.Thread ? window.Thread.backend() : '-'),
-        '--- 回答正文 ---',
-        answerText(card)
-      ].join('\n');
-      copyText(pack, fb);
+      var ctx = feedbackContextFromAnswer(card, ans, extra);
+      var res = FB ? FB.analyze({ state: extra && extra.state, answer: ans, query: ans.query }) : null;
+      openFeedback({
+        source: 'answer',
+        context: ctx,
+        state: extra && extra.state ? extra.state : null,
+        answer: ans,
+        error: res && res.primary ? res.primary : null,
+        prefill: {
+          type: 'research_result',
+          title: '回答问题反馈 · ' + fbClip(ans.query || '未命名回答', 24),
+          description: ''
+        }
+      });
     });
 
     bar.appendChild(cp);
@@ -6839,6 +6885,701 @@
     }
 
     return bar;
+  }
+
+  /* ================= 问题反馈 =================
+   * 三个入口共用一套表单与确认页：
+   *   1) 对话内主动提示（任务异常 / 用户指出回答有问题）
+   *   2) 每条 AI 回答的「反馈问题」
+   *   3) 设置 → 帮助 → 问题反馈
+   *
+   * 这里只负责收集与展示；分类、脱敏、去重、邮件生成都在 core/feedback.js，
+   * 且只有用户点「确认并打开邮件客户端」才会唤起客户端，绝不自动发送。 */
+  var FB = window.AstroFeedback;
+  var FB_SOURCE = 'settings';
+  var FB_CONTEXT = null;
+  var FB_STATE = null;
+  var FB_ANSWER = null;
+  var FB_ERROR = null;
+  var FB_FORM = null;
+  var FB_DRAFT = null;
+  var FB_SUBMIT = null;
+  var FB_RESTORED = false;
+  var LAST_ANSWER = null;
+  var LAST_STATE = null;
+  var LAST_CARD = null;
+
+  function fbClip(s, n) {
+    s = String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
+    return s.length > n ? s.slice(0, n) + '…' : s;
+  }
+
+  function fbCfg() { return FB ? FB.config() : null; }
+
+  function fbThreadId() {
+    try {
+      var t = window.Thread && window.Thread.current ? window.Thread.current() : null;
+      return t && t.id ? t.id : '';
+    } catch (e) { return ''; }
+  }
+
+  function fbSavedKey() {
+    return window.Profile && window.Profile.ns ? Profile.ns('astrum.feedback.draft') : 'astrum.feedback.draft';
+  }
+
+  function fbContextKey() {
+    return (FB_CONTEXT && (FB_CONTEXT.taskId || FB_CONTEXT.messageId)) || '';
+  }
+
+  function fbReadSaved() {
+    try {
+      var raw = localStorage.getItem(fbSavedKey());
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+
+  function fbSaveForm() {
+    if (!FB_FORM) return;
+    var has = ['title', 'description', 'steps', 'expected', 'actual', 'contactEmail'].some(function (k) {
+      return String(FB_FORM[k] || '').trim();
+    });
+    if (!has) { fbClearSaved(); return; }
+    try {
+      localStorage.setItem(fbSavedKey(), JSON.stringify({
+        source: FB_SOURCE,
+        contextKey: fbContextKey(),
+        at: Date.now(),
+        values: FB_FORM
+      }));
+    } catch (e) { /* 隐私模式：本次会话内仍保留 */ }
+  }
+
+  function fbClearSaved() {
+    try { localStorage.removeItem(fbSavedKey()); } catch (e) {}
+  }
+
+  function fbDownloadText(name, text, type) {
+    try {
+      var blob = new Blob([text], { type: type || 'application/json;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () {
+        if (a.parentNode) a.parentNode.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 0);
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function fbDownloadDiagnostic(draft) {
+    var id = (draft && draft.id) || (FB ? FB.feedbackId() : 'report');
+    var diag = (draft && draft.diagnostic) || (FB ? FB.buildDiagnostic({
+      state: FB_STATE, answer: FB_ANSWER, context: FB_CONTEXT, error: FB_ERROR,
+      feedbackId: id, pageModule: FB_SOURCE, version: APP_VERSION
+    }) : null);
+    if (!diag) { toast('诊断信息尚未生成'); return; }
+    var ok = fbDownloadText('astrum-feedback-' + id + '.json', JSON.stringify(diag, null, 2));
+    toast(ok ? '诊断报告已下载（已脱敏）' : '下载失败，请尝试复制反馈内容');
+  }
+
+  function fbCollectList(list, max) {
+    var out = [], seen = {};
+    (Array.isArray(list) ? list : []).forEach(function (x) {
+      var v = String(x == null ? '' : x);
+      if (!v || seen[v]) return;
+      seen[v] = 1;
+      out.push(v);
+    });
+    return out.slice(0, max || 5);
+  }
+
+  /* 只取当前这一轮的上下文：问题、回答正文、消息/任务/线程 ID、参与 Agent、工具与来源。 */
+  function feedbackContextFromAnswer(card, ans, extra) {
+    ans = ans || {};
+    extra = extra || {};
+    var tools = [], agents = [], sources = [];
+    (ans.trace || []).forEach(function (s) {
+      if (s && s.tool) tools.push(s.tool);
+      if (s && s.agent) agents.push(s.agent);
+    });
+    if (ans.meta && Array.isArray(ans.meta.agents)) agents = agents.concat(ans.meta.agents);
+    (ans.sections || []).forEach(function (s) {
+      (s.items || []).forEach(function (it) {
+        if (it.host) sources.push(it.host);
+        else if (it.url) {
+          try { sources.push(new URL(it.url).host); } catch (e) {}
+        }
+      });
+    });
+    return {
+      query: String(ans.query || ''),
+      answerText: card ? answerText(card) : '',
+      messageId: String((ans.meta && ans.meta.messageId) || ''),
+      taskId: String((extra.state && extra.state.id) || (ans.meta && ans.meta.taskId) || ''),
+      threadId: fbThreadId(),
+      intent: String(ans.intent || ''),
+      template: String((extra.state && extra.state.plan && extra.state.plan.template) || ''),
+      agent: '',
+      agents: fbCollectList(agents, 5),
+      tools: fbCollectList(tools, 5),
+      sources: fbCollectList(sources, 5)
+    };
+  }
+
+  function fbTypeForIssue(issue) {
+    if (!issue) return 'bug';
+    var tool = String(issue.tool || '');
+    if (issue.category === 'agent') return 'agent_execution';
+    if (issue.category === 'data_parse') return /pdf|fulltext/i.test(tool) ? 'pdf_parse' : 'astro_data';
+    if (issue.category === 'research_quality') return 'research_result';
+    if (issue.category === 'external') {
+      if (/paper|arxiv|openalex|semantic|search/i.test(tool)) return 'search_paper';
+      if (/simbad|astro|photo/i.test(tool)) return 'astro_data';
+      return 'bug';
+    }
+    return 'bug';
+  }
+
+  function fbAutoTitle(issue, query) {
+    var label = issue && issue.label ? issue.label : '任务异常';
+    var q = fbClip(query || '', 18);
+    return ('任务异常反馈 · ' + label + (q ? ' · ' + q : '')).slice(0, 80);
+  }
+
+  function fbAutoDescription(issue) {
+    if (!issue) return '';
+    return '系统检测到本次任务出现异常。\n\n错误类别：' + String(issue.label || '') +
+      '\n错误代码：' + String(issue.code || '') +
+      '\n错误摘要：' + String(issue.summary || '') +
+      (issue.tool ? '\n相关工具：' + String(issue.tool) : '') +
+      (issue.stepId ? '\n执行步骤：' + String(issue.stepId) : '');
+  }
+
+  function fbField(label, node, hint, required) {
+    var f = el('div', 'ed-field');
+    var l = el('label', '', esc(L(label)) + (required ? ' <span class="fb-req">*</span>' : ''));
+    if (node.id) l.setAttribute('for', node.id);
+    f.appendChild(l);
+    f.appendChild(node);
+    if (hint) f.appendChild(el('div', 'hintline', esc(L(hint))));
+    return f;
+  }
+
+  function fbTextInput(id, max, value, placeholder) {
+    var inp = el('input', '');
+    inp.type = 'text';
+    inp.id = id;
+    inp.maxLength = max;
+    inp.value = value || '';
+    if (placeholder) inp.placeholder = placeholder;
+    return inp;
+  }
+
+  function fbTextArea(id, max, value, rows, placeholder) {
+    var ta = el('textarea', '');
+    ta.id = id;
+    ta.maxLength = max;
+    ta.rows = rows || 3;
+    ta.value = value || '';
+    if (placeholder) ta.placeholder = placeholder;
+    return ta;
+  }
+
+  function fbContextBlock() {
+    var c = FB_CONTEXT || {};
+    if (!c.query && !c.answerText && !c.messageId && !c.taskId) return null;
+    var box = el('div', 'fb-context');
+    var head = el('div', 'fb-ctx-head', esc(L('本次反馈关联的上下文')));
+    box.appendChild(head);
+    function row(k, v) {
+      if (!v) return;
+      var r = el('div', 'fb-ctx-row');
+      r.innerHTML = '<span class="k">' + esc(L(k)) + '</span><span class="v">' + esc(v) + '</span>';
+      box.appendChild(r);
+    }
+    row('当前问题', c.query);
+    if (c.answerText) {
+      var a = el('div', 'fb-ctx-answer');
+      a.innerHTML = '<span class="k">' + esc(L('回答摘录')) + '</span><div class="v">' + esc(fbClip(c.answerText, 500)) + '</div>';
+      box.appendChild(a);
+    }
+    row('消息 ID', c.messageId);
+    row('任务 ID', c.taskId);
+    row('相关 Agent', (c.agents || []).join(', '));
+    row('相关工具', (c.tools || []).join(', '));
+    row('相关来源', (c.sources || []).join(', '));
+    box.appendChild(el('div', 'fb-ctx-foot', esc(L('只收集当前问题与回答的最小上下文，不附加历史对话。'))));
+    return box;
+  }
+
+  function fbRenderDiagPreview() {
+    var box = $('#fbDiagBox');
+    if (!box || !FB_FORM) return;
+    box.innerHTML = '';
+    box.hidden = !FB_FORM.includeDiagnostics;
+    if (!FB_FORM.includeDiagnostics) return;
+
+    var diag = FB.buildDiagnostic({
+      state: FB_STATE, answer: FB_ANSWER, context: FB_CONTEXT, error: FB_ERROR,
+      feedbackId: 'preview', pageModule: FB_SOURCE, version: APP_VERSION
+    });
+    var failed = (diag.task.steps || []).filter(function (s) {
+      return s.status === 'failed' || s.status === 'blocked' || s.status === 'aborted';
+    }).length;
+    box.appendChild(el('div', 'fb-diag-head',
+      esc(L('将附加以下脱敏信息')) + ' · ' + esc(T('{0} 个失败步骤 / {1} 条事件', failed, (diag.task.events || []).length))));
+    box.appendChild(el('div', 'fb-diag-sum',
+      esc(L('任务 ID、错误代码、执行步骤、版本、浏览器与操作系统；已过滤密钥、Token、Cookie、Session 与本地路径。'))));
+
+    var det = el('details', 'fb-diag-details');
+    det.appendChild(el('summary', '', esc(L('查看将要发送的完整内容'))));
+    var pre = el('pre', 'fb-diag-pre');
+    pre.textContent = JSON.stringify(diag, null, 2);
+    det.appendChild(pre);
+    box.appendChild(det);
+  }
+
+  function fbInvalid(res) {
+    var e = res && res.errors && res.errors[0];
+    if (!e) { toast('反馈内容校验失败'); return; }
+    toast(e.message);
+    var map = {
+      type: '#fbType', title: '#fbTitle', description: '#fbDesc',
+      steps: '#fbSteps', expected: '#fbExpected', actual: '#fbActual', contactEmail: '#fbEmail'
+    };
+    var node = $(map[e.field] || '');
+    if (node) node.focus();
+  }
+
+  function fbDraftFromForm() {
+    return FB.buildDraft({
+      type: FB_FORM.type,
+      title: FB_FORM.title,
+      description: FB_FORM.description,
+      steps: FB_FORM.steps,
+      expected: FB_FORM.expected,
+      actual: FB_FORM.actual,
+      contactEmail: FB_FORM.contactEmail,
+      includeDiagnostics: !!FB_FORM.includeDiagnostics,
+      context: FB_CONTEXT || {},
+      error: FB_ERROR || null,
+      state: FB_STATE || null,
+      answer: FB_ANSWER || null,
+      source: FB_SOURCE,
+      pageModule: FB_SOURCE,
+      version: APP_VERSION
+    });
+  }
+
+  function fbCopyCurrent(btn) {
+    var res = fbDraftFromForm();
+    if (!res.ok) { fbInvalid(res); return; }
+    copyText(FB.plainText(res.draft), btn);
+  }
+
+  function fbGenerate() {
+    var res = fbDraftFromForm();
+    if (!res.ok) { fbInvalid(res); return; }
+    FB_DRAFT = res.draft;
+    FB_SUBMIT = FB.submitFeedback(FB_DRAFT);
+    if (!FB_SUBMIT || !FB_SUBMIT.ok) {
+      toast('反馈邮件生成失败：{0}', String((FB_SUBMIT && FB_SUBMIT.reason) || 'unknown'));
+      return;
+    }
+    fbClearSaved();
+    renderFeedbackConfirm(FB_DRAFT, FB_SUBMIT);
+    toast('反馈邮件已生成，请确认后再发送');
+  }
+
+  function fbStatus(text, tone) {
+    var st = $('#fbStatus');
+    if (!st) return;
+    st.textContent = text;
+    st.className = 'fb-status' + (tone ? ' ' + tone : '');
+  }
+
+  function renderFeedbackConfirm(draft, sub) {
+    var body = $('#feedbackBody');
+    if (!body) return;
+    body.innerHTML = '';
+
+    var head = el('div', 'group');
+    head.appendChild(el('h4', '', esc(L('确认反馈内容'))));
+    var meta = el('div', 'fb-meta');
+    [
+      ['反馈编号', draft.id],
+      ['反馈类型', L(draft.typeLabel)],
+      ['收件人', sub.recipient],
+      ['诊断信息', draft.includeDiagnostics ? L('已附加（脱敏）') : L('未附加')]
+    ].forEach(function (kv) {
+      meta.appendChild(el('div', 'fb-meta-row',
+        '<span class="k">' + esc(L(kv[0])) + '</span><span class="v">' + esc(kv[1]) + '</span>'));
+    });
+    head.appendChild(meta);
+    body.appendChild(head);
+
+    var subj = el('div', 'ed-field');
+    subj.appendChild(el('label', '', esc(L('邮件主题'))));
+    subj.appendChild(el('div', 'fb-readonly', esc(sub.subject)));
+    body.appendChild(subj);
+
+    var bodyField = el('div', 'ed-field');
+    bodyField.appendChild(el('label', '', esc(L('邮件正文'))));
+    var pre = el('pre', 'fb-preview');
+    pre.textContent = sub.body;
+    bodyField.appendChild(pre);
+    body.appendChild(bodyField);
+
+    body.appendChild(el('div', 'note-box fb-notice',
+      esc(L('反馈邮件已准备好，请在邮件客户端中检查内容并主动发送。ASTRUM 不会在未经确认的情况下自动发送邮件。'))));
+
+    if (draft.includeDiagnostics) {
+      body.appendChild(el('div', 'fb-hint-strong',
+        esc(L('诊断报告不会自动成为附件。请先下载，再在邮件客户端中手动添加：')) +
+        ' astrum-feedback-' + esc(draft.id) + '.json'));
+    }
+    if (sub.tooLong) {
+      body.appendChild(el('div', 'fb-warn',
+        esc(T('邮件内容较长（约 {0} 字符），可能超过部分邮件客户端或浏览器的 URL 限制。请使用「复制反馈内容」或「下载诊断报告」后在邮件客户端中新建邮件。', sub.length))));
+    }
+
+    var acts = el('div', 'ed-actions');
+    var open = el('button', 'btn-primary', L('确认并打开邮件客户端'));
+    open.type = 'button';
+    open.id = 'fbOpenMail';
+    open.disabled = !!sub.tooLong;
+    open.addEventListener('click', function () {
+      if (open.disabled) return;
+      var r = FB.openMailClient(FB_DRAFT);
+      if (r.opened) {
+        fbStatus(L('已尝试打开邮件客户端。请检查内容并主动发送；ASTRUM 不会自动发送，也不会把打开客户端当作发送成功。'), 'ok');
+        open.textContent = L('再次打开邮件客户端');
+      } else if (r.reason === 'too_long') {
+        fbStatus(L('内容过长，未打开邮件客户端。请复制反馈内容或下载诊断报告后手动发送。'), 'warn');
+      } else {
+        fbStatus(L('未能打开邮件客户端。请复制反馈内容或下载诊断报告后，在任意邮件客户端中手动发送。'), 'warn');
+      }
+    });
+
+    var copy = el('button', 'btn-ghost', L('复制反馈内容'));
+    copy.type = 'button';
+    copy.id = 'fbCopyConfirm';
+    copy.addEventListener('click', function () { copyText(FB.plainText(FB_DRAFT), copy); });
+
+    var dl = el('button', 'btn-ghost', L('下载诊断报告'));
+    dl.type = 'button';
+    dl.id = 'fbDownloadConfirm';
+    dl.addEventListener('click', function () { fbDownloadDiagnostic(FB_DRAFT); });
+
+    var back = el('button', 'btn-ghost', L('返回修改'));
+    back.type = 'button';
+    back.id = 'fbBack';
+    back.addEventListener('click', function () { renderFeedbackForm(); });
+
+    var cancel = el('button', 'btn-ghost', L('关闭'));
+    cancel.type = 'button';
+    cancel.addEventListener('click', function () { closeSheet('feedback'); });
+
+    if (!sub.tooLong) acts.appendChild(open);
+    acts.appendChild(copy);
+    acts.appendChild(dl);
+    acts.appendChild(back);
+    acts.appendChild(cancel);
+    body.appendChild(acts);
+
+    var status = el('div', 'fb-status');
+    status.id = 'fbStatus';
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+    body.appendChild(status);
+
+    var first = open.disabled ? copy : open;
+    setTimeout(function () { if (first && first.focus) first.focus(); }, 30);
+  }
+
+  function renderFeedbackForm() {
+    var body = $('#feedbackBody');
+    if (!body || !FB || !FB_FORM) return;
+    body.innerHTML = '';
+
+    if (FB_RESTORED) {
+      body.appendChild(el('div', 'note-box', esc(L('已恢复上次未提交的反馈草稿。'))));
+    }
+
+    var ctx = fbContextBlock();
+    if (ctx) body.appendChild(ctx);
+
+    var form = el('div', 'fb-form');
+
+    var sel = el('select', '');
+    sel.id = 'fbType';
+    var empty = document.createElement('option');
+    empty.value = '';
+    empty.textContent = L('请选择反馈类型');
+    sel.appendChild(empty);
+    FB.TYPES.forEach(function (t) {
+      var o = document.createElement('option');
+      o.value = t.id;
+      o.textContent = L(t.label);
+      if (FB_FORM.type === t.id) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change', function () { FB_FORM.type = sel.value; fbSaveForm(); });
+    form.appendChild(fbField('反馈类型', sel, '必填。选择最接近的一类即可。', true));
+
+    var title = fbTextInput('fbTitle', 80, FB_FORM.title, '一句话概括问题');
+    var count = el('div', 'hintline fb-counter', '0/80');
+    function syncTitleCount() { count.textContent = String(title.value.length) + '/80'; }
+    title.addEventListener('input', function () {
+      FB_FORM.title = title.value;
+      syncTitleCount();
+      fbSaveForm();
+    });
+    syncTitleCount();
+    var titleField = fbField('问题标题', title, '必填。写清楚哪个天体、哪篇论文或哪一步出错。', true);
+    titleField.appendChild(count);
+    form.appendChild(titleField);
+
+    var desc = fbTextArea('fbDesc', 2000, FB_FORM.description, 4, '发生了什么？你期望看到什么？');
+    desc.addEventListener('input', function () { FB_FORM.description = desc.value; fbSaveForm(); });
+    form.appendChild(fbField('详细描述', desc, '必填。请勿粘贴 API Key、Token 或 Cookie。', true));
+
+    var steps = fbTextArea('fbSteps', 1000, FB_FORM.steps, 3, '例如：1. 打开设置 → 帮助；2. 点击问题反馈；3. …');
+    steps.addEventListener('input', function () { FB_FORM.steps = steps.value; fbSaveForm(); });
+    form.appendChild(fbField('复现步骤', steps, '选填。能稳定复现的步骤最有帮助。'));
+
+    var expected = fbTextArea('fbExpected', 800, FB_FORM.expected, 2, '你期望得到的正确结果或行为');
+    expected.addEventListener('input', function () { FB_FORM.expected = expected.value; fbSaveForm(); });
+    form.appendChild(fbField('预期结果', expected, '选填。'));
+
+    var actual = fbTextArea('fbActual', 800, FB_FORM.actual, 2, '实际看到的结果或行为');
+    actual.addEventListener('input', function () { FB_FORM.actual = actual.value; fbSaveForm(); });
+    form.appendChild(fbField('实际结果', actual, '选填。'));
+
+    var email = fbTextInput('fbEmail', 120, FB_FORM.contactEmail, 'name@example.com');
+    email.addEventListener('input', function () { FB_FORM.contactEmail = email.value; fbSaveForm(); });
+    form.appendChild(fbField('联系邮箱', email, '选填。不填写也可以生成反馈邮件；填写后便于维护团队回信。'));
+
+    var diagRow = el('div', 'fb-check-row');
+    var diagLabel = el('label', 'fb-check');
+    var diag = el('input', '');
+    diag.type = 'checkbox';
+    diag.id = 'fbDiag';
+    diag.checked = !!FB_FORM.includeDiagnostics;
+    diagLabel.appendChild(diag);
+    diagLabel.appendChild(el('span', '', esc(L('附加脱敏诊断信息'))));
+    diagRow.appendChild(diagLabel);
+    diagRow.appendChild(el('span', 'fb-check-hint', esc(L('默认不附加。勾选后可在发送前查看完整内容。'))));
+    form.appendChild(diagRow);
+
+    var diagBox = el('div', 'fb-diag');
+    diagBox.id = 'fbDiagBox';
+    form.appendChild(diagBox);
+
+    diag.addEventListener('change', function () {
+      FB_FORM.includeDiagnostics = !!diag.checked;
+      fbSaveForm();
+      fbRenderDiagPreview();
+    });
+
+    var acts = el('div', 'ed-actions');
+    var gen = el('button', 'btn-primary', L('生成反馈邮件'));
+    gen.type = 'button';
+    gen.id = 'fbGenerate';
+    gen.addEventListener('click', fbGenerate);
+
+    var copy = el('button', 'btn-ghost', L('复制反馈内容'));
+    copy.type = 'button';
+    copy.id = 'fbCopyDraft';
+    copy.addEventListener('click', function () { fbCopyCurrent(copy); });
+
+    var dl = el('button', 'btn-ghost', L('下载诊断报告'));
+    dl.type = 'button';
+    dl.id = 'fbDownloadDraft';
+    dl.addEventListener('click', function () { fbDownloadDiagnostic(null); });
+
+    var cancel = el('button', 'btn-ghost', L('取消'));
+    cancel.type = 'button';
+    cancel.id = 'fbCancel';
+    cancel.addEventListener('click', function () { fbCancel(); });
+
+    acts.appendChild(gen);
+    acts.appendChild(copy);
+    acts.appendChild(dl);
+    acts.appendChild(cancel);
+    form.appendChild(acts);
+    body.appendChild(form);
+
+    fbRenderDiagPreview();
+    setTimeout(function () { if (sel) sel.focus(); }, 30);
+  }
+
+  function fbHasInput() {
+    if (!FB_FORM) return false;
+    return ['title', 'description', 'steps', 'expected', 'actual', 'contactEmail'].some(function (k) {
+      return String(FB_FORM[k] || '').trim();
+    });
+  }
+
+  function fbCancel() {
+    if (FB_DRAFT) { closeSheet('feedback'); return; }
+    if (fbHasInput() && !window.confirm(L('反馈内容尚未生成邮件，确定清除草稿吗？'))) return;
+    fbClearSaved();
+    closeSheet('feedback');
+  }
+
+  function openFeedback(opts) {
+    opts = opts || {};
+    if (!FB) { toast('反馈模块未加载，无法生成反馈'); return; }
+    var cfg = fbCfg();
+    if (!cfg || !cfg.feedbackEnabled) { toast('反馈功能当前已关闭'); return; }
+
+    FB_SOURCE = String(opts.source || 'settings');
+    var ctx = Object.assign({}, opts.context || {});
+    if (!ctx.threadId) ctx.threadId = fbThreadId();
+    if (!ctx.taskId && opts.state && opts.state.id) ctx.taskId = opts.state.id;
+    FB_CONTEXT = ctx;
+    FB_STATE = opts.state || null;
+    FB_ANSWER = opts.answer || null;
+    FB_ERROR = opts.error || null;
+    FB_DRAFT = null;
+    FB_SUBMIT = null;
+    FB_RESTORED = false;
+
+    var prefill = opts.prefill || {};
+    var defaults = {
+      type: String(prefill.type || ''),
+      title: String(prefill.title || ''),
+      description: String(prefill.description || ''),
+      steps: '', expected: '', actual: '', contactEmail: '',
+      includeDiagnostics: false
+    };
+
+    var saved = fbReadSaved();
+    if (saved && saved.values && saved.source === FB_SOURCE && saved.contextKey === fbContextKey()) {
+      FB_FORM = Object.assign(defaults, saved.values);
+      FB_RESTORED = true;
+    } else {
+      FB_FORM = defaults;
+    }
+
+    renderFeedbackForm();
+    openSheet('feedback');
+  }
+
+  function fbOfferOpen(offer) {
+    openFeedback({
+      source: 'proactive',
+      context: offer.context,
+      state: offer.state,
+      answer: offer.answer,
+      error: offer.issue,
+      prefill: {
+        type: fbTypeForIssue(offer.issue),
+        title: fbAutoTitle(offer.issue, offer.context && offer.context.query),
+        description: fbAutoDescription(offer.issue)
+      }
+    });
+  }
+
+  function appendFeedbackOffer(anchor, opts) {
+    if (!anchor || !FB) return null;
+    var issue = opts.issue;
+    if (!issue) return null;
+    var offer = el('div', 'fb-offer');
+    offer.setAttribute('role', 'status');
+    offer.setAttribute('aria-live', 'polite');
+    offer.innerHTML =
+      '<div class="fb-offer-head"><span class="fb-dot" aria-hidden="true"></span>' +
+      '<b>' + esc(L('本次任务可能遇到了异常')) + '</b>' +
+      '<span class="fb-tag">' + esc(L(issue.label || '')) + '</span></div>' +
+      '<p>' + esc(L('本次研究任务可能遇到了异常，是否将问题反馈给 ASTRUM 开发团队？我们可以帮你整理相关错误信息，减少手动描述。')) + '</p>' +
+      '<div class="fb-offer-sum">' + esc(L('检测到')) + '：' + esc(fbClip(issue.summary || issue.code || '', 160)) + '</div>';
+    var acts = el('div', 'fb-offer-acts');
+    var go = el('button', 'fb-btn primary', L('反馈问题'));
+    go.type = 'button';
+    go.addEventListener('click', function () {
+      fbOfferOpen({
+        issue: issue, context: opts.context, state: opts.state, answer: opts.answer
+      });
+    });
+    var skip = el('button', 'fb-btn ghost', L('暂时忽略'));
+    skip.type = 'button';
+    skip.addEventListener('click', function () {
+      if (opts.key) FB.ignore(opts.key);
+      offer.innerHTML = '<div class="fb-ignored">' + esc(L('已忽略本次提示，不会再次打断你。')) + '</div>';
+      setTimeout(function () { if (offer.parentNode) offer.parentNode.removeChild(offer); }, 2200);
+    });
+    acts.appendChild(go);
+    acts.appendChild(skip);
+    offer.appendChild(acts);
+    anchor.parentNode.insertBefore(offer, anchor.nextSibling);
+    return offer;
+  }
+
+  /* 任务异常主动提示：同一 Task ID + 同一错误类别只出现一次；恢复历史不回放提示。 */
+  function maybeOfferFeedback(ans, extra, card, msg) {
+    if (!FB || !ans) return;
+    var cfg = fbCfg();
+    if (!cfg || !cfg.feedbackEnabled) return;
+    var res = FB.analyze({ state: extra && extra.state, answer: ans, query: ans.query });
+    if (!res.needed || !res.primary) return;
+    var taskId = res.taskId || (ans.meta && ans.meta.messageId) || fbThreadId();
+    var key = FB.promptKey(taskId, res.primary.category);
+    if (!FB.shouldPrompt(key)) return;
+    FB.markPrompted(key);
+    appendFeedbackOffer(msg, {
+      issue: res.primary,
+      context: feedbackContextFromAnswer(card, ans, extra),
+      state: extra && extra.state ? extra.state : null,
+      answer: ans,
+      key: key
+    });
+  }
+
+  /* 用户明确说「答错了 / 不准确 / 没证据」时，不等新回答生成，先关联上一条回答提示。 */
+  function offerComplaintFeedback(query, anchor) {
+    if (!FB || !LAST_ANSWER || !anchor) return;
+    var cfg = fbCfg();
+    if (!cfg || !cfg.feedbackEnabled) return;
+    var re = /^不对|^错了|^答错|^答非所问|你(刚才|上一条|上次).*(错|不对|不准确|没证据|有问题)|这个答案.*(错|不对|不准确|没证据|假的)|答案.*(不准确|错误|没有证据)|结果.*(不对|错误|不准确)/;
+    if (!re.test(String(query || '').replace(/\s+/g, ''))) return;
+    var ctx = feedbackContextFromAnswer(LAST_CARD, LAST_ANSWER, { state: LAST_STATE });
+    var res = FB.analyze({
+      state: LAST_STATE, answer: LAST_ANSWER, query: query, userComplaint: true, context: ctx
+    });
+    var issue = res.issues.filter(function (x) { return x.code === 'user_reported'; })[0] || res.primary;
+    if (!issue) return;
+    var taskId = res.taskId || (LAST_ANSWER.meta && LAST_ANSWER.meta.messageId) || 'local';
+    var key = FB.promptKey(taskId, 'research_quality', 'user');
+    if (!FB.shouldPrompt(key)) return;
+    FB.markPrompted(key);
+    appendFeedbackOffer(anchor, {
+      issue: issue,
+      context: ctx,
+      state: LAST_STATE,
+      answer: LAST_ANSWER,
+      key: key
+    });
+  }
+
+  function bindFeedbackClose() {
+    var btn = $('#feedbackClose');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      if (FB_DRAFT) { closeSheet('feedback'); return; }
+      if (fbHasInput()) {
+        fbSaveForm();
+        toast('反馈草稿已保存在本机，可再次打开继续填写');
+        closeSheet('feedback');
+        return;
+      }
+      closeSheet('feedback');
+    });
   }
 
   /* ================= 每日前沿 =================
@@ -7251,6 +7992,8 @@
       ask: ask, selectSource: selectSource, openSheet: openSheet, openAgent: openAgent,
       restoreHistory: restoreHistory, clearHistory: clearHistory,
       renderAnswer: renderAnswer, lastRoute: function () { return LAST_ROUTE; },
+      openFeedback: openFeedback,
+      feedbackConfig: function () { return window.AstroFeedback ? window.AstroFeedback.config() : null; },
       setPersona: setPersona, applyPersona: applyPersona, PERSONAS: PERSONAS,
       detectStyle: detectStyle, newChat: newChat, filterThreads: filterThreads,
       buildExportPayload: buildExportPayload,

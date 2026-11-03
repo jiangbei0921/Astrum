@@ -454,6 +454,17 @@
   <div class="sheet-body" id="settingsBody"></div>
 </aside>
 
+<aside class="sheet wide feedback" id="feedback" aria-hidden="true" role="dialog" aria-label="问题反馈">
+  <div class="sheet-head">
+    <div class="sheet-id">
+      <span class="sigil plain">✦</span>
+      <div><h3 data-i18n="问题反馈">问题反馈</h3><p data-i18n="把问题与脱敏诊断信息发给 ASTRUM 维护团队">把问题与脱敏诊断信息发给 ASTRUM 维护团队</p></div>
+    </div>
+    <button class="icon-btn" id="feedbackClose" aria-label="关闭">×</button>
+  </div>
+  <div class="sheet-body" id="feedbackBody"></div>
+</aside>
+
 <script src="data/catalog.js"></script>
 <script src="data/knowledge.js"></script>
 <script src="data/places.js"></script>
@@ -506,6 +517,7 @@
 <script src="core/paper-fulltext.js"></script>
 <script src="core/paper-attachment.js"></script>
 <script src="core/research-ui.js"></script>
+<script src="core/feedback.js"></script>
 <script src="core/app.js"></script>
 
 <!-- 启动守卫：核心模块未加载时给出明确修复指引（避免退化成无样式裸页面） -->

@@ -2944,3 +2944,124 @@ html[data-adapt="on"][data-w="narrow"] .hero h1 { letter-spacing: 0; }
 .resume-row:last-child { border-bottom: 0; }
 .resume-q { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .resume-meta { font-family: var(--mono); font-size: 10px; color: var(--muted-2); white-space: nowrap; }
+
+/* ================= 问题反馈 =================
+ * 三种入口共用：对话内轻提示、回答操作条、设置帮助入口。
+ * 视觉沿用现有卡片/浮层：不新增颜色体系，只复用 --surface/--line/--accent。 */
+.sheet.feedback { width: 528px; }
+.feedback .sheet-body { padding-top: 4px; }
+
+.fb-mail {
+  display: inline-block; margin-top: 3px; padding: 1px 6px;
+  font-family: var(--mono); font-size: 10.5px; color: var(--accent);
+  background: var(--accent-soft); border-radius: 5px;
+}
+
+/* 对话内主动提示：轻量，不抢答案正文，也不遮挡输入区 */
+.fb-offer {
+  margin-top: 10px; padding: 11px 13px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-left: 2px solid var(--accent); border-radius: var(--r-sm);
+  box-shadow: var(--shadow-xs);
+}
+.fb-offer-head { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.fb-offer-head b { font-size: 11.5px; color: var(--ink); font-weight: 600; }
+.fb-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); flex: 0 0 auto; }
+.fb-tag {
+  font-size: 9.5px; color: var(--muted); background: var(--paper-2);
+  border: 1px solid var(--line-soft); border-radius: 999px; padding: 1px 7px;
+}
+.fb-offer p { margin: 6px 0 0; font-size: 11px; line-height: 1.65; color: var(--muted); }
+.fb-offer-sum {
+  margin-top: 5px; font-size: 10.5px; color: var(--muted-2);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.fb-offer-acts { display: flex; gap: 7px; margin-top: 9px; flex-wrap: wrap; }
+.fb-btn {
+  font-family: inherit; font-size: 10.5px; line-height: 1.5;
+  border-radius: 6px; padding: 3px 10px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink-2);
+  transition: background .14s ease, border-color .14s ease, color .14s ease;
+}
+.fb-btn.primary { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.fb-btn.primary:hover { background: var(--ink-2); border-color: var(--ink-2); }
+.fb-btn.ghost:hover { border-color: var(--line-strong); color: var(--ink); }
+.fb-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.fb-ignored { font-size: 10.5px; color: var(--muted-2); padding: 2px 0; }
+
+/* 表单 */
+.fb-form { margin-top: 4px; }
+.fb-req { color: var(--red); }
+.fb-counter { text-align: right; font-variant-numeric: tabular-nums; }
+.fb-context {
+  margin: 2px 0 14px; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: var(--r-sm);
+  background: var(--surface-2);
+}
+.fb-ctx-head { font-size: 10px; letter-spacing: .08em; color: var(--accent); margin-bottom: 6px; }
+.fb-ctx-row { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 8px; padding: 2px 0; font-size: 10.5px; }
+.fb-ctx-row .k, .fb-ctx-answer .k { color: var(--muted-2); }
+.fb-ctx-row .v { color: var(--ink-2); overflow-wrap: anywhere; }
+.fb-ctx-answer { margin-top: 5px; font-size: 10.5px; }
+.fb-ctx-answer .v {
+  margin-top: 3px; padding: 7px 9px; color: var(--ink-2); line-height: 1.65;
+  background: var(--surface); border: 1px solid var(--line-soft); border-radius: 6px;
+  max-height: 92px; overflow: auto; overflow-wrap: anywhere;
+}
+.fb-ctx-foot { margin-top: 7px; font-size: 9.5px; line-height: 1.6; color: var(--muted-2); }
+
+.fb-check-row { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; margin: 4px 0 10px; }
+.fb-check { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--ink-2); cursor: pointer; }
+.fb-check input { width: 13px; height: 13px; accent-color: var(--accent); }
+.fb-check-hint { font-size: 9.5px; line-height: 1.6; color: var(--muted-2); flex: 1 1 180px; }
+
+.fb-diag {
+  margin: 2px 0 12px; padding: 9px 11px;
+  border: 1px dashed var(--line-strong); border-radius: var(--r-sm);
+  background: var(--paper-2);
+}
+.fb-diag-head { font-size: 10.5px; color: var(--ink-2); }
+.fb-diag-sum { margin-top: 4px; font-size: 9.5px; line-height: 1.6; color: var(--muted-2); }
+.fb-diag-details { margin-top: 7px; }
+.fb-diag-details summary { font-size: 10px; color: var(--accent); cursor: pointer; }
+.fb-diag-pre, .fb-preview {
+  margin: 6px 0 0; padding: 9px 10px;
+  max-height: 260px; overflow: auto;
+  font-family: var(--mono); font-size: 9.5px; line-height: 1.6;
+  color: var(--ink-2); background: var(--surface);
+  border: 1px solid var(--line-soft); border-radius: 6px;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.fb-preview { max-height: 320px; font-family: var(--sans); font-size: 10.5px; }
+
+/* 确认页 */
+.fb-meta { margin-bottom: 14px; border: 1px solid var(--line); border-radius: var(--r-sm); overflow: hidden; }
+.fb-meta-row {
+  display: grid; grid-template-columns: 86px minmax(0, 1fr); gap: 10px;
+  padding: 7px 10px; border-bottom: 1px solid var(--line-soft); font-size: 10.5px;
+}
+.fb-meta-row:last-child { border-bottom: 0; }
+.fb-meta-row .k { color: var(--muted-2); }
+.fb-meta-row .v { color: var(--ink-2); overflow-wrap: anywhere; }
+.fb-readonly {
+  padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--surface-2); font-size: 11.5px; color: var(--ink); overflow-wrap: anywhere;
+}
+.fb-notice { margin: 4px 0 12px; }
+.fb-hint-strong { margin: 0 0 10px; font-size: 10.5px; line-height: 1.7; color: var(--amber); }
+.fb-warn {
+  margin: 0 0 12px; padding: 9px 11px;
+  background: var(--amber-soft); border: 1px solid rgba(160, 116, 20, .24);
+  border-radius: var(--r-sm); font-size: 10.5px; line-height: 1.65; color: var(--amber);
+}
+.fb-status { min-height: 16px; margin-top: 10px; font-size: 10.5px; line-height: 1.65; color: var(--muted-2); }
+.fb-status.ok { color: var(--green, #2d7a4f); }
+.fb-status.warn { color: var(--amber); }
+
+@media (max-width: 560px) {
+  .sheet.feedback { width: 100%; }
+  .fb-ctx-row, .fb-meta-row { grid-template-columns: 58px minmax(0, 1fr); }
+  .fb-preview { max-height: 210px; }
+  .fb-diag-pre { max-height: 180px; }
+  .fb-offer { margin-left: 0; margin-right: 0; }
+}
