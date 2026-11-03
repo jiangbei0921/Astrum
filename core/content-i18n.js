@@ -250,8 +250,10 @@
     var d = displayOf(p, opts.targetLang);
     var card = el('div', 'paper-card' + (opts.variant === 'frontier' ? ' fr-item' : ''));
     var titleBox = el('div', 'paper-head');
-    var title = el('a', 'paper-title', d.title);
     var href = safeHttp(p && (p.url || p.sourceUrl || p.uri));
+    var title = href
+      ? el('a', 'paper-title research-link', d.title)
+      : el('span', 'paper-title', d.title);
     if (href) { title.href = href; title.target = '_blank'; title.rel = 'noopener noreferrer'; }
     titleBox.appendChild(title);
     var original = el('div', 'paper-original', d.showOriginalTitle ? '原文：' + d.originalTitle : '');
@@ -293,16 +295,16 @@
     if (opts.onAsk) {
       var ask = el('button', 'paper-action', t('围绕它提问'));
       ask.type = 'button';
-      ask.addEventListener('click', function (e) {
+      ask.onclick = function (e) {
         if (e && e.stopPropagation) e.stopPropagation();
         opts.onAsk(p);
-      });
+      };
       acts.appendChild(ask);
     }
     if (acts.children.length) card.appendChild(acts);
-    card.addEventListener('click', function (e) {
+    card.onclick = function (e) {
       if (e && e.stopPropagation) e.stopPropagation();
-    });
+    };
 
     function apply(x) {
       title.textContent = x.title;

@@ -87,9 +87,8 @@
   function render(rep) {
     if (!rep || typeof rep !== 'object' || !doc) return null;
     var rootEl = node('details', 'research-panel');
-    /* V1.10：主要阅读区先给结论与综合研判；完整执行报告默认折叠，
-     * 需要核对时再展开，避免大量卡片挤占回答。 */
-    rootEl.open = false;
+    /* 保持既有可折叠行为：默认展开，用户可收起。 */
+    rootEl.open = true;
     var sum = node('summary', 'research-summary');
     sum.appendChild(textNode('span', 'ic', '◎'));
     sum.appendChild(textNode('span', '', L('研究执行报告')));
@@ -152,9 +151,8 @@
             }
           }));
         });
-        /* 折叠面板默认不翻译不可见论文；用户展开时再按需请求。 */
-        rootEl.addEventListener('toggle', function () {
-          if (!rootEl.open) return;
+        /* 折叠面板默认展开时立即翻译可见论文；用户收起后再展开时按需补译。 */
+        function translateCards() {
           pbox.querySelectorAll('.paper-card').forEach(function (card) {
             if (typeof card._astrumTranslate === 'function') {
               var fn = card._astrumTranslate;
@@ -162,8 +160,12 @@
               fn();
             }
           });
-        });
+        }
+        rootEl.ontoggle = function () {
+          if (rootEl.open) translateCards();
+        };
         body.appendChild(block(L('相关论文'), pbox));
+        if (rootEl.open) translateCards();
       } else {
         body.appendChild(block(L('相关论文'), mapRows(rep.papers.slice(0, 6), function (p) {
           return {
