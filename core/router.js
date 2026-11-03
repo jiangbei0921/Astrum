@@ -11,7 +11,7 @@
   'use strict';
 
   var OBSERVE_INTENTS = ['tonight', 'observe-target', 'photo-target', 'gear-fit', 'chart'];
-  var RESEARCH_WORDS = /综述|研究|最新进展|争议|证据|论文/;
+  var RESEARCH_WORDS = /综述|研究|最新进展|争议|证据|论文|JWST|韦伯|早期宇宙|系外行星|测量方法|测量结果|是否一致|一致性/;
   var COMPARE_WORDS = /对比|比较|区别|哪个更|分别|同时|以及/;
   var WHY_WORDS = /为什么|机制|原理/;
 

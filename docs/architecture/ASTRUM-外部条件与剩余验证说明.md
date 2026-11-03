@@ -151,4 +151,16 @@ node tools/v1-5-longrun-test.js --minutes=180 --label=LR-03 --out=lr-03.log
 | 正式回滚/下线 | BLOCKED_AUTHORIZATION | 明确目标 commit/影响范围后执行手册步骤 |
 | Wikipedia/Semantic | ENV_LIMITATION | 换网络或代理后重跑 network CI；不伪造结果 |
 | 180 分钟长跑 | 已完成（历史） | 需要新一轮时按 §5 重跑 |
-</content>
+
+## 7. V1.7 真实科研验证新增外部条件
+
+| 项 | 状态 | 实际观测与处理 |
+|---|---|---|
+| OpenAlex / Semantic Scholar 限流 | ENV_LIMITATION | 连续研究请求会出现 `rate_limit` / `cooling`；基准把无结果且仅有此类错误的案例标 `BLOCKED_EXTERNAL`，不写成 PASS；等待冷却后单独复跑可通过 |
+| 摘要缺失测量数值 | SOURCE_LIMITATION | OpenAlex 对 10.1051/0004-6361:20078247 的摘要本身缺少数值（`to be pc.`）；系统明确输出“摘要缺少测量数值，未获取全文，不能据此引用具体数值”，不补造 414 pc |
+| 仅摘要、无全文 | SOURCE_LIMITATION | 本轮 6 个论文研究案例均为 `abstractOnly=true`；报告 gap/limitation 明确写明，不声称已读全文 |
+| arXiv PDF 首次超时 | ENV_LIMITATION | `v1-3-paper-fulltext-test` 首次 P1 超时（`REAL: undefined`），复跑成功（185,574 B / 5 页 / 22 chunks）；超时被归类，不伪造全文 |
+| SIMBAD 超时 | ENV_LIMITATION | M42/M31 研究中的 `simbad.tap` 偶发 timeout；不影响本地知识库与论文证据，报告明确写“未获得 SIMBAD 天体参数” |
+| 主题研究无坐标目标 | 设计处理 | T-E/T-F 对 JWST/系外行星/星系形成等主题跳过可选 SIMBAD，避免无意义 10s 等待 |
+| 真实 Provider Key | BLOCKED_API_KEY | 未执行真实模型调用；配置路径与错误分类已验证 |
+| 180 分钟长跑 | 历史完成 | 本轮执行 3 分钟 / 997 任务 smoke（18/18）；未重跑 180 分钟 |

@@ -1,0 +1,3 @@
+{"t":"2026-11-02T13:56:16.922Z","elapsedMin":1,"tasks":346,"ok":303,"fail":0,"cancelled":43,"running":0,"appends":43,"replans":43,"idbOk":404,"idbFail":0,"cacheHit":58,"cacheMiss":58,"heap":5.5,"pageErrors":0,"unhandled":0,"ws":"n/a","maxTaskMs":987}
+{"t":"2026-11-02T13:57:17.072Z","elapsedMin":2,"tasks":673,"ok":589,"fail":0,"cancelled":84,"running":0,"appends":84,"replans":84,"idbOk":786,"idbFail":0,"cacheHit":113,"cacheMiss":113,"heap":17,"pageErrors":0,"unhandled":0,"ws":"n/a","maxTaskMs":987}
+{"t":"2026-11-02T13:58:16.872Z","elapsedMin":3,"tasks":997,"ok":873,"fail":0,"cancelled":124,"running":0,"appends":125,"replans":124,"idbOk":1164,"idbFail":0,"cacheHit":167,"cacheMiss":167,"heap":5.7,"pageErrors":0,"unhandled":0,"ws":"n/a","maxTaskMs":987}

@@ -176,4 +176,32 @@ git push git@github.com:jiangbei0921/Astrum.git main
 - [ ] console 无严重错误，CSP 0 违规
 - [ ] tools/docs 404
 - [ ] 回滚目标 commit 已记录
-</content>
+
+## 7. V1.7 真实科研能力发布（2026-11-02）
+
+### 7.1 发布前新增命令
+
+```powershell
+node tools/v1-7-research-benchmark.js --offline
+node tools/v1-7-research-benchmark.js --json
+node tools/v1-3-paper-fulltext-test.js
+node tools/v1-5-longrun-test.js --minutes=3 --label=LR-V17
+node tools/v1-5-bigfile-test.js
+```
+
+基准结果写入 `tools/fixtures/research-benchmark-results.json`，随代码提交；不要把运行时缓存、临时 HTML 或调试脚本提交。
+
+### 7.2 发布记录（推送后回填）
+
+| 项 | 值 |
+|---|---|
+| 功能提交 | `{{V17_COMMIT}}` |
+| test Workflow | `{{V17_TEST_RUN}}` |
+| pages Workflow | `{{V17_PAGES_RUN}}` |
+| 线上 `version.json.commit` | `{{V17_COMMIT_SHORT}}` |
+| 线上 `dirty` | false |
+| 线上验收 | 首页 200、13 Agent、M42 观测、M31/M33 对比、JWST 研究、M42 论文研究、200mm 拍摄参数、console/CSP、tools/docs 404 |
+
+### 7.3 回滚
+
+V1.7 仍使用 §3.1 的标准回滚：回滚到上一个成功 Pages 的 commit，重新触发 test/pages；不使用 `reset --hard`、不 force push。回滚前记录目标 commit 与本次 Run ID。

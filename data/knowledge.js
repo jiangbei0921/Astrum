@@ -1019,7 +1019,7 @@
     },
     {
       id: 'early-galaxies', type: 'concept', cn: '早期宇宙与 JWST 深场', en: 'Early Galaxies',
-      aliases: ['早期星系', 'JWST 深场', '深场', '宇宙黎明', '高红移星系'],
+      aliases: ['早期星系', 'JWST 深场', '深场', '宇宙黎明', '高红移星系', '早期宇宙'],
       tag: '宇宙', status: 'emerging',
       openQuestion: 'JWST 发现的高红移星系数量与亮度高于多数模型预期，是否意味着星系形成效率、初始质量函数或宇宙学需要修正，尚无定论。',
       summary: 'JWST 在红移 z > 10 处发现大量明亮星系，把「宇宙黎明」的观测边界推进到宇宙诞生后约 3 亿年。',

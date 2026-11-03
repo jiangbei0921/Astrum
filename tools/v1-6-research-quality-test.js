@@ -82,11 +82,14 @@ function planFor(q) {
   ok('Q2.1 仍进入 T-E', m42.p && m42.p.template === 'T-E', m42.p && m42.p.template);
   var pStep = (m42.p.steps || []).filter(function (s) { return s.tool === 'paper.search'; })[0];
   var eStep = (m42.p.steps || []).filter(function (s) { return s.tool === 'evidence.search'; })[0];
-  ok('Q2.2 论文检索式聚焦到目标+距离+测量',
-    pStep && pStep.args.query === 'Orion Nebula distance measurement',
+  /* 2026-11-02 调整：检索式由 "distance measurement" 收敛为 "distance"。
+   * 实测 OpenAlex 上后者返回 3 篇距离测量论文；叠加 measurement 只剩 1 篇，
+   * 另外 2 条位置被无关的星云结构论文占据。断言仍要求英文目标 + 距离主题词。 */
+  ok('Q2.2 论文检索式聚焦到目标+距离',
+    pStep && pStep.args.query === 'Orion Nebula distance',
     pStep && pStep.args.query);
   ok('Q2.3 反证检索复用同一检索式',
-    eStep && eStep.args.query === 'Orion Nebula distance measurement',
+    eStep && eStep.args.query === 'Orion Nebula distance',
     eStep && eStep.args.query);
   ok('Q2.4 最终回答仍保留原始问题',
     (m42.p.steps || []).filter(function (s) { return s.tool === 'compose.domain'; })[0].args.query ===
@@ -174,6 +177,73 @@ function planFor(q) {
     photoValues.indexOf('你的口径=200 mm') >= 0, photoValues.slice(0, 120));
   ok('Q7.5 不再出现荒谬焦距',
     photoValues.indexOf('93258') < 0 && photoValues.indexOf('9 万') < 0, photoValues);
+
+  /* Q8 摘要结论必须保留测量值：旧实现 slice(0,320) 会把 414 ± 7 pc 截掉 */
+  var longAbstract = 'We have used the Very Long Baseline Array to measure the trigonometric parallax of several member stars of the Orion Nebula Cluster showing non-thermal radio emission. We have determined the distance to the cluster to be 414 ± 7 pc. Our distance determination allows for an improved calibration of luminosities and ages of young stars in the cluster.';
+  var paperEv = Ev.fromSourceItem({
+    title: 'The distance to the Orion Nebula', excerpt: longAbstract,
+    url: 'https://doi.org/10.1051/0004-6361:20078247', host: 'doi.org',
+    sourceType: 'paper', doi: '10.1051/0004-6361:20078247', version: 'published', authors: ['Menten']
+  }, { tool: 'paper.search', query: 'Orion Nebula distance', retrievedAt: '2026-11-02T00:00:00Z' });
+  var paperClaims = global.AstroClaims.buildClaimsFromEvidence([paperEv], { query: 'M42 distance' });
+  var paperClaim = paperClaims.filter(function (c) { return c.text && c.text.indexOf('distance') >= 0; })[0];
+  ok('Q8.1 摘要结论保留测量值 414 ± 7 pc',
+    paperClaim && paperClaim.text.indexOf('414') >= 0 && paperClaim.text.indexOf('pc') >= 0,
+    paperClaim && paperClaim.text);
+  ok('Q8.2 摘要结论不再从 ABSTRACT 开头',
+    paperClaim && !/^ABSTRACT/i.test(paperClaim.text), paperClaim && paperClaim.text.slice(0, 40));
+
+  var gapEv = Ev.fromSourceItem({
+    title: 'The distance to the Orion Nebula', excerpt: 'We have used the Very Long Baseline Array to measure the trigonometric parallax of several member stars of the Orion Nebula Cluster. We have determined the distance to the cluster to be pc. Our distance determination allows for an improved calibration of luminosities and ages of young stars.',
+    url: 'https://doi.org/10.1051/0004-6361:20078247', host: 'doi.org',
+    sourceType: 'paper', doi: '10.1051/0004-6361:20078247', version: 'published', authors: ['Menten']
+  }, { tool: 'paper.search', query: 'Orion Nebula distance', retrievedAt: '2026-11-02T00:00:00Z' });
+  var gapClaims = global.AstroClaims.buildClaimsFromEvidence([gapEv], { query: 'M42 distance' });
+  var gapClaim = gapClaims[0];
+  ok('Q8.3 摘要缺少数值时不伪造测量结果',
+    gapClaim && /摘要缺少测量数值/.test(gapClaim.text) && !/\d+\s*pc/.test(gapClaim.text),
+    gapClaim && gapClaim.text);
+
+  var kwEv = Ev.fromSourceItem({
+    title: 'Galaxy Formation and Evolution', excerpt: 'Galaxy、Galaxy formation and evolution、Astrophysics、Physics、Dark matter、Supermassive black hole',
+    url: 'https://doi.org/10.1000/kw', host: 'doi.org', sourceType: 'paper', doi: '10.1000/kw', version: 'published'
+  }, { tool: 'paper.search', query: 'galaxy formation', retrievedAt: '2026-11-02T00:00:00Z' });
+  ok('Q8.4 主题词列表不被当成论文摘要',
+    global.AstroClaims.buildClaimsFromEvidence([kwEv], { query: 'galaxy formation' }).length === 0,
+    global.AstroClaims.buildClaimsFromEvidence([kwEv], { query: 'galaxy formation' }).map(function (c) { return c.text; }).join('|'));
+
+  /* Q9 论文测量值必须结构化，才能比较不同论文的分歧 */
+  function paperEvOf(title, doi, excerpt, query) {
+    return Ev.fromSourceItem({
+      title: title, excerpt: excerpt, url: 'https://doi.org/' + doi, host: 'doi.org',
+      sourceType: 'paper', doi: doi, version: 'published', authors: ['A']
+    }, { tool: 'paper.search', query: query, retrievedAt: '2026-11-02T00:00:00Z' });
+  }
+  var evA = paperEvOf('The distance to the Orion Nebula', '10.1051/0004-6361:20078247',
+    'We measured the parallax. We have determined the distance to the cluster to be 414 ± 7 pc. This improves the calibration.', 'Orion Nebula distance');
+  var evB = paperEvOf('The distance to the Orion Nebula cluster', '10.1111/j.1365-2966.2007.11471.x',
+    'A distance of 440 ± 34 pc is found from a sample of 74 PMS stars. This falls to 392 ± 32 pc when discs are excluded.', 'Orion Nebula distance');
+  var qClaims = global.AstroClaims.buildClaimsFromEvidence([evA, evB], { query: 'M42 distance' });
+  var qNums = qClaims.filter(function (c) { return c.type === 'quantitative' && c.numbers && c.numbers.length; });
+  ok('Q9.1 摘要测量值被抽成定量声明', qNums.length === 2, qNums.length);
+  ok('Q9.2 两篇论文使用同一实体和量纲', qNums.length === 2 &&
+    qNums[0].entities[0] === qNums[1].entities[0] &&
+    qNums[0].numbers[0].unit === qNums[1].numbers[0].unit,
+    qNums.map(function (c) { return c.entities[0] + '|' + c.numbers[0].unit; }).join(' / '));
+  var evC = paperEvOf('A conflicting distance measurement', '10.1000/conflict',
+    'We determine a distance of 500 ± 5 pc from a reanalysis of the cluster.', 'Orion Nebula distance');
+  var cClaims = global.AstroClaims.buildClaimsFromEvidence([evA, evB, evC], { query: 'M42 distance' });
+  var red = global.AstroReducer.reduce({
+    evidence: [evA, evB, evC], claims: cClaims, stepResults: {}
+  });
+  ok('Q9.3 超过 1σ 的距离差异进入 conflicts', red.conflicts.length >= 1 &&
+    red.conflicts.some(function (c) { return c.status === 'significant' && /Orion/i.test(c.family); }),
+    JSON.stringify(red.conflicts));
+  var red2 = global.AstroReducer.reduce({
+    evidence: [evA, evB], claims: global.AstroClaims.buildClaimsFromEvidence([evA, evB], { query: 'M42 distance' }),
+    stepResults: {}
+  });
+  ok('Q9.4 1σ 以内的差异不虚构冲突', red2.conflicts.length === 0, JSON.stringify(red2.conflicts));
 
   console.log('');
   results.forEach(function (r) {

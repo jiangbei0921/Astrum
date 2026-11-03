@@ -224,8 +224,13 @@ node tools/v1-6-legacy-test.js
 node tools/v1-6-pdf-fixtures-test.js
 node tools/v1-6-pdf-fixtures-test.js --write   # 可选：落盘到 tools/fixtures/pdf/
 
-# 研究场景质量（目标碰撞/检索式/对比/拍摄参数/全文失败原因，22 项）
+# 研究场景质量（目标碰撞/检索式/对比/拍摄参数/全文失败原因/摘要数值，30 项）
 node tools/v1-6-research-quality-test.js
+
+# 真实天文研究基准（46 案例 / 15 类；离线子集）
+node tools/v1-7-research-benchmark.js --offline
+# 真实网络研究（20–25 秒/论文任务；结果写入 tools/fixtures/research-benchmark-results.json）
+node tools/v1-7-research-benchmark.js --json
 
 # 多任务恢复、附件、真实 PDF 字节、Research UI、失败步骤、窄屏、对比 UI（36 项，需 Chrome）
 node tools/v1-6-browser-test.js

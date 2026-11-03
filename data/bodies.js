@@ -13,6 +13,7 @@
       cn: '太阳', en: 'Sun', type: '恒星（G2V）', color: '#ffcf6b', glow: '#ffb347',
       diameter: '1,392,700 km', distance: '约 1 AU（1.496 亿 km）', period: '—',
       day: '约 25.4 天（赤道）', moons: '—', temp: '表面约 5,772 K',
+      mass: '约 1.989×10^30 kg（占太阳系总质量 99.86%）',
       scale: 1.0, ring: false,
       intro: '太阳系的中心天体，占系统总质量的 99.86%。核心每秒把约 6 亿吨氢聚变为氦，光到达地球需要 8 分 20 秒。',
       observed: [
@@ -29,6 +30,7 @@
       cn: '月球', en: 'Moon', type: '天然卫星', color: '#e8e3d6', glow: '#cfc9bb',
       diameter: '3,474 km', distance: '平均 384,400 km', period: '27.32 天（恒星月）',
       day: '27.32 天（潮汐锁定）', moons: '—', temp: '−173 ~ 127 ℃',
+      mass: '约 7.342×10^22 kg',
       scale: 1.0, ring: false,
       intro: '地球唯一的天然卫星，自转与公转同步，因此始终以同一面朝向地球。它稳定了地轴倾角，也是潮汐的主要来源。',
       observed: [
@@ -45,6 +47,7 @@
       cn: '水星', en: 'Mercury', type: '类地行星', color: '#b7b1a8', glow: '#8d867c',
       diameter: '4,879 km', distance: '距日 0.39 AU', period: '88 天',
       day: '58.6 天', moons: '0', temp: '−173 ~ 427 ℃',
+      mass: '约 3.301×10^23 kg',
       scale: 0.30, ring: false,
       intro: '最靠近太阳的行星，没有真正的大气层，昼夜温差是太阳系行星中最大的。表面布满环形山，外观类似月球。',
       observed: [
@@ -61,6 +64,7 @@
       cn: '金星', en: 'Venus', type: '类地行星', color: '#eadfb4', glow: '#c9b887',
       diameter: '12,104 km', distance: '距日 0.72 AU', period: '225 天',
       day: '243 天（逆行自转）', moons: '0', temp: '约 464 ℃',
+      mass: '约 4.867×10^24 kg',
       scale: 0.52, ring: false,
       intro: '大小与地球接近，却被浓密的二氧化碳大气与硫酸云包裹，温室效应使地表比水星更热。它是夜空中最亮的行星。',
       observed: [
@@ -78,6 +82,7 @@
       cn: '火星', en: 'Mars', type: '类地行星', color: '#c9704f', glow: '#9c4f33',
       diameter: '6,779 km', distance: '距日 1.52 AU', period: '687 天',
       day: '24.6 小时', moons: '2（火卫一、火卫二）', temp: '平均 −63 ℃',
+      mass: '约 6.417×10^23 kg',
       scale: 0.38, ring: false,
       intro: '表面氧化铁使其呈红色。拥有太阳系最高的火山奥林帕斯山与最大的峡谷水手谷，极冠由水冰与干冰组成。',
       observed: [
@@ -95,6 +100,7 @@
       cn: '木星', en: 'Jupiter', type: '气态巨行星', color: '#d9bd93', glow: '#b08f63',
       diameter: '139,820 km', distance: '距日 5.20 AU', period: '11.86 年',
       day: '9.93 小时', moons: '95（2023 年已确认）', temp: '云顶约 −108 ℃',
+      mass: '约 1.898×10^27 kg（317.8 倍地球质量）',
       scale: 0.72, ring: false, bands: true,
       intro: '太阳系最大的行星，质量是其余行星总和的 2.5 倍。大红斑是一个持续数百年的反气旋风暴，直径可容纳地球。',
       observed: [
@@ -112,6 +118,7 @@
       cn: '土星', en: 'Saturn', type: '气态巨行星', color: '#e3d0a4', glow: '#bda678',
       diameter: '116,460 km', distance: '距日 9.58 AU', period: '29.45 年',
       day: '10.7 小时', moons: '146（2023 年已确认）', temp: '云顶约 −139 ℃',
+      mass: '约 5.683×10^26 kg',
       scale: 0.62, ring: true,
       intro: '以壮观的环系闻名，环主要由水冰颗粒组成，厚度仅数十米到数百米。平均密度小于水，是唯一「能浮在水上」的行星。',
       observed: [
@@ -129,6 +136,7 @@
       cn: '天王星', en: 'Uranus', type: '冰巨行星', color: '#a9dde2', glow: '#7fb8c0',
       diameter: '50,724 km', distance: '距日 19.2 AU', period: '84 年',
       day: '17.2 小时', moons: '28', temp: '约 −197 ℃',
+      mass: '约 8.681×10^25 kg',
       scale: 0.44, ring: false,
       intro: '自转轴倾斜约 98°，几乎「躺着」绕太阳公转，因此两极各有长达 42 年的极昼与极夜。甲烷吸收红光使其呈青蓝色。',
       observed: [
@@ -145,6 +153,7 @@
       cn: '海王星', en: 'Neptune', type: '冰巨行星', color: '#6f8fe0', glow: '#4a66b0',
       diameter: '49,244 km', distance: '距日 30.1 AU', period: '164.8 年',
       day: '16.1 小时', moons: '16', temp: '约 −201 ℃',
+      mass: '约 1.024×10^26 kg',
       scale: 0.44, ring: false,
       intro: '距太阳最远的行星，风速可超过 2,000 km/h，是太阳系风最猛烈的世界。它是先由数学预测、后被观测证实的行星。',
       observed: [

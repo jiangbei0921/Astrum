@@ -446,7 +446,7 @@
     tonight: /今晚|今夜|现在|此刻|推荐|看什么|适合|有什么可看|值得看/,
     event: /流星雨|日食|月食|全食|环食|偏食|极光|合相|冲日|凌日|掩星|食甚|ZHR/,
     cosmos: /黑洞|大爆炸|宇宙|暗物质|暗能量|膨胀|红移|微波背景|CMB|暴胀|多重宇宙|平行宇宙|引力波|恒星演化|超新星|白矮星|中子星|宇宙年龄|奇点|视界|哈勃常数|哈勃张力|星系形成|宇宙黎明|时空|量子引力/,
-    knowledge: /为什么|是什么|多远|多大|年龄|怎么形成|原理|区别|历史|发现|组成|温度|质量|距离/,
+    knowledge: /为什么|是什么|多远|多大|直径|大小|多重|年龄|怎么形成|原理|区别|历史|发现|组成|温度|质量|距离|公转|自转|周期|卫星/,
     chart: /星图|星座|连起来|长什么样|形状|认星|怎么认/,
     gear: /(买|选购|推荐|选型|入手|新手|入门)[^。]{0,8}(望远镜|双筒|天文|设备|相机)|器材|(望远镜|双筒)[^。]{0,6}(怎么选|如何选|哪个好|推荐)/,
     nova: /超新星|新星|爆发|伽马暴|耀斑|爆发态|超新星遗迹|中子星形成|光度极大|超新星前驱星|脉冲星|磁星|致密天体/,
@@ -972,6 +972,28 @@
     return { head: h, sub: s, swapped: false };
   }
 
+  /* 行星/太阳/月球的本地公开参数来自 BODY_INFO（NASA Planetary Fact Sheet）。
+   * 问题问哪个属性，就优先把这个属性放进结论与依据，而不是只说“本地没有成因条目”。 */
+  function bodyAttributeOf(q) {
+    var s = String(q || '');
+    if (/质量|多重/.test(s)) return { key: 'mass', label: '质量' };
+    if (/直径|大小|多大/.test(s)) return { key: 'diameter', label: '直径' };
+    if (/距离|多远|距日/.test(s)) return { key: 'distance', label: '距离' };
+    if (/温度|多热|冷热/.test(s)) return { key: 'temp', label: '温度' };
+    if (/公转|周期/.test(s)) return { key: 'period', label: '公转周期' };
+    if (/自转|一天/.test(s)) return { key: 'day', label: '自转周期' };
+    if (/卫星|几颗/.test(s)) return { key: 'moons', label: '卫星数' };
+    return null;
+  }
+
+  function bodyInfoOf(target) {
+    if (!target || !root.BODY_INFO) return null;
+    if (target.type === 'planet' && target.key) return root.BODY_INFO[target.key] || null;
+    if (target.type === 'sun') return root.BODY_INFO.sun || null;
+    if (target.type === 'moon') return root.BODY_INFO.moon || null;
+    return null;
+  }
+
   function composeTarget(answer, ctx, cfg, t, intent) {
     var tz = ctx.tz, P = prec(cfg);
     var entry = t && t.kind === 'kb' ? t.entry : null;
@@ -1010,6 +1032,8 @@
       target = { name: '太阳', ra: s.ra, dec: s.dec, mag: -26.7, type: 'sun' };
     }
 
+    var binfo = bodyInfoOf(target);
+    var attr = bodyAttributeOf(answer.query);
     var ep = target ? ephemForPreloaded(target.name, target.ra, target.dec, ctx) : null;
     if (target && ep) {
       answer.trace.push(step('kepler', '计算星历', '中天 ' + A.fmtHM(ep.track.transit, tz) + ' · 最大高度 ' + deg(ep.track.maxAlt, cfg)));
@@ -1034,15 +1058,20 @@
     }
 
     if (intent === 'knowledge-target' && !entry) {
-      /* 知识库没有对应成因条目，但目标的位置/月相/星等是本地算得出来的。
-       * 结论必须先用算出来的事实开头，「知识库没有条目」只能作为补充说明——
-       * 否则一个能算的问题会被读成「系统查不到」。 */
-      if (posLine) {
+      /* 知识库没有对应条目时，先看 BODY_INFO 是否有用户问的字段。
+       * 有字段就直接回答该参数；没有才说明缺口，且缺口名称必须与问题一致，
+       * 不能把所有“没有条目”都写成“你问的是成因”。 */
+      if (binfo && attr && binfo[attr.key]) {
+        head = (target ? target.name : binfo.cn) + '的' + attr.label + '为 ' + binfo[attr.key] + '。';
+        sub = posLine || ('来源：NASA Planetary Fact Sheet · 数据更新 ' + (binfo.updated || '2025-06'));
+      } else if (posLine) {
         head = posLine;
-        sub = '你问的是成因，本地没有对应条目；以上是当前可确证的观测状态。';
+        sub = (attr ? '你问的是' + attr.label + '，本地没有对应条目' : '你问的是成因，本地没有对应条目') +
+          '；以上是当前可确证的观测状态。';
       } else {
-        head = '关于「' + (target ? target.name : answer.query) + '」的成因，本地没有可引用的条目。';
-        sub = '我能确证的是它的位置与亮度；成因这类问题需要外部文献，我可以给你可复跑的检索。';
+        var missing = attr ? attr.label : '成因';
+        head = '关于「' + (target ? target.name : answer.query) + '」的' + missing + '，本地没有可引用的条目。';
+        sub = '我能确证的是它的位置与亮度；' + missing + '这类问题需要外部文献，我可以给你可复跑的检索。';
       }
     } else if (entry && intent === 'intro-target' && /怎么|如何|怎样|指|辨认|认星/.test(answer.query)) {
       head = entry.summary;
@@ -1073,13 +1102,28 @@
       answer.trace.push(step('vega', '检索知识库', '命中「' + entry.id + '」· 置信度 ' + entry.confidence.toFixed(2) + ' · ' + freshnessLabel(entry.freshness),
         { tool: 'kb-index', check: RT.check('知识库命中', true, entry.id + ' · ' + entry.facts.length + ' 条事实') }));
     } else if (target) {
-      items = [
-        { label: '坐标 (J2000)', value: 'RA ' + A.fmtRA(target.ra) + ' / Dec ' + A.fmtDec(target.dec) },
-        { label: '视星等', value: String(target.mag) },
-        { label: '类型', value: t.kind === 'star' ? '恒星' : t.kind === 'planet' ? '行星' : t.kind === 'moon' ? '天然卫星' : '深空天体' }
-      ];
-      answer.trace.push(step('vega', '星表查询', '未收录详解条目 · 降级为星表级事实',
-        { tool: 'catalog', check: RT.check('详解条目', false, '只有星表级事实，无解释性内容') }));
+      items = [];
+      /* 行星/太阳/月球的物理参数只在“问知识/介绍”时展开；
+       * 观测类回答保持原有 5 条事实，避免旧接口输出漂移。 */
+      var showBodyFacts = !!(binfo && (intent === 'knowledge-target' || intent === 'intro-target'));
+      if (showBodyFacts) {
+        items.push({ label: '类型', value: binfo.type || '' });
+        if (binfo.mass) items.push({ label: '质量', value: binfo.mass });
+        if (binfo.diameter) items.push({ label: '直径', value: binfo.diameter });
+        if (binfo.distance) items.push({ label: '距日/距离', value: binfo.distance });
+        if (binfo.period) items.push({ label: '公转周期', value: binfo.period });
+        if (binfo.day) items.push({ label: '自转周期', value: binfo.day });
+        if (binfo.moons) items.push({ label: '卫星数', value: binfo.moons });
+        if (binfo.temp) items.push({ label: '温度', value: binfo.temp });
+      }
+      items.push({ label: '坐标 (J2000)', value: 'RA ' + A.fmtRA(target.ra) + ' / Dec ' + A.fmtDec(target.dec) });
+      items.push({ label: '视星等', value: String(target.mag) });
+      if (!showBodyFacts) {
+        items.push({ label: '类型', value: t.kind === 'star' ? '恒星' : t.kind === 'planet' ? '行星' : t.kind === 'moon' ? '天然卫星' : '深空天体' });
+      }
+      answer.trace.push(step('vega', showBodyFacts ? '星表/NASA 参数查询' : '星表查询',
+        showBodyFacts ? ('BODY_INFO 命中 · ' + items.length + ' 条可核验参数') : '未收录详解条目 · 降级为星表级事实',
+        { tool: showBodyFacts ? 'body-info' : 'catalog', check: RT.check('详解条目', showBodyFacts, showBodyFacts ? binfo.cn : '只有星表级事实，无解释性内容') }));
     }
     if (ep && target && intent !== 'knowledge-target') {
       /* 时刻必须带时区，否则数值无法复算 */
@@ -1097,19 +1141,14 @@
     }
     answer.sections.push({
       kind: 'evidence', title: '依据', items: items, para: para,
-      sources: entry ? entry.sources : [{ n: '本地星表（J2000 快照）', u: '' }],
+      sources: entry ? entry.sources : (showBodyFacts && binfo.sources ? binfo.sources : [{ n: '本地星表（J2000 快照）', u: '' }]),
       register: reg
     });
     answer.trace.push(step('lyra', '组织表述', (reg === 'pro' ? '专业语体' : '科普语体') + ' · 语气 ' + toneLabel(cfg.lyra.tone)));
 
     /* ---- 太阳系天体的实测面貌（来自 NASA/ESA/JPL 已发布观测结果） ---- */
-    var bodyKey = null;
-    if (target && target.type === 'planet') bodyKey = target.key;
-    else if (target && target.type === 'sun') bodyKey = 'sun';
-    else if (target && target.type === 'moon') bodyKey = 'moon';
-    if (bodyKey && depth !== 'brief') {
-      var binfo = (root.BODY_INFO || {})[bodyKey];
-      if (binfo && binfo.observed && binfo.observed.length) {
+    if (binfo && depth !== 'brief') {
+      if (binfo.observed && binfo.observed.length) {
         answer.sections.push({
           kind: 'list', title: '实测面貌 · ' + binfo.cn + '（截至 ' + (binfo.updated || '2025-06') + '）',
           items: binfo.observed.slice(0, depth === 'deep' ? binfo.observed.length : 3).map(function (o) {
@@ -1463,7 +1502,7 @@
   function composeCosmos(answer, ctx, cfg, t, q) {
     var entry = t && t.kind === 'kb' ? t.entry : null;
     var reg = pickRegister(cfg, q, entry);
-    var wantIndex = !entry || /未解|哪些问题|前沿|争议|不确定|还没解决/.test(q);
+    var wantIndex = !entry || /未解|哪些问题|前沿|不确定|还没解决/.test(q);
 
     if (wantIndex) {
       var front = KB.entries.filter(function (e) { return e.tag === '宇宙' && e.status !== 'established'; });

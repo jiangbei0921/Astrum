@@ -86,4 +86,12 @@
 - 架构：`ASTRUM-最终架构文档.md`
 - 外部条件：`ASTRUM-外部条件与剩余验证说明.md`
 - 发布回滚：`docs/operations/ASTRUM-最终发布与回滚手册.md`
-</content>
+
+## 6. V1.7 真实科研能力验证（2026-11-02）
+
+- 原始 30 项状态不变：24 PASS、1 PARTIAL（ARCH-27 真实 Key）、1 BLOCKED_EXTERNAL（ARCH-30 V1.6 门槛）、2 OPTIONAL、2 NOT_REQUIRED、0 FAILED。
+- ARCH-21（Claims）证据增强：新增摘要关键句选择、缺数值警告、距离测量值结构化 Claim；`v1-6-research-quality` 30/30、`v1-5-research-loop-claims` 48/48。
+- ARCH-26（论文全文）证据增强：真实 arXiv 28/28；新增跨 Provider 去重与无 DOI 论文门槛，未改变全文解析/缓存契约。
+- ARCH-09/24/25 边界复核：13 Agent、7 模板、12 Tool 不变；新增 `v1-7-research-benchmark` 只是测试工具，不注册为生产 Tool。
+- 新增真实研究基准：46 案例 / 15 类，完整运行 46/46 PASS；外部限流单独标 BLOCKED_EXTERNAL，不写成 PASS。
+- ARCH-30 仍不启动：V1.6 门槛未满足，本轮未新增云协议/OCR/多模型能力。

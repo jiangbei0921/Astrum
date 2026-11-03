@@ -390,7 +390,7 @@
     }
     var query = String(args && args.query || '').trim();
     if (!query) return { ok: false, reason: 'empty_query', kind: 'args_invalid', retriable: false };
-    return root.Sources.searchMany([query], { types: ['paper'], maxCalls: 2, budgetMs: 10000 })
+    return root.Sources.searchMany([query], { types: ['paper'], maxCalls: 2, budgetMs: 10000, internal: true })
       .then(function (res) {
         var out = searchResult(spec, args, res, '');
         if (args.fulltext !== true || !out.items.length) return out;
@@ -437,7 +437,7 @@
     var query = String(args && args.query || '').trim();
     if (!query) return { ok: false, reason: 'empty_query', kind: 'args_invalid', retriable: false };
     return root.Sources.searchMany([query], {
-      types: ['paper', 'encyclopedia', 'database'], maxCalls: 3, budgetMs: 10000
+      types: ['paper', 'encyclopedia', 'database'], maxCalls: 3, budgetMs: 10000, internal: true
     }).then(function (res) {
       return searchResult(spec, args, res, args.direction || '');
     }).catch(function (e) {

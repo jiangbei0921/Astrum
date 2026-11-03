@@ -123,3 +123,20 @@
 7. 全文只试 1 篇、失败无具体原因 → 最多 3 篇 + 403/反爬/无文本分类进入 gaps/limitations。
 
 新增 `tools/v1-6-research-quality-test.js`（22/22），浏览器测试 36/36，P0-03 53/53、B8 33/33、兼容性 20/20 与 25/25。详细见 `ASTRUM-研究质量与调度修复报告.md`。
+
+## 8. 2026-11-02 第三轮：真实科研能力验证
+
+在第二轮之后继续执行 46 个真实天文研究基准与 5 类完整研究任务，发现并修复 10 类真实缺陷：
+
+1. `木星的直径是多少` 未进入知识问答 → 扩展 `KW.knowledge`；
+2. BODY_INFO 物理参数无条件展开 → 只在知识/介绍意图展开，旧观测输出与 P0-03 基线不变；
+3. JWST 问题命中“哈勃与韦布的区别”并落到议题索引 → `early-galaxies` 别名 + 取消“争议”触发泛索引；
+4. 主题检索式过宽/过窄 → `JWST high-redshift galaxies`、`exoplanet atmosphere transmission spectroscopy`、`galaxy formation recent progress`；
+5. 主题研究白等 SIMBAD → 无坐标目标跳过可选 t1；
+6. 同一论文跨 Provider 重复 → 标题归一化去重，保留更完整摘要；
+7. 无 DOI/arXiv 的非学术记录进入结论 → 已有 2 篇可信论文时剔除，figshare/zenodo/OSF 标预印本；
+8. 摘要 600 字截断导致 `distance ... to be pc.` → 完整 1600 字 + 关键句选择 + 缺数值明确警告；
+9. Reducer 未换算不确定性导致 M31 744±33 与 772±44 误报冲突 → 与 value 同步换算；
+10. 主题词列表冒充摘要 → 无句号短词列表不生成结论。
+
+新增 `tools/v1-7-research-benchmark.js`（46 案例 / 15 类，结果 JSON `tools/fixtures/research-benchmark-results.json`），并纳入 CI 离线层；`v1-6-research-quality-test` 从 22 项扩展到 30 项。真实 arXiv 全文 28/28，3 分钟长跑 997 任务 18/18，构建 `_site` 58 文件、密钥 0、绝对路径 0。详细见 `ASTRUM-真实天文研究基准集与执行结果.md`。

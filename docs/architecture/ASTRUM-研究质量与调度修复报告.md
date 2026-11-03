@@ -123,6 +123,7 @@
 | 出版社 403/反爬 | 外部 | A&A/IOP PDF 被拒；最多尝试 3 篇，失败原因可见 |
 | 真实 HTML 全文 | 部分成功 | 出版社 HTML 有时被识别为错误页；不冒充全文 |
 | 真实 Provider Key | BLOCKED_API_KEY | 未执行真实模型调用 |
+
 | 真实扫描/CID 样本 | BLOCKED_SAMPLE | 合成 13 类已通过 |
 
 ## 6. 发布与线上验收
@@ -140,3 +141,41 @@
 ## 7. 结论
 
 本轮不是“发现后写报告”，而是完成了真实场景 → 根因 → 代码修改 → 测试 → 基线授权更新 → 回归的闭环。所有修改均有对应测试；旧接口/13 Agent/Tool-Centric/ADR-001 预算未改变。
+
+## 8. 第三轮（V1.7）：真实科研能力验证与修复
+
+> 日期：2026-11-02
+> 触发：46 个真实天文研究基准案例 + 5 类完整研究任务
+> 结论：本轮又发现并修复 10 类真实缺陷；完整基准 46/46 PASS；外部限流单独标 BLOCKED_EXTERNAL，不写成 PASS。
+
+### 8.1 新增缺陷与修复
+
+| # | 现象 | 根因 | 修复 |
+|---|---|---|---|
+| 1 | `木星的直径是多少` 答成“今晚可见窗口” | `KW.knowledge` 没有“直径/公转/自转/周期/卫星” | 扩展知识意图词，参数问题进入 `knowledge-target` |
+| 2 | 行星参数回答影响旧观测输出 | BODY_INFO 无条件展开全部物理参数 | 只在 `knowledge-target`/`intro-target` 展开；观测类保持原 5 条事实，P0-03 仍 53/53 |
+| 3 | `JWST 对早期宇宙…争议` 答成“宇宙学议题索引” | 别名 `JWST` 命中“哈勃与韦布的区别”，且 `wantIndex` 把“争议”判为泛索引 | `early-galaxies` 增加“早期宇宙”别名；移除 `wantIndex` 中的“争议” |
+| 4 | JWST/系外行星检索返回望远镜任务论文 | 检索式用了错误实体名和逐词直译 | 主题型研究收敛为 `JWST high-redshift galaxies` / `exoplanet atmosphere transmission spectroscopy` / `galaxy formation recent progress`；争议追加 `tension` |
+| 5 | 主题研究白等 SIMBAD 超时 | 无可解析坐标仍执行可选 SIMBAD | T-E/T-F 在无坐标目标时跳过 t1，保留 t2/t3 编号 |
+| 6 | 同一论文被 S2/OpenAlex 重复计入 | 仅按 evidenceId 去重；`/pdf` 链接与大小写标题不同 | Adapter 按归一化标题跨工具去重，保留摘要更完整、带 DOI/arXiv 的一条 |
+| 7 | 无 DOI/arXiv 的非学术记录进入结论 | 只有元数据，无法核对作者/年份 | 已有 ≥2 篇带 DOI/arXiv 论文时，丢弃无标识论文；figshare/zenodo/OSF 标为预印本 |
+| 8 | `distance ... to be pc.` 缺少数值 | 摘要前 320 字截断；OpenAlex 摘要本身可能丢公式 | 摘录取完整 1600 字；`keyExcerpt` 选含数值/单位的句子；没有数值时明确写“摘要缺少测量数值，不能引用具体数值” |
+| 9 | M31 744±33 与 772±44 被误报冲突 | Reducer 把不确定性按原单位与换算后的值比较 | 不确定性与 value 一起乘单位因子；1σ 内不再虚构冲突 |
+| 10 | 主题词列表被当成论文摘要 | Provider 把 concepts 塞进 abstract | 无句号、短词 ≥4 段的内容不生成论文结论 |
+
+### 8.2 新增能力
+
+- 摘要中的距离测量值抽成 `type=quantitative` 的 Claim（`numbers[]` + `uncertainty`），实体使用检索式，使不同论文进入同一 `实体|量纲` 组。
+- M31 两篇论文（744 ± 33 kpc、772 ± 44 kpc）现在可同口径展示；超过 1σ 的差异才进入“证据冲突”。
+- 主题型研究不再把“宇宙学议题索引”当结论；索引兜底会被替换为“已检索到 N 篇论文（M 篇仅摘要）”的研究口径摘要。
+
+### 8.3 修改文件
+
+`core/agents.js`、`core/router.js`、`core/planner.js`、`core/claims.js`、`core/reducer.js`、`core/research.js`、`core/sources.js`、`core/compose-adapter.js`、`data/bodies.js`、`data/knowledge.js`、`tools/v1-6-research-quality-test.js`、`tools/v1-4-ci-test.js`、`.github/workflows/test.yml`、新增 `tools/v1-7-research-benchmark.js`。
+
+### 8.4 回归
+
+- 基准：46 案例，15 类；完整运行 46/46 PASS（结果 JSON：`tools/fixtures/research-benchmark-results.json`）。
+- P0-03：53/53，20 问 sections 逐字节 0 差异。
+- 研究质量：30/30（新增摘要数值、主题词列表、定量 Claim、1σ 冲突）。
+- Node/Chrome 全量套件与构建见 `ASTRUM-全量测试与线上验收报告.md`。

@@ -169,7 +169,18 @@ File → kindOf（扩展名 + MIME 双向校验）
 - 原始矩阵：`ASTRUM-原始架构逐项完成度对照表.md`
 - 实施：`ASTRUM-最终工程实施报告.md`
 - 测试：`ASTRUM-全量测试与线上验收报告.md`
+- 研究基准：`ASTRUM-真实天文研究基准集与执行结果.md`
 - 外部条件：`ASTRUM-外部条件与剩余验证说明.md`
 - 发布回滚：`docs/operations/ASTRUM-最终发布与回滚手册.md`
 - 历史：`ASTRUM-全项目架构追踪与缺口分析.md`、`V1-00-核心能力建设总蓝图.md`、`ADR-001-replan-budget.md`
-</content>
+
+## 9. V1.7 真实科研能力（2026-11-02）
+
+- 架构边界不变：13 Agent、Muse、Tool-Centric、7 模板、MEMORY/Thread/TaskStore、旧接口、ADR-001 均保留。
+- 新增能力只在既有模块内增强：
+  - Planner：主题型研究检索式收敛、无坐标目标跳过可选 SIMBAD；
+  - Sources：完整摘要（1600 字）、figshare/zenodo/OSF 预印本识别；
+  - Claims：关键句选择、摘要缺数值警告、距离测量值结构化 Claim；
+  - Reducer：数值与不确定性同单位换算，1σ 内不虚构冲突；
+  - Compose Adapter：跨 Provider 标题去重、可信论文门槛、研究口径 verdict。
+- 新增 `tools/v1-7-research-benchmark.js`（46 案例 / 15 类），不改变生产模块职责。

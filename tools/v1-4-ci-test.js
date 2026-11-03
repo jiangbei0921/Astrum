@@ -47,6 +47,7 @@ var CORE_TESTS = [
   'tools/v1-5-perf-test.js', 'tools/v1-5-concurrency-test.js', 'tools/v1-5-store-stress-test.js',
   'tools/v1-5-research-loop-test.js', 'tools/v1-6-legacy-test.js',
   'tools/v1-6-pdf-fixtures-test.js', 'tools/v1-6-research-quality-test.js',
+  'tools/v1-7-research-benchmark.js',
   'tools/v1-6-provider-test.js'
 ];
 var BROWSER_TESTS = [

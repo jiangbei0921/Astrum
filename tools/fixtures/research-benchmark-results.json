@@ -1,0 +1,3162 @@
+{
+  "generatedAt": "2026-11-03T02:18:48.133Z",
+  "ctx": {
+    "y": 2026,
+    "mo": 11,
+    "d": 2,
+    "h": 21,
+    "mi": 0,
+    "lat": 39.9,
+    "lon": 116.4,
+    "tz": 8,
+    "city": "北京"
+  },
+  "results": [
+    {
+      "id": "B01",
+      "category": "基础天文知识",
+      "question": "M42 是什么？",
+      "expected": "verdict+evidence",
+      "actual": "legacy / verdict+evidence+observe+visual+mapref+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [],
+      "ms": 37,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,observe,visual,mapref,followup,review"
+        },
+        {
+          "name": "包含章节 evidence",
+          "ok": true,
+          "detail": "verdict,evidence,observe,visual,mapref,followup,review"
+        },
+        {
+          "name": "包含关键词 猎户座",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "B02",
+      "category": "基础天文知识",
+      "question": "什么是黑洞？",
+      "expected": "verdict",
+      "actual": "legacy / verdict+evidence+consensus+observe+visual+boundary+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "cosmos",
+        "vega",
+        "orion",
+        "lyra"
+      ],
+      "tools": [],
+      "ms": 4,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,consensus,observe,visual,boundary,followup,review"
+        },
+        {
+          "name": "包含关键词 引力",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "B03",
+      "category": "基础天文知识",
+      "question": "太阳系的结构是怎样的？",
+      "expected": "verdict",
+      "actual": "legacy / verdict+system+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "navigator",
+        "critic"
+      ],
+      "tools": [],
+      "ms": 2,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,system,review"
+        },
+        {
+          "name": "包含任一关键词 太阳/行星",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "B04",
+      "category": "基础天文知识",
+      "question": "超新星爆发能产生多大的能量？",
+      "expected": "verdict",
+      "actual": "legacy / verdict+evidence+observe+boundary+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "nova",
+        "vega",
+        "lyra"
+      ],
+      "tools": [],
+      "ms": 3,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,observe,boundary,followup,review"
+        },
+        {
+          "name": "包含任一关键词 能量/10^/超新星",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "B05",
+      "category": "基础天文知识",
+      "question": "太阳活动对地球有什么影响？",
+      "expected": "verdict",
+      "actual": "legacy / verdict+evidence+observe+boundary+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "helios",
+        "vega",
+        "horizon",
+        "lyra"
+      ],
+      "tools": [],
+      "ms": 2,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,observe,boundary,followup,review"
+        },
+        {
+          "name": "包含任一关键词 磁暴/极光/电离层",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "N01",
+      "category": "名称编号",
+      "question": "M42 在哪？",
+      "expected": "verdict",
+      "actual": "legacy / verdict+evidence+observe+visual+mapref+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [],
+      "ms": 12,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,observe,visual,mapref,followup,review"
+        },
+        {
+          "name": "包含任一关键词 猎户/佩剑",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "N02",
+      "category": "名称编号",
+      "question": "NGC1976 是什么？",
+      "expected": "verdict",
+      "actual": "legacy / verdict+evidence+observe+visual+mapref+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [],
+      "ms": 10,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,observe,visual,mapref,followup,review"
+        },
+        {
+          "name": "包含任一关键词 猎户/星云",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "N03",
+      "category": "名称编号",
+      "question": "猎户座大星云怎么找？",
+      "expected": "verdict",
+      "actual": "legacy / verdict+evidence+observe+visual+mapref+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [],
+      "ms": 10,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,observe,visual,mapref,followup,review"
+        },
+        {
+          "name": "包含任一关键词 猎户/参宿/佩剑",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "N04",
+      "category": "名称编号",
+      "question": "M31 和 M33 是哪个星系？",
+      "expected": "verdict+evidence",
+      "actual": "control / verdict+evidence+observe+visual+mapref+compare+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 41,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,observe,visual,mapref,compare,followup,review"
+        },
+        {
+          "name": "包含章节 evidence",
+          "ok": true,
+          "detail": "verdict,evidence,observe,visual,mapref,compare,followup,review"
+        },
+        {
+          "name": "包含任一关键词 仙女/三角",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "P01",
+      "category": "天体参数",
+      "question": "M42 的距离是多少？",
+      "expected": "verdict+evidence",
+      "actual": "legacy / verdict+evidence+observe+visual+mapref+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [],
+      "ms": 11,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,observe,visual,mapref,followup,review"
+        },
+        {
+          "name": "包含章节 evidence",
+          "ok": true,
+          "detail": "verdict,evidence,observe,visual,mapref,followup,review"
+        },
+        {
+          "name": "包含关键词 1344",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "包含任一关键词 光年",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "P02",
+      "category": "天体参数",
+      "question": "M31 的距离是多少？",
+      "expected": "verdict",
+      "actual": "legacy / verdict+evidence+observe+visual+mapref+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [],
+      "ms": 11,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,observe,visual,mapref,followup,review"
+        },
+        {
+          "name": "包含任一关键词 254/250/万光年",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "P03",
+      "category": "天体参数",
+      "question": "木星的质量是多少？",
+      "expected": "verdict",
+      "actual": "legacy / verdict+evidence+list+observe+visual+boundary+mapref+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [],
+      "ms": 11,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,list,observe,visual,boundary,mapref,followup,review"
+        },
+        {
+          "name": "包含任一关键词 kg/千克/10^",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "P04",
+      "category": "天体参数",
+      "question": "太阳表面温度是多少？",
+      "expected": "verdict",
+      "actual": "legacy / verdict+evidence+observe+boundary+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "helios",
+        "vega",
+        "horizon",
+        "lyra"
+      ],
+      "tools": [],
+      "ms": 2,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,observe,boundary,followup,review"
+        },
+        {
+          "name": "包含任一关键词 K/开/5500/5778",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "P05",
+      "category": "天体参数",
+      "question": "木星的直径是多少？",
+      "expected": "verdict",
+      "actual": "legacy / verdict+evidence+list+observe+visual+boundary+mapref+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [],
+      "ms": 10,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,list,observe,visual,boundary,mapref,followup,review"
+        },
+        {
+          "name": "包含任一关键词 139,820/139820/km",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "P06",
+      "category": "天体参数",
+      "question": "土星的质量是多少？",
+      "expected": "verdict",
+      "actual": "legacy / verdict+evidence+list+observe+visual+boundary+mapref+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [],
+      "ms": 11,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,list,observe,visual,boundary,mapref,followup,review"
+        },
+        {
+          "name": "包含任一关键词 kg/千克/10^",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "C01",
+      "category": "多目标比较",
+      "question": "M42 和 M31 有什么区别？",
+      "expected": "verdict+evidence",
+      "actual": "control / verdict+evidence+observe+visual+mapref+compare+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 20,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,observe,visual,mapref,compare,followup,review"
+        },
+        {
+          "name": "包含章节 evidence",
+          "ok": true,
+          "detail": "verdict,evidence,observe,visual,mapref,compare,followup,review"
+        },
+        {
+          "name": "包含任一关键词 星云/星系",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "C02",
+      "category": "多目标比较",
+      "question": "比较 M31 和 M33 的观测难度与距离测量",
+      "expected": "T-D",
+      "actual": "control / verdict+evidence+observe+visual+mapref+compare+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 22,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "模板 T-D",
+          "ok": true,
+          "detail": "T-D"
+        },
+        {
+          "name": "对比目标数 2",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "包含关键词 距离",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "包含任一关键词 可见性",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "C03",
+      "category": "多目标比较",
+      "question": "木星和土星哪个更适合观测？",
+      "expected": "T-D",
+      "actual": "control / verdict+evidence+list+observe+visual+boundary+mapref+compare+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 23,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "模板 T-D",
+          "ok": true,
+          "detail": "T-D"
+        },
+        {
+          "name": "对比目标数 2",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "包含关键词 木星",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "包含关键词 土星",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "C04",
+      "category": "多目标比较",
+      "question": "M4 和 M42 哪个更适合拍摄？",
+      "expected": "T-D",
+      "actual": "control / verdict+evidence+observe+visual+mapref+compare+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 23,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "模板 T-D",
+          "ok": true,
+          "detail": "T-D"
+        },
+        {
+          "name": "对比目标数 2",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "包含关键词 M4",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "包含关键词 M42",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "M01",
+      "category": "多轮上下文",
+      "question": "M42 是什么？",
+      "expected": "verdict",
+      "actual": "legacy / verdict+evidence+observe+visual+mapref+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [],
+      "ms": 11,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,observe,visual,mapref,followup,review"
+        },
+        {
+          "name": "包含关键词 猎户座",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "M02",
+      "category": "多轮上下文",
+      "question": "它多远？",
+      "expected": "verdict+evidence",
+      "actual": "legacy / verdict+evidence+observe+visual+mapref+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [],
+      "ms": 11,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,observe,visual,mapref,followup,review"
+        },
+        {
+          "name": "包含章节 evidence",
+          "ok": true,
+          "detail": "verdict,evidence,observe,visual,mapref,followup,review"
+        },
+        {
+          "name": "包含关键词 1344",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "包含任一关键词 光年",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "D01",
+      "category": "复杂拆解",
+      "question": "M42 为什么是红色的，并且应该怎么拍？",
+      "expected": "verdict",
+      "actual": "control / verdict+evidence+observe+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "horizon",
+        "lyra"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kb.lookup:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 14,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,observe,followup,review"
+        },
+        {
+          "name": "包含任一关键词 红/拍摄",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "D02",
+      "category": "复杂拆解",
+      "question": "比较 M31 和 M33 并给出今晚的观测建议",
+      "expected": "T-D",
+      "actual": "control / verdict+evidence+observe+visual+mapref+compare+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 52,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "模板 T-D",
+          "ok": true,
+          "detail": "T-D"
+        },
+        {
+          "name": "对比目标数 2",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "包含任一关键词 观测/建议",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "D03",
+      "category": "复杂拆解",
+      "question": "JWST 对早期宇宙星系的主要发现及争议",
+      "expected": "research",
+      "actual": "control / verdict+evidence+consensus+observe+boundary+evidence+list+boundary+followup+review",
+      "evidence": [
+        {
+          "id": "ev_82b076d45522223a",
+          "type": "paper",
+          "title": "Early-Universe Expansion History, Star-Formation Efficiency, and the JWST High-Redshift Galaxy Tension",
+          "uri": "https://doi.org/10.6084/m9.figshare.32239026",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_80ebc400a9bdef00",
+          "type": "paper",
+          "title": "JWST high redshift galaxy observations have a strong tension with Planck CMB measurements",
+          "uri": "https://doi.org/10.48550/arxiv.2301.00347",
+          "abstractOnly": true
+        }
+      ],
+      "agents": [
+        "muse",
+        "cosmos",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "evidence.search:ok",
+        "evidence.search:ok"
+      ],
+      "ms": 5135,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "存在研究报告",
+          "ok": true,
+          "detail": "control"
+        },
+        {
+          "name": "结论引用均可追溯",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "无数值伪影",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "论文有标题与链接",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "论文无重复标题",
+          "ok": true,
+          "detail": "2 titles"
+        },
+        {
+          "name": "论文含年份",
+          "ok": true,
+          "detail": "2026-05-11,2023-01-01"
+        },
+        {
+          "name": "论文链接为可追溯地址",
+          "ok": true,
+          "detail": "https://doi.org/10.6084/m9.figshare.32239026,https://doi.org/10.48550/arxiv.2301.00347"
+        },
+        {
+          "name": "至少一篇论文",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "包含任一关键词 JWST/星系/早期",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [
+        {
+          "tool": "evidence.search",
+          "status": "ok",
+          "empty": false,
+          "errors": [
+            {
+              "kind": "rate_limit",
+              "msg": "触发限流"
+            },
+            {
+              "kind": "timeout",
+              "msg": "请求超时"
+            }
+          ],
+          "error": null
+        },
+        {
+          "tool": "evidence.search",
+          "status": "ok",
+          "empty": false,
+          "errors": [
+            {
+              "kind": "rate_limit",
+              "msg": "触发限流"
+            },
+            {
+              "kind": "timeout",
+              "msg": "请求超时"
+            }
+          ],
+          "error": null
+        }
+      ],
+      "papers": [
+        {
+          "title": "Early-Universe Expansion History, Star-Formation Efficiency, and the JWST High-Redshift Galaxy Tension",
+          "authors": [
+            "Rushan Khan"
+          ],
+          "date": "2026-05-11",
+          "doi": "10.6084/m9.figshare.32239026",
+          "arxivId": "",
+          "url": "https://doi.org/10.6084/m9.figshare.32239026",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "JWST high redshift galaxy observations have a strong tension with Planck CMB measurements",
+          "authors": [
+            "Deng Wang",
+            "Yizhou Liu"
+          ],
+          "date": "2023-01-01",
+          "doi": "10.48550/arxiv.2301.00347",
+          "arxivId": "",
+          "url": "https://doi.org/10.48550/arxiv.2301.00347",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "researchMeta": {
+        "conclusions": [
+          {
+            "text": "In a spatially flat Friedmann–Lemaître–Robertson–Walker (FLRW) background with Planck 2018 parameters (H0 = 67.4 ± 0.5 km s^-1 Mpc^-1, Ωm = 0.315 ± 0.007), the cosmic age at z = 14.32 is t ≈ 290 Myr, yielding an integrated baryon-to-star conversion efficiency ε⋆ ≡ M⋆/(fb Mh), with fb ≡ Ωb/Ωm, that must reach ε⋆ ≳ 0.30 ",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_82b076d45522223a"
+            ],
+            "scope": "abstract-only"
+          },
+          {
+            "text": "The true situation is that the Planck CMB measurement has a strong tension with JWST high redshift galaxy observations",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_80ebc400a9bdef00"
+            ],
+            "scope": "abstract-only"
+          }
+        ],
+        "gaps": [
+          "2 篇论文仅获得摘要，未获取全文",
+          "未获得 SIMBAD 天体参数（本机网络不可达或查询无结果）",
+          "未提供 FITS 观测文件"
+        ],
+        "limitations": [
+          "部分结论仅基于论文摘要，未阅读全文。",
+          "SIMBAD 数据缺失，天体参数可能不完整。",
+          "没有 FITS 观测数据，缺少独立观测验证。"
+        ],
+        "paperStats": {
+          "searched": 2,
+          "fulltext": 0,
+          "abstractOnly": 2,
+          "failed": 0,
+          "fulltextEvidence": 0,
+          "abstractEvidence": 2
+        },
+        "conflicts": []
+      }
+    },
+    {
+      "id": "A01",
+      "category": "多Agent协作",
+      "question": "今晚在北京能看到什么？",
+      "expected": "verdict+rank",
+      "actual": "legacy / verdict+rank+observe+visual+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "horizon",
+        "vega",
+        "orion",
+        "lyra"
+      ],
+      "tools": [],
+      "ms": 456,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,rank,observe,visual,followup,review"
+        },
+        {
+          "name": "包含章节 rank",
+          "ok": true,
+          "detail": "verdict,rank,observe,visual,followup,review"
+        },
+        {
+          "name": "Agent muse",
+          "ok": true,
+          "detail": "muse,kepler,horizon,vega,orion,lyra"
+        },
+        {
+          "name": "Agent vega",
+          "ok": true,
+          "detail": "muse,kepler,horizon,vega,orion,lyra"
+        },
+        {
+          "name": "Agent horizon",
+          "ok": true,
+          "detail": "muse,kepler,horizon,vega,orion,lyra"
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "A02",
+      "category": "多Agent协作",
+      "question": "M42 用 80mm 能拍吗？",
+      "expected": "verdict",
+      "actual": "legacy / verdict+gearfit+query+followup+review",
+      "evidence": [],
+      "agents": [
+        "horizon",
+        "vega"
+      ],
+      "tools": [],
+      "ms": 4,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,gearfit,query,followup,review"
+        },
+        {
+          "name": "包含任一关键词 80/视场/能拍",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "A03",
+      "category": "多Agent协作",
+      "question": "太阳活动对地球有什么影响？",
+      "expected": "verdict",
+      "actual": "legacy / verdict+evidence+observe+boundary+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "helios",
+        "vega",
+        "horizon",
+        "lyra"
+      ],
+      "tools": [],
+      "ms": 2,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,observe,boundary,followup,review"
+        },
+        {
+          "name": "包含任一关键词 太阳/地球",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "S01",
+      "category": "论文搜索",
+      "question": "不同论文对 M42 距离测量结果的比较",
+      "expected": "research",
+      "actual": "control / verdict+evidence+observe+visual+mapref+evidence+list+boundary+followup+review",
+      "evidence": [
+        {
+          "id": "ev_2dd7740e42d6631d",
+          "type": "paper",
+          "title": "The distance to the Orion Nebula",
+          "uri": "https://doi.org/10.1051/0004-6361:20078247",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_42d2fb26a6c51d4c",
+          "type": "paper",
+          "title": "The distance to the Orion Nebula cluster",
+          "uri": "https://doi.org/10.1111/j.1365-2966.2007.11471.x",
+          "abstractOnly": true
+        }
+      ],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "simbad.tap:failed",
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 25062,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "存在研究报告",
+          "ok": true,
+          "detail": "control"
+        },
+        {
+          "name": "结论引用均可追溯",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "结论含可核对数值",
+          "ok": true,
+          "detail": "摘要缺少测量数值（检索到的摘要为「We have determined the distance to the clus | A distance of 440 ± 34 pc is found from a sample of 74 PMS s | 摘要测量值：440 ± 34 pc（The distance to the Orion Nebula cluster）"
+        },
+        {
+          "name": "无数值伪影",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "论文有标题与链接",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "论文无重复标题",
+          "ok": true,
+          "detail": "2 titles"
+        },
+        {
+          "name": "论文含年份",
+          "ok": true,
+          "detail": "2007-08-28,2007-03-12"
+        },
+        {
+          "name": "论文链接为可追溯地址",
+          "ok": true,
+          "detail": "https://doi.org/10.1051/0004-6361:20078247,https://doi.org/10.1111/j.1365-2966.2007.11471.x"
+        },
+        {
+          "name": "至少一篇论文",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "包含关键词 Orion",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [
+        {
+          "tool": "simbad.tap",
+          "status": "failed",
+          "empty": false,
+          "errors": [],
+          "error": {
+            "kind": "timeout",
+            "message": "timeout"
+          }
+        },
+        {
+          "tool": "paper.search",
+          "status": "ok",
+          "empty": false,
+          "errors": [
+            {
+              "kind": "rate_limit",
+              "msg": "触发限流"
+            }
+          ],
+          "error": null
+        },
+        {
+          "tool": "evidence.search",
+          "status": "ok",
+          "empty": false,
+          "errors": [
+            {
+              "kind": "cooling",
+              "msg": "熔断冷却中"
+            },
+            {
+              "kind": "timeout",
+              "msg": "请求超时"
+            },
+            {
+              "kind": "timeout",
+              "msg": "请求超时"
+            }
+          ],
+          "error": null
+        }
+      ],
+      "papers": [
+        {
+          "title": "The distance to the Orion Nebula",
+          "authors": [
+            "Karl M. Menten",
+            "Mark J. Reid",
+            "Jan Forbrich",
+            "A. Brunthaler"
+          ],
+          "date": "2007-08-28",
+          "doi": "10.1051/0004-6361:20078247",
+          "arxivId": "",
+          "url": "https://doi.org/10.1051/0004-6361:20078247",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "The distance to the Orion Nebula cluster",
+          "authors": [
+            "R. D. Jeffries"
+          ],
+          "date": "2007-03-12",
+          "doi": "10.1111/j.1365-2966.2007.11471.x",
+          "arxivId": "",
+          "url": "https://doi.org/10.1111/j.1365-2966.2007.11471.x",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "researchMeta": {
+        "conclusions": [
+          {
+            "text": "摘要缺少测量数值（检索到的摘要为「We have determined the distance to the cluster to be pc」）；未获取全文，不能据此引用具体数值。",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_2dd7740e42d6631d"
+            ],
+            "scope": "abstract-only"
+          },
+          {
+            "text": "A distance of 440 ± 34 pc is found from a sample of 74 PMS stars with spectral types between G6 and M2, but this falls to 392 ± 32 pc when PMS stars with accretion discs are excluded on the basis of their near-infrared excess",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_42d2fb26a6c51d4c"
+            ],
+            "scope": "abstract-only"
+          },
+          {
+            "text": "摘要测量值：440 ± 34 pc（The distance to the Orion Nebula cluster）",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_42d2fb26a6c51d4c"
+            ],
+            "scope": "abstract-only"
+          }
+        ],
+        "gaps": [
+          "2 篇论文仅获得摘要，未获取全文",
+          "未获得 SIMBAD 天体参数（本机网络不可达或查询无结果）",
+          "未提供 FITS 观测文件"
+        ],
+        "limitations": [
+          "部分结论仅基于论文摘要，未阅读全文。",
+          "SIMBAD 数据缺失，天体参数可能不完整。",
+          "没有 FITS 观测数据，缺少独立观测验证。"
+        ],
+        "paperStats": {
+          "searched": 2,
+          "fulltext": 0,
+          "abstractOnly": 2,
+          "failed": 0,
+          "fulltextEvidence": 0,
+          "abstractEvidence": 2
+        },
+        "conflicts": []
+      }
+    },
+    {
+      "id": "S02",
+      "category": "论文搜索",
+      "question": "系外行星大气观测技术与代表性研究",
+      "expected": "research",
+      "actual": "control / verdict+evidence+boundary+evidence+list+boundary+followup+review",
+      "evidence": [
+        {
+          "id": "ev_d666926c9ca5da37",
+          "type": "paper",
+          "title": "Rapid characterization of exoplanet atmospheres with the Exoplanet Transmission Spectroscopy Imager",
+          "uri": "https://doi.org/10.1117/1.jatis.10.4.045005",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_b3205b30e5197aca",
+          "type": "paper",
+          "title": "Effect of centrifugal force on transmission spectroscopy of exoplanet atmospheres",
+          "uri": "https://doi.org/10.1093/mnrasl/slad058",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_550ccd3b86a22d5b",
+          "type": "paper",
+          "title": "Ground-based Reconnaissance Observations of 21 Exoplanet Atmospheres with the Exoplanet Transmission Spectroscopy Imager",
+          "uri": "https://doi.org/10.3847/1538-3881/ada557",
+          "abstractOnly": true
+        }
+      ],
+      "agents": [
+        "muse",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 6286,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "存在研究报告",
+          "ok": true,
+          "detail": "control"
+        },
+        {
+          "name": "结论引用均可追溯",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "无数值伪影",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "论文有标题与链接",
+          "ok": true,
+          "detail": "3"
+        },
+        {
+          "name": "论文无重复标题",
+          "ok": true,
+          "detail": "3 titles"
+        },
+        {
+          "name": "论文含年份",
+          "ok": true,
+          "detail": "2024-12-08,2023-04-27,2025-02-11"
+        },
+        {
+          "name": "论文链接为可追溯地址",
+          "ok": true,
+          "detail": "https://doi.org/10.1117/1.jatis.10.4.045005,https://doi.org/10.1093/mnrasl/slad058,https://doi.org/10.3847/1538-3881/ada557"
+        },
+        {
+          "name": "至少一篇论文",
+          "ok": true,
+          "detail": "3"
+        },
+        {
+          "name": "包含任一关键词 exoplanet/planet/atmosphere",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [
+        {
+          "tool": "paper.search",
+          "status": "ok",
+          "empty": false,
+          "errors": [
+            {
+              "kind": "cooling",
+              "msg": "熔断冷却中"
+            }
+          ],
+          "error": null
+        },
+        {
+          "tool": "evidence.search",
+          "status": "ok",
+          "empty": false,
+          "errors": [
+            {
+              "kind": "cooling",
+              "msg": "熔断冷却中"
+            },
+            {
+              "kind": "cooling",
+              "msg": "熔断冷却中"
+            },
+            {
+              "kind": "timeout",
+              "msg": "请求超时"
+            }
+          ],
+          "error": null
+        }
+      ],
+      "papers": [
+        {
+          "title": "Rapid characterization of exoplanet atmospheres with the Exoplanet Transmission Spectroscopy Imager",
+          "authors": [
+            "Luke M. Schmidt",
+            "Ryan J. Oelkers",
+            "Erika Cook",
+            "Mary Anne Limbach",
+            "Darren L. DePoy",
+            "Jennifer L. Marshall"
+          ],
+          "date": "2024-12-08",
+          "doi": "10.1117/1.jatis.10.4.045005",
+          "arxivId": "",
+          "url": "https://doi.org/10.1117/1.jatis.10.4.045005",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Effect of centrifugal force on transmission spectroscopy of exoplanet atmospheres",
+          "authors": [
+            "Agnibha Banerjee",
+            "J. K. Barstow",
+            "Carole A. Haswell",
+            "Stephen R. Lewis Jr."
+          ],
+          "date": "2023-04-27",
+          "doi": "10.1093/mnrasl/slad058",
+          "arxivId": "",
+          "url": "https://doi.org/10.1093/mnrasl/slad058",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Ground-based Reconnaissance Observations of 21 Exoplanet Atmospheres with the Exoplanet Transmission Spectroscopy Imager",
+          "authors": [
+            "Ryan J. Oelkers",
+            "Luke M. Schmidt",
+            "Erika Cook",
+            "Mary Anne Limbach",
+            "Darren L. DePoy",
+            "Jennifer L. Marshall"
+          ],
+          "date": "2025-02-11",
+          "doi": "10.3847/1538-3881/ada557",
+          "arxivId": "",
+          "url": "https://doi.org/10.3847/1538-3881/ada557",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "researchMeta": {
+        "conclusions": [
+          {
+            "text": "The Exoplanet Transmission Spectroscopy Imager (ETSI) amalgamates a low-resolution slitless prism spectrometer with custom multi-band filters to simultaneously image 15 spectral bandpasses between 430 and 975 nm with an average spectral resolution of R=λ/δλ∼20",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_d666926c9ca5da37"
+            ],
+            "scope": "abstract-only"
+          },
+          {
+            "text": "We recommend that the correction to the atmospheric scale height due to this effect be taken into account for the analysis of high-precision transmission spectra of exoplanets in the future, most immediately JWST Cycle 1 targets WASP-19b and WASP-121b.",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_b3205b30e5197aca"
+            ],
+            "scope": "abstract-only"
+          },
+          {
+            "text": "Here we present reconnaissance observations of 21 exoplanet atmospheres measured with the Exoplanet Transmission Spectroscopy Imager (ETSI), a recently deployed spectrophotometer on the McDonald Observatory Otto Struve 2.1 m telescope",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_550ccd3b86a22d5b"
+            ],
+            "scope": "abstract-only"
+          }
+        ],
+        "gaps": [
+          "3 篇论文仅获得摘要，未获取全文",
+          "未获得 SIMBAD 天体参数（本机网络不可达或查询无结果）",
+          "未提供 FITS 观测文件"
+        ],
+        "limitations": [
+          "部分结论仅基于论文摘要，未阅读全文。",
+          "SIMBAD 数据缺失，天体参数可能不完整。",
+          "没有 FITS 观测数据，缺少独立观测验证。"
+        ],
+        "paperStats": {
+          "searched": 3,
+          "fulltext": 0,
+          "abstractOnly": 3,
+          "failed": 0,
+          "fulltextEvidence": 0,
+          "abstractEvidence": 3
+        },
+        "conflicts": []
+      }
+    },
+    {
+      "id": "S03",
+      "category": "论文搜索",
+      "question": "星系形成的最新研究进展",
+      "expected": "research",
+      "actual": "control / verdict+list+list+evidence+list+boundary+followup+review",
+      "evidence": [
+        {
+          "id": "ev_23ddb25f4c46f8f4",
+          "type": "paper",
+          "title": "Galaxy Formation and Evolution: Recent Progress",
+          "uri": "https://doi.org/10.48550/arxiv.astro-ph/0102056",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_374dee264d18786d",
+          "type": "paper",
+          "title": "Recent progress in simulating galaxy formation from the largest to the smallest scales",
+          "uri": "https://doi.org/10.1038/s41550-018-0427-y",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_5607ae02f4682aa2",
+          "type": "paper",
+          "title": "Advancement in space-based infrared telescopes and recent progress on the exploration of galaxy formation in the early universe",
+          "uri": "https://doi.org/10.1360/csb-2025-0511",
+          "abstractOnly": true
+        }
+      ],
+      "agents": [
+        "muse",
+        "cosmos"
+      ],
+      "tools": [
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 7161,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "存在研究报告",
+          "ok": true,
+          "detail": "control"
+        },
+        {
+          "name": "结论引用均可追溯",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "无数值伪影",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "论文有标题与链接",
+          "ok": true,
+          "detail": "3"
+        },
+        {
+          "name": "论文无重复标题",
+          "ok": true,
+          "detail": "3 titles"
+        },
+        {
+          "name": "论文含年份",
+          "ok": true,
+          "detail": "2001-02-03,2018-04-09,2025-06-18"
+        },
+        {
+          "name": "论文链接为可追溯地址",
+          "ok": true,
+          "detail": "https://doi.org/10.48550/arxiv.astro-ph/0102056,https://doi.org/10.1038/s41550-018-0427-y,https://doi.org/10.1360/csb-2025-0511"
+        },
+        {
+          "name": "至少一篇论文",
+          "ok": true,
+          "detail": "3"
+        },
+        {
+          "name": "包含任一关键词 galaxy/galaxies/formation",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [
+        {
+          "tool": "paper.search",
+          "status": "ok",
+          "empty": false,
+          "errors": [
+            {
+              "kind": "cooling",
+              "msg": "熔断冷却中"
+            }
+          ],
+          "error": null
+        },
+        {
+          "tool": "evidence.search",
+          "status": "ok",
+          "empty": false,
+          "errors": [
+            {
+              "kind": "cooling",
+              "msg": "熔断冷却中"
+            },
+            {
+              "kind": "cooling",
+              "msg": "熔断冷却中"
+            },
+            {
+              "kind": "timeout",
+              "msg": "请求超时"
+            }
+          ],
+          "error": null
+        }
+      ],
+      "papers": [
+        {
+          "title": "Galaxy Formation and Evolution: Recent Progress",
+          "authors": [
+            "Richard S. Ellis"
+          ],
+          "date": "2001-02-03",
+          "doi": "10.48550/arxiv.astro-ph/0102056",
+          "arxivId": "",
+          "url": "https://doi.org/10.48550/arxiv.astro-ph/0102056",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Recent progress in simulating galaxy formation from the largest to the smallest scales",
+          "authors": [
+            "Claude‐André Faucher‐Giguère"
+          ],
+          "date": "2018-04-09",
+          "doi": "10.1038/s41550-018-0427-y",
+          "arxivId": "",
+          "url": "https://doi.org/10.1038/s41550-018-0427-y",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "Advancement in space-based infrared telescopes and recent progress on the exploration of galaxy formation in the early universe",
+          "authors": [
+            "Yu Dai"
+          ],
+          "date": "2025-06-18",
+          "doi": "10.1360/csb-2025-0511",
+          "arxivId": "",
+          "url": "https://doi.org/10.1360/csb-2025-0511",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "researchMeta": {
+        "conclusions": [
+          {
+            "text": "In this series of lectures I review recent observational progress in constraining models of galaxy formation and evolution highlighting the importance advances in addressing questions of the assembly history and origin of the Hubble sequence in the context of modern pictures of structure formation.",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_23ddb25f4c46f8f4"
+            ],
+            "scope": "abstract-only"
+          },
+          {
+            "text": "红外天文是探索遥远宇宙的关键波段。近50年来，随着空间红外望远镜的发展，人们发现并系统性地发现了包括超亮红外星系（ULIRGs）、活动星系核（AGNs）等在内的高红移星系系统。自2021年底发射以来，詹姆斯·韦布空间望远镜（JWST）作为目前最先进的空间天文望远镜，以其前所未有的图像分辨率、超高灵敏度和近中红外覆盖范围，极大地推动了对宇宙早期星系起源的探索。一个重要的突破是打破了最早星系的红移记录。寻找高红移星系的常用方法之一是利用莱曼断裂的光谱特性。JWST在近红外和中红外波段进行了深度探测，并利用莱曼断裂方法筛选出早期宇宙的高红移星系候选体。利用这一方法，结合后随光谱，JWST发现和认证了多个红移超过10的星系，其中就包括了目前",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_5607ae02f4682aa2"
+            ],
+            "scope": "abstract-only"
+          }
+        ],
+        "gaps": [
+          "3 篇论文仅获得摘要，未获取全文",
+          "未获得 SIMBAD 天体参数（本机网络不可达或查询无结果）",
+          "未提供 FITS 观测文件"
+        ],
+        "limitations": [
+          "部分结论仅基于论文摘要，未阅读全文。",
+          "SIMBAD 数据缺失，天体参数可能不完整。",
+          "没有 FITS 观测数据，缺少独立观测验证。"
+        ],
+        "paperStats": {
+          "searched": 3,
+          "fulltext": 0,
+          "abstractOnly": 3,
+          "failed": 0,
+          "fulltextEvidence": 0,
+          "abstractEvidence": 3
+        },
+        "conflicts": []
+      }
+    },
+    {
+      "id": "S04",
+      "category": "论文搜索",
+      "question": "JWST 对早期宇宙星系的主要发现",
+      "expected": "research",
+      "actual": "control / verdict+evidence+consensus+observe+boundary+evidence+list+boundary+followup+review",
+      "evidence": [
+        {
+          "id": "ev_bbbb00ae30899496",
+          "type": "paper",
+          "title": "The cosmic timeline implied by the JWST high-redshift galaxies",
+          "uri": "https://doi.org/10.1093/mnrasl/slad025",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_8edf7d98b8f0bc47",
+          "type": "paper",
+          "title": "JWST high-redshift galaxy constraints on warm and cold dark matter models",
+          "uri": "https://doi.org/10.1051/0004-6361/202345851",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_80ebc400a9bdef00",
+          "type": "paper",
+          "title": "JWST high redshift galaxy observations have a strong tension with Planck CMB measurements",
+          "uri": "https://doi.org/10.48550/arxiv.2301.00347",
+          "abstractOnly": true
+        }
+      ],
+      "agents": [
+        "muse",
+        "cosmos",
+        "vega",
+        "lyra"
+      ],
+      "tools": [
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 1560,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "存在研究报告",
+          "ok": true,
+          "detail": "control"
+        },
+        {
+          "name": "结论引用均可追溯",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "无数值伪影",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "论文有标题与链接",
+          "ok": true,
+          "detail": "3"
+        },
+        {
+          "name": "论文无重复标题",
+          "ok": true,
+          "detail": "3 titles"
+        },
+        {
+          "name": "论文含年份",
+          "ok": true,
+          "detail": "2023-02-14,2023-02-23,2023-01-01"
+        },
+        {
+          "name": "论文链接为可追溯地址",
+          "ok": true,
+          "detail": "https://doi.org/10.1093/mnrasl/slad025,https://doi.org/10.1051/0004-6361/202345851,https://doi.org/10.48550/arxiv.2301.00347"
+        },
+        {
+          "name": "至少一篇论文",
+          "ok": true,
+          "detail": "3"
+        },
+        {
+          "name": "包含任一关键词 JWST/galaxy/early",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [
+        {
+          "tool": "paper.search",
+          "status": "ok",
+          "empty": false,
+          "errors": [
+            {
+              "kind": "cooling",
+              "msg": "熔断冷却中"
+            }
+          ],
+          "error": null
+        },
+        {
+          "tool": "evidence.search",
+          "status": "ok",
+          "empty": false,
+          "errors": [
+            {
+              "kind": "cooling",
+              "msg": "熔断冷却中"
+            },
+            {
+              "kind": "cooling",
+              "msg": "熔断冷却中"
+            },
+            {
+              "kind": "cooling",
+              "msg": "熔断冷却中"
+            }
+          ],
+          "error": null
+        }
+      ],
+      "papers": [
+        {
+          "title": "The cosmic timeline implied by the JWST high-redshift galaxies",
+          "authors": [
+            "Fulvio Melia"
+          ],
+          "date": "2023-02-14",
+          "doi": "10.1093/mnrasl/slad025",
+          "arxivId": "",
+          "url": "https://doi.org/10.1093/mnrasl/slad025",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "JWST high-redshift galaxy constraints on warm and cold dark matter models",
+          "authors": [
+            "Umberto Maio",
+            "Matteo Viel"
+          ],
+          "date": "2023-02-23",
+          "doi": "10.1051/0004-6361/202345851",
+          "arxivId": "",
+          "url": "https://doi.org/10.1051/0004-6361/202345851",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "JWST high redshift galaxy observations have a strong tension with Planck CMB measurements",
+          "authors": [
+            "Deng Wang",
+            "Yizhou Liu"
+          ],
+          "date": "2023-01-01",
+          "doi": "10.48550/arxiv.2301.00347",
+          "arxivId": "",
+          "url": "https://doi.org/10.48550/arxiv.2301.00347",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "researchMeta": {
+        "conclusions": [
+          {
+            "text": "The so-called impossibly early galaxy problem, first identified via the Hubble Space Telescope’s observation of galaxies at redshifts z > 10, appears to have been exacerbated by the more recent JWST discovery of galaxy candidates at even higher redshifts (z ∼ 17) which, however, are yet to be confirmed spectroscopicall",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_bbbb00ae30899496"
+            ],
+            "scope": "abstract-only"
+          },
+          {
+            "text": "We compare properties of high-redshift galaxies observed by JWST with hydrodynamical simulations, in the standard cold dark matter model and in warm dark matter models with a suppressed linear matter power spectrum We find that current data are neither in tension with cold dark matter nor with warm dark matter models w",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_8edf7d98b8f0bc47"
+            ],
+            "scope": "abstract-only"
+          },
+          {
+            "text": "The true situation is that the Planck CMB measurement has a strong tension with JWST high redshift galaxy observations",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_80ebc400a9bdef00"
+            ],
+            "scope": "abstract-only"
+          }
+        ],
+        "gaps": [
+          "3 篇论文仅获得摘要，未获取全文",
+          "未获得 SIMBAD 天体参数（本机网络不可达或查询无结果）",
+          "未提供 FITS 观测文件"
+        ],
+        "limitations": [
+          "部分结论仅基于论文摘要，未阅读全文。",
+          "SIMBAD 数据缺失，天体参数可能不完整。",
+          "没有 FITS 观测数据，缺少独立观测验证。"
+        ],
+        "paperStats": {
+          "searched": 3,
+          "fulltext": 0,
+          "abstractOnly": 3,
+          "failed": 0,
+          "fulltextEvidence": 0,
+          "abstractEvidence": 3
+        },
+        "conflicts": []
+      }
+    },
+    {
+      "id": "S05",
+      "category": "论文比较",
+      "question": "M42 距离测量是否一致？",
+      "expected": "research",
+      "actual": "control / verdict+evidence+observe+visual+mapref+evidence+list+boundary+followup+review",
+      "evidence": [
+        {
+          "id": "ev_2dd7740e42d6631d",
+          "type": "paper",
+          "title": "The distance to the Orion Nebula",
+          "uri": "https://doi.org/10.1051/0004-6361:20078247",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_42d2fb26a6c51d4c",
+          "type": "paper",
+          "title": "The distance to the Orion Nebula cluster",
+          "uri": "https://doi.org/10.1111/j.1365-2966.2007.11471.x",
+          "abstractOnly": true
+        }
+      ],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "simbad.tap:failed",
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 20034,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "存在研究报告",
+          "ok": true,
+          "detail": "control"
+        },
+        {
+          "name": "结论引用均可追溯",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "结论含可核对数值",
+          "ok": true,
+          "detail": "摘要缺少测量数值（检索到的摘要为「We have determined the distance to the clus | A distance of 440 ± 34 pc is found from a sample of 74 PMS s | 摘要测量值：440 ± 34 pc（The distance to the Orion Nebula cluster）"
+        },
+        {
+          "name": "无数值伪影",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "论文有标题与链接",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "论文无重复标题",
+          "ok": true,
+          "detail": "2 titles"
+        },
+        {
+          "name": "论文含年份",
+          "ok": true,
+          "detail": "2007-08-28,2007-03-12"
+        },
+        {
+          "name": "论文链接为可追溯地址",
+          "ok": true,
+          "detail": "https://doi.org/10.1051/0004-6361:20078247,https://doi.org/10.1111/j.1365-2966.2007.11471.x"
+        },
+        {
+          "name": "至少一篇论文",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "包含关键词 Orion",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [
+        {
+          "tool": "simbad.tap",
+          "status": "failed",
+          "empty": false,
+          "errors": [],
+          "error": {
+            "kind": "timeout",
+            "message": "timeout"
+          }
+        },
+        {
+          "tool": "paper.search",
+          "status": "ok",
+          "empty": false,
+          "errors": [
+            {
+              "kind": "cooling",
+              "msg": "熔断冷却中"
+            }
+          ],
+          "error": null
+        },
+        {
+          "tool": "evidence.search",
+          "status": "ok",
+          "empty": false,
+          "errors": [
+            {
+              "kind": "cooling",
+              "msg": "熔断冷却中"
+            },
+            {
+              "kind": "cooling",
+              "msg": "熔断冷却中"
+            },
+            {
+              "kind": "cooling",
+              "msg": "熔断冷却中"
+            }
+          ],
+          "error": null
+        }
+      ],
+      "papers": [
+        {
+          "title": "The distance to the Orion Nebula",
+          "authors": [
+            "Karl M. Menten",
+            "Mark J. Reid",
+            "Jan Forbrich",
+            "A. Brunthaler"
+          ],
+          "date": "2007-08-28",
+          "doi": "10.1051/0004-6361:20078247",
+          "arxivId": "",
+          "url": "https://doi.org/10.1051/0004-6361:20078247",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "The distance to the Orion Nebula cluster",
+          "authors": [
+            "R. D. Jeffries"
+          ],
+          "date": "2007-03-12",
+          "doi": "10.1111/j.1365-2966.2007.11471.x",
+          "arxivId": "",
+          "url": "https://doi.org/10.1111/j.1365-2966.2007.11471.x",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "researchMeta": {
+        "conclusions": [
+          {
+            "text": "摘要缺少测量数值（检索到的摘要为「We have determined the distance to the cluster to be pc」）；未获取全文，不能据此引用具体数值。",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_2dd7740e42d6631d"
+            ],
+            "scope": "abstract-only"
+          },
+          {
+            "text": "A distance of 440 ± 34 pc is found from a sample of 74 PMS stars with spectral types between G6 and M2, but this falls to 392 ± 32 pc when PMS stars with accretion discs are excluded on the basis of their near-infrared excess",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_42d2fb26a6c51d4c"
+            ],
+            "scope": "abstract-only"
+          },
+          {
+            "text": "摘要测量值：440 ± 34 pc（The distance to the Orion Nebula cluster）",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_42d2fb26a6c51d4c"
+            ],
+            "scope": "abstract-only"
+          }
+        ],
+        "gaps": [
+          "2 篇论文仅获得摘要，未获取全文",
+          "未获得 SIMBAD 天体参数（本机网络不可达或查询无结果）",
+          "未提供 FITS 观测文件"
+        ],
+        "limitations": [
+          "部分结论仅基于论文摘要，未阅读全文。",
+          "SIMBAD 数据缺失，天体参数可能不完整。",
+          "没有 FITS 观测数据，缺少独立观测验证。"
+        ],
+        "paperStats": {
+          "searched": 2,
+          "fulltext": 0,
+          "abstractOnly": 2,
+          "failed": 0,
+          "fulltextEvidence": 0,
+          "abstractEvidence": 2
+        },
+        "conflicts": []
+      }
+    },
+    {
+      "id": "S06",
+      "category": "论文比较",
+      "question": "M31 距离测量方法比较",
+      "expected": "research",
+      "actual": "control / verdict+evidence+observe+visual+mapref+evidence+list+boundary+followup+review",
+      "evidence": [
+        {
+          "id": "ev_4490cdb070e580e6",
+          "type": "paper",
+          "title": "The distance to the Andromeda galaxy from eclipsing binaries",
+          "uri": "https://doi.org/10.1051/0004-6361/200913299/pdf",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_ce28fd379ec6f570",
+          "type": "paper",
+          "title": "First Determination of the Distance and Fundamental Properties of an Eclipsing Binary in the Andromeda Galaxy",
+          "uri": "https://doi.org/10.1086/499161",
+          "abstractOnly": true
+        }
+      ],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "simbad.tap:failed",
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 20611,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "存在研究报告",
+          "ok": true,
+          "detail": "control"
+        },
+        {
+          "name": "结论引用均可追溯",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "结论含可核对数值",
+          "ok": true,
+          "detail": "This result, when combined with the previous distance determ | 摘要测量值：744 ± 33 kpc（The distance to the Andromeda galaxy from | The result is d = 772 ± 44 kpc [( m - M ) 0 = 24.44 ± 0.12 m | 摘要测量值：772 ± 44 kpc（First Determination of the Distance and F"
+        },
+        {
+          "name": "无数值伪影",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "论文有标题与链接",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "论文无重复标题",
+          "ok": true,
+          "detail": "2 titles"
+        },
+        {
+          "name": "论文含年份",
+          "ok": true,
+          "detail": "2010-01-21,2005-11-30"
+        },
+        {
+          "name": "论文链接为可追溯地址",
+          "ok": true,
+          "detail": "https://doi.org/10.1051/0004-6361/200913299/pdf,https://doi.org/10.1086/499161"
+        },
+        {
+          "name": "至少一篇论文",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "包含任一关键词 Andromeda/distance/parallax",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [
+        {
+          "tool": "simbad.tap",
+          "status": "failed",
+          "empty": false,
+          "errors": [],
+          "error": {
+            "kind": "timeout",
+            "message": "timeout"
+          }
+        },
+        {
+          "tool": "paper.search",
+          "status": "ok",
+          "empty": false,
+          "errors": [
+            {
+              "kind": "cooling",
+              "msg": "熔断冷却中"
+            }
+          ],
+          "error": null
+        },
+        {
+          "tool": "evidence.search",
+          "status": "ok",
+          "empty": false,
+          "errors": [
+            {
+              "kind": "cooling",
+              "msg": "熔断冷却中"
+            },
+            {
+              "kind": "cooling",
+              "msg": "熔断冷却中"
+            },
+            {
+              "kind": "rate_limit",
+              "msg": "触发限流"
+            }
+          ],
+          "error": null
+        }
+      ],
+      "papers": [
+        {
+          "title": "The distance to the Andromeda galaxy from eclipsing binaries",
+          "authors": [
+            "Francesc Vilardell",
+            "Ignasi Ribas",
+            "C. Jordi",
+            "E. L. Fitzpatrick",
+            "E. F. Guinan"
+          ],
+          "date": "2010-01-21",
+          "doi": "10.1051/0004-6361/200913299/pdf",
+          "arxivId": "",
+          "url": "https://doi.org/10.1051/0004-6361/200913299/pdf",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "First Determination of the Distance and Fundamental Properties of an Eclipsing Binary in the Andromeda Galaxy",
+          "authors": [
+            "Ignasi Ribas",
+            "C. Jordi",
+            "Francesc Vilardell",
+            "Edward L. Fitzpatrick",
+            "Ron W. Hilditch",
+            "Edward F. Guinan"
+          ],
+          "date": "2005-11-30",
+          "doi": "10.1086/499161",
+          "arxivId": "",
+          "url": "https://doi.org/10.1086/499161",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "researchMeta": {
+        "conclusions": [
+          {
+            "text": "This result, when combined with the previous distance determination to M 31, results in a distance modulus of $(m-M)_0$ = 24.36 ± 0.08 mag (744 ± 33 kpc), fully compatible with other distance determinations to M 31",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_4490cdb070e580e6"
+            ],
+            "scope": "abstract-only"
+          },
+          {
+            "text": "摘要测量值：744 ± 33 kpc（The distance to the Andromeda galaxy from eclipsing binaries）",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_4490cdb070e580e6"
+            ],
+            "scope": "abstract-only"
+          },
+          {
+            "text": "The result is d = 772 ± 44 kpc [( m - M ) 0 = 24.44 ± 0.12 mag]. The study of additional systems, currently in progress, should reduce the uncertainty of the M31 distance to better than 5%.",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_ce28fd379ec6f570"
+            ],
+            "scope": "abstract-only"
+          },
+          {
+            "text": "摘要测量值：772 ± 44 kpc（First Determination of the Distance and Fundamental Properties of an Eclipsing Binary in the Andromeda Galaxy）",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_ce28fd379ec6f570"
+            ],
+            "scope": "abstract-only"
+          }
+        ],
+        "gaps": [
+          "2 篇论文仅获得摘要，未获取全文",
+          "未获得 SIMBAD 天体参数（本机网络不可达或查询无结果）",
+          "未提供 FITS 观测文件"
+        ],
+        "limitations": [
+          "部分结论仅基于论文摘要，未阅读全文。",
+          "SIMBAD 数据缺失，天体参数可能不完整。",
+          "没有 FITS 观测数据，缺少独立观测验证。"
+        ],
+        "paperStats": {
+          "searched": 2,
+          "fulltext": 0,
+          "abstractOnly": 2,
+          "failed": 0,
+          "fulltextEvidence": 0,
+          "abstractEvidence": 2
+        },
+        "conflicts": []
+      }
+    },
+    {
+      "id": "F01",
+      "category": "PDF解析",
+      "question": "PDF fixture: mixed",
+      "expected": "pdf",
+      "actual": "pages=3 sections=4 chunks=4",
+      "evidence": [],
+      "agents": [],
+      "tools": [],
+      "ms": 9,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "PDF 解析成功",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "章节/分块",
+          "ok": true,
+          "detail": "4/4"
+        }
+      ]
+    },
+    {
+      "id": "F02",
+      "category": "PDF解析",
+      "question": "PDF fixture: scanned",
+      "expected": "pdf",
+      "actual": "pdf_no_text:未能从 PDF 提取到可读正文（可能是扫描件或特殊编码）",
+      "evidence": [],
+      "agents": [],
+      "tools": [],
+      "ms": 1,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "明确失败 pdf_no_text",
+          "ok": true,
+          "detail": "pdf_no_text"
+        },
+        {
+          "name": "不伪造正文",
+          "ok": true,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "id": "G01",
+      "category": "器材规划",
+      "question": "今晚在北京用 200mm 望远镜拍摄 M42，应该怎么设置参数？",
+      "expected": "answer",
+      "actual": "legacy / verdict+evidence+observe+boundary+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "horizon",
+        "lyra"
+      ],
+      "tools": [],
+      "ms": 8,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含任一关键词 200/259/曝光",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "G02",
+      "category": "器材规划",
+      "question": "M42 用 80mm 望远镜能拍吗？",
+      "expected": "verdict",
+      "actual": "legacy / verdict+gearfit+query+followup+review",
+      "evidence": [],
+      "agents": [
+        "horizon",
+        "vega"
+      ],
+      "tools": [],
+      "ms": 1,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,gearfit,query,followup,review"
+        },
+        {
+          "name": "包含任一关键词 80/能拍/视场",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "G03",
+      "category": "器材规划",
+      "question": "新手买什么望远镜？",
+      "expected": "verdict",
+      "actual": "legacy / verdict+evidence+observe+boundary+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "vega",
+        "horizon",
+        "lyra"
+      ],
+      "tools": [],
+      "ms": 1,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,observe,boundary,followup,review"
+        },
+        {
+          "name": "包含任一关键词 口径/望远镜/推荐",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "T01",
+      "category": "地点时间",
+      "question": "今晚北京适合拍摄什么？",
+      "expected": "verdict+rank",
+      "actual": "legacy / verdict+rank+observe+visual+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "horizon",
+        "vega",
+        "orion",
+        "lyra"
+      ],
+      "tools": [],
+      "ms": 458,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,rank,observe,visual,followup,review"
+        },
+        {
+          "name": "包含章节 rank",
+          "ok": true,
+          "detail": "verdict,rank,observe,visual,followup,review"
+        },
+        {
+          "name": "包含任一关键词 北京/今晚",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "T02",
+      "category": "地点时间",
+      "question": "上海今晚能看到什么？",
+      "expected": "verdict+rank",
+      "actual": "legacy / verdict+rank+observe+visual+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "horizon",
+        "vega",
+        "orion",
+        "lyra"
+      ],
+      "tools": [],
+      "ms": 446,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,rank,observe,visual,followup,review"
+        },
+        {
+          "name": "包含章节 rank",
+          "ok": true,
+          "detail": "verdict,rank,observe,visual,followup,review"
+        },
+        {
+          "name": "包含任一关键词 上海/今晚",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "T03",
+      "category": "地点时间",
+      "question": "2026 年 12 月 31 日在北京能看到什么？",
+      "expected": "verdict+rank",
+      "actual": "legacy / verdict+rank+observe+visual+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "horizon",
+        "vega",
+        "orion",
+        "lyra"
+      ],
+      "tools": [],
+      "ms": 459,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,rank,observe,visual,followup,review"
+        },
+        {
+          "name": "包含章节 rank",
+          "ok": true,
+          "detail": "verdict,rank,observe,visual,followup,review"
+        },
+        {
+          "name": "包含任一关键词 北京/12",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "R01",
+      "category": "研究结论",
+      "question": "比较 M31、M33 和 M42 的物理参数与观测难度",
+      "expected": "T-D",
+      "actual": "control / verdict+evidence+observe+visual+mapref+compare+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 27,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "模板 T-D",
+          "ok": true,
+          "detail": "T-D"
+        },
+        {
+          "name": "对比目标数 3",
+          "ok": true,
+          "detail": "3"
+        },
+        {
+          "name": "包含关键词 距离",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "包含任一关键词 可见性",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "R02",
+      "category": "研究结论",
+      "question": "M42 的距离是多少？不同论文的测量是否一致？",
+      "expected": "research",
+      "actual": "control / verdict+evidence+observe+visual+mapref+evidence+list+boundary+followup+review",
+      "evidence": [
+        {
+          "id": "ev_2dd7740e42d6631d",
+          "type": "paper",
+          "title": "The distance to the Orion Nebula",
+          "uri": "https://doi.org/10.1051/0004-6361:20078247",
+          "abstractOnly": true
+        },
+        {
+          "id": "ev_42d2fb26a6c51d4c",
+          "type": "paper",
+          "title": "The distance to the Orion Nebula cluster",
+          "uri": "https://doi.org/10.1111/j.1365-2966.2007.11471.x",
+          "abstractOnly": true
+        }
+      ],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "simbad.tap:failed",
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 25039,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "存在研究报告",
+          "ok": true,
+          "detail": "control"
+        },
+        {
+          "name": "结论引用均可追溯",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "无数值伪影",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "name": "论文有标题与链接",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "论文无重复标题",
+          "ok": true,
+          "detail": "2 titles"
+        },
+        {
+          "name": "论文含年份",
+          "ok": true,
+          "detail": "2007-08-28,2007-03-12"
+        },
+        {
+          "name": "论文链接为可追溯地址",
+          "ok": true,
+          "detail": "https://doi.org/10.1051/0004-6361:20078247,https://doi.org/10.1111/j.1365-2966.2007.11471.x"
+        },
+        {
+          "name": "至少一篇论文",
+          "ok": true,
+          "detail": "2"
+        },
+        {
+          "name": "包含关键词 Orion",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [
+        {
+          "tool": "simbad.tap",
+          "status": "failed",
+          "empty": false,
+          "errors": [],
+          "error": {
+            "kind": "timeout",
+            "message": "timeout"
+          }
+        },
+        {
+          "tool": "paper.search",
+          "status": "ok",
+          "empty": false,
+          "errors": [
+            {
+              "kind": "rate_limit",
+              "msg": "触发限流"
+            }
+          ],
+          "error": null
+        },
+        {
+          "tool": "evidence.search",
+          "status": "ok",
+          "empty": false,
+          "errors": [
+            {
+              "kind": "rate_limit",
+              "msg": "触发限流"
+            },
+            {
+              "kind": "timeout",
+              "msg": "请求超时"
+            },
+            {
+              "kind": "timeout",
+              "msg": "请求超时"
+            }
+          ],
+          "error": null
+        }
+      ],
+      "papers": [
+        {
+          "title": "The distance to the Orion Nebula",
+          "authors": [
+            "Karl M. Menten",
+            "Mark J. Reid",
+            "Jan Forbrich",
+            "A. Brunthaler"
+          ],
+          "date": "2007-08-28",
+          "doi": "10.1051/0004-6361:20078247",
+          "arxivId": "",
+          "url": "https://doi.org/10.1051/0004-6361:20078247",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        },
+        {
+          "title": "The distance to the Orion Nebula cluster",
+          "authors": [
+            "R. D. Jeffries"
+          ],
+          "date": "2007-03-12",
+          "doi": "10.1111/j.1365-2966.2007.11471.x",
+          "arxivId": "",
+          "url": "https://doi.org/10.1111/j.1365-2966.2007.11471.x",
+          "abstractOnly": true,
+          "fulltextAvailable": false
+        }
+      ],
+      "researchMeta": {
+        "conclusions": [
+          {
+            "text": "摘要缺少测量数值（检索到的摘要为「We have determined the distance to the cluster to be pc」）；未获取全文，不能据此引用具体数值。",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_2dd7740e42d6631d"
+            ],
+            "scope": "abstract-only"
+          },
+          {
+            "text": "A distance of 440 ± 34 pc is found from a sample of 74 PMS stars with spectral types between G6 and M2, but this falls to 392 ± 32 pc when PMS stars with accretion discs are excluded on the basis of their near-infrared excess",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_42d2fb26a6c51d4c"
+            ],
+            "scope": "abstract-only"
+          },
+          {
+            "text": "摘要测量值：440 ± 34 pc（The distance to the Orion Nebula cluster）",
+            "level": "inferred",
+            "evidenceRefs": [
+              "ev_42d2fb26a6c51d4c"
+            ],
+            "scope": "abstract-only"
+          }
+        ],
+        "gaps": [
+          "2 篇论文仅获得摘要，未获取全文",
+          "未获得 SIMBAD 天体参数（本机网络不可达或查询无结果）",
+          "未提供 FITS 观测文件"
+        ],
+        "limitations": [
+          "部分结论仅基于论文摘要，未阅读全文。",
+          "SIMBAD 数据缺失，天体参数可能不完整。",
+          "没有 FITS 观测数据，缺少独立观测验证。"
+        ],
+        "paperStats": {
+          "searched": 2,
+          "fulltext": 0,
+          "abstractOnly": 2,
+          "failed": 0,
+          "fulltextEvidence": 0,
+          "abstractEvidence": 2
+        },
+        "conflicts": []
+      }
+    },
+    {
+      "id": "E01",
+      "category": "异常恢复",
+      "question": "断网时研究 M42 距离",
+      "expected": "verdict",
+      "actual": "control / verdict+evidence+observe+visual+mapref+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "simbad.tap:ok",
+        "paper.search:ok",
+        "evidence.search:ok",
+        "compose.domain:ok"
+      ],
+      "ms": 11,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "离线不伪造论文",
+          "ok": true,
+          "detail": "0"
+        },
+        {
+          "name": "包含章节 verdict",
+          "ok": true,
+          "detail": "verdict,evidence,observe,visual,mapref,followup,review"
+        },
+        {
+          "name": "包含关键词 1344",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [
+        {
+          "tool": "simbad.tap",
+          "status": "ok",
+          "empty": true,
+          "errors": [],
+          "error": null
+        },
+        {
+          "tool": "paper.search",
+          "status": "ok",
+          "empty": true,
+          "errors": [],
+          "error": null
+        },
+        {
+          "tool": "evidence.search",
+          "status": "ok",
+          "empty": true,
+          "errors": [],
+          "error": null
+        }
+      ],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "E02",
+      "category": "异常恢复",
+      "question": "断网时比较 M31 和 M33",
+      "expected": "T-D",
+      "actual": "control / verdict+evidence+observe+visual+mapref+compare+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 19,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "模板 T-D",
+          "ok": true,
+          "detail": "T-D"
+        },
+        {
+          "name": "对比目标数 2",
+          "ok": true,
+          "detail": "2"
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    },
+    {
+      "id": "L01",
+      "category": "长任务",
+      "question": "比较 M42、M31、M33、M4 的观测难度与距离",
+      "expected": "T-D",
+      "actual": "control / verdict+evidence+observe+visual+mapref+compare+followup+review",
+      "evidence": [],
+      "agents": [
+        "muse",
+        "kepler",
+        "vega",
+        "lyra",
+        "horizon",
+        "orion"
+      ],
+      "tools": [
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "kepler.ephemeris:ok",
+        "compare.curate:ok"
+      ],
+      "ms": 34,
+      "pass": true,
+      "reason": "",
+      "checked": [
+        {
+          "name": "模板 T-D",
+          "ok": true,
+          "detail": "T-D"
+        },
+        {
+          "name": "对比目标数 4",
+          "ok": true,
+          "detail": "4"
+        },
+        {
+          "name": "包含关键词 距离",
+          "ok": true,
+          "detail": ""
+        }
+      ],
+      "search": [],
+      "papers": [],
+      "researchMeta": null
+    }
+  ]
+}

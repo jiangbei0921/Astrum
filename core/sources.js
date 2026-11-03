@@ -868,7 +868,7 @@
   /* 判定预印本：DOI 指向 arXiv，或标题/来源带 preprint 标记 */
   function versionOf(w, doi) {
     var d = String(doi || '').toLowerCase();
-    if (/arxiv|biorxiv|medrxiv|ssrn/.test(d)) return 'preprint';
+    if (/arxiv|biorxiv|medrxiv|ssrn|figshare|zenodo|osf/.test(d)) return 'preprint';
     var type = String((w && w.type) || '').toLowerCase();
     if (type === 'preprint') return 'preprint';
     if (/arxiv|preprint/i.test(String((w && w.title) || ''))) return 'preprint';
@@ -916,7 +916,9 @@
         var o = blankItem();
         o.title = w.title || w.display_name || q;
         o.snippet = shortText(abs || (w.concepts || []).map(function (c) { return c.display_name; }).join('、'), 180);
-        o.excerpt = shortText(abs, 600);
+        /* 摘要必须保留完整结果句：600 字截断会把 "d = 772 ± 44 kpc" 切掉，
+         * 后续只能得出没有数值的结论。展示层仍用 snippet 的 180 字。 */
+        o.excerpt = shortText(abs, 1600);
         o.url = w.doi || w.id || '';
         o.host = 'openalex.org';
         o.date = w.publication_date || (w.publication_year ? String(w.publication_year) : null);
@@ -960,7 +962,7 @@
         /* 年份不再拼进 title，改放 date 字段，避免标题被污染 */
         o.title = p.title || q;
         o.snippet = shortText(p.abstract || p.title || '', 180);
-        o.excerpt = shortText(p.abstract, 600);
+        o.excerpt = shortText(p.abstract, 1600);
         o.url = link;
         o.host = 'semanticscholar.org';
         o.date = p.publicationDate || (p.year ? String(p.year) : null);
@@ -1248,7 +1250,7 @@
     });
     if (!eps.length) eps = ENDPOINT_CHAIN.slice();
 
-    var gate = allow('search');
+    var gate = opts.internal ? { ok: true } : allow('search');
     if (!gate.ok) {
       return Promise.resolve({ items: [], calls: 0, errors: [{ name: 'limit', msg: gate.msg }], truncated: true, budgetExhausted: true });
     }
@@ -1299,8 +1301,8 @@
 
   /* ---------- 频率限制：联网检索与云端调用分别限流 ---------- */
   var LIMITS = {
-    searchCooldown: 1500,     /* 两次「用户级」检索最小间隔（ms）；同一轮内部的多查询不受此限 */
-    searchPerMin: 20,         /* 每分钟最多「用户级」检索次数 */
+    searchCooldown: 1500,     /* 两次「用户级」检索最小间隔（ms）；研究流水线用 internal 跳过 */
+    searchPerMin: 20,         /* 每分钟最多「用户级」检索次数；研究流水线另有 maxCalls/budget */
     cloudPerMin: 20           /* 每分钟最多云端调用次数 */
   };
   var rate = { searchAt: 0, searchCount: 0, searchWindow: 0, cloudCount: 0, cloudWindow: 0 };

@@ -112,4 +112,50 @@ selftest 内置 20 问回归：`diffBytes=0`，13 Agent 名称/职责未变；�
 ## 8. 结论
 
 除外部条件外，本地 Node、Chrome、构建、安全、CSP、20 问兼容全部通过；未发现“测试通过但真实功能不成立”的项。线上验收在推送后按第 6 节回填，不以本地结果代替线上结果。
-</content>
+
+## 9. 第三轮（V1.7）：真实科研能力验证
+
+> 日期：2026-11-02
+> 新增：46 案例真实天文研究基准、摘要定量 Claim、跨 Provider 去重、摘要数值保真
+
+### 9.1 新增基准与执行
+
+| 项 | 结果 |
+|---|---|
+| `tools/v1-7-research-benchmark.js` | 46 案例 / 15 类；记录编号、问题、预期、实际、证据、Agent、工具、耗时、通过、失败原因 |
+| 真实网络完整运行 | 46/46 PASS（干净全量；JSON `tools/fixtures/research-benchmark-results.json`） |
+| 离线运行 | 38 PASS / 8 SKIP（网络研究案例标 SKIPPED_OFFLINE） |
+| 外部限流复跑 | S04 标 `BLOCKED_EXTERNAL:cooling/rate_limit`；同一代码路径单独复跑 PASS，不把外部失败写成 PASS |
+| 研究任务耗时 | 本地 1–600ms；主题研究 2.9–13.4s；目标+距离论文研究 20–25s |
+
+### 9.2 新增/更新的测试
+
+| 套件 | 结果 |
+|---|---:|
+| `v1-6-research-quality-test` | 30/30（新增 Q8 摘要数值、Q9 定量 Claim/1σ 冲突） |
+| `v1-7-research-benchmark --offline` | 38 PASS / 8 SKIP |
+| `v1-7-research-benchmark`（真实网络） | 46/46 PASS |
+| `v1-3-paper-fulltext-test`（真实 arXiv） | 28/28（185,574 B / 5 页 / 22 chunks） |
+| `v1-5-longrun-test --minutes=3` | 18/18（997 任务 / 0 失败 / 0 页面错误 / Heap 5.5→5.7MB） |
+| `v1-5-bigfile-test` | 13/13（FITS 200MB / PDF 10MB / 重复 10 次） |
+| `p0-03-test` | 53/53（20 问逐字节 0 差异） |
+| Node 全量套件 | 全部 exit=0（`research-test` 单独复跑 77/77） |
+| Chrome 全量套件 | 全部 exit=0（selftest 156/156、v1-6-browser 36/36 等） |
+| Provider 配置 | `BLOCKED_API_KEY`（exit 2，未执行真实模型调用） |
+
+### 9.3 构建与安全
+
+| 项 | 结果 |
+|---|---|
+| 构建 | `_site` 58 文件 / 1,662 KB / core 45 + data 8 |
+| 资源引用 | 54 个全部存在且大小写一致 |
+| 安全 | 密钥 0 / 本地绝对路径 0 |
+| 静态检查 | daily 20/20、deploy 20/20、CSP 6/6、CI 22/22、i18n 0 残留 |
+
+### 9.4 本轮新增缺陷
+
+10 类，详见 `ASTRUM-研究质量与调度修复报告.md` §8：行星直径意图、BODY_INFO 作用域、JWST 实体/索引、主题检索式、SIMBAD 空等、跨 Provider 去重、无 DOI 论文、摘要数值截断、Reducer 单位不确定性、主题词列表冒充摘要。
+
+### 9.5 部署
+
+本轮代码提交、test/pages Run、线上 `version.json` 与真实场景验收在推送后回填；不以本地构建代替线上结果。

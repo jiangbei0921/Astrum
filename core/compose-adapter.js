@@ -102,16 +102,54 @@
       return pre;
     }
 
+    /* 跨工具（paper.search / evidence.search）去重：同一篇论文在不同 Provider
+     * 常以 DOI URL、OpenAlex ID 或 /pdf 直链返回，evidenceId 不同但内容相同。
+     * 摘要级论文按归一化标题合并；全文分块保留 chunkId，不能误删。 */
+    function paperKeyOf(it) {
+      var c = (it && it.content) || {};
+      if (c.chunkId) return 'chunk:' + it.evidenceId;
+      var title = String((it && it.title) || '').toLowerCase()
+        .replace(/[^\p{L}\p{N}]+/gu, ' ').replace(/\s+/g, ' ').trim();
+      /* 论文优先按标题归一化：同一篇论文在不同 Provider 会给出 DOI、/pdf 直链
+       * 或 OpenAlex ID，DOI 字段本身也可能缺失；标题是最稳定的同一性线索。 */
+      if ((it && it.sourceType === 'paper') && title.length >= 12) return 'title:' + title;
+      var doi = String(c.doi || '').toLowerCase()
+        .replace(/^https?:\/\/(dx\.)?doi\.org\//, '').replace(/^doi:\s*/, '')
+        .replace(/\/pdf\/?$/, '').trim();
+      if (doi) return 'doi:' + doi;
+      return 'id:' + (it && it.evidenceId);
+    }
+
+    function hasPaperId(it) {
+      var c = (it && it.content) || {};
+      return !!(c.doi || c.arxivId || /^10\.\d{4,9}\//.test(String(it && it.uri || '').replace(/^https?:\/\/(dx\.)?doi\.org\//, '')));
+    }
+
     function collectEvidence(args, depResults, ids) {
       var deps = depResults || {};
       var evidence = [], steps = {}, seen = {}, fulltextFailures = [];
-      /* V1.2：附件 Evidence 由 Control 注入 compose args，优先进入报告 */
-      var injected = args && Array.isArray(args.evidence) ? args.evidence : [];
-      injected.forEach(function (it) {
+      var byPaper = {};
+      function push(it) {
         if (!it || !it.evidenceId || seen[it.evidenceId]) return;
         seen[it.evidenceId] = 1;
+        var key = paperKeyOf(it);
+        if (byPaper[key] != null) {
+          var idx = byPaper[key];
+          var old = evidence[idx];
+          /* 已有的条目缺 DOI/arXiv、后来的条目有，则用后者替换；
+           * 两者都可信时保留摘要更完整的一条（OpenAlex 有时会丢公式/数值）。 */
+          var oldLen = ((old.content || {}).excerpt || '').length;
+          var newLen = ((it.content || {}).excerpt || '').length;
+          if (!hasPaperId(old) && hasPaperId(it)) evidence[idx] = it;
+          else if (newLen > oldLen && (hasPaperId(it) || !hasPaperId(old))) evidence[idx] = it;
+          return;
+        }
+        byPaper[key] = evidence.length;
         evidence.push(it);
-      });
+      }
+      /* V1.2：附件 Evidence 由 Control 注入 compose args，优先进入报告 */
+      var injected = args && Array.isArray(args.evidence) ? args.evidence : [];
+      injected.forEach(push);
       ids.forEach(function (id) {
         var r = deps[id];
         if (!r || r.ok === false) return;
@@ -123,24 +161,23 @@
         };
         if (Array.isArray(r.fulltexts)) {
           r.fulltexts.forEach(function (ft) {
-            (ft.evidence || []).forEach(function (it) {
-              if (!it || !it.evidenceId || seen[it.evidenceId]) return;
-              seen[it.evidenceId] = 1;
-              evidence.push(it);
-            });
+            (ft.evidence || []).forEach(push);
           });
         }
         if (Array.isArray(r.fulltextErrors)) {
           r.fulltextErrors.forEach(function (e) { fulltextFailures.push(e); });
         }
         if (!Array.isArray(r.items)) return;
-        r.items.forEach(function (it) {
-          if (!it || !it.evidenceId) return;
-          if (seen[it.evidenceId]) return;
-          seen[it.evidenceId] = 1;
-          evidence.push(it);
-        });
+        r.items.forEach(push);
       });
+      /* 若已有 2 篇带 DOI/arXiv 的论文，则不再把无法核验作者/年份的
+       * 元数据条目当作研究证据（T-F 直连链路不经过 research.rank）。 */
+      var cred = evidence.filter(function (it) { return it.sourceType === 'paper' && hasPaperId(it); }).length;
+      if (cred >= 2) {
+        evidence = evidence.filter(function (it) {
+          return !(it.sourceType === 'paper' && !hasPaperId(it));
+        });
+      }
       return { evidence: evidence, steps: steps, fulltextFailures: fulltextFailures };
     }
 
@@ -224,6 +261,17 @@
 
     function sectionsOfResearch(research, answer) {
       var rep = research.report || {};
+      /* 研究型问题若落到「宇宙学议题索引」或通用兜底，结论会答非所问。
+       * 在这里把首条 verdict 改成研究口径的摘要，详细结论仍由下方分级列表给出。 */
+      var verdict = (answer.sections || []).filter(function (s) { return s.kind === 'verdict'; })[0];
+      if (verdict && /宇宙学里有|尚未指定具体概念|你可以指定其中一个/.test(String(verdict.head || ''))) {
+        var ps = (rep.papers || []).length;
+        var abs = (rep.papers || []).filter(function (p) { return p.abstractOnly; }).length;
+        verdict.head = '已检索到 ' + ps + ' 篇相关论文' +
+          (abs ? '（其中 ' + abs + ' 篇仅获得摘要）' : '') +
+          '，以下按证据强度列出结论；未获取全文时不把摘要当作已证实结论。';
+        verdict.sub = '研究问题：' + String(rep.question || answer.query || '').slice(0, 120);
+      }
       var evidenceItems = [];
       (rep.papers || []).slice(0, 3).forEach(function (p) {
         evidenceItems.push({

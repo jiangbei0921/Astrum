@@ -328,10 +328,11 @@
     var typeMatch = wantTypes && wantTypes.indexOf(it.sourceType) >= 0 ? 1 : 0;
     var hasDate = it.date ? 1 : 0;
     var hasUrl = it.url ? 1 : 0;
+    var hasPaperId = hasId(it);
     var cov = coverage(terms, (it.title || '') + ' ' + (it.excerpt || '') + ' ' + (it.snippet || ''));
     var multi = (it.sources && it.sources.length > 1) ? 1 : 0;
     var astro = astroSignal(it);
-    var score = typeMatch * 3 + hasDate * 1 + hasUrl * 0.5 + cov * 4 + multi * 1.5 + astro * 2.5;
+    var score = typeMatch * 3 + hasDate * 1 + hasUrl * 0.5 + cov * 4 + multi * 1.5 + astro * 2.5 + (hasPaperId ? 1 : 0);
     return {
       score: score,
       astro: astro,
@@ -339,11 +340,19 @@
         typeMatch: !!typeMatch,
         hasDate: !!hasDate,
         hasUrl: !!hasUrl,
+        hasPaperId: !!hasPaperId,
         termCoverage: Math.round(cov * 100) / 100,
         sourceCount: (it.sources && it.sources.length) || 1,
         astroFit: astro > 0 ? 'related' : (astro < 0 ? 'off-topic' : 'unknown')
       }
     };
+  }
+
+  function hasId(it) {
+    if (!it || it.sourceType !== 'paper') return true;
+    var extra = it.extra || {};
+    return !!(normDoi(it.doi) || it.arxivId || extra.arxivId || extra.arxiv ||
+      /^10\.\d{4,9}\//.test(String(it.url || '').replace(/^https?:\/\/(dx\.)?doi\.org\//, '')));
   }
 
   function rank(items, opts) {
@@ -359,6 +368,7 @@
       it.flags = [];
       if (!it.url) it.flags.push('no-url');
       if (!it.date) it.flags.push('no-date');
+      if (it.sourceType === 'paper' && !hasId(it)) it.flags.push('no-paper-id');
       if (it.sourceType === 'paper' && (it.excerpt || '').length < 80) it.flags.push('abstract-only');
     });
     items.sort(function (a, b) {
@@ -376,10 +386,17 @@
      * 否则任何一篇论文都能混进来（审计里 P1-6 的根因）。
      * 另外剔除明显的非天文条目（同名歌曲/电影等）。 */
     var minCov = opts.minCoverage == null ? 0.18 : opts.minCoverage;
+    var withId = items.filter(function (it) { return it.sourceType === 'paper' && hasId(it); }).length;
     var kept = items.filter(function (it) {
       /* 领域明显不符：标题就是歌曲/专辑/电影且无天文信号 */
       if (it.reliability && it.reliability.astroFit === 'off-topic') {
         it.flags = (it.flags || []).concat(['off-topic']);
+        return false;
+      }
+      /* 至少已有 2 篇带 DOI/arXiv 的论文时，元数据缺失的论文不进入结论；
+       * 这类记录无法核对作者、年份与原文，容易把非学术文章当成研究证据。 */
+      if (withId >= 2 && it.sourceType === 'paper' && !hasId(it)) {
+        it.flags = (it.flags || []).concat(['low-credibility']);
         return false;
       }
       if (!terms.length) return true;

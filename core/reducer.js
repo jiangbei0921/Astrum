@@ -186,12 +186,15 @@
         if (c.support && c.support.length) {
           ev = evidenceById[c.support[0].eid] || null;
         }
+        /* 不确定性必须和 value 一起换算到同一单位；
+         * 否则 744 ± 33 kpc 与 772 ± 44 kpc 会被误判成 >1σ 冲突。 */
+        var unc = claimUncertainty(c);
         groups[key].items.push({
           raw: String(n.value) + (n.unit ? ' ' + n.unit : ''),
           value: n.value * u.factor,
           sourceValue: n.value,
           unit: n.unit || '',
-          uncertainty: claimUncertainty(c),
+          uncertainty: typeof unc === 'number' ? unc * u.factor : unc,
           frame: claimFrame(c),
           epoch: claimEpoch(c),
           id: c.id,

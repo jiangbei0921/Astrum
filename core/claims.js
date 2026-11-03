@@ -670,6 +670,52 @@
     return (Math.round(n * 1000) / 1000) + (unit ? ' ' + unit : '');
   }
 
+  /* 论文摘要在前 320 字里经常还在讲背景，真正的测量值（如 414 ± 7 pc）
+   * 往往出现在后面的结果句。旧实现直接 slice(0, 320)，会把数字截掉，
+   * 造成「distance ... to be pc.」这类不能核对的结论。
+   * 这里按「含数值/单位/标题词」给句子打分，选出最能支撑结论的句子。 */
+  function keyExcerpt(text, title) {
+    var src = String(text || '')
+      .replace(/^\s*(ABSTRACT|Abstract)\s*[:：.]?\s*/, '')
+      .replace(/\b(Context|Aims|Methods|Results|Conclusions)\.\s*/g, '')
+      .replace(/\s+/g, ' ').trim();
+    if (!src) return '';
+    var sents = src.split(/[.!?]\s+/).map(function (s) { return s.trim(); }).filter(function (s) { return s.length > 20; });
+    if (!sents.length) return src.slice(0, 320);
+    var tw = String(title || '').toLowerCase().split(/[^a-z0-9]+/).filter(function (w) {
+      return w.length > 3;
+    });
+    /* 摘要里出现单位却缺少数值（如 "to be pc."），通常是 OpenAlex 摘要重建
+     * 丢失公式/排版，或原文只给了图表。不能把它当成测量结果。 */
+    function hasUnitGap(s) {
+      return !/\d/.test(s) && /(?:to be|is|are|of|at|≈|=)\s*(?:pc|kpc|Mpc|ly|light-year|km\/s|K|mag|AU|arcsec)\b/i.test(s);
+    }
+    function score(s) {
+      var low = s.toLowerCase();
+      var n = (s.match(/\d+(?:[.,]\d+)?|±/g) || []).length;
+      var u = (/pc|kpc|mpc|light-year|ly\b|km\/s|redshift|z\s*[=~∼]|solar mass|m☉|parallax|arcsec|mag\b|au\b/i.test(s)) ? 1 : 0;
+      var t = 0;
+      tw.forEach(function (w) { if (low.indexOf(w) >= 0) t++; });
+      return n * 2 + u + t - (hasUnitGap(s) ? 6 : 0);
+    }
+    var idx = 0, best = -1, gap = false, gapText = '';
+    sents.forEach(function (s, i) {
+      var sc = score(s);
+      if (hasUnitGap(s)) { gap = true; gapText = gapText || s; }
+      if (sc > best) { best = sc; idx = i; }
+    });
+    var hasNumeric = sents.some(function (s) {
+      return /\d/.test(s) && /pc|kpc|mpc|light-year|ly\b|km\/s|redshift|z\s*[=~∼]|solar mass|m☉|parallax|arcsec|mag\b|au\b/i.test(s);
+    });
+    if (gap && !hasNumeric) {
+      return '摘要缺少测量数值（检索到的摘要为「' + gapText +
+        '」）；未获取全文，不能据此引用具体数值。';
+    }
+    var out = sents[idx];
+    if (out.length < 100 && sents[idx + 1]) out += '. ' + sents[idx + 1];
+    return out.slice(0, 320);
+  }
+
   function buildClaimsFromEvidence(evidence, opts) {
     opts = opts || {};
     var out = [], seen = {};
@@ -718,12 +764,20 @@
           }));
         }
       } else if (ev.sourceType === 'paper') {
-        var excerpt = String(content.excerpt || content.snippet || '').trim();
+        /* 论文结论只能来自摘要正文；没有摘要时不要拿 snippet（可能是标题或
+         * OpenAlex 主题词列表）冒充摘要。 */
+        var excerpt = String(content.excerpt || '').trim();
         if (!excerpt) return;
+        /* 有些 Provider 把主题词列表塞进 abstract 字段（用「、」分隔、没有句号）。
+         * 这类内容不是摘要，不能生成结论。 */
+        if (!/[.!?。！？]/.test(excerpt)) {
+          var kw = excerpt.split(/[、,，;；]/).map(function (x) { return x.trim(); }).filter(function (x) { return x; });
+          if (kw.length >= 4 && kw.every(function (x) { return x.length <= 30; })) return;
+        }
         var fulltext = content.contentLevel === 'fulltext' || content.fulltext === true;
         c = makeClaim({
           id: 'c_paper_' + hashShort({ id: ev.evidenceId, q: 'abstract' }),
-          text: excerpt.slice(0, 320),
+          text: keyExcerpt(excerpt, ev.title),
           type: 'qualitative',
           source: 'web',
           entities: [ev.title || ''],
@@ -736,6 +790,34 @@
           origin: 'p0-fixture'
         });
         out.push(c);
+        /* 从摘要里抽取带单位的测量值，交给 Reducer 按「实体|量纲」比较。
+         * 只在问距离/测距时抽取：JWST 发现类摘要里的 "1 Mpc" 往往是尺度，
+         * 不是该论文的测量结果，抽出来会伪造一个距离值。 */
+        var wantsDistance = /距离|测距|distance|parallax/i.test(String(opts.query || ''));
+        var mm = wantsDistance && excerpt.match(/(\d+(?:[.,]\d+)?)\s*(?:±\s*(\d+(?:[.,]\d+)?))?\s*(kpc|Mpc|pc|ly|light[- ]year(?:s)?)\b/i);
+        if (mm) {
+          var val = Number(mm[1].replace(/,/g, ''));
+          var unc = mm[2] ? Number(mm[2].replace(/,/g, '')) : null;
+          var unit = /light/i.test(mm[3]) ? 'ly' : mm[3].toLowerCase();
+          var ent = (ev.provenance && ev.provenance.query) || ev.title || '';
+          if (isFinite(val) && val > 0) {
+            out.push(makeClaim({
+              id: 'c_paper_qty_' + hashShort({ id: ev.evidenceId, q: 'qty' }),
+              text: '摘要测量值：' + val + (unc != null ? ' ± ' + unc : '') + ' ' + unit +
+                '（' + (ev.title || '') + '）',
+              type: 'quantitative',
+              source: 'web',
+              entities: [ent],
+              numbers: [{ value: val, unit: unit }],
+              uncertainty: unc != null ? {
+                kind: 'measurement', value: unc, basis: '论文摘要给出的 ± 误差'
+              } : null,
+              support: [{ eid: ev.evidenceId, strength: 'weak', basis: 'numeric' }],
+              required: false,
+              origin: 'p0-fixture'
+            }));
+          }
+        }
       } else if (ev.sourceType === 'observation' && content.stats) {
         var st = content.stats;
         if (!isFiniteNumber(st.mean) || !isFiniteNumber(st.count) || !st.count) return;

@@ -99,17 +99,69 @@
     { re: /观测|拍摄|imaging|observation/i, terms: ['observation'] }
   ];
 
+  /* 没有具体天体目标的研究主题（JWST/系外行星/星系形成等）也需要英文检索式，
+   * 否则整句中文直接进入 OpenAlex，返回无关中文论文。
+   * 这些规则给出的是“能召回领域文献”的检索词组，而不是逐词直译：
+   * 实测 OpenAlex 上 "JWST high-redshift galaxies" 比 "JWST early universe galaxies
+   * discoveries controversy" 更聚焦高红移星系研究本身。 */
+  var TOPIC_TERMS = [
+    { re: /JWST|韦伯|webb/i, en: 'JWST' },
+    { re: /早期宇宙|高红移|high-redshift/i, en: 'high-redshift' },
+    { re: /系外行星|exoplanet/i, en: 'exoplanets' },
+    { re: /大气|atmosphere/i, en: 'atmospheres' },
+    { re: /透射光谱|transmission spectroscopy/i, en: 'transmission spectroscopy' },
+    { re: /观测技术|观测方法|observation/i, en: 'observation techniques' },
+    { re: /代表性研究|representative/i, en: 'representative studies' },
+    { re: /星系形成|galaxy formation/i, en: 'galaxy formation' },
+    { re: /最新进展|研究进展|进展|recent progress/i, en: 'recent progress' },
+    { re: /星系/i, en: 'galaxies' },
+    { re: /主要发现|最新发现|发现/i, en: 'discoveries' },
+    { re: /争议|分歧|tension|controvers/i, en: 'tension' },
+    { re: /恒星形成|star formation/i, en: 'star formation' },
+    { re: /暗物质/i, en: 'dark matter' },
+    { re: /暗能量/i, en: 'dark energy' },
+    { re: /黑洞/i, en: 'black holes' },
+    { re: /综述|review/i, en: 'review' }
+  ];
+
+  function topicQueryOf(q) {
+    var s = String(q || '');
+    /* 两个高价值组合先收敛成领域检索式，避免逐词拼接召回望远镜任务论文。 */
+    if (/(JWST|韦伯|webb)/i.test(s) && /早期宇宙|高红移|星系|galaxy/i.test(s)) {
+      return 'JWST high-redshift galaxies' + (/争议|分歧|tension|controvers/i.test(s) ? ' tension' : '');
+    }
+    if (/系外行星|exoplanet/i.test(s) && /大气|atmosphere/i.test(s)) {
+      return 'exoplanet atmosphere transmission spectroscopy';
+    }
+    if (/星系形成|galaxy formation/i.test(s)) {
+      return /最新|进展|recent|progress/i.test(s) ? 'galaxy formation recent progress' : 'galaxy formation review';
+    }
+    var out = [], seen = {};
+    TOPIC_TERMS.forEach(function (t) {
+      if (out.length >= 4 || !t.re.test(s) || seen[t.en]) return;
+      seen[t.en] = 1;
+      out.push(t.en);
+    });
+    return out.join(' ');
+  }
+
   function researchQueryOf(b) {
     var target = b.names[0] || '';
     var en = target;
     if (target && root.Sources && typeof root.Sources.enQueryFor === 'function') {
       try { en = root.Sources.enQueryFor(target) || target; } catch (e) { en = target; }
     }
+    /* 主题词优先：JWST/系外行星/星系形成等问题的实体往往只是知识条目别名，
+     * 用实体名反查会得到 "Space Telescopes" 这类过宽检索式。 */
+    var topic = topicQueryOf(b.query);
+    if (topic) return ((b.coord && en) ? en + ' ' : '') + topic;
     var terms = [], seen = {};
     RESEARCH_TERMS.forEach(function (p) {
-      if (terms.length >= 2 || !p.re.test(b.query)) return;
+      /* 只取一个主题词：目标名 + distance 已能召回距离测量论文；
+       * 再叠加 measurement/comparison 会把检索式收窄到只剩 1 篇。 */
+      if (terms.length >= 1 || !p.re.test(b.query)) return;
       p.terms.forEach(function (t) {
-        if (terms.length >= 2 || seen[t]) return;
+        if (terms.length >= 1 || seen[t]) return;
         seen[t] = 1;
         terms.push(t);
       });
@@ -157,7 +209,8 @@
       intent: input.intent || route.intent || 'unknown',
       names: routeNames.length ? routeNames.slice() : namesOf(input.targets || [], input.query),
       jd: jdOf(ctx),
-      place: { lat: ctx.lat, lon: ctx.lon }
+      place: { lat: ctx.lat, lon: ctx.lon },
+      coord: hasCoordTarget(input.targets || [])
     };
   }
 
@@ -217,20 +270,24 @@
     'T-E': function (input, b) {
       var first = b.names[0] || b.query;
       var search = researchQueryOf(b);
-      return [
-        makeStep('t1', 'simbad.tap', { query: first }, [], true, false, true),
-        makeStep('t2', 'paper.search', { query: search }, [], true, true, false),
-        makeStep('t3', 'evidence.search', { query: search, direction: 'counter' }, [], false, true, false),
-        makeStep('t4', 'compose.domain', { query: b.query, intent: b.intent, from: ['t1', 't2', 't3'] }, ['t1', 't2', 't3'], false, true, false)
-      ];
+      var deps = ['t2', 't3'], steps = [];
+      /* 主题型研究（JWST/系外行星/星系形成）没有可解析的坐标目标，
+       * SIMBAD 只会超时；直接跳过这个可选步骤，保留 t2/t3 编号。 */
+      if (b.coord) {
+        steps.push(makeStep('t1', 'simbad.tap', { query: first }, [], true, false, true));
+        deps = ['t1', 't2', 't3'];
+      }
+      steps.push(makeStep('t2', 'paper.search', { query: search }, [], true, true, false));
+      steps.push(makeStep('t3', 'evidence.search', { query: search, direction: 'counter' }, [], false, true, false));
+      steps.push(makeStep('t4', 'compose.domain', { query: b.query, intent: b.intent, from: deps }, deps, false, true, false));
+      return steps;
     },
     'T-F': function (input, b) {
       var search = researchQueryOf(b);
-      var steps = [
-        makeStep('t1', 'simbad.tap', { query: b.names[0] || b.query }, [], true, false, true),
-        makeStep('t2', 'evidence.search', { query: search, direction: 'positive' }, [], true, true, false),
-        makeStep('t3', 'evidence.search', { query: search, direction: 'negative' }, [], true, true, false)
-      ];
+      var steps = [];
+      if (b.coord) steps.push(makeStep('t1', 'simbad.tap', { query: b.names[0] || b.query }, [], true, false, true));
+      steps.push(makeStep('t2', 'evidence.search', { query: search, direction: 'positive' }, [], true, true, false));
+      steps.push(makeStep('t3', 'evidence.search', { query: search, direction: 'negative' }, [], true, true, false));
       if (hasCoordTarget(input.targets || [])) {
         steps.push(makeStep('t4', 'kepler.ephemeris',
           { target: b.names[0] || b.query, jd: b.jd, place: b.place }, [], false, false, true));
