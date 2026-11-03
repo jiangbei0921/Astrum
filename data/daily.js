@@ -10,265 +10,292 @@
   'use strict';
 
   root.ASTRUM_DAILY = {
-    "updated": "2026-11-02",
-    "generatedAt": "2026-11-02T07:24:00.263Z",
+    "updated": "2026-11-03",
+    "generatedAt": "2026-11-03T07:40:05.404Z",
     "note": "每日自动同步一次（UTC 01:00）。内容未经本项目核验，不参与答案推理。",
     "papers": [
       {
-        "id": "2610.41948",
-        "title": "Formation of Micron-sized Presolar Graphite Grains in Low-energy Supernova Ejecta",
+        "id": "2611.03645",
+        "title": "Episodic Star Formation - II. The Origin of the Fundamental Metallicity Relation",
         "authors": [
-          "Kengo Shinoda",
-          "Ryo Tazaki",
-          "Takato Tokuno"
+          "Xuelun Mei",
+          "Dandan Xu",
+          "Cheng Li"
         ],
-        "summary": "Presolar graphite grains with supernova isotopic signatures provide direct evidence that large graphite grains formed in supernova ejecta. However, theoretical calculations of dust formation in supernovae have typically…",
-        "cat": "astro-ph.HE",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.41948"
-      },
-      {
-        "id": "2610.41921",
-        "title": "Stellar Kinematics and Molecular Gas toward NGC 6357: An Overlooked Earlier Stellar Generation",
-        "authors": [
-          "Tung Wei Goh",
-          "Satoya Nakano",
-          "Kengo Tachihara"
-        ],
-        "summary": "We investigate past star formation in NGC 6357 using Gaia DR3 astrometry and Three-mm Ultimate Mopra Milky Way Survey (ThrUMMS) $^{12}$CO($J=1$--0) data. A Hierarchical Density-Based Spatial Clustering of Applications wi…",
+        "summary": "The Fundamental Metallicity Relation (FMR) extends the mass-metallicity relation (MZR) by including star formation rate (SFR) as a third parameter. At fixed stellar mass, galaxies with higher SFRs tend to have lower gas-…",
         "cat": "astro-ph.GA",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.41921"
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.03645"
       },
       {
-        "id": "2610.41895",
-        "title": "The 943 MHz radio-SFR relation of nearby galaxies observed with ASKAP",
+        "id": "2611.03570",
+        "title": "Chemical and dynamical evolution of prestellar cores, the dawn of star and planet formation",
         "authors": [
-          "Shengtao Wang",
-          "Xiaohui Sun",
-          "Jiangtao Li"
+          "Silvia Spezzano",
+          "Elena Redaelli",
+          "Paola Caselli"
         ],
-        "summary": "We investigate the integrated 943 MHz radio-infrared and radio-star-formation-rate (SFR) relations of 875 nearby galaxies within $D<50$ Mpc using public Australian SKA Pathfinder (ASKAP) observations. After excluding gal…",
+        "summary": "Studying prestellar cores is crucial to understanding the formation of stellar and planetary systems. To date, we lack a comprehensive survey of their density and velocity structure at small scales (100-1000 au), the gas…",
         "cat": "astro-ph.GA",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.41895"
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.03570"
       },
       {
-        "id": "2610.41876",
-        "title": "Collisional excitation of HMgC$_3$N by He: rate coefficients and astrophysical implications",
+        "id": "2611.03559",
+        "title": "Episodic Protostellar Outflows: A Proper Motion Study in Serpens South",
         "authors": [
-          "Liman Tian",
-          "Ziyu Xiang",
-          "Wenli Zou"
+          "Simran Kaur",
+          "Adele L. Plunkett",
+          "Zhi-Yun Li"
         ],
-        "summary": "Reliable collisional data are essential for interpreting the rotational emission of HMgC$_3$N under the non-equilibrium conditions of molecular clouds. We investigate the rotational excitation and de-excitation of HMgC$_…",
-        "cat": "astro-ph.GA",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.41876"
-      },
-      {
-        "id": "2610.41847",
-        "title": "Bar likelihood in local galaxies: the joint role of stellar mass, morphology and environment",
-        "authors": [
-          "Manuel Alejandro Chacón",
-          "Bernardo Cervantes Sodi",
-          "Yara Jaffé"
-        ],
-        "summary": "We investigate how the likelihood of hosting a stellar bar depends on both intrinsic galaxy properties and environment, using a volume-limited sample of central and satellite galaxies from the NASA-Sloan Atlas, spanning…",
-        "cat": "astro-ph.GA",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.41847"
-      },
-      {
-        "id": "2610.41842",
-        "title": "The multiple origins of spurs in stellar streams: a challenge for dark matter diagnostics",
-        "authors": [
-          "Claire Guillaume",
-          "Alicia Rivero",
-          "Titouan Le Guillois"
-        ],
-        "summary": "Spurs along stellar streams are often interpreted as signatures of interactions with dark matter subhalos, and thus have been proposed as diagnostics on the clustering and nature of dark matter. Although galactic baryoni…",
-        "cat": "astro-ph.GA",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.41842"
-      },
-      {
-        "id": "2610.41731",
-        "title": "The Pristine Survey. XXX. Mapping substructures in the inner and outer halo with blue horizontal branch stars",
-        "authors": [
-          "Manuel Bayer",
-          "Else Starkenburg",
-          "Annemarijn Zwerver"
-        ],
-        "summary": "Blue horizontal branch (BHB) stars serve as good standard candles and kinematic tracers of the Milky Way halo. The halo displays various overdensities and kinematical substructures of different shapes and sizes. Our obje…",
-        "cat": "astro-ph.GA",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.41731"
-      },
-      {
-        "id": "2610.41681",
-        "title": "The Evolution of the Circumgalactic Medium after a starburst in DESI Post-Starburst Galaxies",
-        "authors": [
-          "Zoe Harvey",
-          "Sahyadri Krishna",
-          "Rita Tojeiro"
-        ],
-        "summary": "We present a statistical study of the cool circumgalactic medium (CGM) around massive post-starburst galaxies, traced by Mg II $λ\\lambda2796,2803$ absorption in background quasar spectra from the Dark Energy Spectroscopi…",
-        "cat": "astro-ph.GA",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.41681"
-      },
-      {
-        "id": "2610.42151",
-        "title": "Model-Independent Assessments of Tidal Alignment and Density-Weighting Dependence in Galaxy Intrinsic Alignments",
-        "authors": [
-          "Paul Rogozenski",
-          "Sukhdeep Singh",
-          "Jonathan Blazek"
-        ],
-        "summary": "Intrinsic alignments (IA) of galaxies are an important source of systematic uncertainty in weak gravitational lensing measurements and also serve as a test for models of galaxy formation and evolution. These galaxy align…",
-        "cat": "astro-ph.CO",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.42151"
-      },
-      {
-        "id": "2610.42056",
-        "title": "Tests of equivalence principle violation in doubly coupled dark energy",
-        "authors": [
-          "Yannick Kegel",
-          "Ziyang Zheng",
-          "Luca Amendola"
-        ],
-        "summary": "Recent work has shown that a simple form of coupled dark energy with a constant coupling produces a good fit to the DESI data. In this scenario, dark matter, but not baryons, couples to a scalar field, thereby violating…",
-        "cat": "astro-ph.CO",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.42056"
-      },
-      {
-        "id": "2610.42044",
-        "title": "Elastic boundaries in Stochastic Inflation",
-        "authors": [
-          "Baptiste Blachier"
-        ],
-        "summary": "In the context of stochastic inflation, specifying boundary conditions is often a requirement to distinguish domains where quantum diffusion takes place from regions where stochastic effects are suppressed compared to th…",
-        "cat": "astro-ph.CO",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.42044"
-      },
-      {
-        "id": "2610.41953",
-        "title": "Topological Multi-Natural Inflation",
-        "authors": [
-          "Siao Yang Chai",
-          "Fuminobu Takahashi"
-        ],
-        "summary": "We investigate topological inflation in minimal multi-natural inflation, in which the axion potential consists of two cosine terms. Focusing on the high-scale regime, we perform a systematic parameter scan for representa…",
-        "cat": "hep-ph",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.41953"
-      },
-      {
-        "id": "2610.41940",
-        "title": "Cosmology with post-EoR 21 cm Intensity Mapping surveys: power spectrum measurements in the last decade",
-        "authors": [
-          "Réza Ansari",
-          "Xuelei Chen",
-          "Albert Stebbins"
-        ],
-        "summary": "The technique of 21 cm intensity mapping (IM) is emerging as a possible, cost-effective method to supplement optical surveys to map the large-scale structure, and extend their redshift reach, with projects aiming to cove…",
-        "cat": "astro-ph.CO",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.41940"
-      },
-      {
-        "id": "2610.41914",
-        "title": "Two-loop matter power spectrum from FFTLog and kite integrals",
-        "authors": [
-          "Paola Cappellazzi",
-          "Johannes M. Henn",
-          "Marko Simonović"
-        ],
-        "summary": "We present a fast and accurate method for computing the two-loop matter power spectrum in the Effective Field Theory of Large-Scale Structure (EFTofLSS). Using FFTLog, we decompose the linear power spectrum into complex…",
-        "cat": "astro-ph.CO",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.41914"
-      },
-      {
-        "id": "2610.41823",
-        "title": "Primordial black holes and gravitational waves from aligned axion inflation",
-        "authors": [
-          "Nadir Ijaz"
-        ],
-        "summary": "We study the production of primordial black holes (PBHs) and scalar-induced gravitational waves (SIGWs) in aligned axion inflation through the transition between two stages of inflation. The first stage proceeds along a…",
-        "cat": "astro-ph.CO",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.41823"
-      },
-      {
-        "id": "2610.41796",
-        "title": "The Dynamical Mass Profiles of Galaxy Groups - Application to IllustrisTNG-300",
-        "authors": [
-          "Alfie Russell",
-          "Rita Tojeiro",
-          "Anne-Marie Weijmans"
-        ],
-        "summary": "We present a new rescaling and stacking method to test cold dark matter predictions through the dynamical modelling of galaxy groups using the Jeans equation. We test the viability of this method on idealised, line-of-si…",
-        "cat": "astro-ph.CO",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.41796"
-      },
-      {
-        "id": "2610.42035",
-        "title": "Distinguishing N$_2$-Dominated from O$_2$-Dominated Atmospheres on Terrestrial Exoplanets with Reflected-Light Spectroscopy",
-        "authors": [
-          "Nick Burri",
-          "Mario Damiano",
-          "Renyu Hu"
-        ],
-        "summary": "Reflected-light spectra of Earth-sized exoplanets promise to probe habitability and biosignatures, but interpreting atmospheric oxygen can be challenging because $O_2$ can arise from both biological and abiotic processes…",
-        "cat": "astro-ph.EP",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.42035"
-      },
-      {
-        "id": "2610.42009",
-        "title": "An end-to-end CNN search for ultra-short-period planets in TESS: from the blend ceiling to the independent validation of TOI-6662 b",
-        "authors": [
-          "Juan F. Pagés Navarrete"
-        ],
-        "summary": "We trained a convolutional neural network to detect ultra-short-period planets in TESS photometry, following the procedure now standard in the field: synthetic transits as positives, eclipsing binaries as negatives. Meas…",
-        "cat": "astro-ph.EP",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.42009"
-      },
-      {
-        "id": "2610.41923",
-        "title": "Current Sheets and Magnetic Reconnection statistics by Solar Orbiter at few to tens of Ion Inertial Lengths I: Energy Dissipation",
-        "authors": [
-          "Inmaculada F. Albert",
-          "Sergio Toledo-Redondo",
-          "Víctor Montagud-Camps"
-        ],
-        "summary": "In this work, we study the turbulent origin of ion-scale Current Sheets (CSs) and the dissipation of energy via magnetic reconnection. We analyze 103 hours of high-cadence (4 samples/s) in-situ ion data from Solar Orbite…",
+        "summary": "Serpens South is a notable protostellar cluster with signatures of recent star formation, including a high protostellar fraction. Within the region, several protostars provide important mechanical feedback via outflows.…",
         "cat": "astro-ph.SR",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.41923"
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.03559"
       },
       {
-        "id": "2610.41621",
-        "title": "From Anoxic to Oxic Earth: Detectability of Atmospheric Biosignatures across Stellar Hosts with ELT/ANDES",
+        "id": "2611.03546",
+        "title": "VLITE Observations of the Hubble Ultra Deep Field",
         "authors": [
-          "Dwaipayan Dubey",
-          "Spandan Dash",
-          "Liton Majumdar"
+          "Emil Polisensky",
+          "Wendy Peters",
+          "Simona Giacintucci"
         ],
-        "summary": "Earth's atmosphere evolved from an anoxic, methane-bearing Archean state through Proterozoic oxygenation to the O$_2$-rich modern atmosphere. However, most biosignature detectability studies focus on modern Earth, leavin…",
+        "summary": "We present 136 hr of 340 MHz observations of the Hubble Ultra Deep Field (HUDF) conducted with the VLA Low-band Ionosphere and Transient Experiment (VLITE), collected commensally with higher-frequency Karl G. Jansky Very…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.03546"
+      },
+      {
+        "id": "2611.03450",
+        "title": "A Physics Informed Neural Network Approach to Decipher Environmental Confinement of Molecular Clouds in the Third Galactic Quadrant",
+        "authors": [
+          "Ashok Mondal"
+        ],
+        "summary": "Recent high-sensitivity and high-resolution surveys of the Third Galactic Quadrant [$219.75 \\leq l \\leq 229.75$ and $-5.25 \\leq b \\leq 5.25$], such as the Milky Way Imaging Scroll Painting ( MWISP) survey, have revealed…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.03450"
+      },
+      {
+        "id": "2611.03363",
+        "title": "Stellar wind variability in OB stars and its effect on mass-loss determinations",
+        "authors": [
+          "Raman K. Prinja"
+        ],
+        "summary": "Virtually all stellar winds of OB stars exhibit variability in one spectral diagnostic or another. This review focuses primarily on UV spectroscopic signatures of this variability and on studies that have exploited it to…",
+        "cat": "astro-ph.SR",
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.03363"
+      },
+      {
+        "id": "2611.03226",
+        "title": "A Cepheid-based Distance to the Type 1 Seyfert NGC 3783",
+        "authors": [
+          "Madison Markham",
+          "Misty C. Bentz",
+          "Laura Ferrarese"
+        ],
+        "summary": "We present a Cepheid-based distance to the Type 1 Seyfert NGC 3783 using the Hubble Space Telescope. Images were obtained over 15 visits using nonredundant time spacing, with ten observations in the F350LP filter and eig…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.03226"
+      },
+      {
+        "id": "2611.03172",
+        "title": "Statistical Modeling of Foreground Galactic Cirrus for Diffuse Halo Light Measurement",
+        "authors": [
+          "Qing Liu",
+          "Henk Hoekstra",
+          "Amaël Ellien"
+        ],
+        "summary": "Galactic cirrus, the diffuse Milky Way starlight scattered by interstellar dust, has become a major source of systematic uncertainty in measurements of extragalactic diffuse emission at ultra-low surface brightness level…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.03172"
+      },
+      {
+        "id": "2611.03637",
+        "title": "Mercury (Hg): a relativistic $N$-body simulation for Horndeski gravity",
+        "authors": [
+          "Ahmad Nouri-Zonoz",
+          "Farbod Hassani",
+          "Julian Adamek"
+        ],
+        "summary": "We present Mercury, a relativistic $N$-body code for cosmological simulations in the $α$-basis formulation of Horndeski gravity. Mercury extends a particle-mesh scheme by incorporating the dynamics of the additional scal…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.03637"
+      },
+      {
+        "id": "2611.03580",
+        "title": "Detection of the Galaxy--Galaxy--Temperature Skewed Bispectrum",
+        "authors": [
+          "I. J. Keja",
+          "D. Karagiannis",
+          "W. R. Coulton"
+        ],
+        "summary": "We present the first measurement of the galaxy--galaxy--temperature skewed bispectrum, obtained by cross-correlating the squared, filtered unWISE galaxy overdensity with \\textit{Planck} maps at 100, 143, 217, and 353~GHz…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.03580"
+      },
+      {
+        "id": "2611.03571",
+        "title": "Nonlinear gauge maps and the structure of Goldstone loops in canonical inflation",
+        "authors": [
+          "Cheng-Jun Fang",
+          "Zong-Kuan Guo"
+        ],
+        "summary": "We clarify the nonlinear relation between the spatially flat scalar and Goldstone descriptions of canonical single-field inflation. An exact clock map shows how potential interactions are reorganized into derivative Gold…",
+        "cat": "hep-th",
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.03571"
+      },
+      {
+        "id": "2611.03556",
+        "title": "Toward the one- and two-loop EFTofLSS for Simons Observatory CMB lensing",
+        "authors": [
+          "Evan Saraivanov",
+          "Henrique Rubira",
+          "Vivian Miranda"
+        ],
+        "summary": "Cosmic microwave background (CMB) lensing observations are becoming sensitive to non-linear structure formation and baryonic feedback scenarios. The effective field theory of large-scale structure (EFTofLSS) provides a s…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.03556"
+      },
+      {
+        "id": "2611.03537",
+        "title": "Baryonic feedback and intrinsic alignments in profile: a frequentist view of DES Y3 cosmic shear",
+        "authors": [
+          "Anoma Ganguly",
+          "Elisabeth Krause",
+          "Tanvi Karwal"
+        ],
+        "summary": "Current cosmic shear surveys primarily constrain $S_8$ and $Ω_\\mathrm{m}$, while most other model parameters remain dominated by priors. Consequently, marginal posteriors are vulnerable to prior-volume effects, particula…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.03537"
+      },
+      {
+        "id": "2611.03497",
+        "title": "Multiprobe strategies for Kinematic Lensing with the Roman Space Telescope High Latitude Wide Area Survey",
+        "authors": [
+          "Yu-Hsiu Huang",
+          "Jiachuan Xu",
+          "Tim Eifler"
+        ],
+        "summary": "In its latest design, the High Latitude Wide Area Survey (HLWAS) Medium Tier comprises overlapping photometric and spectroscopic data across 2,300 square degrees. This dataset enables Kinematic Lensing (KL), a Weak Lensi…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.03497"
+      },
+      {
+        "id": "2611.03429",
+        "title": "DBI Softens Stiff-Phase Gravitational-Wave Spectra",
+        "authors": [
+          "Samuel Sánchez López",
+          "Eemeli Tomberg",
+          "Juan C. Bueno Sánchez"
+        ],
+        "summary": "We investigate the effect of non-canonical kinetic terms on the present-day density spectrum of primordial gravitational waves (GWs), by considering the dynamics of a scalar field governed by the Dirac--Born--Infeld (DBI…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.03429"
+      },
+      {
+        "id": "2611.02828",
+        "title": "Targeting the future of spectroscopic galaxy surveys -- A cosmological study case with the Wide-field Spectroscopic Telescope",
+        "authors": [
+          "Constantin Payerne",
+          "Antoine Rocher",
+          "Aurélien Verdier"
+        ],
+        "summary": "The next generation of Stage-V spectroscopic surveys are designed to measure hundreds of millions of galaxy and quasar spectra, extending precision large-scale-structure cosmology to redshifts and volumes well beyond the…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.02828"
+      },
+      {
+        "id": "2611.03643",
+        "title": "The Neptunian ridge through the lens of TESS",
+        "authors": [
+          "Amadeo Castro-González"
+        ],
+        "summary": "The Neptunian desert and savanna are separated by a ridge, an overdensity at orbital periods of approximately 3-6 d identified with Kepler. Like the hot Jupiter pileup at larger radii, this feature has been linked to the…",
         "cat": "astro-ph.EP",
-        "published": "2026-10-30",
-        "url": "https://arxiv.org/abs/2610.41621"
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.03643"
+      },
+      {
+        "id": "2611.03613",
+        "title": "The Giant Planet Mass Function Across Stellar Mass and Metallicity: Massive Stars Make Massive Planets",
+        "authors": [
+          "Judah Van Zandt",
+          "Brendan Bowler"
+        ],
+        "summary": "Although giant planet occurrence correlates with stellar mass and metallicity, it remains unclear whether these properties also shape the companion mass distribution. We investigate this question using 719 FGKM stars fro…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.03613"
+      },
+      {
+        "id": "2611.03417",
+        "title": "HCN detection in the Kreutz sungrazing comet C/2026 A1 (MAPS) shortly before its disruption",
+        "authors": [
+          "Amélie Godard Palluet",
+          "Dominique Bockelée-Morvan",
+          "Nicolas Biver"
+        ],
+        "summary": "Context. Kreutz sungrazing comets are characterised by extremely small perihelion distances (q < 3.45 R). These objects are of particular interest because their intense activity and fragmentation can expose material from…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.03417"
+      },
+      {
+        "id": "2611.03291",
+        "title": "White dwarf pollution in wide binaries: the role of planetary mass",
+        "authors": [
+          "Constanza Norambuena",
+          "Carolina Charalambous",
+          "Claudia Aguilera-Gómez"
+        ],
+        "summary": "Atmospheric pollution in white dwarfs is interpreted as evidence for the accretion of rocky material from remnant planetary systems. In wide binaries, these reservoirs can be influenced by planetary perturbers. Here, we…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-02",
+        "url": "https://arxiv.org/abs/2611.03291"
       }
     ],
     "news": [
+      {
+        "title": "Scientists just found a loophole that could let black holes split in two",
+        "summary": "Scientists have discovered a possible loophole in the laws that normally prevent black holes from splitting apart, suggesting that extremely fast-spinning black…",
+        "source": "ScienceDaily",
+        "date": "2026-11-03",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261101010525.htm"
+      },
+      {
+        "title": "NASA’s Perseverance Mars rover breaks historic record after traveling 28 miles",
+        "summary": "NASA’s Perseverance rover has set a historic record by traveling 28.10 miles across Mars, farther than any vehicle has ever driven on another world. Armed with…",
+        "source": "ScienceDaily",
+        "date": "2026-11-02",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261101010536.htm"
+      },
+      {
+        "title": "IceCube detects ghost particles with 10 billion times the energy of solar neutrinos",
+        "summary": "Mysterious particles called neutrinos constantly stream through our bodies, and scientists are now detecting incredibly powerful versions arriving from distant…",
+        "source": "ScienceDaily",
+        "date": "2026-11-02",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261101010533.htm"
+      },
+      {
+        "title": "NASA's Hubble and Webb discover ancient worlds that remember their past",
+        "summary": "NASA’s Hubble and James Webb Space Telescopes have uncovered surprising clues about the solar system’s origins by studying 27 tiny, distant objects beyond Neptu…",
+        "source": "ScienceDaily",
+        "date": "2026-11-02",
+        "url": "https://www.sciencedaily.com/releases/2026/10/261031221209.htm"
+      },
       {
         "title": "Scientists say a forgotten particle may explain why the universe exists",
         "summary": "A mysterious particle overlooked for decades may hold the key to why matter survived the Big Bang, allowing stars, planets, and life to exist. Scientists believ…",
@@ -298,39 +325,11 @@
         "url": "https://www.sciencedaily.com/releases/2026/10/261029072113.htm"
       },
       {
-        "title": "Physicists created a tiny universe and watched time emerge without a clock",
-        "summary": "Scientists have created a miniature universe in the laboratory that could help answer one of the biggest mysteries in physics: What is time, and where does it c…",
-        "source": "ScienceDaily",
-        "date": "2026-10-30",
-        "url": "https://www.sciencedaily.com/releases/2026/10/261028234703.htm"
-      },
-      {
-        "title": "A mysterious star system just 16 light-years away may be hiding habitable planets",
-        "summary": "Astronomers have solved a 170-year-old planetary mystery in a nearby two-star system, discovering that a mysterious wobble was caused by stellar activity rather…",
-        "source": "ScienceDaily",
-        "date": "2026-10-30",
-        "url": "https://www.sciencedaily.com/releases/2026/10/261028232711.htm"
-      },
-      {
         "title": "Ghostly Cat’s Head Nebula lurks within sight of Hubble and Webb",
         "summary": "The NASA/ESA Hubble and the NASA/ESA/CSA James Webb Space Telescopes recently stared at an eerie star-forming scene within the Carina Nebula, a massive gas and…",
         "source": "ESA",
         "date": "2026-10-29",
         "url": "https://www.esa.int/Science_Exploration/Space_Science/Webb/Ghostly_Cat_s_Head_Nebula_lurks_within_sight_of_Hubble_and_Webb"
-      },
-      {
-        "title": "Einstein's equations may explain the universe without dark energy",
-        "summary": "Mathematicians have uncovered what they argue is a fundamental flaw in the standard model of the universe, potentially challenging the need for dark energy. The…",
-        "source": "ScienceDaily",
-        "date": "2026-10-29",
-        "url": "https://www.sciencedaily.com/releases/2026/10/261028232719.htm"
-      },
-      {
-        "title": "NASA discovers Jupiter’s invisible shield is more complex than Earth’s",
-        "summary": "NASA’s Juno spacecraft has discovered that Jupiter uses a surprisingly complex system of powerful plasma waves and multiple shock regions to defend against the…",
-        "source": "ScienceDaily",
-        "date": "2026-10-29",
-        "url": "https://www.sciencedaily.com/releases/2026/10/261028232715.htm"
       },
       {
         "title": "Stars brewing in a nebulous cauldron",
