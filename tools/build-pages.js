@@ -219,7 +219,18 @@ function main() {
   ROOT_FILES.forEach(function (rel) {
     var src = path.join(ROOT, rel);
     if (!fs.existsSync(src)) fail('缺少运行文件: ' + rel);
-    fs.copyFileSync(src, path.join(OUT, rel));
+    if (rel === 'index.html') {
+      /* 线上 53 个外部脚本串行阻塞，跨区访问时首屏会被逐个请求拖慢；
+       * 仅在 Pages 产物里加 defer，并行下载且保持执行顺序。
+       * 源码保持阻塞加载，file:// 与 CI selftest 行为不变。 */
+      var html = fs.readFileSync(src, 'utf8').replace(
+        /<script src="([^"]+)"><\/script>/g,
+        '<script defer src="$1"></script>'
+      );
+      fs.writeFileSync(path.join(OUT, rel), html, 'utf8');
+    } else {
+      fs.copyFileSync(src, path.join(OUT, rel));
+    }
   });
   RUNTIME_DIRS.forEach(copyDir);
 

@@ -21,7 +21,7 @@ function caseRun(id, title, fn) {
 var INDEX = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 
 caseRun('D1', '相对路径与模块顺序', function () {
-  var srcs = [], re = /<script\s+src="([^"]+)"/g, m;
+  var srcs = [], re = /<script[^>]*\ssrc="([^"]+)"/g, m;
   while ((m = re.exec(INDEX))) srcs.push(m[1]);
   ok('D1.1 无绝对路径', srcs.every(function (s) {
     return !/^\/|^[A-Za-z]:\\|^https?:/i.test(s);
@@ -56,13 +56,13 @@ caseRun('D3', 'standalone 重建', function () {
   ok('D3.1 构建成功', fs.existsSync(file) && html.length > 1200000, String(html.length));
   ok('D3.2 新模块已内联', html.indexOf('AstroAttachmentEvidence') >= 0 &&
     html.indexOf('AstroResearchUI') >= 0 && html.indexOf('AstroControlBridge') >= 0);
-  ok('D3.3 无外链 core 脚本', !/<script\s+src="core\//.test(html));
+  ok('D3.3 无外链 core 脚本', !/<script[^>]*\ssrc="core\//.test(html));
   ok('D3.4 构建日志包含内联脚本数', /内联脚本/.test(out), out.split('\n').slice(-3).join(' | '));
 });
 
 caseRun('D4', 'file:// 与数据路径', function () {
   ok('D4.1 无脚本/资源指向本地服务器', !/<(script|link)[^>]+(src|href)="(http:\/\/localhost|https?:\/\/127\.0\.0\.1)/.test(INDEX));
-  ok('D4.2 数据文件相对路径', /<script src="data\//.test(INDEX));
+  ok('D4.2 数据文件相对路径', /<script[^>]*\ssrc="data\//.test(INDEX));
   ok('D4.3 CSS 相对路径', /href="assets\/app\.css"/.test(INDEX));
   ok('D4.4 无硬编码密钥', !/sk-[A-Za-z0-9]{12,}/.test(INDEX) && !/api[_-]?key\s*[:=]\s*["'][^"']{12,}/i.test(INDEX));
 });
