@@ -11,8 +11,9 @@
 ### 1.1 当前状态
 
 - 代码路径：`core/control-bridge.js` → `core/sources.js` → Provider 请求；JSON 输出、Schema 校验、错误分类、重试/降级入口已实现。
-- 本地验证：`v1-6-provider-test.js` 分类 4/4（auth / rate_limit / timeout / network），结果 `RESULT BLOCKED_API_KEY`，exit 2。
-- 未执行：真实模型网络调用；未伪造任何真实返回。
+- 本地验证：`v1-6-provider-test.js` 分类 4/4（auth / rate_limit / timeout / network）。
+- **真实验证（2026-11-03）**：DeepSeek 官方端点 / `deepseek-chat`，8 次真实请求（7 成功 / 1 故意坏 Key）；基础场景 4/4、科研集成 3/3；usage 3791/348/4139 与 1167/291/1458。真实基础 Provider **PASS**。
+- 未执行：真实 429/配额耗尽、Provider 计划性故障演练、浏览器真实 Key 全链路。未伪造任何真实返回。
 
 ### 1.2 所需环境变量（只在本地 shell 设置，不写入仓库）
 
@@ -33,8 +34,8 @@ node tools/v1-6-provider-test.js
 
 预期：
 
-- 无 Key：`RESULT BLOCKED_API_KEY`，exit 2；这是当前状态。
-- 有 Key：脚本校验配置并提示真实调用入口；真实调用需在本地运行 `core/control-bridge.js` 的 `modelGenerate` 场景（或使用应用设置页“测试连接”），不得把 Key 写入测试代码。
+- 无 Key：`RESULT BLOCKED_API_KEY`，exit 2（CI 使用该状态，不视为 PASS）。
+- 有 Key：使用 `ASTRUM_LIVE_KEY_FILE` 指向本机临时文件，或 `ASTRUM_LIVE_API_KEY`；运行 `v1-9-provider-test.js` 与 `v1-9-real-provider-integration-test.js`，Key 不出现在命令/日志/仓库。
 
 ### 1.4 验收标准
 
@@ -146,7 +147,7 @@ node tools/v1-5-longrun-test.js --minutes=180 --label=LR-03 --out=lr-03.log
 
 | 项 | 状态 | 最后一步 |
 |---|---|---|
-| 真实 Provider Key | BLOCKED_API_KEY | 本地设置 4 个环境变量后运行 `node tools/v1-6-provider-test.js`，再在应用设置页“测试连接” |
+| 真实 Provider Key | **PASS**（2026-11-03） | 已用 DeepSeek `deepseek-chat` 完成；细节见 §9。浏览器侧仍需在设置页填入 Key 后人工复验“测试连接 + 科研问答” |
 | 真实复杂 PDF | BLOCKED_SAMPLE | 提供合法公开样本到仓库外目录，按 §2.3 验证 |
 | 正式回滚/下线 | BLOCKED_AUTHORIZATION | 明确目标 commit/影响范围后执行手册步骤 |
 | Wikipedia/Semantic | ENV_LIMITATION | 换网络或代理后重跑 network CI；不伪造结果 |
@@ -181,9 +182,10 @@ node tools/v1-5-longrun-test.js --minutes=180 --label=LR-03 --out=lr-03.log
 
 | 项 | 状态 | 实际观测与处理 |
 |---|---|---|
-| 真实 Provider Key | BLOCKED_API_KEY | 未设置 `ASTRUM_LIVE_API_KEY/BASE_URL/MODEL`；离线协议与错误分类 20/20 PASS；真实调用 0 次，不伪造 PASS |
-| 真实 Provider 429/配额 | BLOCKED_QUOTA（未触发） | 无真实 Key/额度，无法触发真实 429 |
-| Provider 服务不可用 | BLOCKED_PROVIDER（未触发） | 无真实端点，未伪造服务故障 |
+| 真实 Provider Key | **PASS** | 已用 DeepSeek 官方端点 / `deepseek-chat` 完成 8 次真实请求（7 成功 / 1 故意坏 Key）；基础场景 4/4、科研集成 3/3；usage 3791/348/4139 与 1167/291/1458；Key 未入库，验收后删除本机临时文件 |
+| 真实 Provider 429/配额 | 未触发 | 账户有额度，未为验收刻意耗尽配额；429 分类由本地协议路径验证 |
+| Provider 服务不可用 | 已自然观测 | 本轮早期多次真实 503 “Service is too busy”，归类 `server` 并重试，单独计 `blockedProvider`；最终恢复后 4/4 成功。未做计划性故障演练 |
+| 浏览器“测试连接 + 真实科研问答” | 未执行 | 本轮真实链路为 Node；浏览器侧需在设置页填入 Key 后人工复验 |
 | 真实扫描版 PDF | BLOCKED_SAMPLE | 当前没有合法公开的真实扫描样本；合成扫描件只验证 `pdf_no_text`，不冒充真实 |
 | 真实 CID 成功解析 | BLOCKED_SAMPLE | 2208 真实样本编码异常，本轮正确拒绝 `pdf_unsupported_encoding`；未取得可正确 ToUnicode 的真实 CID 成功样本 |
 | OCR | 未实现 | 不引入大型依赖；仅分类 `pdf_ocr_required` |

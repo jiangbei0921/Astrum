@@ -460,11 +460,37 @@
   }
 
   function tokensOf(shape, data) {
-    if (!data) return 0;
-    if (shape === 'anthropic' && data.usage) return (data.usage.input_tokens || 0) + (data.usage.output_tokens || 0);
-    if (shape === 'gemini' && data.usageMetadata) return data.usageMetadata.totalTokenCount || 0;
-    if (data.usage) return data.usage.total_tokens || 0;
-    return 0;
+    var u = usageOf(shape, data);
+    return u && typeof u.total === 'number' ? u.total : 0;
+  }
+
+  /* 服务商真实 usage；缺失字段保留 null，绝不按字符数估算冒充。 */
+  function usageOf(shape, data) {
+    if (!data) return null;
+    if (shape === 'anthropic' && data.usage) {
+      var ai = data.usage.input_tokens, ao = data.usage.output_tokens;
+      return {
+        prompt: ai == null ? null : ai,
+        completion: ao == null ? null : ao,
+        total: (ai == null && ao == null) ? null : (ai || 0) + (ao || 0)
+      };
+    }
+    if (shape === 'gemini' && data.usageMetadata) {
+      var gu = data.usageMetadata;
+      return {
+        prompt: gu.promptTokenCount == null ? null : gu.promptTokenCount,
+        completion: gu.candidatesTokenCount == null ? null : gu.candidatesTokenCount,
+        total: gu.totalTokenCount == null ? null : gu.totalTokenCount
+      };
+    }
+    if (data.usage) {
+      return {
+        prompt: data.usage.prompt_tokens == null ? null : data.usage.prompt_tokens,
+        completion: data.usage.completion_tokens == null ? null : data.usage.completion_tokens,
+        total: data.usage.total_tokens == null ? null : data.usage.total_tokens
+      };
+    }
+    return null;
   }
 
   function clean(text) {
@@ -713,11 +739,12 @@
           throw empty;
         }
         var latency = Date.now() - t0;
-        var tk = tokensOf(base.shape, d);
+        var usage = usageOf(base.shape, d);
+        var tk = usage && typeof usage.total === 'number' ? usage.total : 0;
         state.metrics[id] = { latency: latency, chars: text.length, tokens: tk };
         setStatus(id, 'ready', '已连通');
         save();
-        return { text: text, latency: latency, tokens: tk };
+        return { text: text, latency: latency, tokens: tk, usage: usage };
       });
     }).catch(function (e) {
       timer.done();
@@ -833,17 +860,33 @@
     if (!s2) return '';
     if (PLANET_EN[s2]) return PLANET_EN[s2];
     var C = root.CATALOG, K = root.KNOWLEDGE;
+    /* 先查星表：知识库的 en 可能是口语别名，检索会跑偏。
+     * 例：M13 在知识库写作 "Hercules Cluster"，OpenAlex 会召回武仙座星系团
+     * （Abell 2151）而不是 M13 球状星团；星表 en 是正确的
+     * "Hercules Globular Cluster"。 */
+    if (C) {
+      var qLower = s2.toLowerCase();
+      for (var j = 0; j < C.dso.length; j++) {
+        var d = C.dso[j];
+        if ((d.cn && d.cn === s2) || (d.id && d.id.toLowerCase() === qLower) || (d.k && d.k === qLower)) {
+          return d.en || d.id;
+        }
+      }
+      for (var k = 0; k < C.stars.length; k++) {
+        var st = C.stars[k];
+        if ((st.cn && st.cn === s2) || (st.en && st.en.toLowerCase() === qLower)) return st.en;
+      }
+      for (var m = 0; m < C.constellations.length; m++) {
+        var co = C.constellations[m];
+        if (co.cn === s2 || co.abbr && co.abbr.toLowerCase() === qLower) return co.en;
+      }
+    }
     if (K) {
       for (var i = 0; i < K.entries.length; i++) {
         var e = K.entries[i];
         if (!e.cn) continue;
         if (e.cn === s2 || (e.aliases || []).indexOf(s2) >= 0) return e.en || s2;
       }
-    }
-    if (C) {
-      for (var j = 0; j < C.dso.length; j++) if (C.dso[j].cn && C.dso[j].cn === s2) return C.dso[j].id;
-      for (var k = 0; k < C.stars.length; k++) if (C.stars[k].cn && C.stars[k].cn === s2) return C.stars[k].en;
-      for (var m = 0; m < C.constellations.length; m++) if (C.constellations[m].cn && C.constellations[m].cn === s2) return C.constellations[m].en;
     }
     return s2;
   }

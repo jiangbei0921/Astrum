@@ -4,13 +4,13 @@
 > 范围：真实 Provider 接入验证、独立科研盲测、真实复杂 PDF、V1.8 反馈诊断闭环
 > 分支：`main`
 > 原则：13 Agent、Muse、Tool-Centric、7 模板、MEMORY/Thread/TaskStore、旧接口、ADR-001、纯静态部署均保留
-> 结论：所有当前环境可执行项已完成并部署；真实 Provider 因缺少 Key 明确 BLOCKED，未伪造成 PASS。
+> 结论：所有当前环境可执行项已完成并部署；真实 Provider 已用 DeepSeek `deepseek-chat` 完成真实外部调用（7 次成功 / 1 次故意坏 Key 鉴权失败），基础 Provider 标 PASS。
 
 ## 1. 执行摘要
 
 | 任务 | 结果 |
 |---|---|
-| A 真实 Provider | **BLOCKED_API_KEY**；离线协议/错误分类 20/20 PASS |
+| A 真实 Provider | **PASS**：DeepSeek `deepseek-chat`，8 次真实请求 / 7 成功 / 1 故意坏 Key；离线协议 20/20 |
 | B 独立科研盲测 | **56/56 PASS**（15 类，21 个真实网络案例，59 篇论文） |
 | C 真实复杂 PDF | **79/79 PASS**；6 个真实样本，5 解析成功，1 乱码拒绝 |
 | D 反馈中心联动 | **149/149 + 49/49 + 27/27 + 31/31**；线上 27/27 |
@@ -22,8 +22,11 @@
 
 | 文件 | 修改 |
 |---|---|
-| `core/sources.js` | 导出 `classifyError`；HTTP 状态/坏 JSON/空响应/超时结构化分类 |
-| `core/control-bridge.js` | 使用 Sources 错误分类；返回 kind/status/retryable |
+| `core/sources.js` | 导出 `classifyError`；HTTP 状态/坏 JSON/空响应/超时结构化分类；新增 `usageOf` 返回 Prompt/Completion/Total；`enQueryFor` 星表优先修正 M13 英文名 |
+| `core/control-bridge.js` | 使用 Sources 错误分类；返回 kind/status/retryable；透传服务商 `usage` |
+| `core/planner.js` | 研究检索词排序：具体物理量（age/metallicity/uncertainty）优先于泛化 measurement |
+| `core/request.js` | Control 路径复用 `resolveByMemory`，修复多轮追问检索目标丢失 |
+| `core/agents.js` | 导出 `resolveByMemory`，与 legacy 路径共用同一指代消解 |
 | `core/router.js` | 扩展研究词表；unknown + 研究信号不再强制 LEGACY |
 | `core/agents.js` | 缺省 ctx bortle/lat/lon/tz 回填，消除 `Bortle undefined` |
 | `core/pdf-text.js` | 页码映射、referencesStartPage、参考文献不进 chunks、标题识别、尾部垃圾容忍、乱码拒绝、24MB 上限、pdf_corrupt/ocr 细节 |
@@ -40,7 +43,9 @@
 
 | 文件 | 内容 | 结果 |
 |---|---|---|
-| `tools/v1-9-provider-test.js` | 协议、错误分类、Agent/预算边界；有 Key 时真实调用 | 20/20；BLOCKED_API_KEY |
+| `tools/v1-9-provider-test.js` | 协议、错误分类、Agent/预算边界；真实调用 4 场景 + 坏 Key | 26/26；REAL PASS；usage 3791/348/4139 |
+| `tools/v1-9-real-provider-integration-test.js` | 真实 DeepSeek + M13 科研任务 + 模型表述 + 同 Thread 多轮 | 15/15；REAL PASS；usage 1167/291/1458 |
+| `tools/v1-9-research-target-test.js` | M13/M31/M45/行星映射、检索式、MEMORY 指代 | 13/13 |
 | `tools/v1-9-blind-research-benchmark.js` | 56 案例 / 15 类 / 10 维评分 | 56/56 |
 | `tools/v1-9-real-pdf-test.js` | 6 个真实 arXiv PDF / 内容完整性 | 79/79 |
 | `tools/v1-9-feedback-diagnostic-test.js` | 诊断科研字段、脱敏、上限 | 27/27 |
@@ -68,6 +73,13 @@
 
 全部已在现有架构内修复；没有删测试、降断言或跳过失败项。
 
+真实 Provider 验收阶段（同日）又修复 4 个可复现缺陷：
+
+14. **P1** `enQueryFor('武仙座球状星团')` 先命中知识库别名 `Hercules Cluster`，OpenAlex 召回武仙座星系团而非 M13；改为星表优先，返回 `Hercules Globular Cluster`。
+15. **P1** Control 路径未做 MEMORY 指代消解，多轮追问 `targets` 为空、检索式退化为 `age`；`request.js` 复用 `resolveByMemory`。
+16. **P2** `RESEARCH_TERMS` 中 `measurement` 先于具体物理量，M13 年龄追问检索式被泛化；重排为 age/metallicity/uncertainty 优先。
+17. **P2** 只返回 total token，无法报告 Prompt/Completion；新增 `usageOf` 并透传 `usage`。
+
 ## 5. 测试结果
 
 ### Node
@@ -82,7 +94,9 @@
 | v1-9 独立盲测（真实网络） | 56/56 PASS |
 | v1-9 真实 PDF | 79/79 |
 | v1-9 E2E | 31/31 |
-| v1-9 Provider | 20/20，BLOCKED_API_KEY |
+| v1-9 Provider（真实） | 26/26；REAL PASS；4 场景成功 + 1 故意坏 Key |
+| v1-9 真实 Provider 集成 | 15/15；REAL PASS；3/3 调用成功 |
+| v1-9 研究目标消歧/多轮 | 13/13 |
 
 ### 浏览器 / 静态
 
@@ -101,8 +115,8 @@
 
 | 项 | 值 |
 |---|---|
-| standalone | 54 脚本、CSS 131KB、1723KB |
-| `_site` | 59 文件（core 46 / data 8）、1750KB |
+| standalone | 54 脚本、CSS 131KB、1726KB |
+| `_site` | 59 文件（core 46 / data 8）、1752KB |
 | 安全扫描 | 密钥 0、本地绝对路径 0 |
 | 功能提交 | `8b7b8aa` |
 | 合并日常数据 | `0640f6f` |
@@ -117,7 +131,10 @@
 
 | 项 | 分类 | 需要什么 |
 |---|---|---|
-| 真实 Provider 调用 | BLOCKED_API_KEY | 本机设置 `ASTRUM_LIVE_*` 四个环境变量 |
+| 真实 Provider 调用 | **PASS** | 已用 DeepSeek `deepseek-chat` 完成；Key 未入库，验收后删除本机临时文件 |
+| 真实 429/配额耗尽 | 未触发 | 需真实账户额度条件；不为验收刻意耗尽配额 |
+| Provider 计划性故障演练 | 未执行 | 已自然观测 503 并验证重试/阻塞分类 |
+| 浏览器“测试连接 + 真实科研问答” | 未执行 | 本轮真实链路为 Node；浏览器侧需填入 Key 后人工复验 |
 | 真实扫描版 PDF | BLOCKED_SAMPLE | 合法公开的真实扫描样本 |
 | 真实可正确解析的复杂 CID PDF | BLOCKED_SAMPLE | 带正确 ToUnicode 的真实 CID 样本 |
 | OCR | 未实现 | 不引入大型依赖；仅分类 `pdf_ocr_required` |
@@ -128,4 +145,4 @@
 
 ASTRUM 在本轮通过了独立盲测、真实 PDF 内容验证、反馈诊断闭环与全量回归。最重要的变化不是增加测试数量，而是修复了会影响真实研究可信度的 5 个 P1：全文 Evidence 去重定位、乱码拒绝、PDF 尾部垃圾、研究主题路由、14MB 长论文支持。
 
-真实 Provider 能力仍未验证，原因是当前环境没有可用 Key；这不会被写成 PASS。
+真实 Provider 能力已验证：DeepSeek 官方端点、`deepseek-chat`、8 次真实外部请求（7 成功 / 1 故意坏 Key），服务商 usage 为 Prompt 3791 + 1167、Completion 348 + 291；M13 科研链路与同 Thread 追问均由真实模型参与完成。M13 消歧、多轮指代与检索词排序三个缺陷在验收中暴露并修复，另补 `resolveByMemory` 导出与 usage 透传。离线/Mock 结果没有冒充真实调用；未触发项（真实 429、计划性故障、浏览器真实 Key 全链路）已明确列出。

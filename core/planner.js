@@ -84,14 +84,17 @@
    * 返回大量无关的中文论文。这里用“英文目标名 + 1–2 个主题词”构造检索式，
    * 目标名仍由既有实体索引给出，不引入新的模型或外部服务。 */
   var RESEARCH_TERMS = [
+    /* 具体物理量优先于泛化「测量」：追问“年龄数据的测量不确定性”时，
+     * 检索式应为 "… age"，而不是 "… measurement"（后者会召回测量学百科）。 */
     { re: /距离|distance|parallax|视差/i, terms: ['distance'] },
-    { re: /测量|测距|measurement|measure/i, terms: ['measurement'] },
-    { re: /一致|分歧|比较|差异|不同|controvers|disagree|tension/i, terms: ['comparison'] },
     { re: /年龄|age/i, terms: ['age'] },
+    { re: /金属|化学成分|abundance|metallicity/i, terms: ['metallicity'] },
     { re: /质量|mass/i, terms: ['mass'] },
     { re: /半径|大小|size|radius/i, terms: ['radius'] },
     { re: /温度|temperature/i, terms: ['temperature'] },
-    { re: /金属|化学成分|abundance|metallicity/i, terms: ['metallicity'] },
+    { re: /不确定性|误差|uncertainty|error budget/i, terms: ['uncertainty'] },
+    { re: /测量|测距|measurement|measure/i, terms: ['measurement'] },
+    { re: /一致|分歧|比较|差异|不同|controvers|disagree|tension/i, terms: ['comparison'] },
     { re: /形成|演化|formation|evolution/i, terms: ['formation'] },
     { re: /光谱|spectroscopy|spectra/i, terms: ['spectroscopy'] },
     { re: /自转|rotation/i, terms: ['rotation'] },

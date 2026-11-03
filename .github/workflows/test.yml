@@ -195,6 +195,10 @@ jobs:
       - name: V1.9 独立盲测 v1-9-blind-research-benchmark（offline）
         run: node tools/v1-9-blind-research-benchmark.js --offline
 
+      # V1.9：M13 目标消歧 + Control 路径多轮指代回归
+      - name: V1.9 研究目标 v1-9-research-target-test
+        run: node tools/v1-9-research-target-test.js
+
       # V1.9：Provider 协议/错误分类；无 Key 时返回 BLOCKED_API_KEY(exit 2)
       - name: V1.9 Provider 验证 v1-9-provider-test
         run: |

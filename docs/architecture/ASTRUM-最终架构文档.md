@@ -253,6 +253,7 @@ openMailClient()（只尝试唤起，不代表发送成功）
 
 ### 11.4 测试与线上
 
-- 独立盲测 56/56；真实 PDF 79/79；反馈诊断 27/27；E2E 31/31；V1.7 基准 46/46。
+- 独立盲测 56/56；真实 PDF 79/79；反馈诊断 27/27；E2E 31/31；V1.7 基准 46/46；Provider 26/26；真实 Provider 集成 15/15；研究目标 13/13。
 - 功能提交 `8b7b8aa`；线上 commit `0640f6f`；test `41603946113` / pages `41604395159` success。
-- 剩余外部条件：真实 Provider Key、真实扫描/CID PDF、真实邮件客户端发送。
+- 真实 Provider 已用 DeepSeek `deepseek-chat` 完成（8 次请求 / 7 成功 / 1 故意坏 Key），基础 Provider PASS。
+- 剩余外部条件：真实 429/配额耗尽、Provider 计划性故障演练、浏览器真实 Key 全链路、真实扫描/CID PDF、真实邮件客户端发送。

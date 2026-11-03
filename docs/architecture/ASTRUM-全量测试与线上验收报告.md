@@ -233,14 +233,16 @@ selftest 内置 20 问回归：`diffBytes=0`，13 Agent 名称/职责未变；�
 
 | 套件 | 命令 | 结果 |
 |---|---|---:|
-| Provider 协议/分类 | `node tools/v1-9-provider-test.js` | 20/20；BLOCKED_API_KEY |
+| Provider 协议/分类（真实） | `node tools/v1-9-provider-test.js` | 26/26；REAL PASS；4 场景成功 + 1 故意坏 Key |
+| 真实 Provider 集成 | `node tools/v1-9-real-provider-integration-test.js` | 15/15；3/3 调用成功 |
+| 研究目标消歧/多轮 | `node tools/v1-9-research-target-test.js` | 13/13 |
 | 独立盲测（真实网络） | `node tools/v1-9-blind-research-benchmark.js --json` | 56/56 PASS |
 | 真实 PDF | `node tools/v1-9-real-pdf-test.js` | 79/79 |
 | 反馈诊断联动 | `node tools/v1-9-feedback-diagnostic-test.js` | 27/27 |
 | 跨任务 E2E | `node tools/v1-9-e2e-test.js` | 31/31 |
 | 线上验收 | 临时 CDP 脚本 | 27/27 |
 
-独立盲测：15 类 56 题，21 个真实网络案例，59 篇论文；PASS 56 / FAIL 0 / BLOCKED_EXTERNAL 0 / SKIP 0；关键失败（虚构论文、坏引用、NaN）0。
+独立盲测：15 类 56 题，21 个真实网络案例，59 篇论文；PASS 56 / FAIL 0 / BLOCKED_EXTERNAL 0 / SKIP 0；关键失败（虚构论文、坏引用、NaN）0。基线结果生成于 `2026-11-03T08:21:30Z`；随后复核时 OpenAlex 进入 cooling，15 个网络案例返回 `BLOCKED_EXTERNAL`（41 PASS / 0 FAIL），未写成失败，也未用残缺结果覆盖已完成基线。冷却后应按 `network.yml` 单独复跑。
 
 真实 PDF：6 个 arXiv 样本，5 成功，1 乱码明确拒绝；页数 29/11/6/9/28；参考文献起始页 25/9/6/8/25；不存在参考文献污染正文块。
 
@@ -262,8 +264,8 @@ selftest 内置 20 问回归：`diffBytes=0`，13 Agent 名称/职责未变；�
 
 | 项 | 结果 |
 |---|---|
-| standalone | 54 脚本、131KB CSS、1723KB |
-| Pages 产物 | 59 文件（core 46 / data 8）、1750KB |
+| standalone | 54 脚本、131KB CSS、1726KB |
+| Pages 产物 | 59 文件（core 46 / data 8）、1752KB |
 | 安全扫描 | 密钥 0、绝对路径 0 |
 | 功能提交 | `8b7b8aa` |
 | 合并日常数据 | `0640f6f` |
@@ -284,3 +286,20 @@ selftest 内置 20 问回归：`diffBytes=0`，13 Agent 名称/职责未变；�
 - 路由：WASP-39b 透射光谱问题线上为 `research / T-E`。
 - 控制台：无 JS 错误、无 CSP 违规；除既有 `ipwho.is` IP 定位外无额外外发资源。
 - `mailto`：确认前不打开；真实客户端/发送仍需人工验收。
+
+### 11.5 真实 Provider 验收（同日）
+
+| 项 | 结果 |
+|---|---|
+| Provider / Base URL / 模型 | DeepSeek / `https://api.deepseek.com/v1/chat/completions` / `deepseek-chat` |
+| 基础 Provider 测试 | 26/26；`calls=5 success=4 failed=1`（故意坏 Key）；`blockedProvider=0` |
+| 基础场景耗时 | 1076 / 1725 / 1240 / 1039 ms，平均 1270 ms |
+| 基础场景 usage | Prompt 3791 / Completion 348 / **Total 4139** |
+| 真实科研集成 | 15/15；`calls=3 success=3`；1864 / 1257 / 1650 ms；usage 1167/291/1458 |
+| M13 科研结果 | 3 篇真实论文、3 条证据、`evidenceRefs` 可解析、坏引用 0；仅摘要 gap 如实保留 |
+| 同 Thread 多轮 | `resolved=M13`；第二问仍检索 M13 论文，模型指出 DOI 并说明不确定性缺失 |
+| 故意坏 Key | 真实 401 → `auth`，未重试、未冒充成功 |
+| 真实 503 | 本轮早期自然出现 “Service is too busy”，归类 `server`、重试后恢复；未计为代码失败 |
+| 未执行 | 真实 429/配额耗尽、计划性故障演练、浏览器真实 Key 全链路 |
+
+详细见 `ASTRUM-V1.9-Provider接入验证报告.md`。

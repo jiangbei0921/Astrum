@@ -20,6 +20,13 @@
     if (!AC || !R) throw new Error('AstroRequest 依赖 AgentCore/AstroRouter');
     var q = trim(query);
     var targets = AC.resolveTargets(q);
+    /* Control 路径也必须做指代消解：上一轮的主体在 MEMORY 里，
+     * 否则「上一条回答中那个星团…」会把 targets 留空，检索式退化成 "age"。
+     * buildAnswer（legacy）已有同样的消解，这里复用同一个函数。 */
+    if (typeof AC.resolveByMemory === 'function') {
+      var mem = AC.resolveByMemory(q, targets);
+      targets = mem.targets;
+    }
     var intent = AC.detectIntent(q, targets);
     var route = R.route({ query: q, intent: intent, targets: targets, ctx: ctx, cfg: cfg });
     return {

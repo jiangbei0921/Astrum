@@ -42,6 +42,18 @@ var AC = global.AgentCore;
 var R = global.AstroRequest || null;
 var Router = global.AstroRouter;
 var KEY = process.env.ASTRUM_LIVE_API_KEY || '';
+/* 允许从本机临时文件读取，避免在命令行/日志中复制 Key。
+ * 文件不得进入仓库；用完即删。 */
+(function () {
+  var file = process.env.ASTRUM_LIVE_KEY_FILE || '';
+  if (!KEY && file && fs.existsSync(file)) {
+    try {
+      var raw = fs.readFileSync(file, 'utf8').split(/\r?\n/).map(function (x) { return x.trim(); })
+        .filter(function (x) { return x && x.charAt(0) !== '#'; })[0] || '';
+      KEY = raw.replace(/^['"]|['"]$/g, '');
+    } catch (e) { KEY = ''; }
+  }
+})();
 var BASE = process.env.ASTRUM_LIVE_BASE_URL || '';
 var MODEL = process.env.ASTRUM_LIVE_MODEL || '';
 var PROVIDER = process.env.ASTRUM_LIVE_PROVIDER || 'openai-compatible';
@@ -119,6 +131,8 @@ async function localProtocol(local) {
   var good = await call('/ok');
   ok('P1 协议请求成功', good.r.ok === true && /猎户座/.test(good.r.text || ''), good.r.code);
   ok('P2 返回 token 与耗时', good.r.tokens === 6 && good.r.latency >= 0, good.r.tokens + '/' + good.r.latency);
+  ok('P2b 返回服务商 usage', good.r.usage && good.r.usage.total === 6 &&
+    good.r.usage.prompt === null && good.r.usage.completion === null, JSON.stringify(good.r.usage));
   ok('P3 单次调用只发一次请求', good.hits === 1, 'hits=' + good.hits);
   ok('P4 请求走 chat/completions', good.paths[0] === '/ok', good.paths[0]);
 
@@ -172,17 +186,47 @@ async function localProtocol(local) {
 }
 
 async function realCalls(local) {
-  var id = PROVIDER === 'gemini' ? 'gemini' : PROVIDER === 'anthropic' ? 'anthropic' : 'openai';
+  var id = PROVIDER === 'gemini' ? 'gemini'
+    : PROVIDER === 'anthropic' ? 'anthropic'
+      : PROVIDER === 'deepseek' ? 'deepseek' : 'openai';
   var endpoint = BASE || (S.list().filter(function (x) { return x.id === id; })[0] || {}).endpoint;
   var model = MODEL || (S.list().filter(function (x) { return x.id === id; })[0] || {}).model;
   S.setConfig(id, { key: KEY, endpoint: endpoint, model: model, temperature: 0.3, maxTokens: 300 });
-  var calls = 0, success = 0, failed = 0, latencies = [], tokens = 0, errors = [];
+  var calls = 0, success = 0, failed = 0, blocked = 0, latencies = [], tokens = 0, errors = [];
+  var usageSum = { prompt: 0, completion: 0, total: 0, any: false };
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function busy(r) {
+    return !!(r && !r.ok && (r.code === 'server' || r.code === 'rate_limit') &&
+      /too busy|busy|503|限流|rate limit/i.test(r.reason || ''));
+  }
   async function call(name, payload, opts) {
-    calls += 1;
-    var r = await Bridge.modelGenerate(id, payload, opts);
-    if (r.ok) { success += 1; if (r.latency) latencies.push(r.latency); if (r.tokens) tokens += r.tokens; }
-    else { failed += 1; errors.push(r.code); }
-    ok('R ' + name, r.ok === true && !!r.text, r.ok ? 'ok' : r.code + ':' + r.reason);
+    var r = null;
+    for (var attempt = 0; attempt < 3; attempt++) {
+      calls += 1;
+      r = await Bridge.modelGenerate(id, payload, opts);
+      if (r.ok) break;
+      if (busy(r) && attempt < 2) { await sleep(2500 * (attempt + 1)); continue; }
+      break;
+    }
+    if (r.ok) {
+      success += 1;
+      if (r.latency) latencies.push(r.latency);
+      if (r.tokens) tokens += r.tokens;
+      if (r.usage) {
+        usageSum.any = true;
+        if (typeof r.usage.prompt === 'number') usageSum.prompt += r.usage.prompt;
+        if (typeof r.usage.completion === 'number') usageSum.completion += r.usage.completion;
+        if (typeof r.usage.total === 'number') usageSum.total += r.usage.total;
+      }
+      ok('R ' + name, true, 'ok ' + r.latency + 'ms');
+    } else if (busy(r)) {
+      blocked += 1;
+      console.log('BLOCKED_PROVIDER | ' + name + ' | ' + r.code + ' | ' + r.reason);
+    } else {
+      failed += 1;
+      errors.push(r.code);
+      ok('R ' + name, false, r.code + ':' + r.reason);
+    }
     return r;
   }
   await call('基础问答', {
@@ -218,7 +262,10 @@ async function realCalls(local) {
   var avg = latencies.length ? Math.round(latencies.reduce(function (a, b) { return a + b; }, 0) / latencies.length) : 0;
   return {
     provider: PROVIDER, model: model, calls: calls, success: success, failed: failed,
-    avgLatencyMs: avg, tokens: tokens, errors: errors
+    blockedProvider: blocked,
+    avgLatencyMs: avg, tokens: tokens, errors: errors,
+    usage: usageSum.any ? usageSum : null,
+    latencies: latencies
   };
 }
 
@@ -251,10 +298,12 @@ async function realCalls(local) {
     console.log('请在本机环境变量配置 ASTRUM_LIVE_API_KEY / BASE_URL / MODEL，禁止粘贴到聊天或仓库。');
     process.exitCode = failed.length ? 1 : 2;
   } else {
-    report.status = failed.length ? 'FAIL' : 'PASS';
+    report.status = failed.length ? 'FAIL' : (report.real.success ? 'PASS' : 'FAIL');
     console.log('REAL PROVIDER ' + report.status + ' | calls=' + report.real.calls +
       ' success=' + report.real.success + ' failed=' + report.real.failed +
-      ' avg=' + report.real.avgLatencyMs + 'ms tokens=' + report.real.tokens);
+      ' blockedProvider=' + report.real.blockedProvider +
+      ' avg=' + report.real.avgLatencyMs + 'ms tokens=' + report.real.tokens +
+      ' usage=' + JSON.stringify(report.real.usage));
     process.exitCode = failed.length ? 1 : 0;
   }
   var out = path.join(ROOT, 'tools', 'fixtures', 'v1-9-provider-results.json');

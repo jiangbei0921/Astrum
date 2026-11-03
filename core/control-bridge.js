@@ -58,6 +58,7 @@
         ok: true, code: 'ok', text: r && r.text || '',
         latency: r && r.latency != null ? r.latency : Date.now() - t0,
         tokens: r && r.tokens != null ? r.tokens : null,
+        usage: r && r.usage ? r.usage : null,
         modelId: id, source: 'cloud'
       };
     } catch (e) {

@@ -239,16 +239,18 @@ V1.7 仍使用 §3.1 的标准回滚：回滚到上一个成功 Pages 的 commit
 | pages Workflow | `41604395159` success |
 | 线上 `version.json.commit` | `0640f6f` |
 | 线上 `dirty` | false |
-| 新增 CI 步骤 | V1.9 反馈诊断、独立盲测离线、Provider 验证（无 Key 接受 exit 2） |
+| 新增 CI 步骤 | V1.9 反馈诊断、独立盲测离线、Provider 验证（CI 无 Key 接受 exit 2）、研究目标消歧 |
 | 线上验收 | 27/27；反馈三入口、研究路由、诊断科研字段、console/CSP |
 | 回滚 | 若 V1.9 出问题，回滚到 `0d0d444`（V1.8 文档提交）或 `55fe9db`；正常提交 + 重新触发 test/pages，不使用 force push / reset --hard |
 
 V1.9 发布前检查：
 
-1. `node tools/v1-9-provider-test.js`（无 Key 时 exit 2，不得当 PASS）；
-2. `node tools/v1-9-blind-research-benchmark.js --offline`；有网络时执行全量；
-3. `node tools/v1-9-real-pdf-test.js`（样本缺失时 BLOCKED_SAMPLE）；
-4. `node tools/v1-9-e2e-test.js`；
-5. `node tools/v1-9-feedback-diagnostic-test.js`；
-6. 全量 Node/Chrome/静态/i18n；
-7. `build-pages` 安全扫描密钥 0、绝对路径 0。
+1. `node tools/v1-9-provider-test.js`（CI 无 Key 时 exit 2，不得当 PASS；真实验收用本机 `ASTRUM_LIVE_KEY_FILE` 临时文件，禁止把 Key 写入命令、日志或仓库）；
+2. `node tools/v1-9-real-provider-integration-test.js`（需真实 Key；验证 M13 科研链路与同 Thread 多轮）；
+3. `node tools/v1-9-research-target-test.js`（离线，M13 消歧 + 多轮指代）；
+4. `node tools/v1-9-blind-research-benchmark.js --offline`；有网络时执行全量；
+5. `node tools/v1-9-real-pdf-test.js`（样本缺失时 BLOCKED_SAMPLE）；
+6. `node tools/v1-9-e2e-test.js`；
+7. `node tools/v1-9-feedback-diagnostic-test.js`；
+8. 全量 Node/Chrome/静态/i18n；
+9. `build-pages` 安全扫描密钥 0、绝对路径 0。

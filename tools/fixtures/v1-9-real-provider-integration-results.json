@@ -1,0 +1,172 @@
+{
+  "generatedAt": "2026-11-03T10:41:40.479Z",
+  "provider": "DeepSeek",
+  "baseUrl": "https://api.deepseek.com/v1/chat/completions",
+  "model": "deepseek-chat",
+  "calls": 3,
+  "success": 3,
+  "failed": 0,
+  "latencies": [
+    1864,
+    1257,
+    1650
+  ],
+  "usage": {
+    "prompt": 1167,
+    "completion": 291,
+    "total": 1458
+  },
+  "simple": {
+    "text": "结论：M42 就是猎户座大星云，是猎户座里的一个星云目标。 · 它常被天文爱好者当作观测对象。 · 现有事实只给出名称和所属星座，没有更多细节。 · 关于它的距离、大小等信息，这里没有提供，信息不足。",
+    "latency": 1864,
+    "tokens": 333,
+    "usage": {
+      "prompt": 265,
+      "completion": 68,
+      "total": 333
+    },
+    "hasOrion": true
+  },
+  "research": {
+    "mode": "control",
+    "template": "T-E",
+    "intent": "knowledge-target",
+    "agents": [
+      "muse",
+      "kepler",
+      "vega",
+      "lyra",
+      "horizon",
+      "orion"
+    ],
+    "tools": [
+      "simbad.tap:failed",
+      "paper.search:ok",
+      "evidence.search:ok",
+      "compose.domain:ok"
+    ],
+    "summary": {
+      "paperCount": 3,
+      "evidenceCount": 3,
+      "conclusionCount": 1,
+      "claimCount": 1,
+      "gaps": [
+        "3 篇论文仅获得摘要，未获取全文",
+        "未获得 SIMBAD 天体参数（本机网络不可达或查询无结果）",
+        "未提供 FITS 观测文件"
+      ],
+      "limitations": [
+        "部分结论仅基于论文摘要，未阅读全文。",
+        "SIMBAD 数据缺失，天体参数可能不完整。",
+        "没有 FITS 观测数据，缺少独立观测验证。"
+      ],
+      "papers": [
+        {
+          "title": "A new study of the variable star population in the Hercules globular cluster (M13; NGC 6205)★",
+          "date": "2019-03-05",
+          "doi": "10.1093/mnras/stz642",
+          "url": "https://doi.org/10.1093/mnras/stz642",
+          "abstractOnly": true
+        },
+        {
+          "title": "Globular Star Clusters",
+          "date": "1888-08-01",
+          "doi": "10.1038/038365c0",
+          "url": "https://doi.org/10.1038/038365c0",
+          "abstractOnly": true
+        },
+        {
+          "title": "Chemical composition and ages of four globular clusters in M31",
+          "date": "2022-02-22",
+          "doi": "10.51194/vak2021.2022.1.1.186",
+          "url": "https://doi.org/10.51194/vak2021.2022.1.1.186",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "A membership analysis of 52 800 stars in the field of the cluster is presented based on Gaia-DR2 proper motions which enabled the recognition of 23 070 likely cluster members, for …",
+          "evidenceRefs": [
+            "ev_f267ba45e48bfedf"
+          ],
+          "scope": "abstract-only"
+        }
+      ]
+    },
+    "badRefs": [],
+    "question": "M13 的年龄和金属丰度测量在不同论文中是否一致？",
+    "answerHead": "北天最亮的球状星团，约含数十万颗恒星，是小口径望远镜下的经典目标。"
+  },
+  "modelExpression": {
+    "text": "结论：现有事实不足以判断 M13 的年龄和金属丰度测量在不同论文中是否一致，因为只给出了单一数值，未提供各论文的对比结果。 · 可用事实仅列出年龄约 116 亿年，未给出金属丰度数值。 · 两篇论文均仅有摘要，无法据此比较测量差异。 · 因此无法确认不同论文间是否一致，信息不足。",
+    "latency": 1257,
+    "tokens": 504,
+    "usage": {
+      "prompt": 418,
+      "completion": 86,
+      "total": 504
+    },
+    "factCount": 6,
+    "evidenceCount": 0,
+    "hasKnownNumber": true
+  },
+  "multiTurn": {
+    "mode": "control",
+    "intent": "knowledge-target",
+    "template": "T-E",
+    "resolved": "M13",
+    "memoryUsed": true,
+    "summary": {
+      "paperCount": 3,
+      "evidenceCount": 3,
+      "conclusionCount": 1,
+      "claimCount": 1,
+      "gaps": [
+        "3 篇论文仅获得摘要，未获取全文",
+        "未获得 SIMBAD 天体参数（本机网络不可达或查询无结果）",
+        "未提供 FITS 观测文件"
+      ],
+      "limitations": [
+        "部分结论仅基于论文摘要，未阅读全文。",
+        "SIMBAD 数据缺失，天体参数可能不完整。",
+        "没有 FITS 观测数据，缺少独立观测验证。"
+      ],
+      "papers": [
+        {
+          "title": "A new study of the variable star population in the Hercules globular cluster (M13; NGC 6205)★",
+          "date": "2019-03-05",
+          "doi": "10.1093/mnras/stz642",
+          "url": "https://doi.org/10.1093/mnras/stz642",
+          "abstractOnly": true
+        },
+        {
+          "title": "Globular Star Clusters",
+          "date": "1888-08-01",
+          "doi": "10.1038/038365c0",
+          "url": "https://doi.org/10.1038/038365c0",
+          "abstractOnly": true
+        },
+        {
+          "title": "Chemical composition and ages of four globular clusters in M31",
+          "date": "2022-02-22",
+          "doi": "10.51194/vak2021.2022.1.1.186",
+          "url": "https://doi.org/10.51194/vak2021.2022.1.1.186",
+          "abstractOnly": true
+        }
+      ],
+      "conclusions": [
+        {
+          "text": "A membership analysis of 52 800 stars in the field of the cluster is presented based on Gaia-DR2 proper motions which enabled the recognition of 23 070 likely cluster members, for …",
+          "evidenceRefs": [
+            "ev_f267ba45e48bfedf"
+          ],
+          "scope": "abstract-only"
+        }
+      ]
+    },
+    "badRefs": [],
+    "answerHead": "北天最亮的球状星团，约含数十万颗恒星，是小口径望远镜下的经典目标。",
+    "modelText": "结论：现有事实只给出星团年龄约 116 亿年，未说明该数值出自哪篇论文，也未给出测量不确定性，因此无法回答来源与误差。 · 可用论文中仅列出一篇 2019 年发表于 MNRAS、DOI 为 10.1093/mnras/stz642 的 M13 变星研究，但未标明其提供该年龄数据。 · 另一篇 1888 年文献仅有摘要信息，同样未涉及该年龄数值。 · 关于测量不确定性，现有事实中没有相关数据。 · 因此该年龄的论文出处与误差范围均属信息不足。"
+  },
+  "errors": []
+}

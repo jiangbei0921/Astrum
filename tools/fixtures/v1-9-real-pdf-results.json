@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-03T08:02:30.716Z",
+  "generatedAt": "2026-11-03T10:45:20.779Z",
   "environment": {
     "node": "v24.19.0",
     "os": "win32",
@@ -57,7 +57,7 @@
       ],
       "url": "https://arxiv.org/pdf/1512.06519v1",
       "bytes": 47982,
-      "ms": 20,
+      "ms": 21,
       "ok": true,
       "code": "",
       "title": "Collision between Neutron Stars and Asteroids as a Mechanis",
@@ -100,7 +100,7 @@
       ],
       "url": "https://arxiv.org/pdf/2206.14908v1",
       "bytes": 14697260,
-      "ms": 245,
+      "ms": 254,
       "ok": true,
       "code": "",
       "title": "The Prime Focus Spectrograph Galaxy Evolution Survey",
@@ -121,7 +121,7 @@
       ],
       "url": "https://arxiv.org/pdf/2208.11692v1",
       "bytes": 2238213,
-      "ms": 255,
+      "ms": 243,
       "ok": false,
       "code": "pdf_unsupported_encoding",
       "title": "",

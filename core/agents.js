@@ -2389,7 +2389,7 @@
     /* 供检索规划层复用意图识别，避免两套判定逻辑分叉 */
     detectIntent: detectIntent, nameOf: nameOf, TRACE_ORDER: TRACE_ORDER,
     ephemFor: ephemFor, windowsWithin: windowsWithin,
-    tzOf: tzOf, setMemory: setMemory, getMemory: getMemory, clearMemory: clearMemory, curate: curate,
+    tzOf: tzOf, setMemory: setMemory, getMemory: getMemory, clearMemory: clearMemory, resolveByMemory: resolveByMemory, curate: curate,
     stats: stats,
     version: '1.0.0'
   };

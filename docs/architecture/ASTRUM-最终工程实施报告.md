@@ -184,7 +184,7 @@
 
 ### 10.1 实际完成
 
-- **Provider**：修复 HTTP 500/坏 JSON/空响应/404 分类；新增 `v1-9-provider-test`（20/20 离线协议）；真实调用因无 Key 为 `BLOCKED_API_KEY`，未伪造成 PASS。
+- **Provider**：修复 HTTP 500/坏 JSON/空响应/404 分类；`v1-9-provider-test` 26/26；已用 DeepSeek `deepseek-chat` 完成 8 次真实请求（7 成功 / 1 故意坏 Key），基础 Provider **PASS**；服务商 usage 3791/348/4139。
 - **独立盲测**：新增 56 题 / 15 类 / 10 维评分，真实网络 21 案例、59 篇论文，结果 56/56 PASS，0 坏引用/0 虚构/0 NaN。
 - **真实 PDF**：6 个 arXiv 样本（29/11/6/9/28 页，含 14.3MB 长论文），5 解析成功、1 乱码明确拒绝；79/79 断言。
 - **反馈诊断**：增加论文/证据/Claim/evidenceRefs/PDF 状态/工具状态/Provider/gaps/limitations；27/27 + E2E 31/31。
@@ -202,7 +202,11 @@
 7. 全文 Evidence ID 按 chunk 唯一，修复 `ev_f` 重复；
 8. Provider 错误码细化 `server/parse/empty/notfound`；
 9. 反馈诊断补齐科研定位字段；
-10. 缺省 ctx 回填 bortle，消除 `Bortle undefined`。
+10. 缺省 ctx 回填 bortle，消除 `Bortle undefined`；
+11. `enQueryFor` 星表优先，M13 检索名从 `Hercules Cluster` 修正为 `Hercules Globular Cluster`；
+12. Control 路径复用 `resolveByMemory`，同 Thread 追问不再丢失 M13 目标；
+13. 研究检索词具体量优先，M13 年龄追问检索式为 `Hercules Globular Cluster age`；
+14. `usageOf` 透传 Prompt/Completion/Total，报告不再只有 total token。
 
 ### 10.3 上线
 
@@ -214,5 +218,20 @@
 | pages Run | `41604395159` success |
 | 线上 version | app 4.8、commit `0640f6f`、dirty=false、runId `41604395159` |
 | 线上验收 | 27/27 |
+
+### 10.4 真实 Provider 验收（同日）
+
+| 项 | 结果 |
+|---|---|
+| Provider / 模型 | DeepSeek 官方端点 / `deepseek-chat` |
+| 基础场景 | 4/4 成功，平均 1270 ms，Prompt 3791 / Completion 348 / Total 4139 |
+| 故意坏 Key | 401 → `auth`，未重试、未冒充成功 |
+| 真实科研任务 | M13 真实检索 3 篇论文、3 条证据、`evidenceRefs` 可解析、坏引用 0 |
+| 模型与证据结合 | 504 tokens，明确说明“仅摘要，无法判断一致性”，未补造数值 |
+| 同 Thread 多轮 | `resolved=M13`；第二问仍命中 M13 论文，模型如实说明来源与不确定性缺失 |
+| 集成测试 | 15/15；3/3 调用成功；usage 1167/291/1458 |
+| 验收后处理 | 删除本机临时 Key 文件；仓库/产物/日志无 Key |
+
+详细见 `ASTRUM-V1.9-Provider接入验证报告.md`。真实 429/配额耗尽、Provider 计划性故障演练与浏览器真实 Key 全链路未执行，已列入外部条件。
 
 详细见四份 V1.9 专项报告与 `ASTRUM-全量测试与线上验收报告.md` §11。
