@@ -60,7 +60,7 @@ function main() {
 
   /* 2) 内联所有 <script src="...">，保持原有顺序 */
   var hashes = [];
-  var srcRe = /[ \t]*<script src="([^"]+)"><\/script>[ \t]*\r?\n?/g;
+  var srcRe = /[ \t]*<script[^>]*\ssrc="([^"]+)"[^>]*><\/script>[ \t]*\r?\n?/g;
   var m;
   var count = 0;
   while ((m = srcRe.exec(html)) !== null) {

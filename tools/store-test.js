@@ -101,10 +101,10 @@ var SCRIPT = `
   /* 等启动恢复彻底结束再开始：restoreHistory 的骨架消失 = 它已完成。
    * 否则会与 boot 的恢复并发，出现「测试刚清空、恢复又把数据读回来」的竞争。 */
   function waitReady(n, cb) {
-    if ((!document.getElementById('restoreSkel') && !document.querySelector('.thinking')) || n <= 0) { cb(); return; }
+    if ((window.Store && window.Thread && !document.getElementById('restoreSkel') && !document.querySelector('.thinking')) || n <= 0) { cb(); return; }
     setTimeout(function () { waitReady(n - 1, cb); }, 200);
   }
-  waitReady(25, function () {
+  waitReady(100, function () {
   var S = window.Store, T = window.Thread;
     if (!S || !T) { ok('store/thread 已加载', false); finish(); return; }
 

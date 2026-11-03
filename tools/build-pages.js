@@ -50,7 +50,7 @@ function fail(msg) {
 function readIndexRefs() {
   var html = fs.readFileSync(INDEX, 'utf8');
   var refs = [];
-  var re = /<script\s+src="([^"]+)"><\/script>/g, m;
+  var re = /<script[^>]*\ssrc="([^"]+)"[^>]*><\/script>/g, m;
   while ((m = re.exec(html))) refs.push({ kind: 'script', rel: m[1] });
   var link = /<link\s+rel="stylesheet"\s+href="([^"]+)"/g;
   while ((m = link.exec(html))) refs.push({ kind: 'style', rel: m[1] });

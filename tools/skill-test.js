@@ -89,7 +89,13 @@ var SCRIPT = `
     R.push({ n: 'no uncaught error', p: false, x: String(e.message).slice(0, 60) });
   });
 
-  setTimeout(function () {
+  /* defer 脚本在 DOMContentLoaded 前才执行，测试必须等应用挂载完成 */
+  function waitApp(n, cb) {
+    if (window.__astrum && window.AgentCore) { cb(); return; }
+    if (n <= 0) { ok('runtime', false, 'modules not loaded'); finish(); return; }
+    setTimeout(function () { waitApp(n - 1, cb); }, 200);
+  }
+  waitApp(100, function () {
     try {
       var ACx = window.AgentCore;
       if (!ACx) { ok('runtime', false, 'AgentCore missing'); finish(); return; }
@@ -145,7 +151,7 @@ var SCRIPT = `
       ok('init', false, String(e && e.message));
       finish();
     }
-  }, 400);
+  });
 })();
 `;
 

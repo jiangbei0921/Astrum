@@ -250,7 +250,7 @@ function bodyText(file) { return fs.readFileSync(path.join(OUT, file), 'utf8'); 
   var files = fs.readdirSync(OUT).sort();
   var index = bodyText('index.html');
   var refs = [];
-  var re = /<script\s+src="([^"]+)"><\/script>/g, m;
+  var re = /<script[^>]*\ssrc="([^"]+)"[^>]*><\/script>/g, m;
   while ((m = re.exec(index))) refs.push(m[1]);
   var css = (index.match(/<link\s+rel="stylesheet"\s+href="([^"]+)"/) || [])[1] || '';
   var refsAll = refs.concat(css ? [css] : []);

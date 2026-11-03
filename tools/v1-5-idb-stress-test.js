@@ -28,6 +28,15 @@ function findChrome() {
 }
 
 var SCRIPT = `
+(function wait(n){
+  if(!window.AstroTaskStore||!window.AstroTask){
+    if(n<=0){
+      var pre=document.createElement('pre');pre.id='__v15_idb_result';
+      pre.textContent='RESULT 0/1\\nFAIL | IDB 异常 | modules not loaded';
+      document.body.appendChild(pre);return;
+    }
+    setTimeout(function(){wait(n-1);},200);return;
+  }
 (async function(){
   var R=[];
   function ok(n,p,x){R.push({n:n,p:!!p,x:x||''});}
@@ -63,6 +72,7 @@ var SCRIPT = `
   pre.textContent='RESULT '+pass+'/'+R.length+'\\n'+R.map(function(r){return (r.p?'PASS':'FAIL')+' | '+r.n+(r.x?' | '+r.x:'');}).join('\\n');
   document.body.appendChild(pre);
 })();
+})(100);
 `;
 
 function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
