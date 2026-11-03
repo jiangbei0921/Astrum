@@ -4,7 +4,11 @@
 > 文件：`tools/v1-9-blind-research-benchmark.js`
 > 结果：`tools/fixtures/v1-9-blind-research-results.json`
 > 执行：56 个独立问题 / 15 类；本地 + 真实 OpenAlex/arXiv/SIMBAD 检索
-> 结论：**PASS 56 / FAIL 0 / BLOCKED_EXTERNAL 0 / SKIP 0**
+> 结论：**历史完整基线 PASS 56 / FAIL 0 / BLOCKED_EXTERNAL 0 / SKIP 0**
+>
+> 2026-11-03 12:54 UTC 网络复跑：OpenAlex 进入 cooling，21 个网络案例 `BLOCKED_EXTERNAL`，
+> 结果 **35 PASS / 0 FAIL / 21 BLOCKED_EXTERNAL**；`tools/fixtures/v1-9-blind-research-results.json`
+> 保存的是这次最新复跑结果。外部冷却不计为代码失败，历史 56/56 基线仍保留在本报告第 3 节。
 
 ## 1. 与 V1.7 基准的独立性
 

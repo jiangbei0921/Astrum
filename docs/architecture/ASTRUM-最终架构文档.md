@@ -257,3 +257,28 @@ openMailClient()（只尝试唤起，不代表发送成功）
 - 功能提交 `9e6d99b`；线上 commit `9e6d99b`；test `41626577600` / pages `41627103167` success；线上验收 27/27。
 - 真实 Provider 已用 DeepSeek `deepseek-chat` 完成（8 次请求 / 7 成功 / 1 故意坏 Key），基础 Provider PASS。
 - 剩余外部条件：真实 429/配额耗尽、Provider 计划性故障演练、浏览器真实 Key 全链路、真实扫描/CID PDF、真实邮件客户端发送。
+
+### 11.5 V1.10 新增层（2026-11-03）
+
+```
+Answer 组装：
+  ComposeAdapter → AstroAnswerComposer.finalize
+    → 去重/证据合并/结构排序（A–E）
+    → Claim→Evidence 校验 + 数字/确定性检查
+    → meta.quality
+
+知识来源：
+  Query → AstroKnowledgeSources.decide
+    → user / system / external / model
+    → 只按 state.steps 汇总真实执行状态
+    → answer.sections[sources] + meta.sourcePlan
+
+动态论文：
+  paper 对象（原始 title/excerpt/doi/arxivId/evidenceId）
+    → AstroContentI18n.displayOf（语言决策）
+    → 缓存（原文哈希 + 语言 + 类型）
+    → Provider 翻译或英文回退
+    → 统一 paper-card（每日前沿 / 研究论文 / 论文类 Evidence）
+```
+
+边界：翻译只存在展示缓存；不写回论文/Evidence/Claim；语言切换不重跑研究；Muse 只组织已有材料，模型输出不进入证据链。

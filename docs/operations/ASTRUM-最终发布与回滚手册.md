@@ -254,3 +254,26 @@ V1.9 发布前检查：
 7. `node tools/v1-9-feedback-diagnostic-test.js`；
 8. 全量 Node/Chrome/静态/i18n；
 9. `build-pages` 安全扫描密钥 0、绝对路径 0。
+
+### 7.6 V1.10 发布记录（2026-11-03）
+
+| 项 | 值 |
+|---|---|
+| 功能提交 | `2aef15d`（回答整合/来源路由/动态国际化） |
+| 兼容性修复 | `323f934`（研究面板兼容 + 监听器泄漏修复） |
+| test Workflow | `41642206695` success |
+| pages Workflow | `41642780392` success |
+| 线上 `version.json` | app 4.9、feature V1.10、commit `323f934`、dirty=false、runId `41642780392` |
+| 新增 CI 步骤 | V1.10 回答整合、来源路由、动态国际化、集成 |
+| 线上验收 | 中英文论文卡片/来源/分析 17/17；反馈与诊断 27/27 |
+| 回滚 | 若 V1.10 出问题，回滚到 `04a37df`（V1.9 文档提交）；正常提交 + 重新触发 test/pages，不使用 force push / reset --hard |
+
+V1.10 发布前检查：
+
+1. `node tools/v1-10-answer-composer-test.js`；
+2. `node tools/v1-10-knowledge-sources-test.js`；
+3. `node tools/v1-10-content-i18n-test.js`；
+4. `node tools/v1-10-integration-test.js`；
+5. 原有 V1.7–V1.9 测试与浏览器/静态/i18n；
+6. 真实 Provider 可用时，在设置页配置后验证中文论文卡片与缓存，再复跑真实科研表述；
+7. `build-pages` 安全扫描密钥 0、绝对路径 0。

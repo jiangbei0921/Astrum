@@ -303,3 +303,46 @@ selftest 内置 20 问回归：`diffBytes=0`，13 Agent 名称/职责未变；�
 | 未执行 | 真实 429/配额耗尽、计划性故障演练、浏览器真实 Key 全链路 |
 
 详细见 `ASTRUM-V1.9-Provider接入验证报告.md`。
+
+## 12. V1.10 回答整合、知识来源与动态国际化（2026-11-03）
+
+### 12.1 新增测试
+
+| 套件 | 命令 | 结果 |
+|---|---|---:|
+| 回答整合 | `node tools/v1-10-answer-composer-test.js` | 29/29 |
+| 知识来源 | `node tools/v1-10-knowledge-sources-test.js` | 33/33 |
+| 动态国际化 | `node tools/v1-10-content-i18n-test.js` | 28/28 |
+| 集成 | `node tools/v1-10-integration-test.js` | 27/27 |
+| 浏览器 UI（本地构建） | 临时 CDP 脚本 | 17/17 |
+| 浏览器 UI（线上） | 临时 CDP 脚本 | 17/17 |
+
+### 12.2 回归
+
+| 层 | 结果 |
+|---|---|
+| V1.7 真实基准 | 46/46 |
+| V1.8 反馈核心 / 浏览器 | 149/149 / 49/49 |
+| V1.9 反馈诊断 / E2E / 真实 PDF | 27/27 / 31/31 / 79/79 |
+| V1.9 独立盲测（最新网络） | 35 PASS / 0 FAIL / 21 BLOCKED_EXTERNAL（外部冷却） |
+| V1.9 独立盲测（历史基线） | 56/56 |
+| selftest / V1.1 browser / V1.6 browser | 156/156 / 27/27 / 36/36 |
+| V1.4 Pages 本地等价 | 32/32 |
+| V1.5 资源/监听器 | 13/13 |
+| P0-03 兼容性 | 53/53（第 15 问有意更新） |
+| i18n-scan | 界面残留 0 |
+
+### 12.3 构建与线上
+
+| 项 | 结果 |
+|---|---|
+| standalone | 57 脚本、CSS 134KB、1786KB |
+| Pages 产物 | 62 文件（core 49 / data 8）、1813KB |
+| 安全扫描 | 密钥 0、绝对路径 0 |
+| 功能提交 | `2aef15d` + `323f934` |
+| test / pages | `41642206695` / `41642780392` success |
+| 线上 `version.json` | app 4.9、feature V1.10、commit `323f934`、dirty=false、runId `41642780392` |
+| 线上 UI | 中文优先/英文原文/英文模式/来源/分析 17/17 |
+| 线上反馈/诊断 | 27/27 |
+
+真实 Provider 翻译为 `BLOCKED_API_KEY`，未用 Mock 冒充；详细见 `ASTRUM-V1.10-科研回答与动态国际化优化报告.md`。

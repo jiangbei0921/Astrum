@@ -193,3 +193,16 @@ node tools/v1-5-longrun-test.js --minutes=180 --label=LR-03 --out=lr-03.log
 | 21 个真实网络研究案例 | 本轮可达 | OpenAlex/arXiv 正常，SIMBAD 偶发不可达；本轮 56/56 PASS，未来可能变化 |
 | `network.yml` V1.9 步骤 | 已配置未触发 | 可手动运行 `gh workflow run network.yml` 验证真实 PDF + E2E |
 | 首屏 CDN 波动 | ENV_LIMITATION | 本轮 2.9–9.0s；脚本数 54、体积 +1.9%，最佳 2.9s 与 V1.7 3.07s 同量级 |
+
+## 10. V1.10 动态国际化与来源路由新增外部条件（2026-11-03）
+
+| 项 | 状态 | 实际观测与处理 |
+|---|---|---|
+| 真实 Provider 翻译 | **BLOCKED_API_KEY** | 当前无 Key；翻译逻辑用注入生成器测试，未冒充真实 Provider 翻译 |
+| 真实 Provider 科研表述复跑 | 未执行 | `sources.js` 仅扩展翻译任务与结构提示；需 Key 后复跑确认 |
+| 真实 429/配额 | 未触发 | 未为验收刻意耗尽账户额度 |
+| V1.9 独立盲测网络复跑 | BLOCKED_EXTERNAL 21 | OpenAlex cooling；35 PASS / 0 FAIL / 21 BLOCKED_EXTERNAL；历史基线 56/56 |
+| 浏览器真实 Provider 全链路 | 未执行 | 线上用预置缓存验证中文/英文展示，未配置真实 Key |
+| 翻译质量人工审校 | 未执行 | 当前无真实译文；需在配置 Provider 后抽样核对天文术语与数值 |
+| 真实扫描/CID PDF | BLOCKED_SAMPLE | 与 V1.9 相同 |
+| 真实邮件客户端/发送 | BLOCKED_MAIL_CLIENT / BLOCKED_USER_ACTION | 与 V1.8/V1.9 相同 |
