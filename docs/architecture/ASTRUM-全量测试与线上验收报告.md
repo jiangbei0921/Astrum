@@ -156,6 +156,18 @@ selftest 内置 20 问回归：`diffBytes=0`，13 Agent 名称/职责未变；�
 
 10 类，详见 `ASTRUM-研究质量与调度修复报告.md` §8：行星直径意图、BODY_INFO 作用域、JWST 实体/索引、主题检索式、SIMBAD 空等、跨 Provider 去重、无 DOI 论文、摘要数值截断、Reducer 单位不确定性、主题词列表冒充摘要。
 
-### 9.5 部署
+### 9.5 部署与线上验收
 
-本轮代码提交、test/pages Run、线上 `version.json` 与真实场景验收在推送后回填；不以本地构建代替线上结果。
+| 项 | 结果 |
+|---|---|
+| 功能提交 | `e0e7842ce288ad1231ccb57d970578ff61fec241` |
+| test Run | `41571532062` success（static / offline-core / offline-browser） |
+| pages Run | `41571802143` success |
+| 线上 `version.json` | commit `e0e7842`、dirty=false、runId 41571802143 |
+| 首页 / 核心资源 | 200 / `core/app.js` 200 |
+| 工具/文档隔离 | `tools/selftest.js` 404、`docs/architecture/00-README.md` 404 |
+| 线上问答 | “木星的直径是多少？”返回 139,820 km |
+| 线上对比 | “比较 M31 和 M33…”2 个目标卡，M31/M33 均渲染 |
+| 首屏性能 | 3.07 s（本网络）；53 个外部脚本在 Pages 产物中 `defer` 并行下载，源码/CI 保持阻塞加载 |
+
+> `defer` 只写入 Pages 产物 `_site/index.html`；源码 `index.html`、file://、standalone 与 CI selftest 仍按阻塞脚本顺序执行。`build-standalone.js`、`build-pages.js`、`v1-2-deploy-test`、`v1-4-pages-test` 已兼容带属性的 script 标签。

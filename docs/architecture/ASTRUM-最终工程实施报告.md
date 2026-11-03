@@ -140,3 +140,5 @@
 10. 主题词列表冒充摘要 → 无句号短词列表不生成结论。
 
 新增 `tools/v1-7-research-benchmark.js`（46 案例 / 15 类，结果 JSON `tools/fixtures/research-benchmark-results.json`），并纳入 CI 离线层；`v1-6-research-quality-test` 从 22 项扩展到 30 项。真实 arXiv 全文 28/28，3 分钟长跑 997 任务 18/18，构建 `_site` 58 文件、密钥 0、绝对路径 0。详细见 `ASTRUM-真实天文研究基准集与执行结果.md`。
+
+性能优化：线上首屏 53 个外部脚本原先串行阻塞，本网络实测 >220s；改为仅在 Pages 产物 `_site/index.html` 中加 `defer`，并行下载并保持执行顺序，源码 `index.html`、file://、CI selftest 仍阻塞。线上复测首屏可交互 3.07s，M31/M33 对比两目标均渲染。`build-pages.js`、`build-standalone.js`、`v1-2-deploy-test.js`、`v1-4-pages-test.js` 已兼容带属性 script 标签；`store-test`、`skill-test`、`v1-5-idb-stress-test`、`selftest` 增加启动就绪等待，避免 defer 与测试注入脚本竞态。

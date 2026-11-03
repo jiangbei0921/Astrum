@@ -12,16 +12,16 @@
 
 | 项 | 值 |
 |---|---|
-| 最新功能提交 | `fffc12847552fb18a7461af95d3c28676d1c731f` |
-| test Workflow | `41443340306` success |
-| pages Workflow | `41443735631` success |
-| 线上 `version.json.commit` | `fffc128` |
+| 最新功能提交 | `e0e7842ce288ad1231ccb57d970578ff61fec241` |
+| test Workflow | `41571532062` success |
+| pages Workflow | `41571802143` success |
+| 线上 `version.json.commit` | `e0e7842` |
 | 线上 `dirty` | false |
 | Pages Source | `build_type=workflow` |
-| 本地/远端 | 一致 `fffc128` |
-| 线上验收 | 首页 200、13 Agent、核心问答、对比 UI、200mm 拍摄参数、console/CSP、tools/docs 404 全 PASS |
+| 本地/远端 | 一致 `e0e7842` |
+| 线上验收 | 首页 200、13 Agent、M42 观测、木星直径 139,820 km、M31/M33 对比两目标、console/CSP、tools/docs 404 全 PASS |
 
-历史发布：`7e50227`（V1.4 首次 Actions 发布）、`5aa644a`（V1.5 浏览器/回滚补齐）。
+历史发布：`7e50227`（V1.4 首次 Actions 发布）、`5aa644a`（V1.5 浏览器/回滚补齐）、`9eb0439`（V1.7 研究质量/基准）、`66bfdb6`（defer 并行加载）、`e0e7842`（Pages-only defer 与 CI 等待修复）。
 
 ## 2. 发布流程（正常）
 
@@ -195,12 +195,12 @@ node tools/v1-5-bigfile-test.js
 
 | 项 | 值 |
 |---|---|
-| 功能提交 | `{{V17_COMMIT}}` |
-| test Workflow | `{{V17_TEST_RUN}}` |
-| pages Workflow | `{{V17_PAGES_RUN}}` |
-| 线上 `version.json.commit` | `{{V17_COMMIT_SHORT}}` |
+| 功能提交 | `e0e7842ce288ad1231ccb57d970578ff61fec241` |
+| test Workflow | `41571532062` |
+| pages Workflow | `41571802143` |
+| 线上 `version.json.commit` | `e0e7842` |
 | 线上 `dirty` | false |
-| 线上验收 | 首页 200、13 Agent、M42 观测、M31/M33 对比、JWST 研究、M42 论文研究、200mm 拍摄参数、console/CSP、tools/docs 404 |
+| 线上验收 | 首页 200、13 Agent、木星直径 139,820 km、M31/M33 对比两目标、首屏 3.07s、console/CSP、tools/docs 404 |
 
 ### 7.3 回滚
 
