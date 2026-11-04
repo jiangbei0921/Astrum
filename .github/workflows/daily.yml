@@ -9,17 +9,23 @@ name: daily-frontier
 #   - 抓取前先提交 sync.status=running，页面可显示“正在更新”；
 #   - 抓取完成后再提交最终状态（ok / partial / failed）；
 #   - 全部来源失败时保留旧论文/报道，只更新失败状态，并把本次运行标红。
+#
+# 为什么有两个 cron：
+#   GitHub 的 schedule 事件在高峰期可能延迟甚至被丢弃（2026-11-04 的
+#   01:00 UTC 运行在 01:28 UTC 仍未创建）。04:00 UTC 作为备用触发，
+#   “--check-today” 会在当天已成功同步时跳过，保证实际只更新一次。
+#
+# GITHUB_TOKEN 推送的提交不会触发其他 workflow，因此数据提交后显式
+# 派发 pages.yml，线上才会读取新数据。
 
 on:
   schedule:
-    # UTC 01:00 = 北京 09:00。避开整点 00:00 的高峰（GitHub 会延迟甚至跳过高峰期的任务）
     - cron: '0 1 * * *'
+    - cron: '0 4 * * *'
   workflow_dispatch:
 
 permissions:
   contents: write
-  # 默认 GITHUB_TOKEN 推送的提交不会触发其他 workflow；
-  # 每日数据提交后需要显式派发 Pages 部署，线上才会读取新数据。
   actions: write
 
 concurrency:
@@ -36,10 +42,16 @@ jobs:
         with:
           node-version: '22'
 
+      - name: 检查今天是否已成功同步
+        id: gate
+        run: echo "status=$(node tools/sync-daily.js --check-today)" >> "$GITHUB_OUTPUT"
+
       - name: 标记开始更新
+        if: steps.gate.outputs.status == 'RUN'
         run: node tools/sync-daily.js --mark-running
 
       - name: 提交开始状态（不触发 CI，避免为状态标记重复部署）
+        if: steps.gate.outputs.status == 'RUN'
         run: |
           git config user.name "astrum-bot"
           git config user.email "astrum-bot@users.noreply.github.com"
@@ -54,16 +66,17 @@ jobs:
 
       - name: 抓取预印本与报道
         id: sync
+        if: steps.gate.outputs.status == 'RUN'
         # 允许在失败时先提交“失败状态”，再由最后一步把运行标红。
         continue-on-error: true
         run: node tools/sync-daily.js
 
       - name: 重建单文件版
-        # data/daily.js 会被内联进 astrum-standalone.html，
-        # 不重新构建会导致「单文件版」停在旧数据上。
+        if: steps.gate.outputs.status == 'RUN'
         run: node tools/build-standalone.js
 
       - name: 上传单文件版（最新数据）
+        if: steps.gate.outputs.status == 'RUN'
         uses: actions/upload-artifact@v4
         with:
           name: astrum-standalone-daily
@@ -71,6 +84,7 @@ jobs:
           retention-days: 14
 
       - name: 提交（仅在确有变化时）
+        if: steps.gate.outputs.status == 'RUN'
         run: |
           git config user.name "astrum-bot"
           git config user.email "astrum-bot@users.noreply.github.com"
@@ -82,18 +96,17 @@ jobs:
           # git add 一个被忽略的路径会直接报错，整步失败。
           git add data/daily.js
           git commit -m "chore: 每日前沿同步 $(date -u +%Y-%m-%d)"
-          # 期间可能有别人推送，先 rebase 再推，避免非快进失败
           git pull --rebase --autostash
           git push
 
       - name: 触发 Pages 部署
-        # 无论成功、部分失败还是全失败，只要提交了 data/daily.js，就让线上读取最新状态。
+        if: steps.gate.outputs.status == 'RUN'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh workflow run pages.yml --ref main
 
       - name: 同步失败时标记运行失败
-        if: steps.sync.outcome != 'success'
+        if: steps.sync.outcome == 'failure'
         run: |
           echo "::error::每日前沿同步失败；旧论文/报道已保留，失败状态已写入 data/daily.js"
           exit 1

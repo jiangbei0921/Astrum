@@ -209,6 +209,18 @@ ok('M3 running 不改变最后成功时间', runData && runData.sync.lastSuccess
 ok('M4 running 不改变数据日期', runData && runData.updated === goodPayload.updated,
   runData && runData.updated);
 
+/* 备用定时器：当天已成功则跳过；partial/failed/running 仍允许补救 */
+ok('M5 当天 ok 跳过备用运行', S.alreadySyncedToday(NOW, tmpFile) === true,
+  S.alreadySyncedToday(NOW, tmpFile));
+ok('M6 running 不跳过备用运行', S.alreadySyncedToday(NOW, runningFile) === false);
+var partialFile = path.join(tmpDir, 'partial.js');
+fs.writeFileSync(partialFile, S.render(S.buildPayload(
+  { items: merged.papers }, { items: merged.news }, NOW, old, stPartial)), 'utf8');
+ok('M7 partial 不跳过备用运行', S.alreadySyncedToday(NOW, partialFile) === false);
+var failFile = path.join(tmpDir, 'failed.js');
+fs.writeFileSync(failFile, S.render(failPayload), 'utf8');
+ok('M8 昨天成功不跳过今天', S.alreadySyncedToday(NOW, failFile) === false);
+
 /* 同内容、仅时间戳不同 → 不写 */
 var sameAgain = S.buildPayload({ items: merged.papers }, { items: merged.news }, new Date('2026-11-03T09:00:00Z'), old, {
   lastAttemptAt: '2026-11-03T09:00:00.000Z',

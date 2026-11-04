@@ -696,10 +696,34 @@ function markRunning(now, file) {
   return { ok: true, data: payload };
 }
 
+function beijingDate(d) {
+  var b = new Date((d instanceof Date ? d.getTime() : Date.parse(d)) + 8 * 3600000);
+  return b.getUTCFullYear() + '-' + pad2(b.getUTCMonth() + 1) + '-' + pad2(b.getUTCDate());
+}
+function pad2(n) { return n < 10 ? '0' + n : String(n); }
+
+/* 备用定时器防重复：只有“今天已经成功同步且状态 ok”才跳过。
+ * partial / failed 仍允许后一次运行补救失败来源。 */
+function alreadySyncedToday(now, file) {
+  var read = readExisting(file || OUT);
+  if (!read.ok || !read.data || !read.data.sync) return false;
+  var s = read.data.sync;
+  if (s.status !== 'ok' || !s.lastSuccessAt) return false;
+  var last = new Date(s.lastSuccessAt);
+  if (isNaN(last.getTime())) return false;
+  return beijingDate(last) === beijingDate(now || new Date());
+}
+
 async function main() {
   var dry = process.argv.indexOf('--dry-run') >= 0;
   var mark = process.argv.indexOf('--mark-running') >= 0;
+  var check = process.argv.indexOf('--check-today') >= 0;
   console.log('ASTRUM 每日前沿同步 ' + new Date().toISOString());
+
+  if (check) {
+    console.log(alreadySyncedToday(new Date()) ? 'SKIP' : 'RUN');
+    return;
+  }
 
   if (mark) {
     var marked = markRunning(new Date());
@@ -809,6 +833,7 @@ module.exports = {
   render: render,
   mergeDaily: mergeDaily,
   markRunning: markRunning,
+  alreadySyncedToday: alreadySyncedToday,
   buildStatus: buildStatus,
   validatePayload: validatePayload,
   readExisting: readExisting,
