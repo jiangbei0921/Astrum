@@ -314,3 +314,7 @@ jobs:
 
       - name: V1.11 Provider 设置页浏览器 v1-11-provider-browser-test
         run: node tools/v1-11-provider-browser-test.js
+
+      # V1.11 补充：每日前沿状态、北京时间筛选、空态与缓存刷新
+      - name: V1.11 每日前沿浏览器 v1-11-daily-browser-test
+        run: node tools/v1-11-daily-browser-test.js

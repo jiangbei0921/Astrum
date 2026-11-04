@@ -2719,6 +2719,8 @@ body.lang-en #settingsBody .set-tabs button { letter-spacing: .02em; }
 }
 .fr-tab:hover { border-color: var(--accent); color: var(--accent-deep); }
 .fr-tab.on { background: var(--accent-soft); border-color: rgba(59, 59, 214, 0.28); color: var(--accent-deep); }
+.fr-refresh { margin-left: auto; }
+.fr-more { display: inline-block; margin: -6px 0 18px; }
 .fr-h {
   margin: 20px 0 8px; padding: 0 0 7px 9px;
   border-left: 2px solid var(--accent);

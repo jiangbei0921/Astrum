@@ -51,7 +51,7 @@ var old = {
 
 var fresh = [
   /* 同一篇（带版本号），标题被修订 */
-  paper({ id: '2610.00001v3', title: 'An Old Paper About Galaxy Clusters (Revised)', summary: '修订后的摘要', url: 'https://arxiv.org/abs/2610.00001', published: '2026-10-20' }),
+  paper({ id: '2610.00001v3', title: 'An Old Paper About Galaxy Clusters (Revised)', summary: '修订后的摘要', url: 'https://arxiv.org/abs/2610.00001', published: '2026-10-20', publishedAt: '2026-10-20T18:30:00Z', updatedAt: '2026-11-02T03:00:00Z' }),
   /* 真正的新论文 */
   paper({ id: '2611.00002', title: 'A Brand New Paper on Exoplanet Atmospheres', url: 'https://arxiv.org/abs/2611.00002', published: '2026-11-02' }),
   /* DOI 重复：第二条只给 DOI 的 URL，仍应并入同一实体 */
@@ -73,6 +73,10 @@ ok('D4 同一篇元数据被更新', merged.papers.filter(function (p) { return 
 ok('D5 firstSeen 保留首次抓取日', merged.papers.filter(function (p) { return p.id === '2610.00001'; })[0].firstSeen === '2026-10-20');
 ok('D6 published 不被抓取日覆盖', merged.papers.filter(function (p) { return p.id === '2610.00001'; })[0].published === '2026-10-20');
 ok('D7 fetchedAt 记录本次抓取', merged.papers.filter(function (p) { return p.id === '2610.00001'; })[0].fetchedAt === '2026-11-03T07:40:00.000Z');
+ok('D7b publishedAt 完整时间保留', merged.papers.filter(function (p) { return p.id === '2610.00001'; })[0].publishedAt === '2026-10-20T18:30:00Z',
+  merged.papers.filter(function (p) { return p.id === '2610.00001'; })[0].publishedAt);
+ok('D7c updatedAt 完整时间保留', merged.papers.filter(function (p) { return p.id === '2610.00001'; })[0].updatedAt === '2026-11-02T03:00:00Z',
+  merged.papers.filter(function (p) { return p.id === '2610.00001'; })[0].updatedAt);
 ok('D8 DOI 重复合并为一个实体', merged.papers.filter(function (p) { return p.doi === '10.1234/abc.2026.001'; }).length === 1);
 ok('D9 多来源保留来源清单', (merged.papers.filter(function (p) { return p.doi === '10.1234/abc.2026.001'; })[0].sources || []).indexOf('OpenAlex') >= 0,
   JSON.stringify(merged.papers.filter(function (p) { return p.doi === '10.1234/abc.2026.001'; })[0].sources));
@@ -102,6 +106,19 @@ for (var i = 0; i < 10; i++) {
 var capped = S.mergeDaily(null, { papers: many, news: [] }, NOW, { maxPapers: 3 });
 ok('D18 历史条数上限生效', capped.papers.length === 3, capped.papers.length);
 
+/* arXiv Atom 完整时间戳：前端“今日”需要 UTC→北京时间换算 */
+var axXml = '<feed><entry>' +
+  '<id>http://arxiv.org/abs/2611.00123v1</id>' +
+  '<title>Boundary Time Paper</title>' +
+  '<summary>Summary</summary>' +
+  '<published>2026-11-03T23:30:00Z</published>' +
+  '<updated>2026-11-04T01:10:00Z</updated>' +
+  '</entry></feed>';
+var ax = S.parseArxiv(axXml, 'astro-ph.GA');
+ok('P1 publishedAt 保留完整 UTC 时间', ax[0] && ax[0].publishedAt === '2026-11-03T23:30:00Z', ax[0] && ax[0].publishedAt);
+ok('P2 updatedAt 保留完整 UTC 时间', ax[0] && ax[0].updatedAt === '2026-11-04T01:10:00Z', ax[0] && ax[0].updatedAt);
+ok('P3 published 日期仍为 YYYY-MM-DD', ax[0] && ax[0].published === '2026-11-03', ax[0] && ax[0].published);
+
 /* ---------------- 状态 ---------------- */
 
 var stOk = S.buildStatus(old, merged, {
@@ -122,6 +139,20 @@ ok('S5 失败信息被记录', stPartial.failures.length === 1 && /timeout/.test
 var stFail = S.buildStatus(old, merged, { paperOk: false, newsOk: false, failures: [{ source: 'arXiv', msg: '503' }] }, NOW);
 ok('S6 全失败保留上一次成功时间', stFail.status === 'failed' && stFail.ok === false &&
   stFail.lastSuccessAt === '2026-11-02T07:40:00Z', stFail.lastSuccessAt);
+
+/* 全失败也必须能生成“保留旧数据 + 失败状态”的可提交文件 */
+var failMerged = S.mergeDaily(old, { papers: [], news: [] }, NOW);
+var failStatus = S.buildStatus(old, failMerged, {
+  paperOk: false, newsOk: false, failures: [{ source: 'arXiv', category: 'astro-ph.GA', msg: 'timeout' }]
+}, NOW);
+var failPayload = S.buildPayload({ items: failMerged.papers }, { items: failMerged.news }, NOW, old, failStatus);
+ok('S7 全失败仍保留旧论文', failPayload.papers.length === old.papers.length - 1,
+  failPayload.papers.length);
+ok('S8 全失败状态可校验', S.validatePayload(failPayload).ok === true,
+  JSON.stringify(S.validatePayload(failPayload).errors));
+ok('S9 全失败不把 updated 改成今天', failPayload.updated === '2026-11-02', failPayload.updated);
+ok('S10 全失败记录失败来源', failPayload.sync.failures.length === 1 &&
+  /timeout/.test(failPayload.sync.failures[0].msg));
 
 /* ---------------- 校验 ---------------- */
 
@@ -164,6 +195,20 @@ var atomic = path.join(tmpDir, 'atomic.js');
 S.writeAtomic(atomic, 'window.X = 1;');
 ok('F4 原子写入产生完整文件', fs.readFileSync(atomic, 'utf8') === 'window.X = 1;');
 
+/* 抓取前的 running 状态：只改 sync，不动论文/报道/更新日期 */
+var runningFile = path.join(tmpDir, 'running.js');
+fs.writeFileSync(runningFile, code, 'utf8');
+var marked = S.markRunning(new Date('2026-11-03T08:30:00Z'), runningFile);
+var runData = S.readExisting(runningFile).data;
+ok('M1 标记 running 成功', marked.ok === true && runData && runData.sync.status === 'running',
+  marked.error || (runData && runData.sync && runData.sync.status));
+ok('M2 running 不改变论文数量', runData && runData.papers.length === read.data.papers.length,
+  runData && runData.papers.length);
+ok('M3 running 不改变最后成功时间', runData && runData.sync.lastSuccessAt === stOk.lastSuccessAt,
+  runData && runData.sync.lastSuccessAt);
+ok('M4 running 不改变数据日期', runData && runData.updated === goodPayload.updated,
+  runData && runData.updated);
+
 /* 同内容、仅时间戳不同 → 不写 */
 var sameAgain = S.buildPayload({ items: merged.papers }, { items: merged.news }, new Date('2026-11-03T09:00:00Z'), old, {
   lastAttemptAt: '2026-11-03T09:00:00.000Z',
@@ -173,6 +218,10 @@ var sameAgain = S.buildPayload({ items: merged.papers }, { items: merged.news },
   sources: stOk.sources, failures: [], ok: true, partial: false, status: 'ok'
 });
 ok('F5 同日无新增不产生无意义写入', S.shouldWrite(goodPayload, sameAgain) === false);
+
+var fetchedChanged = JSON.parse(JSON.stringify(sameAgain));
+fetchedChanged.papers.forEach(function (p) { p.fetchedAt = '2026-11-03T09:00:00.000Z'; });
+ok('F5b 仅 fetchedAt 变化不算内容更新', S.shouldWrite(goodPayload, fetchedChanged) === false);
 
 var changed = S.mergeDaily(read.data, { papers: [paper({ id: '2611.00099', title: 'Another New Paper', url: 'https://arxiv.org/abs/2611.00099', published: '2026-11-03' })], news: [] }, NOW);
 var changedPayload = S.buildPayload({ items: changed.papers }, { items: changed.news }, NOW, read.data, stOk);

@@ -8101,20 +8101,36 @@
   }
 
   /* V1.11：每日数据的时间范围筛选（今日 / 近 7 天 / 近 30 天）。
-   * 只按论文首次发布时间判断，不把「今天重新抓取」当成「今天新发表」。 */
+   * 只按论文实际发表时间判断，不把「今天重新抓取」当成「今天新发表」。
+   * arXiv 的 publishedAt 是 UTC 时间；「今日」按北京时间（UTC+8）换算，
+   * 避免 UTC 深夜发布的论文在北京时间已经是第二天却被算成昨天。 */
   var FR_RANGE = '7';
+  var FR_REFRESHING = false;
+  var FR_RUN = null;
+  var FR_REPO = 'jiangbei0921/Astrum';
 
-  function frLocalDate(d) {
-    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  function frBeijingDate(d) {
+    var b = new Date(d.getTime() + 8 * 3600000);
+    return b.getUTCFullYear() + '-' + pad(b.getUTCMonth() + 1) + '-' + pad(b.getUTCDate());
+  }
+  function frBeijingToday() { return frBeijingDate(new Date()); }
+  function frDateShift(dateStr, days) {
+    var d = new Date(dateStr + 'T00:00:00Z');
+    d.setUTCDate(d.getUTCDate() + days);
+    return d.toISOString().slice(0, 10);
   }
   function frCutoff(range) {
-    var d = new Date();
-    d.setHours(0, 0, 0, 0);
-    if (range === 'today') return frLocalDate(d);
-    d.setDate(d.getDate() - (range === '30' ? 29 : 6));
-    return frLocalDate(d);
+    var today = frBeijingToday();
+    if (range === 'today') return today;
+    return frDateShift(today, range === '30' ? -29 : -6);
   }
   function frPaperDate(p) {
+    var pa = String((p && p.publishedAt) || '');
+    if (pa) {
+      var t = Date.parse(pa);
+      if (!isNaN(t)) return frBeijingDate(new Date(t));
+    }
+    /* 旧数据只有日期：按日期原样判断，不做可能错误的时区换算。 */
     return String((p && (p.published || p.firstSeen)) || '').slice(0, 10);
   }
   function frInRange(p, range) {
@@ -8123,24 +8139,68 @@
     if (!ds) return true;
     return ds >= frCutoff(range);
   }
+  function frFailuresText(s) {
+    return (s && s.failures || []).map(function (f) {
+      return (f.source || '') + (f.category ? '/' + f.category : '') + '：' + String(f.msg || '').slice(0, 80);
+    }).filter(Boolean).join('；');
+  }
+  function frRunText() {
+    if (!FR_RUN) return '';
+    var n = FR_RUN.number || '';
+    if (FR_RUN.status === 'queued') return T('GitHub Actions 更新任务已排队（第 {0} 次）', n);
+    if (FR_RUN.status === 'in_progress' || FR_RUN.status === 'waiting' ||
+      FR_RUN.status === 'requested' || FR_RUN.status === 'pending') {
+      return T('GitHub Actions 正在更新（第 {0} 次运行）', n);
+    }
+    if (FR_RUN.conclusion === 'failure' || FR_RUN.conclusion === 'timed_out' ||
+      FR_RUN.conclusion === 'cancelled') {
+      return T('最近一次自动更新运行失败（{0}）', String(FR_RUN.createdAt || '').slice(0, 10));
+    }
+    return '';
+  }
   function frSyncText(d) {
     var s = d.sync || null;
     var bits = [];
-    if (s && s.lastSuccessAt) bits.push(L('最后成功') + '：' + String(s.lastSuccessAt).slice(0, 10));
-    else if (d.updated) bits.push(L('最后成功') + '：' + d.updated);
-    else bits.push(L('尚未同步（暂无成功记录）'));
-    if (s && typeof s.newPapers === 'number') {
-      bits.push(L('本次新增') + ' ' + s.newPapers + ' ' + L('篇论文') +
-        (typeof s.newNews === 'number' ? ' · ' + s.newNews + ' ' + L('条报道') : ''));
+    if (FR_REFRESHING) bits.push(L('正在读取最新数据…'));
+    var run = frRunText();
+    if (run) bits.push(run);
+    var last = s && s.lastSuccessAt ? String(s.lastSuccessAt).slice(0, 10) : (d.updated || '');
+    if (!s) {
+      bits.push(last ? L('尚未执行每日同步') + ' · ' + L('最近一次成功同步：') + last : L('尚未执行每日同步'));
+      return bits.join(' · ');
+    }
+    if (s.status === 'running') {
+      var at = Date.parse(s.lastAttemptAt || '');
+      var stale = isFinite(at) && (Date.now() - at) > 15 * 60 * 1000;
+      bits.push(stale ? L('上次更新未完成（可能中断）') : L('正在更新（正在抓取来源）'));
+      bits.push(L('最近一次成功同步：') + (last || L('暂无')));
+      return bits.join(' · ');
+    }
+    if (s.status === 'failed') {
+      bits.push(T('本次更新失败：{0}', frFailuresText(s) || L('全部来源不可用')));
+      bits.push(L('最近一次成功同步：') + (last || L('暂无')));
+    } else if (s.status === 'partial') {
+      bits.push(L('部分来源失败（其余来源已更新）'));
+      if (typeof s.newPapers === 'number') {
+        bits.push(T('新增 {0} 篇论文（更新 {1} 篇已有）', s.newPapers, s.updatedPapers || 0));
+      }
+      if (typeof s.newNews === 'number') bits.push(T('新增 {0} 条报道', s.newNews));
+      bits.push(L('失败来源：') + (frFailuresText(s) || '—'));
+      bits.push(L('最近一次成功同步：') + (last || L('暂无')));
+    } else {
+      if (typeof s.newPapers === 'number') {
+        if (s.newPapers > 0) {
+          bits.push(T('本次更新成功：新增 {0} 篇论文（更新 {1} 篇已有）', s.newPapers, s.updatedPapers || 0));
+        } else {
+          bits.push(T('本次同步成功，未发现新论文（更新 {0} 篇已有元数据）', s.updatedPapers || 0));
+        }
+      }
+      if (typeof s.newNews === 'number') bits.push(T('新增 {0} 条报道', s.newNews));
+      bits.push(L('最近一次成功同步：') + (last || L('暂无')));
     }
     var srcs = [];
-    if (s && s.sources) srcs = (s.sources.papers || []).concat(s.sources.news || []);
-    if (srcs.length) bits.push(L('来源') + '：' + srcs.join(' '));
-    if (s && s.failures && s.failures.length) {
-      bits.push(L('失败') + ' ' + s.failures.length + ' ' + L('个来源') +
-        '（' + s.failures.map(function (f) { return f.source; }).filter(Boolean).join('、') + '）');
-      bits.push(L('部分来源失败，历史数据已保留'));
-    }
+    if (s.sources) srcs = (s.sources.papers || []).concat(s.sources.news || []);
+    if (srcs.length) bits.push(L('抓取来源（响应条数）：') + srcs.join(' '));
     return bits.join(' · ');
   }
   function frTabs() {
@@ -8154,7 +8214,82 @@
       });
       box.appendChild(b);
     });
+    var refresh = el('button', 'fr-tab fr-refresh', L('刷新数据'));
+    refresh.type = 'button';
+    refresh.addEventListener('click', function () {
+      refreshFrontier();
+      fetchDailyRun();
+    });
+    box.appendChild(refresh);
     return box;
+  }
+
+  /* 从 data/daily.js 文本中取出 ASTRUM_DAILY 的 JSON 对象。
+   * 不能用 lastIndexOf('}')：文件末尾还有 IIFE 的 `})(window);`，
+   * 会把函数体右括号当成对象结尾，导致 JSON.parse 永远失败、缓存刷新形同虚设。
+   * 这里按引号/转义/花括号配对取出第一个完整对象。 */
+  function dailyObjectSlice(text, start) {
+    var depth = 0, inStr = false, esc = false;
+    for (var i = start; i < text.length; i++) {
+      var c = text.charAt(i);
+      if (inStr) {
+        if (esc) { esc = false; continue; }
+        if (c === '\\') { esc = true; continue; }
+        if (c === '"') inStr = false;
+        continue;
+      }
+      if (c === '"') { inStr = true; continue; }
+      if (c === '{') depth++;
+      else if (c === '}') {
+        depth--;
+        if (depth === 0) return text.slice(start, i + 1);
+      }
+    }
+    return '';
+  }
+
+  /* 页面缓存修复：GitHub Pages 对 data/daily.js 可能有缓存，
+   * 打开面板时带时间戳 fetch 一次并解析，成功则替换内存数据并重绘；
+   * file:// 或离线失败时保留脚本已加载的数据，不影响使用。 */
+  function refreshFrontier() {
+    if (FR_REFRESHING || typeof fetch !== 'function') return Promise.resolve();
+    FR_REFRESHING = true;
+    if ($('#frontierBody')) renderFrontier();
+    return fetch('data/daily.js?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      })
+      .then(function (text) {
+        var i = text.indexOf('root.ASTRUM_DAILY');
+        if (i < 0) throw new Error('ASTRUM_DAILY not found');
+        var a = text.indexOf('{', i);
+        var body = a < 0 ? '' : dailyObjectSlice(text, a);
+        if (!body) throw new Error('bad daily data');
+        window.ASTRUM_DAILY = JSON.parse(body);
+      })
+      .catch(function () { /* file:// 或离线：保留已加载数据 */ })
+      .then(function () {
+        FR_REFRESHING = false;
+        if ($('#frontierBody')) renderFrontier();
+      });
+  }
+
+  /* GitHub Actions 的真实运行状态：只在 GitHub Pages 域名下查询公开 API。
+   * 用于显示「正在更新 / 已排队 / 最近一次失败」；失败或限流时静默退回本地状态。 */
+  function fetchDailyRun() {
+    if (typeof fetch !== 'function' || !/github\.io$/i.test(location.hostname)) return;
+    fetch('https://api.github.com/repos/' + FR_REPO + '/actions/workflows/daily.yml/runs?per_page=1&t=' + Date.now(), {
+      cache: 'no-store', headers: { Accept: 'application/vnd.github+json' }
+    }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      var run = j && j.workflow_runs && j.workflow_runs[0];
+      if (!run) return;
+      FR_RUN = {
+        status: run.status, conclusion: run.conclusion,
+        createdAt: run.created_at, number: run.run_number, url: run.html_url
+      };
+      if ($('#frontierBody')) renderFrontier();
+    }).catch(function () { /* 网络/限流：保留本地 sync 状态 */ });
   }
 
   function renderFrontier() {
@@ -8176,8 +8311,8 @@
     /* 状态来自真实更新记录（sync），不按当前时间伪造“今日已更新”。 */
     body.appendChild(el('div', 'fr-note', frSyncText(d)));
     body.appendChild(el('div', 'fr-note',
-      L('同步于 ') + (d.updated || '—') +
-      L('。内容来自公开接口，未经本项目核验，因此不参与答案推理；引用前请打开原文核对。')));
+      L('数据日期 ') + (d.updated || '—') +
+      L('；今日/近 7 天/近 30 天按论文发表日（北京时间）筛选。内容来自公开接口，未经本项目核验，因此不参与答案推理；引用前请打开原文核对。')));
 
     body.appendChild(frTabs());
 
@@ -8191,9 +8326,23 @@
       body.appendChild(pl);
     } else if (papersAll.length) {
       var last = d.sync && d.sync.lastSuccessAt ? String(d.sync.lastSuccessAt).slice(0, 10) : (d.updated || '—');
+      var emptyText = FR_RANGE === 'today'
+        ? L('今天没有检索到符合条件的新论文。')
+        : T('近 {0} 天没有检索到符合条件的新论文。', FR_RANGE === '30' ? '30' : '7');
       body.appendChild(el('div', 'fr-note',
-        L('该时间范围内没有新论文；最近一次成功同步于 ') + last +
-        L('。可切换到「近 30 天」查看更早的条目。')));
+        emptyText + ' ' + L('最近一次成功同步：') + last));
+      if (FR_RANGE !== '30' && papersAll.some(function (p) { return frInRange(p, '30'); })) {
+        var more = el('button', 'fr-tab fr-more', L('查看近 30 天论文'));
+        more.type = 'button';
+        more.addEventListener('click', function () {
+          FR_RANGE = '30';
+          renderFrontier();
+        });
+        body.appendChild(more);
+      }
+    } else {
+      body.appendChild(el('div', 'fr-note',
+        L('尚未获取到论文数据。请检查 GitHub Actions 的每日同步状态，或点击「刷新数据」。')));
     }
 
     var news = Array.isArray(d.news) ? d.news : [];
@@ -8232,6 +8381,8 @@
       open.addEventListener('click', function () {
         renderFrontier();
         openSheet('frontier');
+        refreshFrontier();
+        fetchDailyRun();
       });
     }
     if (close) close.addEventListener('click', function () { closeSheet('frontier'); });
@@ -8494,6 +8645,15 @@
       ask: ask, selectSource: selectSource, openSheet: openSheet, openAgent: openAgent,
       restoreHistory: restoreHistory, clearHistory: clearHistory,
       renderAnswer: renderAnswer, lastRoute: function () { return LAST_ROUTE; },
+      /* 每日前沿刷新入口：页面打开时自动调用，测试也可显式等待完成。 */
+      refreshFrontier: refreshFrontier,
+      dailyState: function () {
+        return {
+          refreshing: FR_REFRESHING,
+          papers: ((window.ASTRUM_DAILY && window.ASTRUM_DAILY.papers) || []).length,
+          status: (window.ASTRUM_DAILY && window.ASTRUM_DAILY.sync && window.ASTRUM_DAILY.sync.status) || ''
+        };
+      },
       openFeedback: openFeedback,
       feedbackConfig: function () { return window.AstroFeedback ? window.AstroFeedback.config() : null; },
       setPersona: setPersona, applyPersona: applyPersona, PERSONAS: PERSONAS,

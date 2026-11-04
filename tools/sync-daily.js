@@ -157,9 +157,12 @@ function parseArxiv(xml, cat) {
       if (authors.length >= 3) break;
     }
 
-    /* 日期只取 YYYY-MM-DD：clean 的截断会加省略号，这里不能复用它 */
-    var pub = clean(tag(e, 'published'), 0).slice(0, 10);
-    var upd = clean(tag(e, 'updated'), 0).slice(0, 10);
+    /* 日期只取 YYYY-MM-DD：clean 的截断会加省略号，这里不能复用它。
+     * 同时保留完整 ISO 时间，供前端按北京时间判断「今日发表」。 */
+    var pubRaw = clean(tag(e, 'published'), 0);
+    var updRaw = clean(tag(e, 'updated'), 0);
+    var pub = pubRaw.slice(0, 10);
+    var upd = updRaw.slice(0, 10);
     var doi = clean(tag(e, 'arxiv:doi'), 0);
     var catTerm = '';
     var cm = e.match(/<arxiv:primary_category[^>]*term="([^"]+)"/);
@@ -172,8 +175,11 @@ function parseArxiv(xml, cat) {
       summary: clean(tag(e, 'summary'), SUMMARY_CHARS),
       cat: catTerm || cat,
       published: pub,
+      /* 完整时间戳用于 UTC/北京时间换算；published 仍保留日期供旧代码使用 */
+      publishedAt: pubRaw || '',
       /* updated：arXiv 版本更新时间，与首次发布、抓取时间分开保存 */
       updated: upd || '',
+      updatedAt: updRaw || '',
       doi: doi || '',
       source: 'arXiv',
       url: 'https://arxiv.org/abs/' + id
@@ -194,14 +200,19 @@ async function fetchPapers() {
       var xml = await get(url);
       var rows = parseArxiv(xml, cat);
       all = all.concat(rows);
-      okCats.push(cat + '(' + rows.length + ')');
-      /* arXiv 对连续请求有速率限制（建议 3 秒间隔）。5 个分类必须留间隔，
-       * 否则后续请求会返回 503 且内容为空——这是它最容易踩的坑。 */
-      await new Promise(function (r) { setTimeout(r, 3200); });
+      if (rows.length) okCats.push(cat + '(' + rows.length + ')');
+      else {
+        /* 返回 0 条不是「成功」：必须记为来源异常，避免把空页当更新成功。 */
+        failures.push({ source: 'arXiv', category: cat, msg: '返回 0 条结果' });
+        console.warn('  ! arXiv ' + cat + ' 返回 0 条');
+      }
     } catch (e) {
       console.warn('  ! arXiv ' + cat + ' 失败：' + e.message);
       failures.push({ source: 'arXiv', category: cat, msg: String(e && e.message || e).slice(0, 120) });
     }
+    /* arXiv 对连续请求有速率限制（建议 3 秒间隔）。无论成功失败都留间隔，
+     * 否则失败后的下一次请求会立即撞上限流。 */
+    if (i < ARXIV_CATS.length - 1) await new Promise(function (r) { setTimeout(r, 3200); });
   }
 
   /* 去重（同一论文可能同时挂多个分类）+ 按提交日期倒序 */
@@ -253,7 +264,11 @@ async function fetchNews() {
       var xml = await get(f.url);
       var rows = parseRss(xml, f.name);
       all = all.concat(rows);
-      okFeeds.push(f.name + '(' + rows.length + ')');
+      if (rows.length) okFeeds.push(f.name + '(' + rows.length + ')');
+      else {
+        failures.push({ source: f.name, msg: '返回 0 条结果' });
+        console.warn('  ! ' + f.name + ' 返回 0 条');
+      }
     } catch (e) {
       console.warn('  ! ' + f.name + ' 失败：' + e.message);
       failures.push({ source: f.name, msg: String(e && e.message || e).slice(0, 120) });
@@ -322,7 +337,7 @@ function uniqStrings(list) {
 
 function mergePaper(old, fresh, nowIso, today) {
   var out = Object.assign({}, old || {});
-  ['id', 'title', 'summary', 'cat', 'published', 'updated', 'url', 'doi', 'source'].forEach(function (k) {
+  ['id', 'title', 'summary', 'cat', 'published', 'publishedAt', 'updated', 'updatedAt', 'url', 'doi', 'source'].forEach(function (k) {
     var v = fresh && fresh[k];
     if (v != null && String(v).trim() !== '') out[k] = v;
   });
@@ -346,7 +361,9 @@ function newPaperRecord(p, nowIso, today) {
   out.source = out.source || 'arXiv';
   out.sources = uniqStrings((out.sources || []).concat([out.source]));
   out.published = out.published || '';
+  out.publishedAt = out.publishedAt || '';
   out.updated = out.updated || '';
+  out.updatedAt = out.updatedAt || '';
   out.firstSeen = today;
   out.fetchedAt = nowIso;
   return out;
@@ -650,9 +667,50 @@ function render(data) {
   ].join('\n');
 }
 
+/* 开始更新标记：只改 sync.status，不动论文与报道。
+ * 由 daily.yml 在抓取前写入并提交，页面可显示「正在更新」；
+ * 若运行中断，前端会把超过 15 分钟的 running 视为上次未完成。 */
+function markRunning(now, file) {
+  var t = now || new Date();
+  var target = file || OUT;
+  var existingRead = readExisting(target);
+  if (!existingRead.ok) return { ok: false, error: existingRead.error };
+  var existing = existingRead.data;
+  if (!existing) return { ok: true, skipped: true };
+  var prev = existing.sync || {};
+  var status = {
+    lastAttemptAt: t.toISOString(),
+    lastSuccessAt: prev.lastSuccessAt || null,
+    newPapers: 0, updatedPapers: 0, newNews: 0,
+    totalPapers: (existing.papers || []).length,
+    totalNews: (existing.news || []).length,
+    sources: prev.sources || { papers: [], news: [] },
+    failures: prev.failures || [],
+    ok: null, partial: null,
+    status: 'running'
+  };
+  var payload = buildPayload({ items: existing.papers || [] }, { items: existing.news || [] }, t, existing, status);
+  var check = validatePayload(payload);
+  if (!check.ok) return { ok: false, errors: check.errors };
+  writeAtomic(target, render(payload));
+  return { ok: true, data: payload };
+}
+
 async function main() {
   var dry = process.argv.indexOf('--dry-run') >= 0;
+  var mark = process.argv.indexOf('--mark-running') >= 0;
   console.log('ASTRUM 每日前沿同步 ' + new Date().toISOString());
+
+  if (mark) {
+    var marked = markRunning(new Date());
+    if (!marked.ok) {
+      console.error('\n× 无法写入更新状态：' + (marked.error || (marked.errors || []).join('；')));
+      process.exit(1);
+    }
+    if (marked.skipped) console.log('首次同步，无历史数据，跳过运行标记');
+    else console.log('已标记 sync.status=running');
+    return;
+  }
 
   /* 先读旧数据：读不懂就停止，绝不用新文件覆盖可能仍然有效的历史。 */
   var existingRead = readExisting(OUT);
@@ -677,10 +735,29 @@ async function main() {
   console.log('  本次抓取报道 ' + news.items.length + ' 条' +
     (news.okFeeds.length ? '（' + news.okFeeds.join(' ') + '）' : '（全部失败）'));
 
-  /* 所有来源都失败：保留旧文件并非零退出让 Action 报红。 */
+  /* 所有来源都失败：保留旧论文/报道，但必须把失败状态写进数据文件，
+   * 否则页面只能看到“上次成功”，无法区分“今天失败了”。
+   * 有历史数据时写状态并以 1 退出（工作流会提交状态后把运行标红）；
+   * 没有历史数据时无法生成有效文件，直接退出 1。 */
   if (allFailed) {
-    console.error('\n× 所有来源均失败，保留现有 data/daily.js 不变');
     failures.forEach(function (f) { console.error('  - ' + f.source + (f.category ? '/' + f.category : '') + '：' + f.msg); });
+    var preserved = mergeDaily(existing, { papers: [], news: [] }, now);
+    if (existing && (preserved.papers.length || preserved.news.length)) {
+      var failedStatus = buildStatus(existing, preserved, {
+        paperOk: false, newsOk: false, paperSources: [], newsSources: [], failures: failures
+      }, now);
+      var failedPayload = buildPayload(
+        { items: preserved.papers }, { items: preserved.news }, now, existing, failedStatus
+      );
+      var failedCheck = validatePayload(failedPayload);
+      if (failedCheck.ok && !dry) {
+        writeAtomic(OUT, render(failedPayload));
+        console.error('\n× 所有来源均失败；已保留 ' + preserved.papers.length + ' 篇论文 / ' +
+          preserved.news.length + ' 条报道，并写入失败状态');
+      }
+    } else {
+      console.error('\n× 所有来源均失败，且没有可保留的历史数据；未写入');
+    }
     process.exit(1);
   }
 
@@ -731,6 +808,7 @@ module.exports = {
   buildPayload: buildPayload,
   render: render,
   mergeDaily: mergeDaily,
+  markRunning: markRunning,
   buildStatus: buildStatus,
   validatePayload: validatePayload,
   readExisting: readExisting,

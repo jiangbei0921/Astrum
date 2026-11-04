@@ -4,6 +4,11 @@ name: daily-frontier
 #   本项目是纯静态站点，没有后端。「每天自动更新」只能是构建期行为——
 #   由 Action 抓取、生成 data/daily.js、提交回仓库，Pages 再重建。
 #   页面端零网络请求，所以 file:// 双击打开也能看到最新一份数据。
+#
+# 状态语义：
+#   - 抓取前先提交 sync.status=running，页面可显示“正在更新”；
+#   - 抓取完成后再提交最终状态（ok / partial / failed）；
+#   - 全部来源失败时保留旧论文/报道，只更新失败状态，并把本次运行标红。
 
 on:
   schedule:
@@ -28,13 +33,39 @@ jobs:
         with:
           node-version: '22'
 
+      - name: 标记开始更新
+        run: node tools/sync-daily.js --mark-running
+
+      - name: 提交开始状态（不触发 CI，避免为状态标记重复部署）
+        run: |
+          git config user.name "astrum-bot"
+          git config user.email "astrum-bot@users.noreply.github.com"
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "无需更新状态"
+            exit 0
+          fi
+          git add data/daily.js
+          git commit -m "chore: 每日前沿开始更新 $(date -u +%Y-%m-%d) [skip ci]"
+          git pull --rebase --autostash
+          git push
+
       - name: 抓取预印本与报道
+        id: sync
+        # 允许在失败时先提交“失败状态”，再由最后一步把运行标红。
+        continue-on-error: true
         run: node tools/sync-daily.js
 
       - name: 重建单文件版
         # data/daily.js 会被内联进 astrum-standalone.html，
         # 不重新构建会导致「单文件版」停在旧数据上。
         run: node tools/build-standalone.js
+
+      - name: 上传单文件版（最新数据）
+        uses: actions/upload-artifact@v4
+        with:
+          name: astrum-standalone-daily
+          path: astrum-standalone.html
+          retention-days: 14
 
       - name: 提交（仅在确有变化时）
         run: |
@@ -51,3 +82,9 @@ jobs:
           # 期间可能有别人推送，先 rebase 再推，避免非快进失败
           git pull --rebase --autostash
           git push
+
+      - name: 同步失败时标记运行失败
+        if: steps.sync.outcome != 'success'
+        run: |
+          echo "::error::每日前沿同步失败；旧论文/报道已保留，失败状态已写入 data/daily.js"
+          exit 1

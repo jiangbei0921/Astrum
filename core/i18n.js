@@ -147,6 +147,40 @@
       '. Switch to "Last 30 days" to see earlier items.',
     '部分来源失败，历史数据已保留': 'Some sources failed; history preserved',
     '尚未同步（暂无成功记录）': 'Not synced yet (no successful run recorded)',
+    '正在读取最新数据…': 'Reading the latest data…',
+    '刷新数据': 'Refresh data',
+    'GitHub Actions 更新任务已排队（第 {0} 次）':
+      'GitHub Actions update is queued (run #{0})',
+    'GitHub Actions 正在更新（第 {0} 次运行）':
+      'GitHub Actions is updating (run #{0})',
+    '最近一次自动更新运行失败（{0}）':
+      'The latest automatic update run failed ({0})',
+    '尚未执行每日同步': 'Daily sync has not run yet',
+    '最近一次成功同步：': 'Last successful sync: ',
+    '暂无': 'None',
+    '正在更新（正在抓取来源）': 'Updating (fetching sources)',
+    '上次更新未完成（可能中断）': 'The last update did not finish (possibly interrupted)',
+    '本次更新失败：{0}': 'This update failed: {0}',
+    '全部来源不可用': 'all sources unavailable',
+    '部分来源失败（其余来源已更新）': 'Some sources failed; the rest were updated',
+    '新增 {0} 篇论文（更新 {1} 篇已有）':
+      '{0} new papers ({1} existing papers updated)',
+    '新增 {0} 条报道': '{0} new reports',
+    '失败来源：': 'Failed sources: ',
+    '本次更新成功：新增 {0} 篇论文（更新 {1} 篇已有）':
+      'Update successful: {0} new papers ({1} existing papers updated)',
+    '本次同步成功，未发现新论文（更新 {0} 篇已有元数据）':
+      'Sync successful; no new papers found ({0} existing records refreshed)',
+    '抓取来源（响应条数）：': 'Fetched sources (response counts): ',
+    '数据日期 ': 'Data date: ',
+    '；今日/近 7 天/近 30 天按论文发表日（北京时间）筛选。内容来自公开接口，未经本项目核验，因此不参与答案推理；引用前请打开原文核对。':
+      '; Today / 7 days / 30 days are filtered by publication date (UTC+8). Pulled from public APIs and NOT verified by this project, so it does not take part in answer reasoning. Check the original before citing.',
+    '今天没有检索到符合条件的新论文。': 'No new papers matching the filters were found today.',
+    '近 {0} 天没有检索到符合条件的新论文。':
+      'No new papers matching the filters were found in the last {0} days.',
+    '查看近 30 天论文': 'View papers from the last 30 days',
+    '尚未获取到论文数据。请检查 GitHub Actions 的每日同步状态，或点击「刷新数据」。':
+      'No paper data yet. Check the GitHub Actions daily sync status, or click "Refresh data".',
 
     /* V1.11 流式回答 */
     '停止生成': 'Stop',
