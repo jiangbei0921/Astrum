@@ -191,6 +191,21 @@
     '生成失败': 'Generation failed',
     '正在生成回答': 'Generating answer',
     '正在生成回答 · {0}': 'Generating answer · {0}',
+    '科研依据': 'Research basis',
+    '科研详情与执行记录': 'Research details & execution log',
+    '查看科研依据': 'View research basis',
+    '继续追问': 'Ask a follow-up',
+    '有帮助': 'Helpful',
+    '没有帮助': 'Not helpful',
+    '更多': 'More',
+    '已记录：有帮助': 'Recorded: helpful',
+    '展开查看': 'Expand',
+    '{0} 篇论文': '{0} papers',
+    '{0} 条依据数据': '{0} data points',
+    '科研详情（结论 / 参数 / 证据 / 局限）':
+      'Research details (conclusions / parameters / evidence / limitations)',
+    '需要注意': 'Note',
+    '阅读提示': 'Reading note',
     '已由用户停止生成；以上为已生成的部分内容，研究结论仍以证据链为准。':
       'Stopped by user; the text above is partial. Research conclusions still follow the evidence chain.',
     '已停止生成，未得到模型表述。研究结论仍按证据链保留。':

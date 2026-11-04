@@ -91,9 +91,8 @@
     rootEl.open = true;
     var sum = node('summary', 'research-summary');
     sum.appendChild(textNode('span', 'ic', '◎'));
-    sum.appendChild(textNode('span', '', L('研究执行报告')));
-    sum.appendChild(textNode('span', 'mt', T('{0} 条结论 · {1} 篇论文',
-      (rep.conclusions || []).length, (rep.papers || []).length)));
+    sum.appendChild(textNode('span', '', L('科研依据')));
+    sum.appendChild(textNode('span', 'mt', T('{0} 篇论文', (rep.papers || []).length)));
     rootEl.appendChild(sum);
 
     var body = node('div', 'research-body');
@@ -164,10 +163,12 @@
         rootEl.ontoggle = function () {
           if (rootEl.open) translateCards();
         };
-        body.appendChild(block(L('相关论文'), pbox));
+        var pblock = block(L('相关论文'), pbox);
+        pblock.classList.add('paper-block');
+        body.appendChild(pblock);
         if (rootEl.open) translateCards();
       } else {
-        body.appendChild(block(L('相关论文'), mapRows(rep.papers.slice(0, 6), function (p) {
+        var pblock2 = block(L('相关论文'), mapRows(rep.papers.slice(0, 6), function (p) {
           return {
             name: p.title,
             meta: [(p.authors || []).slice(0, 3).join('、'), p.date || '', p.doi ? 'DOI ' + p.doi : '',
@@ -177,7 +178,9 @@
               ? L('全文范围') + '：' + p.sections.slice(0, 4).join('、') : ''].filter(Boolean).join(' · '),
             url: p.url
           };
-        })));
+        }));
+        pblock2.classList.add('paper-block');
+        body.appendChild(pblock2);
       }
     }
 
@@ -226,6 +229,21 @@
       body.appendChild(block(L('研究局限'), limitBox));
     }
     if (rep.disclaimer) body.appendChild(node('div', 'sec-note', esc(rep.disclaimer)));
+
+    /* 论文优先：科研依据先给可直接阅读的论文列表，
+     * 概览/参数/证据验证/冲突/局限收进二级折叠，不再与论文混排。 */
+    var paperBlock = body.querySelector('.paper-block');
+    if (paperBlock) {
+      var detail = node('details', 'research-detail');
+      detail.appendChild(node('summary', '', esc(L('科研详情（结论 / 参数 / 证据 / 局限）'))));
+      var metaBody = node('div', 'research-detail-body');
+      Array.prototype.slice.call(body.children).forEach(function (ch) {
+        if (ch !== paperBlock) metaBody.appendChild(ch);
+      });
+      detail.appendChild(metaBody);
+      body.insertBefore(paperBlock, body.firstChild);
+      body.appendChild(detail);
+    }
     rootEl.appendChild(body);
     return rootEl;
   }

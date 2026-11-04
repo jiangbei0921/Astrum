@@ -1861,6 +1861,7 @@
      ============================================================ */
   var CURRENT_REG = 'pop';   /* 由 renderAnswer 设置，供各渲染函数取用 */
   var CURRENT_TIER = 'infer'; /* 同理：失败态与正常态用不同版式 */
+  var CURRENT_MODE = 'A';     /* A–E 复杂度：决定结论是否用轻量强调区 */
 
   var TERM_PAIRS = [
     [/可溯源/g, '已核对'],
@@ -2132,26 +2133,23 @@
   function sectionNode(s) {
     var wrap = el('div', 'sec');
     if (s.kind === 'verdict') {
-      wrap.className = 'sec sec-verdict' + (CURRENT_TIER === 'unknown' ? ' quiet' : '');
+      /* 简单事实/解释直接作为导语；C–E 的参数、比较与综述才用轻量强调区。
+       * 不每个回答都套结论卡，也不重复正文。 */
+      var highlight = CURRENT_MODE === 'C' || CURRENT_MODE === 'D' || CURRENT_MODE === 'E';
+      wrap.className = 'sec sec-verdict' + (highlight ? ' answer-summary' : ' answer-lead') +
+        (CURRENT_TIER === 'unknown' ? ' quiet' : '');
       wrap.innerHTML = '<p class="head">' + esc(s.head) + '</p>' + (s.sub ? '<p class="sub">' + esc(s.sub) + '</p>' : '');
     } else if (s.kind === 'analysis') {
       /* V1.10：Muse 综合研判。先给结论，再按“证据 → 差异 → 限制”的顺序展开；
        * 模型表述与证据链在同一段结构里，不再作为孤立卡片插在中间。 */
       wrap.className = 'sec sec-analysis';
-      wrap.innerHTML = '<div class="sec-title">' + esc(tn(s.title || '综合研判')) +
-        '<span class="st ' + (s.mode === 'A' ? 'st-established' : 'st-emerging') + '">' +
-        esc(tn((window.AstroAnswerComposer && AstroAnswerComposer.MODE_LABEL[s.mode]) || s.mode || '')) + '</span></div>';
       var abox = el('div', 'analysis-body');
       (s.paragraphs || []).forEach(function (p) {
         var line = el('p', 'analysis-p' + (p.role === 'limitation' ? ' limit' : ''));
         line.textContent = String(p.text || '');
         abox.appendChild(line);
       });
-      if (s.source && s.source.name) {
-        abox.appendChild(el('div', 'sec-note',
-          L('表述来源：') + s.source.name + (s.source.latency ? ' · ' + s.source.latency + ' ms' : '') +
-          L('。模型只组织已有材料，不构成新的科研证据。')));
-      }
+      /* 模型名称/耗时不进正文：阅读时应只见回答，执行信息放到折叠详情。 */
       wrap.appendChild(abox);
     } else if (s.kind === 'sources') {
       /* V1.10：四类知识来源与真实执行状态；未调用的工具不得写成已执行。 */
@@ -2315,11 +2313,11 @@
     } else if (s.kind === 'model') {
       var src = s.source;
       var card = el('div', 'model-note' + (s.fallback ? ' fallback' : ''));
-      card.innerHTML =
-        '<div class="who"><span class="av" style="background:' + esc(src.dot) + '">' + esc(src.sigil) + '</span>' +
+      /* 正文优先：模型名/厂商/耗时只作为隐藏元信息，不参与阅读层级。 */
+      card.innerHTML = '<div class="bd">' + esc(s.text) + '</div>' +
+        '<div class="who" aria-hidden="true"><span class="av" style="background:' + esc(src.dot) + '">' + esc(src.sigil) + '</span>' +
         '<span class="nm2">' + esc(src.name) + '</span><span class="vd">' + esc(src.vendor) + '</span>' +
-        (s.latency ? '<span class="lat">' + s.latency + ' ms</span>' : '') + '</div>' +
-        '<div class="bd">' + esc(s.text) + '</div>';
+        (s.latency ? '<span class="lat">' + s.latency + ' ms</span>' : '') + '</div>';
       wrap.appendChild(card);
     } else if (s.kind === 'compare') {
       var grid = el('div', 'compare');
@@ -2387,7 +2385,7 @@
       wrap.appendChild(cn);
     } else if (s.kind === 'boundary') {
       wrap.innerHTML = '<div class="boundary"><span class="lbl">' +
-        (s.mode === 'uncertain' ? 'boundary · 不确定声明' : 'boundary · 边界与时效') + '</span>' + esc(s.text) + '</div>';
+        (s.mode === 'uncertain' ? L('需要注意') : L('阅读提示')) + '</span>' + esc(s.text) + '</div>';
     } else if (s.kind === 'visual') {
       wrap.innerHTML = '<div class="sec-title">' + esc(s.title || '可视化') + '</div>';
       var viz = el('div', 'viz');
@@ -2919,31 +2917,52 @@
       CURRENT_TIER = ans.meta.tier;
     }
     var msg = el('div', 'msg bot');
-    var card = el('div', 'answer');
+    var card = el('div', 'answer answer-doc');
     rememberTurn(ans);
-    card.appendChild(answerHead(ans, extra));
-    if (state.settings.showTrace && ans.trace && ans.trace.length && ans.intent !== 'smalltalk') {
-      card.appendChild(renderTrace(ans.trace));
-    }
+    CURRENT_MODE = (ans.meta.quality && ans.meta.quality.mode) ||
+      (window.AstroAnswerComposer ? window.AstroAnswerComposer.modeFor(ans, { question: ans.query }) : 'A');
+    if (ans.query) card.appendChild(el('h2', 'answer-question', ans.query));
+    var hiddenHead = answerHead(ans, extra);
+    hiddenHead.classList.add('ans-sr-head');
+    card.appendChild(hiddenHead);
+    var main = el('div', 'answer-main');
+    var basisSecs = [];
+    var detailSecs = [];
     var pending = [];
     var consumed = {};
     /* 叙述层：能合成一段话的就合成，读者看到的是「一个回答」而不是一叠卡片 */
     var narr = renderNarrative(ans);
     if (narr) {
-      card.appendChild(narr.el);
+      main.appendChild(narr.el);
       narr.consumed.forEach(function (i) { consumed[i] = 1; });
     }
     var verifyList = [];
+    var summaryMode = CURRENT_MODE === 'C' || CURRENT_MODE === 'D' || CURRENT_MODE === 'E';
+    var hasSummaryVerdict = false;
     ans.sections.forEach(function (s, i) {
       if (consumed[i]) return;
       /* 问候类输入没有事实可评审，跳过评审章节，避免出现「存在缺口」的噪音 */
       if ((ans.intent === 'smalltalk' || CURRENT_TIER === 'unknown') && s.kind === 'review') return;
       /* 核对类章节统一收进一个折叠条，不再各自占一块 */
       if (VERIFY_KINDS[s.kind]) { verifyList.push(s); return; }
+      if (s.kind === 'evidence') { basisSecs.push(s); return; }
+      if (s.kind === 'sources' || s.kind === 'review' || s.kind === 'consensus') {
+        detailSecs.push(s);
+        return;
+      }
+      if (s.kind === 'verdict' && summaryMode) hasSummaryVerdict = true;
       var n = sectionNode(s);
+      /* 结论已在上方强调区完整表达时，综合分析里重复的「核心结论：」段不再重复展示。 */
+      if (s.kind === 'analysis' && hasSummaryVerdict) {
+        var abody = n.querySelector('.analysis-body');
+        if (abody) Array.prototype.slice.call(abody.querySelectorAll('.analysis-p')).forEach(function (p) {
+          if (/^核心结论/.test(String(p.textContent || '').trim())) abody.removeChild(p);
+        });
+      }
       if (n._canvas) pending.push(n._canvas);
-      card.appendChild(n);
+      main.appendChild(n);
     });
+    if (main.children.length) card.appendChild(main);
     if (verifyList.length) {
       var vstrip = renderVerifyStrip(verifyList);
       if (vstrip) card.appendChild(vstrip);
@@ -2968,6 +2987,69 @@
      * 而这些动作不写存储，重复渲染没有副作用。 */
     card.appendChild(answerActions(card, ans, extra));
     card.appendChild(metaBar(ans));
+
+    /* V1.11 结果区分层：
+     * 刚才的兼容渲染仍把核对/研究/执行节点挂在 card 上；这里统一摘下，
+     * 按「正文 → 科研依据（折叠）→ 科研详情（折叠）→ 操作」重排。
+     * 不再改 sectionNode 的既有契约，避免影响历史答案恢复与测试选择器。 */
+    function detachDirect(cls) {
+      var found = Array.prototype.filter.call(card.children, function (x) {
+        return x.classList && x.classList.contains(cls);
+      })[0];
+      if (found) card.removeChild(found);
+      return found || null;
+    }
+    var verifyNode = detachDirect('verify-fold');
+    var researchNode = detachDirect('research-panel');
+    var stepNode = detachDirect('step-panel');
+    var metaNode = detachDirect('meta-bar');
+    var actionsNode = detachDirect('ans-acts');
+    var recallNodes = Array.prototype.filter.call(card.children, function (x) {
+      return x.classList && x.classList.contains('recall');
+    });
+    recallNodes.forEach(function (x) { card.removeChild(x); });
+
+    var basisHas = basisSecs.length || verifyNode || researchNode;
+    if (basisHas) {
+      var basis = el('details', 'answer-basis');
+      var basisCount = 0;
+      var paperCount = ans.research && ans.research.papers ? ans.research.papers.length : 0;
+      basisSecs.forEach(function (s) { basisCount += (s.items || []).length; });
+      var bmeta = [];
+      if (paperCount) bmeta.push(T('{0} 篇论文', paperCount));
+      if (basisCount) bmeta.push(T('{0} 条依据数据', basisCount));
+      var bsum = el('summary', 'answer-basis-summary');
+      bsum.innerHTML = '<span class="basis-ic">◎</span><span class="basis-name">' + esc(L('科研依据')) +
+        '</span><span class="basis-more">' + esc(bmeta.join(' · ') || L('展开查看')) + '</span>';
+      basis.appendChild(bsum);
+      var bbody = el('div', 'answer-basis-body');
+      basisSecs.forEach(function (s) { bbody.appendChild(sectionNode(s)); });
+      if (verifyNode) bbody.appendChild(verifyNode);
+      if (researchNode) bbody.appendChild(researchNode);
+      basis.appendChild(bbody);
+      card.appendChild(basis);
+    }
+
+    var detailNodes = [];
+    if (state.settings.showTrace && ans.trace && ans.trace.length && ans.intent !== 'smalltalk') {
+      detailNodes.push(renderTrace(ans.trace));
+    }
+    detailSecs.forEach(function (s) { detailNodes.push(sectionNode(s)); });
+    if (stepNode) detailNodes.push(stepNode);
+    recallNodes.forEach(function (x) { detailNodes.push(x); });
+    var detailHas = detailNodes.length > 0;
+    if (detailHas) {
+      var det = el('details', 'answer-details');
+      det.appendChild(el('summary', 'answer-details-summary', L('科研详情与执行记录')));
+      var dbody = el('div', 'answer-details-body');
+      detailNodes.forEach(function (x) { dbody.appendChild(x); });
+      if (metaNode) dbody.appendChild(metaNode);
+      det.appendChild(dbody);
+      card.appendChild(det);
+    }
+    if (actionsNode) card.appendChild(actionsNode);
+    var actionsBasis = card.querySelector('.ans-basis-btn');
+    if (actionsBasis) actionsBasis.style.display = card.querySelector('.answer-basis') ? '' : 'none';
     msg.appendChild(card);
     $('#thread').appendChild(msg);
     pending.forEach(function (pc) {
@@ -7101,7 +7183,7 @@
   }
 
   /* ================= 版本 / 统计 / 答案操作 ================= */
-  var APP_VERSION = '5.0';
+  var APP_VERSION = '5.1';
 
   /* 更新提示：只在「之前来过且版本变了」时提示一次，首次访问不打扰 */
   function checkVersion() {
@@ -7144,9 +7226,12 @@
   /* 取答案正文：从已渲染的卡片里剥离元信息，保证与用户所见一致 */
   function answerText(card) {
     var clone = card.cloneNode(true);
-    ['.meta-bar', '.ans-acts', '.recall', '.trace-fold', '.verify-fold', '.model-note'].forEach(function (sel) {
+    ['.meta-bar', '.ans-acts', '.recall', '.trace-fold', '.verify-fold',
+      '.answer-question', '.answer-basis', '.answer-details', '.ans-sr-head'].forEach(function (sel) {
       clone.querySelectorAll(sel).forEach(function (x) { x.remove(); });
     });
+    /* 模型/厂商/耗时只是隐藏元信息，复制时去掉，正文保留 */
+    clone.querySelectorAll('.model-note .who').forEach(function (x) { x.remove(); });
     return (clone.textContent || '').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
   }
 
@@ -7210,6 +7295,39 @@
     cp.title = '复制这条答案的正文';
     cp.addEventListener('click', function () { copyText(answerText(card), cp); });
 
+    var hb = el('button', 'ans-act', L('有帮助'));
+    hb.type = 'button';
+    hb.title = '这条回答对你有帮助';
+    hb.addEventListener('click', function () {
+      hb.classList.add('on');
+      toast(L('已记录：有帮助'));
+    });
+
+    var nh = el('button', 'ans-act', L('没有帮助'));
+    nh.type = 'button';
+    nh.title = '这条回答没有解决问题，可以提交具体问题';
+    nh.addEventListener('click', function () {
+      var fbBtn = bar.querySelector('.ans-act[data-fb="1"]');
+      if (fbBtn) fbBtn.click();
+    });
+
+    var basisBtn = el('button', 'ans-act ans-basis-btn', L('查看科研依据'));
+    basisBtn.type = 'button';
+    basisBtn.addEventListener('click', function () {
+      /* 依据折叠层在 renderAnswer 的收尾阶段才挂上，这里必须动态查询。 */
+      var basis = card.querySelector('.answer-basis');
+      if (!basis) return;
+      basis.open = true;
+      basis.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    });
+
+    var askBtn = el('button', 'ans-act', L('继续追问'));
+    askBtn.type = 'button';
+    askBtn.addEventListener('click', function () {
+      var input = $('#input');
+      if (input) { input.focus(); input.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+    });
+
     var sh = el('button', 'ans-act', L('分享'));
     sh.type = 'button';
     sh.title = '复制为可粘贴分享的纯文本';
@@ -7225,6 +7343,7 @@
      * 只带当前这一轮的最小上下文，不把整段历史对话塞进反馈。 */
     var fb = el('button', 'ans-act', L('反馈问题'));
     fb.type = 'button';
+    fb.setAttribute('data-fb', '1');
     fb.title = '反馈这条回答中的事实、引用或分析问题';
     fb.addEventListener('click', function () {
       var ctx = feedbackContextFromAnswer(card, ans, extra);
@@ -7244,8 +7363,20 @@
     });
 
     bar.appendChild(cp);
-    bar.appendChild(sh);
-    bar.appendChild(fb);
+    bar.appendChild(hb);
+    bar.appendChild(nh);
+    bar.appendChild(basisBtn);
+    bar.appendChild(askBtn);
+
+    /* 分享 / 反馈 / SIMBAD / 云量是低频动作，收进「更多」，
+     * 不再和答案主体抢注意力；反馈按钮仍保留在原位置供无障碍/测试定位。 */
+    var more = el('details', 'ans-more');
+    more.appendChild(el('summary', 'ans-more-sum', L('更多')));
+    var extraBar = el('div', 'ans-extra');
+    extraBar.appendChild(sh);
+    extraBar.appendChild(fb);
+    more.appendChild(extraBar);
+    bar.appendChild(more);
     /* 只有问句里出现星表编号时才提供 SIMBAD 查询：没有明确天体就不该发请求 */
     var ident = guessIdent(ans.query);
     if (ident && window.Simbad) {
@@ -7267,7 +7398,7 @@
           card.insertBefore(simbadBox(r, ident), bar);
         }).catch(function () { sb.textContent = 'SIMBAD'; sb.disabled = false; });
       });
-      bar.appendChild(sb);
+      extraBar.appendChild(sb);
     }
 
     /* 只在「观测类」答案上提供云量：其它问题加天气是噪音 */
@@ -7290,7 +7421,7 @@
           card.insertBefore(weatherBox(r), bar);
         }).catch(function () { wb.textContent = '云量'; wb.disabled = false; });
       });
-      bar.appendChild(wb);
+      extraBar.appendChild(wb);
     }
 
     return bar;

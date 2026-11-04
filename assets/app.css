@@ -3174,3 +3174,322 @@ html[data-adapt="on"][data-w="narrow"] .hero h1 { letter-spacing: 0; }
   .analysis-p { font-size: 11.5px; }
 }
 
+/* ============================================================
+   V1.12 · 结果阅读区重设计
+   目标：一个答案 = 问题标题 + 连续的阅读正文 + 折叠依据/详情 + 轻量操作。
+   不再把结果做成后台式的多分区卡片；横线只保留在真正需要分层的折叠入口。
+   ============================================================ */
+.answer.answer-doc {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+.answer-doc .ans-sr-head {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.answer-question {
+  max-width: 740px;
+  margin: 0 0 24px;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(19px, 2.2vw, 24px);
+  line-height: 1.48;
+  letter-spacing: 0.005em;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.answer-main { max-width: 740px; }
+.answer-main > .sec { margin-bottom: 24px; }
+.answer-main > .sec:last-child { margin-bottom: 0; }
+
+/* 简单事实/解释：直接作为导语，没有额外结论卡 */
+.sec-verdict.answer-lead .head {
+  margin: 0 0 10px;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1.8;
+  color: var(--ink);
+  letter-spacing: 0.002em;
+}
+.sec-verdict.answer-lead .sub {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.85;
+  color: var(--muted);
+}
+/* 参数/比较/综述：轻量背景强调核心结论，仅此一处有底色 */
+.sec-verdict.answer-summary {
+  padding: 17px 19px 16px;
+  border-radius: 13px;
+  background: var(--surface-2);
+}
+.sec-verdict.answer-summary .head {
+  margin: 0 0 7px;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1.72;
+  color: var(--ink);
+}
+.sec-verdict.answer-summary .sub {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.85;
+  color: var(--muted);
+}
+.sec-verdict.quiet.answer-summary { background: transparent; padding-left: 0; padding-right: 0; }
+.sec-verdict.quiet .head { font-size: 17px; }
+
+/* 阅读正文：宽度、字号、行高只在这里定义，避免每个章节各自为政 */
+.answer-main .analysis-body { gap: 16px; }
+.answer-main .analysis-p,
+.answer-main .narr-body,
+.answer-main .model-note .bd {
+  max-width: 720px;
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.95;
+  color: var(--ink-2);
+  letter-spacing: 0.003em;
+}
+.answer-main .narr-lead {
+  margin: 0 0 18px;
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1.8;
+  color: var(--ink);
+}
+.answer-main .analysis-p.limit {
+  margin-top: 2px;
+  font-size: 12.5px;
+  line-height: 1.85;
+  color: var(--muted);
+}
+.answer-main .narr-caveat {
+  margin-top: 18px;
+  padding-left: 13px;
+  border-left: 2px solid var(--amber);
+  background: transparent;
+  font-size: 12px;
+  line-height: 1.85;
+  color: var(--muted);
+}
+.answer-main .model-note {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.answer-main .model-note .who { display: none; }
+.answer-main .model-note.fallback .bd {
+  padding-left: 13px;
+  border-left: 2px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+}
+.answer-main .boundary {
+  margin-top: 18px;
+  padding: 0 0 0 13px;
+  border: 0;
+  border-left: 2px solid var(--amber);
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.9;
+}
+.answer-main .boundary .lbl { color: var(--amber); margin-bottom: 3px; }
+.answer-main .sec-title { margin-bottom: 8px; }
+.answer-main .sec-title::after { display: none; }
+.answer-main .sec-note { color: var(--muted-2); }
+
+/* 依据表：只在折叠区里出现，保持可扫读但不像后台表格 */
+.answer-basis .sec-evidence .kv { grid-template-columns: 110px minmax(0, 1fr); }
+.answer-basis .sec-evidence .kv .k,
+.answer-basis .sec-evidence .kv .v { padding-top: 5px; padding-bottom: 5px; }
+.answer-basis .sec-title { font-size: 10px; color: var(--muted); letter-spacing: 0.08em; text-transform: none; }
+.answer-basis .sec-title::after { display: none; }
+
+/* 科研依据：唯一的折叠入口，默认收起；摘要行保持轻 */
+.answer-basis,
+.answer-details {
+  max-width: 740px;
+  margin-top: 28px;
+  padding-top: 13px;
+  border-top: 1px solid var(--line-soft);
+}
+.answer-basis > summary,
+.answer-details > summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 11.5px;
+  color: var(--muted);
+  user-select: none;
+}
+.answer-basis > summary::-webkit-details-marker,
+.answer-details > summary::-webkit-details-marker { display: none; }
+.answer-basis > summary::before,
+.answer-details > summary::before {
+  content: '▸';
+  font-size: 9px;
+  color: var(--muted-2);
+  transition: transform 0.16s ease;
+}
+.answer-basis[open] > summary::before,
+.answer-details[open] > summary::before { transform: rotate(90deg); }
+.answer-basis > summary:hover,
+.answer-details > summary:hover { color: var(--accent); }
+.answer-basis .basis-ic { color: var(--accent); font-size: 12px; }
+.answer-basis .basis-name { color: var(--ink-2); font-weight: 500; }
+.answer-basis .basis-more { margin-left: auto; font-family: var(--mono); font-size: 9.5px; color: var(--muted-2); }
+.answer-basis-body { padding: 12px 0 2px; }
+.answer-details { margin-top: 14px; padding-top: 10px; }
+.answer-details > summary { font-size: 10.5px; color: var(--muted-2); }
+.answer-details-body { padding: 10px 0 2px; }
+.answer-details .trace-fold { margin: 0 0 10px; }
+.answer-details .meta-bar { margin-top: 0; border-top: 0; }
+
+/* 论文阅读列表：标题、作者/时间、摘要、原文链接；去掉重边框和徽章 */
+.research-panel {
+  margin-top: 18px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+.research-summary {
+  padding: 0 0 10px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  border-bottom: 1px solid var(--line-soft);
+}
+.research-summary .mt { color: var(--muted-2); font-size: 9.5px; }
+.research-body { padding: 0; }
+.research-block { padding-top: 14px; }
+.research-block .sec-title { font-size: 10px; color: var(--muted); }
+.research-block .sec-title::after { display: none; }
+.paper-list { gap: 0; }
+.research-panel .paper-card {
+  padding: 14px 0 15px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.research-panel .paper-card:last-child { border-bottom: 0; padding-bottom: 2px; }
+.research-panel .paper-title { font-size: 13.5px; line-height: 1.65; }
+.research-panel .paper-meta { margin-top: 5px; font-size: 9.8px; color: var(--muted-2); }
+.research-panel .paper-abstract {
+  margin-top: 6px;
+  font-size: 11.5px;
+  line-height: 1.8;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.research-panel .paper-actions { margin-top: 5px; }
+.research-panel .paper-action { border: 0; padding: 0 10px 0 0; color: var(--accent); }
+.research-panel .research-link { margin-top: 0; }
+.research-detail { margin-top: 14px; }
+.research-detail > summary {
+  cursor: pointer; list-style: none;
+  font-size: 10.5px; color: var(--muted-2);
+}
+.research-detail > summary::-webkit-details-marker { display: none; }
+.research-detail > summary::before { content: '▸'; font-size: 9px; margin-right: 5px; }
+.research-detail[open] > summary::before { content: '▾'; }
+
+/* 操作：常驻但极轻，不与答案争视觉权重 */
+.ans-acts {
+  max-width: 740px;
+  margin-top: 22px;
+  padding-top: 11px;
+  border-top: 1px solid var(--line-soft);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  opacity: 1;
+}
+.ans-act {
+  border: 0;
+  background: none;
+  padding: 2px 0;
+  font-size: 11px;
+  color: var(--muted);
+  cursor: pointer;
+  line-height: 1.7;
+}
+.ans-act:hover { color: var(--accent); }
+.ans-act.on { color: var(--accent); font-weight: 500; }
+.ans-more { position: relative; margin-left: auto; }
+.ans-more-sum {
+  cursor: pointer;
+  list-style: none;
+  font-size: 10.5px;
+  color: var(--muted-2);
+}
+.ans-more-sum::-webkit-details-marker { display: none; }
+.ans-more-sum::before { content: '⋯ '; }
+.ans-more[open] .ans-more-sum { color: var(--accent); }
+.ans-extra {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  z-index: 20;
+  display: flex;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+}
+.ans-extra .ans-act { font-size: 10.5px; }
+
+/* 深色模式：新分层只使用既有变量；这里只补透明背景与低对比细节 */
+:root[data-theme="night"] .answer.answer-doc,
+:root[data-theme="night"] .answer-main .model-note { background: transparent; }
+:root[data-theme="night"] .sec-verdict.answer-summary { background: var(--surface-2); }
+:root[data-theme="night"] .ans-extra { background: var(--surface-2); }
+
+@media (max-width: 720px) {
+  .answer-question { font-size: 19px; margin-bottom: 18px; }
+  .answer-main .analysis-p,
+  .answer-main .narr-body,
+  .answer-main .model-note .bd { font-size: 14px; line-height: 1.9; }
+  .answer-main .narr-lead,
+  .sec-verdict.answer-lead .head,
+  .sec-verdict.answer-summary .head { font-size: 17px; }
+  .sec-verdict.answer-summary { padding: 14px 15px; }
+  .ans-acts { gap: 10px; }
+  .ans-extra { position: static; margin-top: 8px; flex-wrap: wrap; white-space: normal; }
+  .ans-more { margin-left: 0; }
+}
+@media (max-width: 560px) {
+  .answer-doc { padding-left: 2px; padding-right: 2px; }
+  .answer-main .analysis-p,
+  .answer-main .narr-body,
+  .answer-main .model-note .bd { font-size: 13.5px; line-height: 1.9; }
+  .answer-question { font-size: 18px; }
+  .answer-basis, .answer-details, .ans-acts { margin-top: 20px; }
+  .research-panel .paper-title { font-size: 13px; }
+  .ans-acts { row-gap: 6px; }
+}
+

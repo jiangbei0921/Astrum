@@ -318,3 +318,7 @@ jobs:
       # V1.11 补充：每日前沿状态、北京时间筛选、空态与缓存刷新
       - name: V1.11 每日前沿浏览器 v1-11-daily-browser-test
         run: node tools/v1-11-daily-browser-test.js
+
+      # 结果阅读区重设计：正文/依据/详情/操作分层、移动端、深色模式
+      - name: 结果阅读区 UI 浏览器 v1-12-answer-ui-test
+        run: node tools/v1-12-answer-ui-test.js

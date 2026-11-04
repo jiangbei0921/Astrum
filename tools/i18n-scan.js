@@ -60,7 +60,7 @@ var SCRIPT = `
     if (!node.closest) return '界面';
     if (node.closest('.msg.user')) return '用户';
     if (node.closest('.sec-title, .sec.followup, .sec.mapref, .sec-note, .trace-fold')) return '界面';
-    if (node.closest('.answer .narr, .answer .sec, .answer .p, .answer .md, .q-block')) return '内容';
+    if (node.closest('.answer .narr, .answer .sec, .answer .p, .answer .md, .answer .answer-question, .q-block')) return '内容';
     return '界面';
   }
 

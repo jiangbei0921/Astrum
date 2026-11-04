@@ -193,11 +193,9 @@
     var chosen = (verified.length ? verified : inferred).slice(0, 2);
     if (chosen.length) {
       var findings = chosen.map(function (c) { return clip(c.text, 140); }).join('；');
-      var refs = chosen.map(function (c) { return (c.evidenceRefs || []).join('、'); }).filter(Boolean).join('；');
       paras.push({
         role: 'analysis',
-        text: '与此相关，现有证据支持的要点是：' + ends(findings) +
-          (refs ? '对应证据编号：' + refs + '。' : '')
+        text: '与此相关，现有证据支持的要点是：' + ends(findings)
       });
     }
 
