@@ -740,6 +740,7 @@
     modeFor: modeFor,
     brief: brief,
     trimSimple: trimSimple,
+    scientificLimits: scientificLimits,
     textParagraphs: textParagraphs,
     audit: audit,
     MODE_LABEL: MODE_LABEL,

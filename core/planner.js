@@ -139,6 +139,13 @@
     if (/星系形成|galaxy formation/i.test(s)) {
       return /最新|进展|recent|progress/i.test(s) ? 'galaxy formation recent progress' : 'galaxy formation review';
     }
+    /* DESI DR2 是具体巡天数据；用“discoveries”这类泛词会召回教育学论文。
+     * 固定成数据集 + 主题词，保证检索式落在暗能量测量本身。 */
+    if (/DESI|DR2/i.test(s)) {
+      return /演化|evolution|随时间/i.test(s)
+        ? 'DESI DR2 dark energy evolution'
+        : 'DESI DR2 dark energy results';
+    }
     var out = [], seen = {};
     TOPIC_TERMS.forEach(function (t) {
       if (out.length >= 4 || !t.re.test(s) || seen[t.en]) return;

@@ -348,10 +348,13 @@
       }
 
       var gaps = rep.gaps || [];
-      if (gaps.length) {
+      /* 工具失败/网络错误等执行状态留在科研详情；正文边界只保留科研限制。 */
+      var sciGaps = root.AstroAnswerComposer && typeof root.AstroAnswerComposer.scientificLimits === 'function'
+        ? root.AstroAnswerComposer.scientificLimits({ research: rep }) : gaps;
+      if (sciGaps.length) {
         insertBeforeFollowup(answer, {
           kind: 'boundary', mode: 'uncertain',
-          text: '未完成/不确定：' + gaps.join('；') + '。以上结论均保留原始来源，不把缺失数据当作事实。'
+          text: '未完成/不确定：' + sciGaps.join('；') + '。以上结论均保留原始来源，不把缺失数据当作事实。'
         });
       }
     }

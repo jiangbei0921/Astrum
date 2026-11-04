@@ -211,6 +211,44 @@ ok('E1 brief 含论文/证据/结论/冲突/限制', Array.isArray(briefC.papers
 ok('E2 brief 去重计数', briefC.evidenceBefore >= briefC.evidenceAfter,
   briefC.evidenceBefore + '→' + briefC.evidenceAfter);
 
+/* ---------- G. DESI 检索式与执行状态隔离 ---------- */
+var desiPlan = global.AstroPlanner.buildPlan({
+  query: 'DESI DR2 的主要发现是什么？', intent: 'unknown',
+  route: { mode: 'research', level: 'L3' }, targets: [], ctx: CTX
+});
+var desiSearch = desiPlan && desiPlan.steps.filter(function (s) { return s.tool === 'paper.search'; })[0];
+ok('G1 DESI DR2 检索式聚焦暗能量数据', desiSearch && desiSearch.args.query === 'DESI DR2 dark energy results',
+  desiSearch && desiSearch.args.query);
+
+var opAns = {
+  query: 'DESI DR2 的主要发现是什么？', intent: 'unknown', targets: [],
+  sections: [{
+    kind: 'evidence', title: '依据',
+    items: [{ label: 'DESI DR2', value: '暗能量测量结果' }]
+  }],
+  research: {
+    papers: [{
+      title: 'DESI DR2 Results', authors: ['DESI Collaboration'], date: '2025-03-01',
+      doi: '10.1103/physrevd.111.023532', arxivId: '2503.14738',
+      url: 'https://arxiv.org/abs/2503.14738', abstractOnly: true,
+      excerpt: 'We find preferences for evolving dark energy.', evidenceIds: ['ev_op']
+    }],
+    conclusions: [{
+      claimId: 'c1', text: 'DESI DR2 对演化暗能量给出偏好', level: 'inferred',
+      verdict: 'PARTIAL', evidenceRefs: ['ev_op']
+    }],
+    gaps: ['未获得 SIMBAD 天体参数（本机网络不可达或查询无结果）',
+      '全文失败原因：fulltext_unavailable（没有公开全文地址）',
+      '1 篇论文仅获得摘要，未获取全文'],
+    limitations: [], conflicts: [], differences: [], evidence: [], sources: []
+  },
+  meta: {}
+};
+finalize(opAns, 'DESI DR2 的主要发现是什么？');
+ok('G2 执行状态不进入答案正文', !/SIMBAD|全文失败原因|fulltext_unavailable/.test(textOf(opAns)),
+  textOf(opAns).slice(0, 160));
+ok('G3 科学限制保留', /仅获得摘要|未获取全文/.test(textOf(opAns)), textOf(opAns).slice(-120));
+
 /* ---------- F. 既有契约 ---------- */
 ok('F1 13 Agent 不变', AC.AGENTS.length === 13, AC.AGENTS.length);
 ok('F2 ADR-001 预算不变', JSON.stringify(AC.defaultConfig().budget) === JSON.stringify(AC.defaultConfig().budget));
