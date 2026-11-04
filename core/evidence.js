@@ -28,6 +28,240 @@
       .replace(/^https?:\/\/doi\.org\//, '').replace(/^doi:/, '');
   }
 
+  /* V1.13：证据核验状态。只描述“这条 Evidence 能否追溯到原始来源”，
+   * 不代表论文结论已被复现。核验不通过的内容不得写成已核验。 */
+  var VERIFY_STATES = {
+    VERIFIED: 'verified',
+    PARTIAL: 'partial',
+    UNVERIFIED: 'unverified',
+    UNAVAILABLE: 'unavailable',
+    CONFLICT: 'conflict'
+  };
+  var VERIFY_LABEL = {
+    verified: '已核验',
+    partial: '部分核验',
+    unverified: '未核验',
+    unavailable: '来源不可用',
+    conflict: '证据冲突'
+  };
+  var DOI_RE = /^10\.\d{4,9}\/\S+$/i;
+  var FAKE_DOI_RE = /^10\.(0000|0001|1111|1234|5555|9999)\//i;
+  var ARXIV_RE = /^(?:\d{4}\.\d{4,5}(?:v\d+)?|(?:astro-ph|cond-mat|gr-qc|hep-ex|hep-lat|hep-ph|hep-th|math-ph|nlin|nucl-ex|nucl-th|physics|quant-ph)\/\d{7}(?:v\d+)?)$/i;
+  var TRUSTED_SOURCE_RE = /(doi\.org|arxiv\.org|openalex\.org|semanticscholar\.org|crossref\.org|adsabs\.harvard\.edu|simbad|nasa\.gov|esa\.(?:int|com)|nature\.com|science\.org|iopscience|aanda\.org|academic\.oup\.com|pnas\.org|springer|elsevier|wiley|tandfonline|iop\.org)/i;
+
+  function hasHttp(u) { return /^https?:\/\/\S+/i.test(String(u || '')); }
+  function normArxiv(v) {
+    return String(v == null ? '' : v).trim()
+      .replace(/^arxiv:\s*/i, '').replace(/^https?:\/\/arxiv\.org\/(?:abs|pdf)\//i, '')
+      .replace(/\.pdf$/i, '');
+  }
+  function uriDoiOf(uri) {
+    var m = String(uri || '').match(/doi\.org\/(10\.\d{4,9}\/\S+)/i);
+    return m ? normDoi(m[1]).replace(/[?#].*$/, '').replace(/\/+$/, '') : '';
+  }
+  function uriArxivOf(uri) {
+    var m = String(uri || '').match(/arxiv\.org\/(?:abs|pdf)\/([^?#\s]+)/i);
+    return m ? normArxiv(m[1]) : '';
+  }
+
+  function verificationOf(ev, opts) {
+    opts = opts || {};
+    var checks = [];
+    function ck(name, ok, detail) {
+      checks.push({ name: name, ok: !!ok, detail: detail || '' });
+      return !!ok;
+    }
+    var type = ev && ev.sourceType;
+    var uri = ev && ev.uri;
+    var title = ev && ev.title;
+    var c = (ev && ev.content) || {};
+    var doi = normDoi(c.doi);
+    var arx = normArxiv(c.arxivId);
+    var http = hasHttp(uri);
+    var local = /^local:/i.test(String(uri || ''));
+    var titleOk = ck('title.present', !!String(title || '').trim(), '标题');
+    if (opts.unavailable) {
+      return { state: VERIFY_STATES.UNAVAILABLE, basis: String(opts.reason || '来源暂时无法访问'), checkedAt: nowIso(), checks: checks };
+    }
+    if (opts.conflictWith && (Array.isArray(opts.conflictWith) ? opts.conflictWith.length : !!opts.conflictWith)) {
+      return { state: VERIFY_STATES.CONFLICT, basis: '多个可信来源存在实质性差异', checkedAt: nowIso(), checks: checks };
+    }
+
+    if (type === 'paper') {
+      var doiOk = ck('doi.format', !doi || (DOI_RE.test(doi) && !FAKE_DOI_RE.test(doi)), doi ? 'DOI 格式' : '无 DOI');
+      var arxOk = ck('arxiv.format', !arx || ARXIV_RE.test(arx), arx ? 'arXiv 格式' : '无 arXiv ID');
+      var idOk = ck('paper.identifier', !!(doi || arx || http), 'DOI/arXiv/URL 至少一项');
+      var uriDoi = uriDoiOf(uri);
+      var uriArx = uriArxivOf(uri);
+      var consistent = true;
+      if (doi && uriDoi && uriDoi !== doi) consistent = false;
+      if (arx && uriArx && uriArx !== arx) consistent = false;
+      ck('identifier.uri.consistent', consistent, consistent ? '标识与链接一致' : '标识与链接不一致');
+      var trusted = http && TRUSTED_SOURCE_RE.test(uri);
+      var sourceOk = ck('source.present', trusted,
+        !http ? '缺少原始链接' : trusted ? '有可识别的学术来源链接' : '来源链接不是可识别的学术来源');
+      var authors = ck('authors.present', Array.isArray(c.authors) && c.authors.length > 0, '作者信息');
+      var date = ck('date.present', !!String(ev.publishedAt || '').trim(), '发表时间');
+      var abstract = ck('abstract.present',
+        !!(String(c.excerpt || c.snippet || '').trim() || c.contentLevel === 'fulltext' || c.fulltext === true),
+        '摘要或全文片段');
+      ck('retrievedAt.present', !!String(ev.retrievedAt || '').trim(), '检索时间');
+      if (!sourceOk || !titleOk) {
+        return {
+          state: VERIFY_STATES.UNVERIFIED,
+          basis: sourceOk ? '缺少可核对的标题' : '缺少原始链接，无法确认来源真实存在',
+          checkedAt: nowIso(), checks: checks
+        };
+      }
+      if (!idOk || !doiOk || !arxOk || !consistent) {
+        return {
+          state: VERIFY_STATES.PARTIAL,
+          basis: !consistent ? '论文标识与原始链接不一致' : '来源存在，但标识/元数据尚未完整确认',
+          checkedAt: nowIso(), checks: checks
+        };
+      }
+      if (!authors || !date || !abstract) {
+        return {
+          state: VERIFY_STATES.PARTIAL,
+          basis: '来源与标识存在，但作者/时间/摘要等关键细节不完整',
+          checkedAt: nowIso(), checks: checks
+        };
+      }
+      return { state: VERIFY_STATES.VERIFIED, basis: '原始链接与论文标识一致，关键元数据可核对', checkedAt: nowIso(), checks: checks };
+    }
+
+    if (type === 'database' || type === 'observation' || type === 'calculation') {
+      var src = ck('source.present', http || local || !!ev.sourceId, '来源/原始记录');
+      var record = true;
+      if (type === 'observation') record = ck('record.fileHash', !!(ev.provenance && ev.provenance.fileHash), '本地文件哈希');
+      if (type === 'calculation') {
+        record = ck('calc.inputs', !!(c.inputs && c.epoch && c.frame), '可复算输入');
+      }
+      if (!src || !titleOk) {
+        return { state: VERIFY_STATES.UNVERIFIED, basis: '缺少可追溯来源或标题', checkedAt: nowIso(), checks: checks };
+      }
+      if (!record) {
+        return { state: VERIFY_STATES.PARTIAL, basis: '来源存在，但复算/文件信息不完整', checkedAt: nowIso(), checks: checks };
+      }
+      return {
+        state: VERIFY_STATES.VERIFIED,
+        basis: type === 'database' ? '权威数据库条目，可追溯'
+          : type === 'observation' ? '本地观测文件可复算'
+            : '本地计算结果可复算',
+        checkedAt: nowIso(), checks: checks
+      };
+    }
+
+    var present = ck('source.present', http || local || !!ev.sourceId, '来源');
+    if (!present || !titleOk) {
+      return { state: VERIFY_STATES.UNVERIFIED, basis: '缺少可追溯来源或标题', checkedAt: nowIso(), checks: checks };
+    }
+    return { state: VERIFY_STATES.PARTIAL, basis: '来源存在，但来源类型未分类，未做完整性核验', checkedAt: nowIso(), checks: checks };
+  }
+
+  function normalizeVerification(v, ev, opts) {
+    if (v && VERIFY_LABEL[v.state]) {
+      return {
+        state: v.state,
+        basis: v.basis || VERIFY_LABEL[v.state],
+        checkedAt: v.checkedAt || nowIso(),
+        checks: Array.isArray(v.checks) ? v.checks.slice() : []
+      };
+    }
+    if (typeof v === 'string' && VERIFY_LABEL[v]) {
+      return { state: v, basis: VERIFY_LABEL[v], checkedAt: nowIso(), checks: [] };
+    }
+    return verificationOf(ev, opts);
+  }
+
+  function verify(ev, opts) {
+    if (!ev) return null;
+    ev.verification = normalizeVerification(ev.verification, ev, opts);
+    return ev.verification;
+  }
+
+  function verifyAll(list, opts) {
+    var counts = { verified: 0, partial: 0, unverified: 0, unavailable: 0, conflict: 0 };
+    var out = (list || []).map(function (ev) {
+      if (!ev) return ev;
+      ev.verification = normalizeVerification(ev.verification, ev, opts);
+      if (counts[ev.verification.state] == null) counts[ev.verification.state] = 0;
+      counts[ev.verification.state] += 1;
+      return ev;
+    });
+    return { evidence: out, counts: counts };
+  }
+
+  /* 引用真实性审计：编号、DOI、arXiv ID、URL 都必须能在本轮 Evidence 中找到。
+   * 只做“是否对应真实来源”，不判断语义是否支持该结论。 */
+  function auditCitations(text, evidence) {
+    var src = String(text || '');
+    var ids = {}, dois = {}, arxivs = {}, uris = {};
+    (evidence || []).forEach(function (ev) {
+      if (!ev) return;
+      if (ev.evidenceId) ids[ev.evidenceId] = ev;
+      if (ev.id) ids[ev.id] = ev;
+      var c = ev.content || {};
+      var d = normDoi(c.doi || ev.doi);
+      if (d) dois[d] = ev;
+      var a = normArxiv(c.arxivId || ev.arxivId);
+      if (a) arxivs[a] = ev;
+      if (ev.uri || ev.url) {
+        uris[String(ev.uri || ev.url).toLowerCase().replace(/[?#].*$/, '').replace(/\/+$/, '')] = ev;
+      }
+    });
+    var refs = [], unknownRefs = [];
+    var refRe = /[\[【]\s*E\s*(\d+)\s*[\]】]/g, m;
+    while ((m = refRe.exec(src)) !== null) {
+      var id = 'E' + m[1];
+      refs.push(id);
+      if (!ids[id] && unknownRefs.indexOf(id) < 0) unknownRefs.push(id);
+    }
+    var unmatchedDois = [];
+    var doiRe = /\b10\.\d{4,9}\/[^\s，。；、）)\]"'<>]+/g;
+    while ((m = doiRe.exec(src)) !== null) {
+      var d2 = normDoi(m[0]).replace(/[.,;:]+$/, '');
+      if (d2 && !dois[d2] && unmatchedDois.indexOf(d2) < 0) unmatchedDois.push(d2);
+    }
+    var cleaned = src.replace(doiRe, ' ');
+    var unmatchedArxivIds = [];
+    var arxRe = /\b(?:arXiv[:\s]*)?(\d{4}\.\d{4,5}(?:v\d+)?)\b/g;
+    while ((m = arxRe.exec(cleaned)) !== null) {
+      var a2 = normArxiv(m[1]);
+      if (a2 && !arxivs[a2] && unmatchedArxivIds.indexOf(a2) < 0) unmatchedArxivIds.push(a2);
+    }
+    var unmatchedUrls = [];
+    var urlRe = /https?:\/\/[^\s)）"'，。；]+/g;
+    while ((m = urlRe.exec(src)) !== null) {
+      var u = String(m[0]).toLowerCase().replace(/[.,;]+$/, '').replace(/[?#].*$/, '').replace(/\/+$/, '');
+      if (uris[u]) continue;
+      var ud = uriDoiOf(u), ua = uriArxivOf(u);
+      if (ud && dois[ud]) continue;
+      if (ua && arxivs[ua]) continue;
+      if (unmatchedUrls.indexOf(u) < 0) unmatchedUrls.push(u);
+    }
+    var verifiedEvidence = (evidence || []).filter(function (ev) {
+      return ev && ev.verification && ev.verification.state === 'verified';
+    }).length;
+    var unverifiedEvidence = (evidence || []).filter(function (ev) {
+      return ev && (!ev.verification || ev.verification.state !== 'verified');
+    }).length;
+    return {
+      total: refs.length,
+      refs: refs,
+      unknownRefs: unknownRefs,
+      unmatchedDois: unmatchedDois,
+      unmatchedArxivIds: unmatchedArxivIds,
+      unmatchedUrls: unmatchedUrls,
+      verifiedEvidence: verifiedEvidence,
+      unverifiedEvidence: unverifiedEvidence
+    };
+  }
+
+  function verificationLabel(state) {
+    return VERIFY_LABEL[state] || VERIFY_LABEL.unverified;
+  }
+
   function hostOf(uri) {
     var m = String(uri || '').match(/^(?:https?:\/\/)?(?:www\.)?([^\/]+)/i);
     return m ? m[1].toLowerCase() : '';
@@ -45,7 +279,7 @@
       title: input.title || '',
       publishedAt: input.publishedAt || ''
     }));
-    return {
+    var out = {
       evidenceId: evidenceId,
       sourceId: input.sourceId,
       sourceType: input.sourceType,
@@ -58,8 +292,11 @@
       claimRefs: Array.isArray(input.claimRefs) ? input.claimRefs.slice() : [],
       trust: input.trust || { level: 'unknown', score: 0, basis: '未评估' },
       provenance: input.provenance || {},
-      abstractOnly: !!input.abstractOnly
+      abstractOnly: !!input.abstractOnly,
+      verification: null
     };
+    out.verification = normalizeVerification(input.verification, out, input.verifyOpts || null);
+    return out;
   }
 
   function trustForPaper(item) {
@@ -101,8 +338,14 @@
         doi: doi,
         arxivId: arxivId || '',
         pdfUrl: (item.extra && item.extra.pdfUrl) || '',
+        venue: (item.extra && item.extra.venue) || item.venue || '',
         dateKind: item.dateKind || null,
         version: item.version || '',
+        section: (item.extra && item.extra.section) || item.section || '',
+        pageStart: item.extra && item.extra.pageStart != null ? item.extra.pageStart
+          : (item.pageStart == null ? null : item.pageStart),
+        pageEnd: item.extra && item.extra.pageEnd != null ? item.extra.pageEnd
+          : (item.pageEnd == null ? null : item.pageEnd),
         uncertainty: item.uncertainty || ''
       },
       trust: trust,
@@ -306,7 +549,16 @@
     normTitle: normTitle,
     independentSources: independentSources,
     normDoi: normDoi,
+    normArxiv: normArxiv,
+    verify: verify,
+    verifyAll: verifyAll,
+    verificationOf: verificationOf,
+    normalizeVerification: normalizeVerification,
+    auditCitations: auditCitations,
+    verificationLabel: verificationLabel,
+    VERIFY_STATES: VERIFY_STATES,
+    VERIFY_LABEL: VERIFY_LABEL,
     hostOf: hostOf,
-    version: '1.0.0'
+    version: '1.1.0'
   };
 })(typeof window !== 'undefined' ? window : global);

@@ -178,6 +178,10 @@
           return !(it.sourceType === 'paper' && !hasPaperId(it));
         });
       }
+      /* V1.13：进入报告前统一核验；没有原始来源/标识不一致的证据不得标为已核验。 */
+      if (root.AstroEvidence && typeof root.AstroEvidence.verifyAll === 'function') {
+        try { root.AstroEvidence.verifyAll(evidence, null); } catch (e) { /* 核验失败不阻断交付 */ }
+      }
       return { evidence: evidence, steps: steps, fulltextFailures: fulltextFailures };
     }
 
@@ -273,11 +277,26 @@
         verdict.sub = '研究问题：' + String(rep.question || answer.query || '').slice(0, 120);
       }
       var evidenceItems = [];
+      var verifyLabel = root.AstroEvidence && root.AstroEvidence.verificationLabel
+        ? root.AstroEvidence.verificationLabel : null;
+      function paperStateOf(p) {
+        if (p && p.verification && p.verification.state) return p.verification.state;
+        var ev = null;
+        (rep.evidence || []).forEach(function (e) {
+          if (ev || !e || e.sourceType !== 'paper') return;
+          var d1 = String(p.doi || '').toLowerCase().replace(/^https?:\/\/(dx\.)?doi\.org\//, '');
+          var d2 = String((e.content && e.content.doi) || '').toLowerCase().replace(/^https?:\/\/(dx\.)?doi\.org\//, '');
+          if ((d1 && d2 && d1 === d2) || (String(e.title || '') === String(p.title || ''))) ev = e;
+        });
+        return ev && ev.verification ? ev.verification.state : '';
+      }
       (rep.papers || []).slice(0, 3).forEach(function (p) {
+        var stateCode = paperStateOf(p);
+        var state = stateCode ? (verifyLabel ? verifyLabel(stateCode) : stateCode) : '';
         evidenceItems.push({
           label: '论文 · ' + (p.title || ''),
           value: [p.date || '日期未知', p.doi ? 'DOI ' + p.doi : (p.arxivId ? 'arXiv ' + p.arxivId : ''),
-            p.abstractOnly ? '仅摘要' : ''].filter(Boolean).join(' · ')
+            p.abstractOnly ? '仅摘要' : '', state].filter(Boolean).join(' · ')
         });
       });
       (rep.parameters || []).slice(0, 4).forEach(function (p) {

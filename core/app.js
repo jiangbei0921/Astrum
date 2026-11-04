@@ -3421,6 +3421,28 @@
     return { facts: facts, para: para || head };
   }
 
+  /* V1.13：简单事实/原理解释直达。
+   * 本地知识已经能给出结论时不启动外部检索，避免首屏被无关网络请求拖慢。 */
+  function directAnswerPlan(q, ans, atts) {
+    if (!ans || !window.AstroAnswerComposer || !window.AstroKnowledgeSources) return null;
+    var mode = '';
+    try { mode = window.AstroAnswerComposer.modeFor(ans, { question: q }); } catch (e) { return null; }
+    if (mode !== 'A' && mode !== 'B') return null;
+    var decide = null;
+    try {
+      decide = window.AstroKnowledgeSources.decide({
+        query: q, intent: ans.intent, targets: ans.targets || [], attachments: atts || []
+      });
+    } catch (e) { return null; }
+    if (!decide || decide.externalRequired) return null;
+    var hasVerdict = (ans.sections || []).some(function (s) { return s && s.kind === 'verdict'; });
+    var hasEvidence = (ans.sections || []).some(function (s) {
+      return s && s.kind === 'evidence' && (s.items || []).length;
+    });
+    if (!hasVerdict || !hasEvidence) return null;
+    return { mode: mode, maxChars: mode === 'A' ? 180 : 280 };
+  }
+
   function noteFor(src, text, latency, fallback) {
     return {
       kind: 'model',
@@ -3750,18 +3772,24 @@
     var src = [para || ''];
     (facts || []).forEach(function (f) { src.push(f.label + ' ' + f.value); });
     var pool = src.join(' ');
-    var nums = String(text || '').match(/[0-9]+(?:\.[0-9]+)?/g) || [];
+    var srcText = String(text || '');
+    var re = /[0-9]+(?:\.[0-9]+)?/g, m;
     var unverified = [], seen = {};
-    nums.forEach(function (n) {
-      if (seen[n]) return;
+    while ((m = re.exec(srcText)) !== null) {
+      var n = m[0];
+      if (seen[n]) continue;
       seen[n] = 1;
-      /* 允许小整数与常见单位换算（0-24、100、1000 等结构性数字） */
+      /* 编号不是测量值：M31、NGC 224、DESI DR2、2MASS 等 */
+      var before = srcText.slice(Math.max(0, m.index - 2), m.index);
+      var after = srcText.slice(m.index + n.length, m.index + n.length + 2);
+      if (/[A-Za-z]$/.test(before) || /^[A-Za-z]/.test(after)) continue;
       var v = parseFloat(n);
-      if (v <= 24 || v === 100 || v === 1000 || v === 60 || v === 360 || v === 24 || v === 365) return;
-      if (pool.indexOf(n) >= 0) return;
-      /* 允许年份出现在事实层（已由上面的 indexOf 覆盖） */
+      if (v >= 1900 && v <= 2100) continue;
+      /* 允许小整数与常见单位换算（0-24、100、1000 等结构性数字） */
+      if (v <= 24 || v === 100 || v === 1000 || v === 60 || v === 360 || v === 365) continue;
+      if (pool.indexOf(n) >= 0) continue;
       unverified.push(n);
-    });
+    }
     return unverified.slice(0, 5);
   }
 
@@ -4362,6 +4390,14 @@
       if (!canExpress) { syncSources({ code: 'not-used', ok: false }); finish(); return; }
       var pay = factsFromAnswer(r.answer);
       var ev = evidenceForPrompt(r.answer);
+      var brief = window.AstroAnswerComposer && typeof window.AstroAnswerComposer.brief === 'function'
+        ? window.AstroAnswerComposer.brief(r.answer, { question: qForAns }) : null;
+      var useBrief = !!(brief && ((brief.papers || []).length ||
+        (brief.evidence || []).length || (brief.conclusions || []).length));
+      if (useBrief) {
+        r.answer.meta = r.answer.meta || {};
+        r.answer.meta.promptEvidence = brief.evidence;
+      }
       /* 与旧契约一致：没有任何可核实事实/证据时不外发模型。 */
       if (!pay.facts.length && !ev.length) { syncSources({ code: 'not-used', ok: false }); finish(); return; }
       var ctxLine2 = ctx.city + ' · ' + ctx.y + '-' + pad(ctx.mo) + '-' + pad(ctx.d) + ' ' +
@@ -4371,12 +4407,14 @@
       streamAnswer({
         answer: r.answer, src: src, question: qForAns, think: think, signal: ac.signal,
         payload: {
-          question: qForAns, facts: pay.facts, para: pay.para, evidence: ev,
+          question: qForAns, facts: pay.facts, para: pay.para,
+          evidence: useBrief ? brief.evidence : ev, synthesis: useBrief ? brief : null,
           attachments: A_ATT.forPrompt(atts || []),
           images: src.vision ? A_ATT.imagesForPrompt(atts || []) : [],
           tone: state.settings.register === 'pro' ? 'academic' : 'warm', context: ctxLine2,
           memory: memoryForPrompt(), answerMode: answerMode,
-          maxChars: (answerMode === 'C' || answerMode === 'D' || answerMode === 'E') ? 520 : 360
+          maxChars: answerMode === 'E' ? 900 : answerMode === 'D' ? 700
+            : answerMode === 'C' ? 600 : 360
         },
         onFinish: function (m) {
           r.answer.meta = r.answer.meta || {};
@@ -4478,7 +4516,9 @@
           try {
             var routeInfo = window.AstroRequest.classify(qForAns, ctx, cfgRun);
             LAST_ROUTE = routeInfo;
-            if (window.AstroControlBridge.canControl(routeInfo, {
+            /* 资源定位问题（“数据在哪下载”）不进入论文检索链路。 */
+            var locationOnly = /在哪下载|哪里下载|何处下载|下载地址|下载链接|数据(包|文件)?(在|从)哪|如何获取.{0,8}(数据|观测)|获取原始数据|原始数据.{0,8}下载/.test(qForAns);
+            if (!locationOnly && window.AstroControlBridge.canControl(routeInfo, {
               mode: state.settings.mode, sourceType: src.type, attachments: atts,
               forceCompare: state.settings.mode === 'compare'
             })) {
@@ -4602,6 +4642,43 @@
         var tModel = taskStart('model', src.name + ' · ' + (src.model || ''));
         var ent2 = entityForResearch(ans);
 
+        /* V1.13 简单问题直达：本地知识已足够时不再跑外部检索。
+         * 仍然只调用一次模型流式，不增加 Agent/模型调用次数。 */
+        var direct = directAnswerPlan(q, ans, atts);
+        if (direct) {
+          var payD = factsFromAnswer(ans);
+          streamAnswer({
+            answer: ans, src: src, question: q, think: think,
+            payload: {
+              question: q, facts: payD.facts, para: payD.para, evidence: [],
+              attachments: A_ATT.forPrompt(atts),
+              images: src.vision ? A_ATT.imagesForPrompt(atts) : [],
+              tone: state.settings.register === 'pro' ? 'academic' : 'warm', context: ctxLine,
+              memory: memoryForPrompt(),
+              answerMode: direct.mode, maxChars: direct.maxChars
+            },
+            audit: function (text) {
+              var bad = numericAudit(text, payD.facts, payD.para);
+              return text + (bad.length
+                ? '\n（输出中的数值 ' + bad.join('、') + ' 未能在本地事实中找到出处，请以「依据」章节为准。）'
+                : '');
+            },
+            onFinish: function (m) {
+              taskEnd(tModel);
+              attachSources(ans, {
+                query: q, intent: ans.intent, targets: ans.targets, attachments: atts,
+                external: { status: 'skipped', attempted: false, ok: 0, failed: 0, tools: [], failures: [] },
+                model: {
+                  code: (m && m.code) || 'ok', ok: !!(m && m.text) && !(m && m.aborted),
+                  stream: !!(m && m.stream), aborted: !!(m && m.aborted)
+                }
+              });
+              renderAnswer(ans, { latency: m && m.latency });
+            }
+          });
+          return;
+        }
+
         /* 先检索取证，再把证据交给模型 —— 模型只依据「本地事实 + 本轮证据」作答，
            避免它只复述本地知识库，也避免它自己编造外部资料。 */
         Research.run(q, {
@@ -4621,19 +4698,29 @@
           }
           var ev = evidenceForPrompt(ans);
           var pay2 = factsFromAnswer(ans);
+          var modeNow = window.AstroAnswerComposer
+            ? window.AstroAnswerComposer.modeFor(ans, { question: q }) : '';
+          var brief = window.AstroAnswerComposer && typeof window.AstroAnswerComposer.brief === 'function'
+            ? window.AstroAnswerComposer.brief(ans, { question: q }) : null;
+          var useBrief = !!(brief && ((brief.papers || []).length ||
+            (brief.evidence || []).length || (brief.conclusions || []).length));
+          if (useBrief) {
+            ans.meta = ans.meta || {};
+            ans.meta.promptEvidence = brief.evidence;
+          }
           return streamAnswer({
             answer: ans, src: src, question: q, think: think,
             payload: {
               question: q, facts: pay2.facts, para: pay2.para,
-              evidence: ev,
+              evidence: useBrief ? brief.evidence : ev,
+              synthesis: useBrief ? brief : null,
               /* 附件：文本类作为参考材料；图片仅发给声明支持视觉的来源 */
               attachments: A_ATT.forPrompt(atts),
               images: src.vision ? A_ATT.imagesForPrompt(atts) : [],
               tone: state.settings.register === 'pro' ? 'academic' : 'warm', context: ctxLine,
               memory: memoryForPrompt(),
-              answerMode: window.AstroAnswerComposer
-                ? window.AstroAnswerComposer.modeFor(ans, { question: q }) : '',
-              maxChars: 520
+              answerMode: modeNow,
+              maxChars: modeNow === 'E' ? 900 : modeNow === 'D' ? 700 : modeNow === 'C' ? 600 : 520
             },
             audit: function (text) {
               var extra = [];
@@ -4643,9 +4730,15 @@
               }));
               var bad = numericAudit(text, pool, pay2.para);
               if (bad.length) extra.push('输出中的数值 ' + bad.join('、') + ' 未能在事实层或本轮证据中找到出处，请以「依据」与「检索证据」章节为准。');
-              /* 引用核验：文中若出现 [E#]，必须存在于本轮证据 */
-              var fake = fakeCitations(text, rec.evidence || []);
+              /* 引用核验：编号必须存在于本轮证据；DOI/arXiv 与证据交叉核对 */
+              var citePool = brief ? brief.evidence : (rec.evidence || []);
+              var fake = fakeCitations(text, citePool);
               if (fake.length) extra.push('文中引用的 ' + fake.join('、') + ' 不在本轮检索结果中，已标为无效引用。');
+              if (window.AstroEvidence && window.AstroEvidence.auditCitations) {
+                var ca = window.AstroEvidence.auditCitations(text, citePool);
+                if (ca.unmatchedDois.length) extra.push('文中的 DOI ' + ca.unmatchedDois.slice(0, 3).join('、') + ' 无法在本轮证据中找到。');
+                if (ca.unmatchedArxivIds.length) extra.push('文中的 arXiv ID ' + ca.unmatchedArxivIds.slice(0, 3).join('、') + ' 无法在本轮证据中找到。');
+              }
               return text + (extra.length ? '\n（' + extra.join(' ') + '）' : '');
             },
             onFinish: function (m) {
@@ -7183,7 +7276,7 @@
   }
 
   /* ================= 版本 / 统计 / 答案操作 ================= */
-  var APP_VERSION = '5.1';
+  var APP_VERSION = '5.2';
 
   /* 更新提示：只在「之前来过且版本变了」时提示一次，首次访问不打扰 */
   function checkVersion() {

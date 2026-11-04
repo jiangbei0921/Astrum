@@ -195,12 +195,17 @@
     }
 
     if ((rep.evidence || []).length) {
+      var vLabel = root.AstroEvidence && root.AstroEvidence.verificationLabel
+        ? root.AstroEvidence.verificationLabel : null;
       body.appendChild(block(L('证据验证'), mapRows(rep.evidence.slice(0, 10), function (e) {
+        var state = e.verification && e.verification.state && vLabel
+          ? vLabel(e.verification.state) : '';
         return {
-          name: e.title || e.evidenceId,
+          name: e.title || L('未命名来源'),
           meta: [e.sourceType || '', e.trust && e.trust.level ? e.trust.level : '',
-            e.abstractOnly ? L('仅摘要') : ''].filter(Boolean).join(' · '),
-          text: [e.evidenceId, e.uri || ''].filter(Boolean).join(' · '),
+            e.abstractOnly ? L('仅摘要') : '', state].filter(Boolean).join(' · '),
+          text: [String((e.content && (e.content.excerpt || e.content.snippet)) || '').slice(0, 120),
+            e.uri || ''].filter(Boolean).join(' · '),
           url: e.uri
         };
       })));

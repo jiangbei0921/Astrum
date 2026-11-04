@@ -90,7 +90,8 @@
         retrievedAt: ev.retrievedAt,
         publishedAt: ev.publishedAt,
         abstractOnly: !!ev.abstractOnly,
-        trust: ev.trust || null
+        trust: ev.trust || null,
+        verification: ev.verification || null
       });
       if (ev.sourceType === 'paper') {
         var doiNorm = (c.doi || '').toLowerCase().replace(/^https?:\/\/doi\.org\//, '');
@@ -116,10 +117,17 @@
             pageEnd: null,
             excerpt: '',
             evidenceIds: [],
-            retrievedAt: ev.retrievedAt
+            retrievedAt: ev.retrievedAt,
+            verification: null
           };
         }
         var pp = paperMap[pid];
+        if (ev.verification && ev.verification.state) {
+          if (!pp.verification || pp.verification.state === 'unverified' ||
+            ev.verification.state === 'verified' || ev.verification.state === 'conflict') {
+            pp.verification = ev.verification;
+          }
+        }
         if (c.contentLevel === 'fulltext') {
           pp.fulltextAvailable = true;
           pp.abstractOnly = false;
@@ -297,7 +305,8 @@
           name: hostOf(e.uri) || e.title,
           uri: e.uri,
           sourceType: e.sourceType,
-          count: 1
+          count: 1,
+          verification: e.verification || null
         };
       }));
     }

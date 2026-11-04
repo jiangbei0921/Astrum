@@ -13,7 +13,17 @@
   var OBSERVE_INTENTS = ['tonight', 'observe-target', 'photo-target', 'gear-fit', 'chart'];
   /* 研究类词表只收「明确需要文献/证据」的信号。
    * 不收裸「测量」：否则“比较 M31 和 M33 的观测难度与距离测量”会从 T-D 误跳 T-E。 */
-  var RESEARCH_WORDS = /综述|研究|最新进展|进展|争议|证据|论文|文献|JWST|韦伯|早期宇宙|系外行星|测量方法|测量结果|不同结果|是否一致|一致性|随红移|红移演化|并合|21cm|中性氢|潮汐锁定|宿主星系|冲压剥离|矮星系|恒星形成|透射光谱|凌星|径向速度|金属丰度|年龄测定|光度函数|再电离|卫星星系|缺失卫星|失败超新星|探测现状|观测现状|研究现状|现有资料/;
+  var RESEARCH_WORDS = /综述|研究|最新进展|进展|争议|证据|论文|文献|JWST|韦伯|早期宇宙|系外行星|测量方法|测量结果|不同结果|是否一致|一致性|随红移|红移演化|并合|21cm|中性氢|潮汐锁定|宿主星系|冲压剥离|矮星系|恒星形成|透射光谱|凌星|径向速度|金属丰度|年龄测定|光度函数|再电离|卫星星系|缺失卫星|失败超新星|探测现状|观测现状|研究现状|现有资料|主要发现|最新发现|观测数据|巡天|DESI|Planck|SDSS|暗能量|暗物质|演化/;
+  /* 定义式问题（“什么是暗能量”）仍走概念解释，不因为出现“暗能量/演化”
+   * 就升级成论文检索；只有同时出现研究/数据/发现信号时才按科研问题处理。 */
+  var DEFINITION_WORDS = /什么是|是什么|原理|为什么|机制/;
+  var RESEARCH_CONTEXT = /论文|研究|进展|证据|争议|测量|观测|数据|发现|综述|现状/;
+  function isResearchQuestion(q) {
+    var s = String(q || '');
+    if (!RESEARCH_WORDS.test(s)) return false;
+    if (DEFINITION_WORDS.test(s) && !RESEARCH_CONTEXT.test(s)) return false;
+    return true;
+  }
   var COMPARE_WORDS = /对比|比较|区别|哪个更|分别|同时|以及/;
   var WHY_WORDS = /为什么|机制|原理/;
   /* 定量参数：当目标没有系统内置条目时，本地星表不足以回答，
@@ -135,7 +145,7 @@
   function modeOf(query, intent, targets, complexity) {
     var q = String(query || '');
     var count = mentionCount(q, targets);
-    if (RESEARCH_WORDS.test(q) || complexity === 4 || needsExternalParam(q, targets)) return 'research';
+    if (isResearchQuestion(q) || complexity === 4 || needsExternalParam(q, targets)) return 'research';
     if (COMPARE_WORDS.test(q) || count > 1) return 'compare';
     return 'single';
   }
@@ -163,7 +173,7 @@
       mentions: mentionCount(query, filtered),
       compare: COMPARE_WORDS.test(query),
       why: WHY_WORDS.test(query),
-      research: RESEARCH_WORDS.test(query),
+      research: isResearchQuestion(query),
       targetParam: needsExternalParam(query, filtered)
     };
 

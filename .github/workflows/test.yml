@@ -212,6 +212,10 @@ jobs:
       - name: V1.10 集成 v1-10-integration-test
         run: node tools/v1-10-integration-test.js
 
+      # V1.13：回答质量、证据核验、Muse 综合
+      - name: V1.13 回答质量 v1-13-answer-quality-test
+        run: node tools/v1-13-answer-quality-test.js
+
       # V1.11：流式协议、答案质量、每日增量更新
       - name: V1.11 流式协议 v1-11-stream-test
         run: node tools/v1-11-stream-test.js
@@ -322,3 +326,7 @@ jobs:
       # 结果阅读区重设计：正文/依据/详情/操作分层、移动端、深色模式
       - name: 结果阅读区 UI 浏览器 v1-12-answer-ui-test
         run: node tools/v1-12-answer-ui-test.js
+
+      # V1.13：简单直达、复杂研究后流式、最终正文一致、停止与依据核验
+      - name: V1.13 流式交付浏览器 v1-13-stream-browser-test
+        run: node tools/v1-13-stream-browser-test.js

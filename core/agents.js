@@ -727,8 +727,14 @@
 
     answer.trace.push(step('muse', '解析意图', intentLabel(intent) + (t0 ? ' · 实体「' + nameOf(t0) + '」' : '') + (mem.ref ? ' · 指代还原为「' + mem.ref + '」' : '')));
 
+    var bodyKey = bodyKeyForQuery(q, targets);
+    var bodyInfo = bodyKey && root.BODY_INFO ? root.BODY_INFO[bodyKey] : null;
+    var bodyAttr = bodyAttributeOf(q);
     var out;
-    if (intent === 'smalltalk') out = composeSmalltalk(answer, ctx, cfg);
+    if (bodyInfo && bodyAttr && bodyInfo[bodyAttr.key]) {
+      /* 简单参数问题直接给数值，不进入活动/结构模板 */
+      out = composeBodyParam(answer, ctx, bodyInfo, bodyAttr);
+    } else if (intent === 'smalltalk') out = composeSmalltalk(answer, ctx, cfg);
     else if (intent === 'tonight') out = composeTonight(answer, ctx, cfg);
     else if (intent === 'cosmos') out = composeCosmos(answer, ctx, cfg, t0, q);
     else if (intent === 'nova') out = composeNova(answer, ctx, cfg, t0, q);
@@ -817,7 +823,10 @@
     var verdict = dimFail ? 'FAIL' : ((failed.length || dimPartial) ? 'PARTIAL' : 'PASS');
     var gaps = failed.map(function (c) { return { claimId: null, kind: 'legacy-check', hint: c.k }; });
 
-    if (gate === 'strict' && (failed.length || !hasEvidence)) {
+    /* 失败态已有明确的缺口三行说明时，不再叠加一层通用「严格门槛」边界卡；
+     * 只在正常答案缺少证据/边界时补声明，避免失败页堆砌。 */
+    var hasGap = a.sections.some(function (s) { return s && s.kind === 'gap'; });
+    if (gate === 'strict' && !hasGap && (failed.length || !hasEvidence)) {
       a.sections.push({
         kind: 'boundary', mode: 'uncertain',
         text: '严格证据门槛下，本次回答存在未达标项（' + failed.map(function (c) { return c.k; }).join('、') +
@@ -1003,6 +1012,43 @@
     if (target.type === 'sun') return root.BODY_INFO.sun || null;
     if (target.type === 'moon') return root.BODY_INFO.moon || null;
     return null;
+  }
+
+  /* V1.13：简单参数问题（如“太阳的质量是多少”）直接回答数值，
+   * 不再被太阳活动、结构讲解等模板接管。只命中明确的太阳/月球/行星参数问题。 */
+  function bodyKeyForQuery(q, targets) {
+    var s = String(q || '');
+    if (/太阳系|太阳风|太阳活动|耀斑|日冕|黑子|极光|空间天气|太阳的结构/.test(s)) return '';
+    if (/太阳/.test(s) && !/太阳系/.test(s)) return 'sun';
+    if (/月球|月亮/.test(s)) return 'moon';
+    for (var i = 0; i < (targets || []).length; i++) {
+      var it = targets[i] && targets[i].item ? targets[i].item : targets[i];
+      if (it && it.kind === 'planet' && it.key) return it.key;
+    }
+    return '';
+  }
+
+  function composeBodyParam(answer, ctx, info, attr) {
+    var name = info.cn || '太阳';
+    var val = String(info[attr.key] || '');
+    answer.sections.push({
+      kind: 'verdict',
+      head: name + '的' + attr.label + '为 ' + val + '。',
+      sub: '来源：NASA Planetary Fact Sheet · 数据更新 ' + (info.updated || '2025-06')
+    });
+    var items = [];
+    if (info.type) items.push({ label: '类型', value: info.type });
+    items.push({ label: attr.label, value: val });
+    answer.sections.push({
+      kind: 'evidence', title: '依据', items: items, para: '',
+      sources: (info.sources || []).slice(0, 2), register: 'pop'
+    });
+    answer.trace.push(step('vega', '读取行星参数', name + ' · ' + attr.label,
+      { tool: 'body-info', check: RT.check('参数命中', true, val) }));
+    answer.meta.confidence = 0.92;
+    answer.meta.freshness = 'static';
+    answer.meta.verified = info.updated || '2025-06';
+    return answer;
   }
 
   function composeTarget(answer, ctx, cfg, t, intent) {
