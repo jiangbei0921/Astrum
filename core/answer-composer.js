@@ -431,7 +431,7 @@
       paras.push({ role: 'evidence', text: '在证据来源上，本轮未获得可核验的论文；结论只覆盖已有本地事实与计算。' });
     }
 
-    var chosen = (verified.length ? verified : inferred).slice(0, 2);
+    var chosen = (verified.length ? verified : inferred.slice(leadFromAbstract ? 1 : 0)).slice(0, 2);
     if (chosen.length) {
       var findings = chosen.map(function (c) { return clip(c.text, 140); }).join('；');
       paras.push({
