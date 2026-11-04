@@ -177,6 +177,11 @@ async function main() {
       await sleep(300);
     }
 
+    /* 首帧之后还有历史恢复（IndexedDB）会渲染答案、可能弹出存储提示。
+     * 资源泄漏基线必须等 __astrum.ready() 完成，否则会把正常异步挂载误判为泄漏。 */
+    await cdp.evaluate('window.__astrum && window.__astrum.ready ? window.__astrum.ready().then(function(){return true;}) : true', 30000);
+    await sleep(300);
+
     var base = await cdp.evaluate('__v15res.count()', 10000);
     var baseNodes = base.result.value;
     ok('R1 初始 DOM 节点数', typeof baseNodes === 'number' && baseNodes > 0, baseNodes);
