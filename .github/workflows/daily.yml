@@ -18,6 +18,9 @@ on:
 
 permissions:
   contents: write
+  # 默认 GITHUB_TOKEN 推送的提交不会触发其他 workflow；
+  # 每日数据提交后需要显式派发 Pages 部署，线上才会读取新数据。
+  actions: write
 
 concurrency:
   group: daily-frontier
@@ -82,6 +85,12 @@ jobs:
           # 期间可能有别人推送，先 rebase 再推，避免非快进失败
           git pull --rebase --autostash
           git push
+
+      - name: 触发 Pages 部署
+        # 无论成功、部分失败还是全失败，只要提交了 data/daily.js，就让线上读取最新状态。
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run pages.yml --ref main
 
       - name: 同步失败时标记运行失败
         if: steps.sync.outcome != 'success'

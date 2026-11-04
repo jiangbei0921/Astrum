@@ -332,7 +332,10 @@ function bodyText(file) { return fs.readFileSync(path.join(OUT, file), 'utf8'); 
          GitHub Pages 上同样会 404，不属于关键错误。 */
       var badLog = probeRun.problems.concat(pageRun.problems).filter(function (p) {
         return /Failed to load resource|net::ERR_|Uncaught|Refused to|Content Security Policy|CSP/i.test(p) &&
-          !/favicon\.ico/i.test(p);
+          !/favicon\.ico/i.test(p) &&
+          /* Chrome 会提示 meta 里的 frame-ancestors 无效（它确实只支持 HTTP 头）。
+           * 这是浏览器规范提示，不是当前页面被拦截；不能因此判 CSP 失败。 */
+          !/frame-ancestors.*ignored when delivered via a <meta>/i.test(p);
       });
 
       ok('H1.1 首页 200 且为 HTML', checks.base.status === 200 && /text\/html/.test(checks.base.type) && checks.base.body.indexOf('ASTRUM') >= 0, 'status=' + checks.base.status);
