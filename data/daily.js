@@ -11,7 +11,7 @@
 
   root.ASTRUM_DAILY = {
     "updated": "2026-11-03",
-    "generatedAt": "2026-11-03T14:26:09.794Z",
+    "generatedAt": "2026-11-04T01:56:12.683Z",
     "note": "每日 UTC 01:00 增量同步；内容未经本项目核验，不参与答案推理。",
     "papers": [
       {
@@ -645,11 +645,11 @@
       }
     ],
     "sync": {
-      "lastAttemptAt": "2026-11-03T14:26:09.794Z",
+      "lastAttemptAt": "2026-11-04T01:56:12.683Z",
       "lastSuccessAt": "2026-11-03T14:26:09.794Z",
       "newPapers": 0,
-      "updatedPapers": 20,
-      "newNews": 3,
+      "updatedPapers": 0,
+      "newNews": 0,
       "totalPapers": 20,
       "totalNews": 15,
       "sources": {
@@ -666,9 +666,9 @@
         ]
       },
       "failures": [],
-      "ok": true,
-      "partial": false,
-      "status": "ok"
+      "ok": null,
+      "partial": null,
+      "status": "running"
     }
   };
 })(typeof window !== 'undefined' ? window : this);
