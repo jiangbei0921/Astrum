@@ -308,7 +308,9 @@
           value: (o.summary || (o.hduCount + ' HDU')) + (o.warnings && o.warnings.length ? '（有警告）' : '')
         });
       });
-      if (evidenceItems.length) {
+      /* V1.14：有论文时，论文/参数/观测已由 research-panel 统一展示；
+       * 这里不再重复生成“研究证据”列表，避免同一篇论文出现两份。 */
+      if (evidenceItems.length && !(rep.papers && rep.papers.length)) {
         insertBeforeFollowup(answer, {
           kind: 'evidence',
           title: '研究证据 · 真实来源',
@@ -326,7 +328,7 @@
         };
       });
       if (listItems.length) {
-        insertBeforeFollowup(answer, { kind: 'list', title: '科学结论（按证据强度分级）', items: listItems });
+        insertBeforeFollowup(answer, { kind: 'list', title: '科学结论（按证据强度分级）', items: listItems, detail: true });
       }
 
       var conflicts = rep.conflicts || [];
@@ -334,6 +336,7 @@
         insertBeforeFollowup(answer, {
           kind: 'conflict',
           title: '证据冲突',
+          detail: true,
           note: '同一物理量在不同来源存在数值差异；未强行合并。',
           items: conflicts.map(function (c) {
             return {
@@ -353,7 +356,7 @@
         ? root.AstroAnswerComposer.scientificLimits({ research: rep }) : gaps;
       if (sciGaps.length) {
         insertBeforeFollowup(answer, {
-          kind: 'boundary', mode: 'uncertain',
+          kind: 'boundary', mode: 'uncertain', detail: true,
           text: '未完成/不确定：' + sciGaps.join('；') + '。以上结论均保留原始来源，不把缺失数据当作事实。'
         });
       }

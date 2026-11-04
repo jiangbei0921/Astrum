@@ -83,10 +83,9 @@ function researchOf(extra) {
   });
   var beforeRefs = JSON.stringify(a.research.conclusions.map(function (c) { return c.evidenceRefs; }));
   C.finalize(a, { question: a.query });
-  ok('B1 只保留一个 verdict', a.sections.filter(function (s) { return s.kind === 'verdict'; }).length === 1);
+  ok('B1 analysis 存在时不再保留独立 verdict', a.sections.filter(function (s) { return s.kind === 'verdict'; }).length === 0);
   ok('B2 生成 analysis 段', a.sections.some(function (s) { return s.kind === 'analysis'; }));
-  ok('B3 结论在分析之前', a.sections.findIndex(function (s) { return s.kind === 'verdict'; }) <
-    a.sections.findIndex(function (s) { return s.kind === 'analysis'; }));
+  ok('B3 正文以 analysis 开头', a.sections.findIndex(function (s) { return s.kind === 'analysis'; }) === 0);
   ok('B4 证据合并为一个章节', a.sections.filter(function (s) { return s.kind === 'evidence'; }).length === 1);
   var ev = a.sections.filter(function (s) { return s.kind === 'evidence'; })[0];
   ok('B5 重复证据已去重', ev.items.length === 2, ev.items.length);

@@ -159,6 +159,8 @@ var ANSWER_A = `(function(){
         headHidden: hs.position==='absolute' && head.getBoundingClientRect().width<=1,
         summary: !!ans.querySelector('.sec-verdict.answer-summary'),
         lead: !!ans.querySelector('.sec-verdict.answer-lead'),
+        analysisCount: main.querySelectorAll('.sec-analysis').length,
+        verdictCount: main.querySelectorAll('.sec-verdict').length,
         basis: !!basis, basisOpen: !!(basis&&basis.open),
         details: !!details, detailsOpen: !!(details&&details.open),
         mainEvidence: !!main.querySelector('.sec-evidence'),
@@ -170,21 +172,23 @@ var ANSWER_A = `(function(){
         researchPanel: !!(basis&&basis.querySelector('.research-panel')),
         acts: Array.prototype.map.call(primary.querySelectorAll(':scope > .ans-act'),function(b){return b.textContent.trim();}),
         moreHasFeedback: !!(ans.querySelector('.ans-more')&&Array.prototype.some.call(ans.querySelectorAll('.ans-more .ans-act'),function(b){return /反馈问题/.test(b.textContent);})),
-        duplicateConclusion: Array.prototype.some.call(ans.querySelectorAll('.analysis-p'),function(p){return /^核心结论/.test(p.textContent.trim());})
+        duplicateConclusion: Array.prototype.some.call(ans.querySelectorAll('.analysis-p'),function(p){return /^核心结论/.test(p.textContent.trim());}),
+        conclusionCount: Array.prototype.filter.call(ans.querySelectorAll('.analysis-p'),function(p){return /^核心结论/.test(p.textContent.trim());}).length
       };
     })()`, 10000);
     var v = c && c.result && c.result.value;
     ok('U2 问题标题存在', v && v.question && /M13/.test(v.title || ''), v && v.title);
     ok('U3 系统徽标视觉隐藏', v && v.headHidden === true);
-    ok('U4 C 类使用轻量结论区', v && v.summary === true && v.lead === false);
-    ok('U5 综合分析不重复核心结论', v && v.duplicateConclusion === false);
+    ok('U4 C 类正文为单一 analysis，无独立结论卡', v && v.analysisCount === 1 && v.verdictCount === 0,
+      JSON.stringify({ a: v && v.analysisCount, vd: v && v.verdictCount }));
+    ok('U5 综合分析不重复核心结论', v && v.conclusionCount <= 1, v && v.conclusionCount);
     ok('U6 科研依据默认折叠', v && v.basis === true && v.basisOpen === false);
     ok('U7 执行详情默认折叠', v && v.details === true && v.detailsOpen === false);
     ok('U8 正文不混入证据/来源/评审/链路/元信息', v && !v.mainEvidence && !v.mainSources &&
       !v.mainReview && !v.mainTrace && !v.mainMeta,
       JSON.stringify({ e: v && v.mainEvidence, s: v && v.mainSources, r: v && v.mainReview, t: v && v.mainTrace, m: v && v.mainMeta }));
     ok('U9 论文在科研依据内', v && v.paperCards === 2 && v.researchPanel === true, v && v.paperCards);
-    ok('U10 轻量操作齐全', v && ['复制', '有帮助', '没有帮助', '查看科研依据', '继续追问'].every(function (x) {
+    ok('U10 轻量操作齐全', v && ['复制', '有帮助', '没有帮助', '查看来源与依据', '继续追问'].every(function (x) {
       return (v.acts || []).indexOf(x) >= 0;
     }), JSON.stringify(v && v.acts));
     ok('U11 反馈入口保留在更多中', v && v.moreHasFeedback === true);
@@ -193,7 +197,7 @@ var ANSWER_A = `(function(){
     var behave = await cdp.eval(`(function(){
       var ans=document.querySelector('#thread .msg.bot:last-child .answer');
       var btns=ans.querySelectorAll('.ans-act');
-      var basisBtn=Array.prototype.filter.call(btns,function(b){return b.textContent==='查看科研依据';})[0];
+      var basisBtn=Array.prototype.filter.call(btns,function(b){return b.textContent==='查看来源与依据';})[0];
       var helpBtn=Array.prototype.filter.call(btns,function(b){return b.textContent==='有帮助';})[0];
       var askBtn=Array.prototype.filter.call(btns,function(b){return b.textContent==='继续追问';})[0];
       if(basisBtn) basisBtn.click();
@@ -204,7 +208,7 @@ var ANSWER_A = `(function(){
         focused: document.activeElement && document.activeElement.id };
     })()`, 10000);
     var bv = behave && behave.result && behave.result.value;
-    ok('U12 查看科研依据可展开', bv && bv.basisOpen === true);
+    ok('U12 查看来源与依据可展开', bv && bv.basisOpen === true);
     ok('U13 有帮助有即时反馈状态', bv && bv.helpful === true);
     ok('U14 继续追问聚焦输入框', bv && bv.focused === 'input', bv && bv.focused);
 

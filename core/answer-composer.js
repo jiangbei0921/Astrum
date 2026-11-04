@@ -255,12 +255,16 @@
   };
 
   /* 简单问题只留答案与必要证据：不主动扩展观测建议、追问和背景清单。
-   * 只删除既有章节，不改写内容，也不隐藏证据。 */
+   * 只删除既有章节，不改写内容，也不隐藏证据。
+   * V1.14：A/B 的评审属于内部流程，不再作为答案章节；meta.review 保留供反馈诊断。 */
   function trimSimple(answer, mode) {
     if (!answer || (mode !== 'A' && mode !== 'B')) return { removed: 0 };
-    var intent = String(answer.intent || '');
-    if (SIMPLE_INTENT_KEEP[intent]) return { removed: 0 };
     var before = (answer.sections || []).length;
+    answer.sections = (answer.sections || []).filter(function (s) {
+      return !(s && s.kind === 'review');
+    });
+    var intent = String(answer.intent || '');
+    if (SIMPLE_INTENT_KEEP[intent]) return { removed: before - answer.sections.length };
     answer.sections = (answer.sections || []).filter(function (s) {
       if (!s) return false;
       if (s.kind === 'observe' || s.kind === 'followup') return false;
@@ -272,6 +276,25 @@
     return { removed: before - answer.sections.length };
   }
 
+  /* 研究报告里的“科学结论（按证据强度分级）”与正文承担同一件事；
+   * 原值仍在 answer.research.conclusions 里，由科研详情展示。 */
+  function isConclusionList(s) {
+    return !!(s && s.kind === 'list' && /科学结论|按证据强度/.test(String(s.title || '')));
+  }
+
+  /* 详情层标记：不改 kind，不影响旧渲染契约；只告诉渲染层“这块不属于正文”。 */
+  function markDetails(answer) {
+    var kinds = {};
+    (answer && answer.sections || []).forEach(function (s) {
+      if (!s) return;
+      if (s.kind === 'boundary' || s.kind === 'followup' || (s.kind === 'list' && !isConclusionList(s))) {
+        s.detail = true;
+        kinds[s.kind] = 1;
+      }
+    });
+    return kinds;
+  }
+
   function limitItemsOf(answer) {
     return scientificLimits(answer);
   }
@@ -280,13 +303,25 @@
     return /限制|未获取|仅摘要|无法|不确定|尚缺|未完成|不足|尚未/.test(String(text || ''));
   }
 
-  /* 检索/工具的执行状态不属于答案正文；科研限制只保留与结论范围有关的部分。 */
+  /* 检索/工具的执行状态不属于答案正文；科研限制只保留与结论范围有关的部分。
+   * V1.14：限制按“摘要级 / 全文 / 观测 / 其他”归类，避免同一限制换种说法重复。 */
   var OPERATIONAL_GAP = /未获得 SIMBAD|未提供 FITS|全文失败原因|fulltext_unavailable|未获得论文元数据|SIMBAD 数据缺失|外部搜索|网络|HTTP|timeout|超时|不可达|未提供 FITS 观测|获取\/解析失败/;
   function scientificLimits(answer) {
     var rep = (answer && answer.research) || {};
-    return uniq((rep.gaps || []).concat(rep.limitations || [])).filter(function (s) {
+    var seen = {}, out = [];
+    uniq((rep.gaps || []).concat(rep.limitations || [])).filter(function (s) {
       return !OPERATIONAL_GAP.test(String(s || ''));
-    }).slice(0, 3);
+    }).forEach(function (s) {
+      var text = String(s || '').replace(/[。；;，,]+$/, '').trim();
+      if (!text) return;
+      var key = /摘要|全文/.test(text) ? 'abstract'
+        : /FITS|观测数据/.test(text) ? 'observation'
+          : norm(text).slice(0, 18);
+      if (seen[key]) return;
+      seen[key] = 1;
+      out.push(text);
+    });
+    return out.slice(0, 3);
   }
 
   function hasResearch(answer) {
@@ -409,7 +444,7 @@
     if (lead) {
       paras.push({
         role: 'conclusion',
-        text: (leadFromAbstract ? '论文摘要提示（摘要级，未读全文）：' : '核心结论：') + ends(clip(lead, 240))
+        text: '核心结论：' + ends(clip(lead, 240))
       });
     } else {
       paras.push({
@@ -419,24 +454,32 @@
     }
 
     var papers = rep.papers || [];
+    var limits = scientificLimits(answer);
     if (papers.length) {
-      var abs = papers.filter(function (p) { return p.abstractOnly; }).length;
+      /* 证据段只说明哪些论文支持当前判断；摘要级限制统一放到最后的限制段，
+       * 避免同一事实在结论/证据/限制里各说一遍。 */
+      var names = papers.slice(0, 3).map(function (p) {
+        var year = String(p.date || '').slice(0, 4);
+        return '《' + String(p.title || '未命名论文').slice(0, 80) + '》' + (year ? '（' + year + '）' : '');
+      });
       paras.push({
         role: 'evidence',
-        text: abs
-          ? '现有证据以论文摘要为主；摘要级结果只作有限判断，不当作已证实结论。'
-          : '现有证据包含论文全文片段；结论仍按原始来源限定适用范围。'
+        text: '支持这一判断的论文包括：' + names.join('；') + '。'
       });
     } else {
       paras.push({ role: 'evidence', text: '在证据来源上，本轮未获得可核验的论文；结论只覆盖已有本地事实与计算。' });
     }
 
     var chosen = (verified.length ? verified : inferred.slice(leadFromAbstract ? 1 : 0)).slice(0, 2);
+    chosen = chosen.filter(function (c) {
+      var t = String(c && c.text || '');
+      return t && overlap(t, lead) < 0.8;
+    });
     if (chosen.length) {
       var findings = chosen.map(function (c) { return clip(c.text, 140); }).join('；');
       paras.push({
         role: 'analysis',
-        text: (verified.length ? '现有证据支持的要点是：' : '论文摘要报告（摘要级，未读全文）：') + ends(findings)
+        text: (verified.length ? '现有证据支持的要点是：' : '论文摘要报告：') + ends(findings)
       });
     }
 
@@ -457,7 +500,6 @@
       });
     }
 
-    var limits = scientificLimits(answer);
     if (limits.length) {
       paras.push({
         role: 'limitation',
@@ -683,30 +725,33 @@
         }
         analysis.source = opts.modelSource || null;
 
-        /* 模型答案负责完整论述；本地 verdict 只在不重复时才保留。
-         * A/B 直接以模型文本为答案；C–E 仅在 verdict 简短且不与首段重复时作轻量结论区。 */
-        if (mode === 'A' || mode === 'B') {
-          answer.sections = (answer.sections || []).filter(function (s) { return s && s.kind !== 'verdict'; });
-        } else {
-          var lead = String(modelParas[0] || '');
-          answer.sections = (answer.sections || []).filter(function (s) {
-            if (!s || s.kind !== 'verdict') return true;
-            var h = String(s.head || '');
-            return !(h.length > 120 || overlap(h, lead) >= 0.65);
-          });
-        }
+        /* V1.14：模型答案就是最终正文，首段承担结论。
+         * verdict 不再作为独立结论卡重复展示；旧版仅对 A/B 删除，C–E 会出现
+         * “结论卡 + 正文首段”两份同一结论。 */
       } else if (hasResearch(answer)) {
         analysis = researchParagraphs(answer, mode);
       }
       if (analysis) {
         answer.sections = (answer.sections || []).filter(function (s) { return s.kind !== 'analysis'; });
         answer.sections.push(analysis);
+        answer.sections = (answer.sections || []).filter(function (s) {
+          if (!s) return false;
+          if (s.kind === 'verdict') return false;
+          /* 科学结论列表与正文重复；原始结论在科研详情中仍可查看。 */
+          if (isConclusionList(s)) return false;
+          return true;
+        });
       }
       reorder(answer);
     }
 
     var trimmed = trimSimple(answer, mode);
+    var detailKinds = markDetails(answer);
     answer.meta = answer.meta || {};
+    answer.meta.layout = {
+      body: 'single',
+      detailKinds: Object.keys(detailKinds)
+    };
     var repNow = answer.research || {};
     answer.meta.muse = {
       mode: mode,
@@ -742,6 +787,7 @@
     trimSimple: trimSimple,
     scientificLimits: scientificLimits,
     textParagraphs: textParagraphs,
+    overlap: overlap,
     audit: audit,
     MODE_LABEL: MODE_LABEL,
     version: VERSION

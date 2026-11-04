@@ -91,12 +91,14 @@
     rootEl.open = true;
     var sum = node('summary', 'research-summary');
     sum.appendChild(textNode('span', 'ic', '◎'));
-    sum.appendChild(textNode('span', '', L('科研依据')));
-    sum.appendChild(textNode('span', 'mt', T('{0} 篇论文', (rep.papers || []).length)));
+    sum.appendChild(textNode('span', '', L('来源与核验')));
+    var paperCount = (rep.papers || []).length;
+    sum.appendChild(textNode('span', 'mt',
+      paperCount ? T('{0} 篇论文', paperCount) : L('数据与参数')));
     rootEl.appendChild(sum);
 
     var body = node('div', 'research-body');
-    body.appendChild(block(L('研究概览'), kv([
+    body.appendChild(block(L('研究记录'), kv([
       { label: L('研究问题'), value: rep.question || '—' },
       { label: L('研究主题'), value: (rep.subject && rep.subject.names || []).join('、') || '—' },
       { label: L('检索时间'), value: rep.retrievedAt || '—' },

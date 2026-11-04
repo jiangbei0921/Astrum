@@ -2672,25 +2672,58 @@
     /* 第一句：结论 */
     box.appendChild(el('p', 'narr-lead', esc(v.head)));
 
+    /* V1.14：同一事实只完整说一次。verdict 已经写出的数值/属性，
+     * 不再在下方依据句里重复；只有 verdict 没提到的信息才补进正文。 */
+    function normNarr(s) {
+      return String(s == null ? '' : s).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+    }
+    function ovNarr(a, b) {
+      try {
+        if (window.AstroAnswerComposer && typeof window.AstroAnswerComposer.overlap === 'function') {
+          return window.AstroAnswerComposer.overlap(a, b);
+        }
+      } catch (e) { /* 回退到子串判断 */ }
+      var x = normNarr(a), y = normNarr(b);
+      if (!x || !y) return 0;
+      return x.indexOf(y) >= 0 || y.indexOf(x) >= 0 ? 1 : 0;
+    }
+    var headNorm = normNarr(v.head);
+    function expressedInHead(text) {
+      var n = normNarr(text);
+      if (!n || n.length < 3) return false;
+      if (headNorm && headNorm.indexOf(n) >= 0) return true;
+      return ovNarr(text, v.head) >= 0.75;
+    }
+
     /* 数值句与属性句 */
     var dataItems = [], metaItems = [];
     (ev.items || []).forEach(function (it) {
-      if (/[0-9]/.test(String(it.value))) dataItems.push(it); else metaItems.push(it);
+      var line = String(it.label || '') + ' ' + String(it.value || '');
+      if (expressedInHead(line)) return;
+      (/[0-9]/.test(String(it.value)) ? dataItems : metaItems).push(it);
     });
+    var written = [];
+    function writeBody(html) {
+      var p = el('p', 'narr-body', html);
+      box.appendChild(p);
+      written.push(p.textContent || '');
+    }
     if (dataItems.length) {
       var dh = dataItems.map(function (x) {
         return esc(x.label) + ' <b class="nv">' + esc(x.value) + '</b>';
       }).join('、') + '。';
       if (srcNote) dh += '<sup class="fn">' + srcNote + '</sup>';
-      box.appendChild(el('p', 'narr-body', dh));
+      writeBody(dh);
     }
     if (metaItems.length) {
-      box.appendChild(el('p', 'narr-body', metaItems.map(function (x) {
+      writeBody(metaItems.map(function (x) {
         return esc(x.label) + '为 ' + esc(x.value);
-      }).join('；') + '。'));
+      }).join('；') + '。');
     }
     if (ev.para) {
-      box.appendChild(el('p', 'narr-body', esc(ev.para) + (srcNote ? '<sup class="fn">' + srcNote + '</sup>' : '')));
+      var paraTxt = String(ev.para || '');
+      var paraDup = expressedInHead(paraTxt) || written.some(function (t) { return ovNarr(paraTxt, t) >= 0.8; });
+      if (!paraDup) writeBody(esc(paraTxt) + (srcNote ? '<sup class="fn">' + srcNote + '</sup>' : ''));
     }
     if (bd && bd.text) {
       box.appendChild(el('p', 'narr-caveat', '⚠ ' + esc(tn(bd.text))));
@@ -2893,6 +2926,19 @@
     return box;
   }
 
+  /* 答案核验提示：数值/引用审计属于可靠性说明，放在科研详情，
+   * 不再拼接到模型正文末尾。 */
+  function answerNotesNode(ans) {
+    var notes = ans && ans.meta && Array.isArray(ans.meta.answerNotes) ? ans.meta.answerNotes : [];
+    if (!notes.length) return null;
+    var box = el('div', 'answer-notes');
+    box.appendChild(el('div', 'sec-title', L('答案核验')));
+    notes.forEach(function (n) {
+      box.appendChild(el('div', 'audit-note', esc(tn(n))));
+    });
+    return box;
+  }
+
   function renderAnswer(ans, extra) {
     extra = extra || {};
     /* 反馈关联用的稳定标识：首渲染生成，随 ans 持久化；恢复历史时复用。
@@ -2939,17 +2985,32 @@
     var verifyList = [];
     var summaryMode = CURRENT_MODE === 'C' || CURRENT_MODE === 'D' || CURRENT_MODE === 'E';
     var hasSummaryVerdict = false;
+    var hasPapers = !!(ans.research && ans.research.papers && ans.research.papers.length);
     ans.sections.forEach(function (s, i) {
       if (consumed[i]) return;
+      /* 失败态已有紧凑缺口三行说明，不再叠加边界卡（即使折叠也不加）。 */
+      if (s.kind === 'boundary' && (CURRENT_TIER === 'unknown' ||
+        (ans.sections || []).some(function (x) { return x && x.kind === 'gap'; }))) return;
+      /* V1.14：标记为 detail 的章节（研究结论列表、边界、追问）只进科研详情，
+       * 不再与正文承担同一份答案。 */
+      if (s.detail) { detailSecs.push(s); return; }
       /* 问候类输入没有事实可评审，跳过评审章节，避免出现「存在缺口」的噪音 */
       if ((ans.intent === 'smalltalk' || CURRENT_TIER === 'unknown') && s.kind === 'review') return;
+      /* 简单答案不需要内部评审；meta.review 仍保留供反馈诊断。 */
+      if ((CURRENT_MODE === 'A' || CURRENT_MODE === 'B') && s.kind === 'review') return;
       /* 核对类章节统一收进一个折叠条，不再各自占一块 */
       if (VERIFY_KINDS[s.kind]) { verifyList.push(s); return; }
-      if (s.kind === 'evidence') { basisSecs.push(s); return; }
+      if (s.kind === 'evidence') {
+        /* 论文型“研究证据”由 research-panel 统一展示；本地参数/星历数据仍留在依据区。 */
+        if (hasPapers && /研究证据/.test(String(s.title || ''))) { detailSecs.push(s); return; }
+        basisSecs.push(s); return;
+      }
       if (s.kind === 'sources' || s.kind === 'review' || s.kind === 'consensus') {
         detailSecs.push(s);
         return;
       }
+      /* 推荐问题属于后续入口，不占据正文阅读顺序。 */
+      if (s.kind === 'followup') { detailSecs.push(s); return; }
       if (s.kind === 'verdict' && summaryMode) hasSummaryVerdict = true;
       var n = sectionNode(s);
       /* 结论已在上方强调区完整表达时，综合分析里重复的「核心结论：」段不再重复展示。 */
@@ -3013,19 +3074,30 @@
     if (basisHas) {
       var basis = el('details', 'answer-basis');
       var basisCount = 0;
-      var paperCount = ans.research && ans.research.papers ? ans.research.papers.length : 0;
+      var paperCount = hasPapers ? ans.research.papers.length : 0;
       basisSecs.forEach(function (s) { basisCount += (s.items || []).length; });
+      /* 机构来源与论文分开计数：同一机构发布多篇论文时只算一个来源。 */
+      var instCount = 0, seenInst = {};
+      ((ans.research && ans.research.sources) || []).forEach(function (s) {
+        var k = String((s && (s.name || s.uri || s.sourceId)) || '').toLowerCase().trim();
+        if (!k || seenInst[k]) return;
+        seenInst[k] = 1;
+        instCount++;
+      });
       var bmeta = [];
       if (paperCount) bmeta.push(T('{0} 篇论文', paperCount));
-      if (basisCount) bmeta.push(T('{0} 条依据数据', basisCount));
+      if (instCount) bmeta.push(T('{0} 个机构来源', instCount));
+      if (basisCount) bmeta.push(T('{0} 项数据', basisCount));
+      var basisName = paperCount ? L('参考来源') : L('数据来源');
       var bsum = el('summary', 'answer-basis-summary');
-      bsum.innerHTML = '<span class="basis-ic">◎</span><span class="basis-name">' + esc(L('科研依据')) +
+      bsum.innerHTML = '<span class="basis-ic">◎</span><span class="basis-name">' + esc(basisName) +
         '</span><span class="basis-more">' + esc(bmeta.join(' · ') || L('展开查看')) + '</span>';
       basis.appendChild(bsum);
       var bbody = el('div', 'answer-basis-body');
-      basisSecs.forEach(function (s) { bbody.appendChild(sectionNode(s)); });
-      if (verifyNode) bbody.appendChild(verifyNode);
+      /* 论文优先：研究面板负责论文/作者/DOI/核验状态；有论文时不再重复依据表。 */
       if (researchNode) bbody.appendChild(researchNode);
+      if (verifyNode) bbody.appendChild(verifyNode);
+      basisSecs.forEach(function (s) { bbody.appendChild(sectionNode(s)); });
       basis.appendChild(bbody);
       card.appendChild(basis);
     }
@@ -3034,13 +3106,17 @@
     if (state.settings.showTrace && ans.trace && ans.trace.length && ans.intent !== 'smalltalk') {
       detailNodes.push(renderTrace(ans.trace));
     }
+    var notesNode = answerNotesNode(ans);
+    if (notesNode) detailNodes.unshift(notesNode);
     detailSecs.forEach(function (s) { detailNodes.push(sectionNode(s)); });
     if (stepNode) detailNodes.push(stepNode);
     recallNodes.forEach(function (x) { detailNodes.push(x); });
-    var detailHas = detailNodes.length > 0;
+    var simpleLike = (CURRENT_MODE === 'A' || CURRENT_MODE === 'B') && !hasPapers &&
+      !notesNode && !stepNode && !recallNodes.length;
+    var detailHas = detailNodes.length > 0 && !simpleLike;
     if (detailHas) {
       var det = el('details', 'answer-details');
-      det.appendChild(el('summary', 'answer-details-summary', L('科研详情与执行记录')));
+      det.appendChild(el('summary', 'answer-details-summary', L('执行记录与核验')));
       var dbody = el('div', 'answer-details-body');
       detailNodes.forEach(function (x) { dbody.appendChild(x); });
       if (metaNode) dbody.appendChild(metaNode);
@@ -3478,7 +3554,10 @@
       .replace(/\r\n/g, '\n')
       .replace(/^```[^\n]*$/gm, '')
       .replace(/^#{1,6}\s*/gm, '')
-      .replace(/\*\*/g, '');
+      .replace(/\*\*/g, '')
+      /* 与 Sources.clean 对齐：保留段落、统一要点符号，不吞掉条目。 */
+      .replace(/^\s*[-*•▪]\s+/gm, '· ')
+      .replace(/\n{3,}/g, '\n\n');
   }
 
   function makeStreamCard(src) {
@@ -3765,6 +3844,23 @@
       if (!ids[id] && bad.indexOf(id) < 0) bad.push(id);
     });
     return bad;
+  }
+
+  /* 答案核验提示：属于可靠性说明，进科研详情，不进正文。 */
+  function pushAnswerNotes(ans, list) {
+    if (!ans || !list || !list.length) return;
+    ans.meta = ans.meta || {};
+    ans.meta.answerNotes = (ans.meta.answerNotes || []).concat(list);
+  }
+
+  /* 模型自造的 [E#] 不留在正文里：用户不应该看到一个不存在的引用编号。 */
+  function stripInvalidRefs(text, ids) {
+    var out = String(text || '');
+    (ids || []).forEach(function (id) {
+      var re = new RegExp('[\\[【]\\s*' + String(id).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*[\\]】]', 'g');
+      out = out.replace(re, '');
+    });
+    return out.replace(/[ \t]+([，。；：！？])/g, '$1').replace(/[ \t]{2,}/g, ' ');
   }
 
   /* 数值一致性核验：模型输出中的数字必须能在事实层找到出处，否则标注出来 */
@@ -4659,9 +4755,10 @@
             },
             audit: function (text) {
               var bad = numericAudit(text, payD.facts, payD.para);
-              return text + (bad.length
-                ? '\n（输出中的数值 ' + bad.join('、') + ' 未能在本地事实中找到出处，请以「依据」章节为准。）'
-                : '');
+              if (bad.length) pushAnswerNotes(ans, [
+                '输出中的数值 ' + bad.join('、') + ' 未能在本地事实中找到出处，请以「依据」章节为准。'
+              ]);
+              return text;
             },
             onFinish: function (m) {
               taskEnd(tModel);
@@ -4724,22 +4821,27 @@
             },
             audit: function (text) {
               var extra = [];
+              var body = String(text || '');
               /* 数值核验：事实层 + 本轮证据一起作为出处池 */
               var pool = pay2.facts.concat(ev.map(function (e) {
                 return { label: e.title, value: e.excerpt };
               }));
-              var bad = numericAudit(text, pool, pay2.para);
+              var bad = numericAudit(body, pool, pay2.para);
               if (bad.length) extra.push('输出中的数值 ' + bad.join('、') + ' 未能在事实层或本轮证据中找到出处，请以「依据」与「检索证据」章节为准。');
               /* 引用核验：编号必须存在于本轮证据；DOI/arXiv 与证据交叉核对 */
               var citePool = brief ? brief.evidence : (rec.evidence || []);
-              var fake = fakeCitations(text, citePool);
-              if (fake.length) extra.push('文中引用的 ' + fake.join('、') + ' 不在本轮检索结果中，已标为无效引用。');
+              var fake = fakeCitations(body, citePool);
+              if (fake.length) {
+                body = stripInvalidRefs(body, fake);
+                extra.push('文中引用的 ' + fake.join('、') + ' 不在本轮检索结果中，已从正文移除。');
+              }
               if (window.AstroEvidence && window.AstroEvidence.auditCitations) {
-                var ca = window.AstroEvidence.auditCitations(text, citePool);
+                var ca = window.AstroEvidence.auditCitations(body, citePool);
                 if (ca.unmatchedDois.length) extra.push('文中的 DOI ' + ca.unmatchedDois.slice(0, 3).join('、') + ' 无法在本轮证据中找到。');
                 if (ca.unmatchedArxivIds.length) extra.push('文中的 arXiv ID ' + ca.unmatchedArxivIds.slice(0, 3).join('、') + ' 无法在本轮证据中找到。');
               }
-              return text + (extra.length ? '\n（' + extra.join(' ') + '）' : '');
+              pushAnswerNotes(ans, extra);
+              return body;
             },
             onFinish: function (m) {
               taskEnd(tModel);
@@ -7276,7 +7378,7 @@
   }
 
   /* ================= 版本 / 统计 / 答案操作 ================= */
-  var APP_VERSION = '5.2';
+  var APP_VERSION = '5.3';
 
   /* 更新提示：只在「之前来过且版本变了」时提示一次，首次访问不打扰 */
   function checkVersion() {
@@ -7404,7 +7506,7 @@
       if (fbBtn) fbBtn.click();
     });
 
-    var basisBtn = el('button', 'ans-act ans-basis-btn', L('查看科研依据'));
+    var basisBtn = el('button', 'ans-act ans-basis-btn', L('查看来源与依据'));
     basisBtn.type = 'button';
     basisBtn.addEventListener('click', function () {
       /* 依据折叠层在 renderAnswer 的收尾阶段才挂上，这里必须动态查询。 */

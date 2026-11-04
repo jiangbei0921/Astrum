@@ -3252,13 +3252,13 @@ html[data-adapt="on"][data-w="narrow"] .hero h1 { letter-spacing: 0; }
 .sec-verdict.quiet .head { font-size: 17px; }
 
 /* 阅读正文：宽度、字号、行高只在这里定义，避免每个章节各自为政 */
-.answer-main .analysis-body { gap: 16px; }
+.answer-main .analysis-body { gap: 1.05em; }
 .answer-main .analysis-p,
 .answer-main .narr-body,
 .answer-main .model-note .bd {
   max-width: 720px;
   margin: 0;
-  font-size: 14.5px;
+  font-size: 15px;
   line-height: 1.95;
   color: var(--ink-2);
   letter-spacing: 0.003em;
@@ -3364,6 +3364,18 @@ html[data-adapt="on"][data-w="narrow"] .hero h1 { letter-spacing: 0; }
 .answer-details-body { padding: 10px 0 2px; }
 .answer-details .trace-fold { margin: 0 0 10px; }
 .answer-details .meta-bar { margin-top: 0; border-top: 0; }
+/* 答案核验：只在详情层出现，不与正文争视觉权重 */
+.answer-notes { margin: 0 0 14px; }
+.answer-notes .sec-title { font-size: 10px; color: var(--muted); margin-bottom: 6px; }
+.answer-notes .sec-title::after { display: none; }
+.audit-note {
+  padding-left: 11px;
+  margin-top: 4px;
+  border-left: 2px solid var(--line);
+  font-size: 11.5px;
+  line-height: 1.8;
+  color: var(--muted);
+}
 
 /* 论文阅读列表：标题、作者/时间、摘要、原文链接；去掉重边框和徽章 */
 .research-panel {
@@ -3379,6 +3391,9 @@ html[data-adapt="on"][data-w="narrow"] .hero h1 { letter-spacing: 0; }
   color: var(--ink-2);
   border-bottom: 1px solid var(--line-soft);
 }
+/* 依据区已有唯一入口；嵌套的研究面板不再重复第二层“来源与核验”标题。 */
+.answer-basis .research-summary { display: none; }
+.answer-basis .research-panel { margin-top: 0; }
 .research-summary .mt { color: var(--muted-2); font-size: 9.5px; }
 .research-body { padding: 0; }
 .research-block { padding-top: 14px; }
@@ -3473,7 +3488,7 @@ html[data-adapt="on"][data-w="narrow"] .hero h1 { letter-spacing: 0; }
   .answer-question { font-size: 19px; margin-bottom: 18px; }
   .answer-main .analysis-p,
   .answer-main .narr-body,
-  .answer-main .model-note .bd { font-size: 14px; line-height: 1.9; }
+  .answer-main .model-note .bd { font-size: 14.5px; line-height: 1.9; }
   .answer-main .narr-lead,
   .sec-verdict.answer-lead .head,
   .sec-verdict.answer-summary .head { font-size: 17px; }
@@ -3486,7 +3501,7 @@ html[data-adapt="on"][data-w="narrow"] .hero h1 { letter-spacing: 0; }
   .answer-doc { padding-left: 2px; padding-right: 2px; }
   .answer-main .analysis-p,
   .answer-main .narr-body,
-  .answer-main .model-note .bd { font-size: 13.5px; line-height: 1.9; }
+  .answer-main .model-note .bd { font-size: 14px; line-height: 1.9; }
   .answer-question { font-size: 18px; }
   .answer-basis, .answer-details, .ans-acts { margin-top: 20px; }
   .research-panel .paper-title { font-size: 13px; }

@@ -216,6 +216,10 @@ jobs:
       - name: V1.13 回答质量 v1-13-answer-quality-test
         run: node tools/v1-13-answer-quality-test.js
 
+      # V1.14：最终答案单一正文、详情分层、不截断
+      - name: V1.14 输出质量 v1-14-output-quality-test
+        run: node tools/v1-14-output-quality-test.js
+
       # V1.11：流式协议、答案质量、每日增量更新
       - name: V1.11 流式协议 v1-11-stream-test
         run: node tools/v1-11-stream-test.js
@@ -330,3 +334,7 @@ jobs:
       # V1.13：简单直达、复杂研究后流式、最终正文一致、停止与依据核验
       - name: V1.13 流式交付浏览器 v1-13-stream-browser-test
         run: node tools/v1-13-stream-browser-test.js
+
+      # V1.14：单一正文、来源轻量化、长答案不截断、审计提示入详情
+      - name: V1.14 输出渲染浏览器 v1-14-stream-browser-test
+        run: node tools/v1-14-stream-browser-test.js
