@@ -44,7 +44,7 @@ jobs:
 
       - name: 检查今天是否已成功同步
         id: gate
-        run: echo "status=$(node tools/sync-daily.js --check-today)" >> "$GITHUB_OUTPUT"
+        run: echo "status=$(node tools/sync-daily.js --check-today | tail -n 1)" >> "$GITHUB_OUTPUT"
 
       - name: 标记开始更新
         if: steps.gate.outputs.status == 'RUN'

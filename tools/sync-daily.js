@@ -718,12 +718,14 @@ async function main() {
   var dry = process.argv.indexOf('--dry-run') >= 0;
   var mark = process.argv.indexOf('--mark-running') >= 0;
   var check = process.argv.indexOf('--check-today') >= 0;
-  console.log('ASTRUM 每日前沿同步 ' + new Date().toISOString());
 
+  /* 只输出单行 SKIP/RUN，供 GitHub Actions 写入 GITHUB_OUTPUT。 */
   if (check) {
     console.log(alreadySyncedToday(new Date()) ? 'SKIP' : 'RUN');
     return;
   }
+
+  console.log('ASTRUM 每日前沿同步 ' + new Date().toISOString());
 
   if (mark) {
     var marked = markRunning(new Date());
