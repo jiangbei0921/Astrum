@@ -273,12 +273,20 @@
   }
 
   function limitItemsOf(answer) {
-    var rep = (answer && answer.research) || {};
-    return uniq((rep.gaps || []).concat(rep.limitations || [])).slice(0, 3);
+    return scientificLimits(answer);
   }
 
   function mentionsLimit(text) {
     return /限制|未获取|仅摘要|无法|不确定|尚缺|未完成|不足|尚未/.test(String(text || ''));
+  }
+
+  /* 检索/工具的执行状态不属于答案正文；科研限制只保留与结论范围有关的部分。 */
+  var OPERATIONAL_GAP = /未获得 SIMBAD|未提供 FITS|全文失败原因|fulltext_unavailable|未获得论文元数据|SIMBAD 数据缺失|外部搜索|网络|HTTP|timeout|超时|不可达|未提供 FITS 观测|获取\/解析失败/;
+  function scientificLimits(answer) {
+    var rep = (answer && answer.research) || {};
+    return uniq((rep.gaps || []).concat(rep.limitations || [])).filter(function (s) {
+      return !OPERATIONAL_GAP.test(String(s || ''));
+    }).slice(0, 3);
   }
 
   function hasResearch(answer) {
@@ -394,11 +402,16 @@
     var verified = (rep.conclusions || []).filter(function (c) { return c && c.level === 'verified'; });
     var inferred = (rep.conclusions || []).filter(function (c) { return c && c.level === 'inferred'; });
     var summary = String(rep.summary || '');
-    var lead = '';
+    var lead = '', leadFromAbstract = false;
     if (summary && !/证据不足，未形成/i.test(summary)) lead = summary;
     else if (verified.length) lead = verified[0].text;
-    if (lead) paras.push({ role: 'conclusion', text: '核心结论：' + ends(clip(lead, 240)) });
-    else {
+    else if (inferred.length) { lead = inferred[0].text; leadFromAbstract = true; }
+    if (lead) {
+      paras.push({
+        role: 'conclusion',
+        text: (leadFromAbstract ? '论文摘要提示（摘要级，未读全文）：' : '核心结论：') + ends(clip(lead, 240))
+      });
+    } else {
       paras.push({
         role: 'conclusion',
         text: '核心结论：现有证据不足以形成可验证的科研结论；本轮只给出可核对的事实、论文来源与仍缺失的信息。'
@@ -408,14 +421,12 @@
     var papers = rep.papers || [];
     if (papers.length) {
       var abs = papers.filter(function (p) { return p.abstractOnly; }).length;
-      var full = papers.length - abs;
-      var ptext = '本轮共获得 ' + papers.length + ' 篇相关论文';
-      if (full > 0 && abs > 0) ptext += '（' + full + ' 篇有全文，' + abs + ' 篇仅摘要）';
-      else if (abs > 0) ptext += '，均只获得摘要';
-      else ptext += '，均含全文';
-      var d = papers.slice(0, 3).map(function (p) { return p.doi ? 'DOI ' + p.doi : (p.arxivId ? 'arXiv ' + p.arxivId : ''); }).filter(Boolean);
-      if (d.length) ptext += '；可核查编号为 ' + d.join('、');
-      paras.push({ role: 'evidence', text: '在此基础上，' + ends(ptext) });
+      paras.push({
+        role: 'evidence',
+        text: abs
+          ? '现有证据以论文摘要为主；摘要级结果只作有限判断，不当作已证实结论。'
+          : '现有证据包含论文全文片段；结论仍按原始来源限定适用范围。'
+      });
     } else {
       paras.push({ role: 'evidence', text: '在证据来源上，本轮未获得可核验的论文；结论只覆盖已有本地事实与计算。' });
     }
@@ -425,7 +436,7 @@
       var findings = chosen.map(function (c) { return clip(c.text, 140); }).join('；');
       paras.push({
         role: 'analysis',
-        text: '与此相关，现有证据支持的要点是：' + ends(findings)
+        text: (verified.length ? '现有证据支持的要点是：' : '论文摘要报告（摘要级，未读全文）：') + ends(findings)
       });
     }
 
@@ -446,14 +457,13 @@
       });
     }
 
-    var limits = (rep.gaps || []).slice(0, 3).concat((rep.limitations || []).slice(0, 3));
+    var limits = scientificLimits(answer);
     if (limits.length) {
       paras.push({
         role: 'limitation',
-        text: '综合来看，本次回答的限制是：' + ends(uniq(limits).join('；'))
+        text: '综合来看，本次回答的限制是：' + ends(limits.join('；'))
       });
-    }
-    if (!paras.length) {
+    } else if (!papers.length) {
       paras.push({ role: 'limitation', text: '综合来看，当前证据不足，尚不能形成可核验的科研结论。' });
     }
     return { kind: 'analysis', title: '综合研判 · ' + MODE_LABEL[mode], mode: mode, paragraphs: paras };
@@ -611,10 +621,11 @@
     if (certainty) issues.push({ kind: 'certainty-without-evidence', count: certainty, detail: '出现无证据支持的确定性措辞' });
 
     var hasBoundary = (answer.sections || []).some(function (s) { return s.kind === 'boundary' || s.kind === 'gap'; });
-    if (rep && ((rep.gaps && rep.gaps.length) || (rep.limitations && rep.limitations.length)) && !hasBoundary) {
+    var boundaryLimits = scientificLimits(answer);
+    if (boundaryLimits.length && !hasBoundary) {
       answer.sections.push({
         kind: 'boundary', mode: 'uncertain',
-        text: '限制与未完成项：' + uniq((rep.gaps || []).concat(rep.limitations || [])).slice(0, 4).join('；') +
+        text: '限制与未完成项：' + boundaryLimits.join('；') +
           '。以上结论不把缺失数据当作事实。'
       });
       issues.push({ kind: 'missing-boundary', count: 1, detail: '已补充限制声明' });
@@ -643,6 +654,15 @@
     var mode = modeFor(answer, opts);
     var dedupe = dedupeSections(answer);
     mergeEvidence(answer);
+    /* 已有真实论文证据时，不能再把“系统内置知识未收录”当作结论首句；
+     * 以免同一答案同时出现“没有依据”和论文结论。 */
+    var repPre = answer.research || {};
+    if ((repPre.papers || []).length) {
+      answer.sections = (answer.sections || []).filter(function (s) {
+        return !(s && s.kind === 'verdict' &&
+          /系统内置知识.{0,8}(未|没有|暂未)|尚未完成外部科研资料核验/.test(String(s.head || '')));
+      });
+    }
 
     var modelParas = opts.modelText ? textParagraphs(opts.modelText) : [];
     if (hasResearch(answer) || modelParas.length) {
