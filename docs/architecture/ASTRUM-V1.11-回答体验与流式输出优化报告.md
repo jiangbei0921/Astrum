@@ -176,6 +176,79 @@
 
 ---
 
-## 5. 最终结论
+## 5. V1.11 补充：每日前沿更新机制彻底修复（2026-11-04）
+
+### 5.1 问题根因
+
+1. **定时运行未创建**：截至 2026-11-04 09:28（北京时间），GitHub 还没有创建当天的 `daily-frontier` 定时运行；最近一次仍是 11-03。GitHub 的 `schedule` 在高负载时会延迟甚至丢弃事件，仅保留 cron 不能保证每天执行。
+2. **每日提交不触发 Pages**：GitHub 默认 `GITHUB_TOKEN` 推送的提交不会触发 `test`/`pages` workflow。每日任务即使提交了 `data/daily.js`，线上也不会自动重建，页面会继续显示旧数据。
+3. **页面缓存刷新是死代码**：`refreshFrontier` 用 `lastIndexOf('}')` 截取 JSON，实际截到了 IIFE 的 `})(window);` 右括号，`JSON.parse` 永远失败，刷新逻辑被静默跳过。GitHub Pages 的 10 分钟缓存因此无法被绕过。
+4. **全失败不写状态**：旧逻辑在所有来源失败时直接 `exit 1`，不写 `sync.status=failed`；页面只能看到上一次成功，无法区分“今天失败了”。
+5. **空结果被当成成功**：arXiv 分类或 RSS 返回 0 条时仍计入 `okCats/okFeeds`，可能把空页当成功更新。
+6. **日期只按浏览器本地日期**：此前“今日”用 `new Date()` 本地日期和 `published` 日期比较，未处理 arXiv UTC 时间与北京时间的边界，也丢失了完整发布时间。
+7. **状态语义混淆**：页面只显示新增数量，没有区分 `newPapers / updatedPapers / newNews`，也没有“成功但无新论文”“部分失败”“全部失败”“running”状态。
+
+### 5.2 修复内容
+
+- `tools/sync-daily.js`
+  - 保留完整 `publishedAt / updatedAt` UTC 时间；`published` 仍为兼容日期。
+  - arXiv 分类 / RSS 返回 0 条记为失败，不再计入成功来源。
+  - 新增 `--mark-running`：抓取前写入 `sync.status=running`。
+  - 新增 `--check-today`：当天已 `ok` 则输出单行 `SKIP`，供备用定时器防重复。
+  - 全失败时保留旧论文/报道，写入 `status=failed` 与失败原因，再以非零退出。
+  - `shouldWrite` 忽略每次都会变的 `fetchedAt`，避免无意义提交。
+- `.github/workflows/daily.yml`
+  - 保留 `0 1 * * *`，新增 `0 4 * * *` 备用触发；`--check-today` 保证每天实际只更新一次。
+  - 抓取前提交 running 状态；抓取失败用 `continue-on-error` 保留失败状态提交，最后把运行标红。
+  - 数据提交后显式 `gh workflow run pages.yml`，解决 `GITHUB_TOKEN` 不触发 Pages 的问题。
+  - 重新构建并上传 `astrum-standalone.html` 产物（最新数据）。
+- `core/app.js`
+  - 修复 `dailyObjectSlice`：按引号/转义/花括号配对截取对象，缓存刷新真正生效。
+  - 打开每日前沿时 `fetch('data/daily.js?t=...')` 强制 `no-store`，成功后替换内存数据并重绘。
+  - 状态区分：尚未执行 / running / 成功但无新论文 / 成功有新增 / 部分失败 / 全部失败。
+  - `newPapers`、`updatedPapers`、`newNews` 分开展示；来源条数标明“响应条数”。
+  - “今日 / 近 7 天 / 近 30 天”按北京时间（UTC+8）和完整 `publishedAt` 筛选；今日为空显示明确文案并提供近 30 天入口。
+  - 在 GitHub Pages 域名下查询 GitHub Actions 公开 API，显示真实的“已排队 / 正在更新 / 最近一次失败”。
+- `core/i18n.js` / `assets/app.css` / `index.html`：新增中英文案、样式与 `api.github.com` CSP 白名单。
+
+### 5.3 实际运行记录（真实网络）
+
+- 手动触发：`workflow_dispatch` run **41757387563**，2026-11-04 09:56（北京时间，01:56 UTC），耗时 25s，结论 success。
+- 抓取结果：
+  - arXiv：`astro-ph.GA(8)`、`astro-ph.CO(8)`、`astro-ph.EP(8)`、`astro-ph.HE(8)`、`astro-ph.SR(8)`，共 20 条（去重后）。
+  - ESA：8 条。
+  - ScienceDaily：8 条。
+- 增量结果：`newPapers=0`、`updatedPapers=20`、`newNews=0`；保留论文 20 篇、报道 15 条。
+  - 本次确实没有新论文：arXiv 返回的最新论文仍是 2026-11-02 发布；页面明确显示“本次同步成功，未发现新论文”，没有把抓取数量冒充新增。
+- 数据文件：`data/daily.js` 29,179 字节，`updated=2026-11-04`，`lastSuccessAt=2026-11-04T01:56:28.827Z`，`status=ok`。
+- 提交：running 标记 `b91a40b`；同步结果 `d3eaaa6`（`chore: 每日前沿同步 2026-11-04`）。
+- 单文件版：`astrum-standalone.html` 596,857 字节，artifact ID 13289275114。
+- 备用 gate 验证：再次手动触发 run **41759758125**，`--check-today` 输出 `SKIP`，所有抓取/提交步骤均 skipped，未产生重复提交。
+- 修复过程中一次 gate 输出多行导致 run **41759564822** 失败；已修为单行 `SKIP/RUN`，run 41759758125 通过。
+
+### 5.4 Pages 与线上一致性
+
+- Pages 部署 run **41758302247**（67cae85）success；后续 gate 修复 run **41759488978** / **41760196242** success。
+- 线上 `version.json`：commit `3f24123`、appVersion 5.0、featureVersion V1.11、dirty=false。
+- 线上 `data/daily.js` 与 GitHub main SHA256 完全一致：
+  - 两边均为 `b43d0df2517cac01a749321e04b141155f34718d97be01727337b57162cf7bf9`，28,651 字节。
+  - `updated=2026-11-04`、`status=ok`、`newPapers=0`、`updatedPapers=20`、`lastSuccessAt=2026-11-04T01:56:28.827Z`。
+- 线上浏览器验收 12/12：状态文案、五个 arXiv + 两个 RSS 来源、四个筛选按钮、北京时间说明、今日空态、近 30 天 20 篇论文、缓存刷新后仍为最新数据、无未捕获异常。
+
+### 5.5 测试
+
+- `v1-11-daily-test` 59/59
+- `v1-11-daily-browser-test` 19/19
+- `daily-test` 31/31
+- `v1-4-pages-test` 32/32
+- CI：run 41757812220（67cae85）success；run 41759066564（8d2c373）success；run 41759737749（3f24123）success。
+- 线上每日验收：12/12。
+
+### 5.6 仍未完成/外部限制
+
+- 2026-11-04 的 GitHub `schedule` 事件在检查时仍未创建；本次通过手动触发完成真实更新，并新增 04:00 UTC 备用触发与幂等 gate。GitHub 调度延迟本身无法由仓库代码完全消除。
+- arXiv 当前最新论文仍为 2026-11-02 发布，因此新增论文为 0；这是数据事实，不是更新失败。
+
+## 6. 最终结论
 
 V1.11 已完成科研回答简化、真实流式链路、停止与降级、每日论文增量更新与真实状态、知识来源路由与动态国际化的一致性，并通过本地回归、真实浏览器、GitHub Actions 与 Pages 部署验证。除缺少真实 Provider Key 与 OCR 样本导致的外部阻塞项外，交付标准已满足。
