@@ -438,13 +438,23 @@
     var inferred = (rep.conclusions || []).filter(function (c) { return c && c.level === 'inferred'; });
     var summary = String(rep.summary || '');
     var lead = '', leadFromAbstract = false;
+    var hasLocalEvidence = (answer.sections || []).some(function (s) {
+      return s && s.kind === 'evidence' && (s.items || []).length;
+    });
     if (summary && !/证据不足，未形成/i.test(summary)) lead = summary;
     else if (verified.length) lead = verified[0].text;
     else if (inferred.length) { lead = inferred[0].text; leadFromAbstract = true; }
     if (lead) {
+      var chineseChars = (String(lead).match(/[\u4e00-\u9fa5]/g) || []).length;
+      var asciiLead = chineseChars < 8 && /[A-Za-z]/.test(String(lead));
       paras.push({
         role: 'conclusion',
-        text: '核心结论：' + ends(clip(lead, 240))
+        text: (asciiLead ? '本轮核心结论来自英文摘要（保留原文，未作机器翻译）：' : '核心结论：') + ends(clip(lead, 240))
+      });
+    } else if (hasLocalEvidence) {
+      paras.push({
+        role: 'conclusion',
+        text: '本轮没有形成可复核的论文结论；以下先列出本地知识库中可核对的事实与方法。'
       });
     } else {
       paras.push({
@@ -471,9 +481,11 @@
     }
 
     var chosen = (verified.length ? verified : inferred.slice(leadFromAbstract ? 1 : 0)).slice(0, 2);
+    var priorText = paras.map(function (p) { return p.text || ''; }).concat([lead]);
     chosen = chosen.filter(function (c) {
       var t = String(c && c.text || '');
-      return t && overlap(t, lead) < 0.8;
+      if (!t) return false;
+      return !priorText.some(function (x) { return x && overlap(x, t) >= 0.6; });
     });
     if (chosen.length) {
       var findings = chosen.map(function (c) { return clip(c.text, 140); }).join('；');

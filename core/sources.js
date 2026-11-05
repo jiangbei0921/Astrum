@@ -1557,7 +1557,8 @@
 
   /* OpenAlex：学术文献，ACAO: * */
   function openAlex(q) {
-    var u = 'https://api.openalex.org/works?search=' + encodeURIComponent(enQueryFor(q)) + '&per-page=3';
+    var u = 'https://api.openalex.org/works?search=' + encodeURIComponent(enQueryFor(q)) +
+      '&per-page=3&mailto=astrum@users.noreply.github.com';
     /* 相关度排序的默认行为即可；最新发现类问题由上层按 date 再排 */
     return fetchJSON(u, 8000).then(function (d) {
       return (d.results || []).slice(0, 3).map(function (w) {
@@ -1632,6 +1633,76 @@
         };
         return o;
       }).filter(function (x) { return x.snippet; });
+    });
+  }
+
+  /* Crossref：出版社元数据检索，ACAO: *。
+   * OpenAlex / Semantic Scholar 的匿名检索池经常 429，Crossref 是当前网络下
+   * 仍可用的真实论文来源；只保留期刊/会议/预印本/章节，不把学位论文当论文。 */
+  function crossrefText(s) {
+    return String(s == null ? '' : s)
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+      .replace(/\s+/g, ' ').trim();
+  }
+  function crossrefDate(it) {
+    var src = (it && (it.published || it.issued)) || {};
+    var p = src['date-parts'] && src['date-parts'][0];
+    if (!p || !p.length || !p[0]) return null;
+    return [p[0], p[1] || 1, p[2] || 1].map(function (n, i) {
+      return i === 0 ? String(n) : ('0' + n).slice(-2);
+    }).join('-');
+  }
+  function crossrefSearch(q) {
+    var eq = enQueryFor(q);
+    /* 中文查询不发给 Crossref：它只认英文题名/摘要，硬查会返回无关条目。 */
+    if (!/^[\x00-\x7F]+$/.test(eq)) return Promise.resolve([]);
+    var u = 'https://api.crossref.org/works?query=' + encodeURIComponent(eq) +
+      '&rows=8&mailto=astrum@users.noreply.github.com' +
+      '&select=title,DOI,URL,author,published,issued,abstract,container-title,type,is-referenced-by-count';
+    /* Crossref 是出版社元数据大杂烩，包含杂志新闻、学位论文、OSF 预印本。
+     * 只保留天文学/物理学期刊与会议论文，避免把“看起来像论文”的内容当科研证据。 */
+    var VENUE_OK = /(astronom|astrophys|monthly notices|mnras|physical review|nature|science|a&a|jcap|universe|galaxies|physics reports|journal of cosmology|cosmology and astroparticle|classical and quantum gravity|proceedings of the|aip conference|iau symposium)/i;
+    var VENUE_BAD = /(physics world|europhysics news|accessscience|osf|preprint|news|magazine|press release)/i;
+    return fetchJSON(u, 8000).then(function (d) {
+      var items = (d && d.message && d.message.items) || [];
+      return items.map(function (it) {
+        var type = String(it.type || '').toLowerCase();
+        if (!/journal-article|proceedings-article/.test(type)) return null;
+        var title = crossrefText((it.title || [])[0] || '');
+        var abs = crossrefText(it.abstract || '');
+        if (!title) return null;
+        var venue = crossrefText((it['container-title'] || [])[0] || '');
+        if (!VENUE_OK.test(venue) || VENUE_BAD.test(venue)) return null;
+        var o = blankItem();
+        var doi = String(it.DOI || '').replace(/^https?:\/\/doi\.org\//, '');
+        o.title = title;
+        /* 出版社元数据经常不提供摘要；保留题名与 DOI 作为可核验来源，
+         * 但明确标记“摘要缺失”，不把题名当成论文结论。 */
+        o.snippet = shortText(abs || title, 180);
+        o.excerpt = shortText(abs || title, 1600);
+        o.url = it.URL || (doi ? 'https://doi.org/' + doi : '');
+        o.host = 'crossref.org';
+        o.date = crossrefDate(it);
+        o.dateKind = o.date ? 'published' : null;
+        o.sourceType = 'paper';
+        o.doi = doi;
+        o.version = versionOf({ type: type, title: title }, doi);
+        o.authors = (it.author || []).map(function (a) {
+          return [a.given, a.family].filter(Boolean).join(' ') || a.name || '';
+        }).filter(Boolean).slice(0, 6);
+        o.uncertainty = findUncertainty(abs);
+        var arx = doi.match(/10\.48550\/arxiv\.([0-9]{4}\.[0-9]{4,})/i);
+        o.extra = {
+          citedBy: it['is-referenced-by-count'] || 0,
+          type: type,
+          venue: venue,
+          abstractMissing: !abs,
+          arxivId: arx ? arx[1] : ''
+        };
+        return o;
+      }).filter(Boolean).slice(0, 3);
     });
   }
 
@@ -1728,7 +1799,8 @@
     h.fails++; h.total++; h.lastMs = ms; h.lastErr = cls.msg; h.lastKind = cls.kind;
     /* 连续失败 3 次进入冷却，避免每次都去打一个挂掉的端点 */
     if (h.fails >= 3) {
-      h.cooldownUntil = Date.now() + 60000;
+      /* 短冷却：用户换一个问题时不应被上一个端点的临时限流挡住太久。 */
+      h.cooldownUntil = Date.now() + 20000;
       h.fails = 0;
     }
   }
@@ -1755,9 +1827,10 @@
    * 注意：priority 只决定同一类型内的尝试顺序，不再决定「谁先成功就用谁」。 */
   var ENDPOINT_CHAIN = [
     { id: 'openalex', name: 'OpenAlex', fn: openAlex, kind: '学术文献', types: ['paper'], priority: 1 },
+    { id: 'crossref', name: 'Crossref', fn: crossrefSearch, kind: '学术文献', types: ['paper'], priority: 2 },
     { id: 'nasa', name: 'NASA 图库', fn: nasaSearch, kind: '天文影像', types: ['image'], priority: 2 },
     { id: 'wikimedia', name: '维基百科', fn: wikiCore, kind: '百科条目', types: ['encyclopedia'], priority: 1 },
-    { id: 'semanticscholar', name: 'Semantic Scholar', fn: semanticScholar, kind: '学术文献', types: ['paper'], priority: 2 },
+    { id: 'semanticscholar', name: 'Semantic Scholar', fn: semanticScholar, kind: '学术文献', types: ['paper'], priority: 3 },
     { id: 'wiki-action', name: '维基百科（备用）', fn: wikiAction, kind: '百科条目', types: ['encyclopedia'], priority: 2 }
   ];
 
@@ -1801,7 +1874,13 @@
     }
     return withRetry(ep.fn, 2, [q]).then(function (r) {
       if (!r.items.length) {
-        healthFail(ep.id, { kind: 'empty', msg: ERR_KIND.empty }, r.ms);
+        /* 空结果是「这个查询没命中」，不是端点宕机；不能让它累计到熔断。
+         * 否则用户连续问几个不同问题时，Crossref/OpenAlex 会被误判为不可用。 */
+        var h0 = health(ep.id);
+        h0.total++;
+        h0.lastMs = r.ms;
+        h0.lastErr = '无匹配结果';
+        h0.lastKind = 'empty';
         var ee = new Error('无匹配结果');
         ee.cls = { kind: 'empty', msg: ERR_KIND.empty };
         ee.items = [];

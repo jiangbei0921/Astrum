@@ -337,14 +337,28 @@
   /* 目录编号（m42 / ngc1976 / hd12345）必须独立出现：
    * “m42”里不能再匹配出“m4”，“m33”里不能再匹配出“m3”。
    * 中文别名仍按子串匹配，保持“猎户座大星云”等自然语言命中。 */
-  function aliasHitsQuery(q, key) {
+  function aliasHitsQuery(q, key, isConstellation) {
+    /* 中文星座名存在“包含关系”：半人马座包含“人马座/人马”，南十字座包含“十字”。
+     * 对星座别名，前面若还有限定字（半/南/北/大/小/东/西），不能把更短的星座名当成命中。 */
+    if (/^[\u4e00-\u9fa5]/.test(key)) {
+      if (isConstellation || /座$/.test(key)) {
+        var at = q.indexOf(key);
+        while (at >= 0) {
+          var before = at > 0 ? q.charAt(at - 1) : '';
+          if (/[半南北大小东西]/.test(before)) { at = q.indexOf(key, at + 1); continue; }
+          return true;
+        }
+        return false;
+      }
+      return q.indexOf(key) >= 0;
+    }
     if (!/^[a-z0-9]+$/.test(key)) return q.indexOf(key) >= 0;
-    var at = q.indexOf(key);
-    while (at >= 0) {
-      var before = at > 0 ? q.charAt(at - 1) : '';
-      var after = at + key.length < q.length ? q.charAt(at + key.length) : '';
-      if (!/[a-z0-9]/.test(before) && !/[a-z0-9]/.test(after)) return true;
-      at = q.indexOf(key, at + 1);
+    var at2 = q.indexOf(key);
+    while (at2 >= 0) {
+      var b = at2 > 0 ? q.charAt(at2 - 1) : '';
+      var a2 = at2 + key.length < q.length ? q.charAt(at2 + key.length) : '';
+      if (!/[a-z0-9]/.test(b) && !/[a-z0-9]/.test(a2)) return true;
+      at2 = q.indexOf(key, at2 + 1);
     }
     return false;
   }
@@ -354,7 +368,7 @@
     var q = normKey(text), hits = [], seen = {};
     for (var i = 0; i < ALIAS.length; i++) {
       var a = ALIAS[i];
-      if (aliasHitsQuery(q, a.k)) {
+      if (aliasHitsQuery(q, a.k, a.item.kind === 'constellation')) {
         var id = a.item.kind === 'kb' ? 'kb:' + a.item.entry.id
           : a.item.kind === 'star' ? 'star:' + a.item.key
           : a.item.kind === 'dso' ? 'dso:' + a.item.key
@@ -489,6 +503,9 @@
     }
     if (KW.cosmos.test(text) && !/怎么找|几点|升起|落下|方位|高度|能看到|看得到|在哪|哪儿/.test(text)) return 'cosmos';
     if (KW.tonight.test(text) && (!hasTarget || /看什么|推荐|有什么/.test(text))) return 'tonight';
+    /* 纯光学参数计算：不需要天体坐标，也能给出可复算结果。 */
+    if (/放大倍率|倍率|视场|分辨率|口径|焦距|目镜/.test(text) &&
+      /计算|多少|多大|比较|范围|区别|理论/.test(text)) return 'gear-fit';
     if (KW.gear.test(text)) return 'gear';
     /* 方案 A：有目标 + 问能不能拍/装不装得下 → 走器材匹配（可算） */
     if (hasTarget && /视场|能拍|拍得|装得|装不下|够不够|够吗|合适吗|拍不到|看不到|多大倍率/.test(text)) return 'gear-fit';
@@ -660,17 +677,39 @@
 
   var PRONOUN = /它|这个|那个|这颗|那颗|上面|刚才|前面|同一颗| thereof|前者/;
 
-  /* 指代消解：把「它 / 那个」还原为上一轮的主体 */
+  /* 指代消解 + 对比承接：
+   * - 「它 / 这颗」还原为上一轮主体；
+   * - 「和 X 相比」「它和 X 会不会碰撞」同时保留上一轮主体和本轮 X，
+   *   否则会丢掉用户真正比较的对象。 */
   function resolveByMemory(q, targets) {
-    if (targets.length || !MEMORY.length) return { targets: targets, ref: '' };
-    if (!PRONOUN.test(q)) return { targets: targets, ref: '' };
+    if (!MEMORY.length) return { targets: targets, ref: '' };
+
+    var memHit = null, memName = '';
     for (var i = MEMORY.length - 1; i >= 0; i--) {
       var name = MEMORY[i].target;
       if (!name) continue;
       var hit = resolveTargets(name);
-      if (hit.length) return { targets: hit.concat(targets), ref: name };
+      if (hit.length) { memHit = hit; memName = name; break; }
     }
-    return { targets: targets, ref: '' };
+    if (!targets.length) {
+      if (!PRONOUN.test(q) || !memHit) return { targets: targets, ref: '' };
+      return { targets: memHit.concat(targets), ref: memName };
+    }
+    if (!memHit) return { targets: targets, ref: '' };
+
+    var compareIntent = /和.{0,20}(相比|对比|比较|区别|差异)|与.{0,20}(相比|对比|比较|区别|差异)|碰撞|合并|撞/.test(q);
+    if (!PRONOUN.test(q) && !compareIntent) return { targets: targets, ref: '' };
+
+    function idOf(item) {
+      if (!item) return '';
+      if (item.kind === 'kb') return 'kb:' + item.entry.id;
+      if (item.kind === 'constellation') return 'con:' + item.abbr;
+      return item.kind + ':' + (item.key || item.cn || item.en || '');
+    }
+    var have = {};
+    targets.forEach(function (t) { have[idOf(t.item)] = 1; });
+    var merged = memHit.filter(function (t) { return !have[idOf(t.item)]; }).concat(targets);
+    return { targets: merged, ref: memName };
   }
 
   /* ================= 运行时统计（可观测性） ================= */
@@ -722,7 +761,8 @@
       dateNote = '未指定地点，按「' + ctx.city + '」（' + ctx.lat.toFixed(2) + '°, ' + ctx.lon.toFixed(2) + '°）计算。';
     }
     var intent = detectIntent(q, targets);
-    var t0 = targets.length ? targets[0].item : null;
+    var t0Wrap = targets.length ? primaryTargetOf(targets) : null;
+    var t0 = t0Wrap ? t0Wrap.item : null;
     var answer = { query: q, intent: intent, ctx: ctx, targets: targets, trace: [], sections: [], meta: {}, _dateNote: dateNote, _when: when };
 
     answer.trace.push(step('muse', '解析意图', intentLabel(intent) + (t0 ? ' · 实体「' + nameOf(t0) + '」' : '') + (mem.ref ? ' · 指代还原为「' + mem.ref + '」' : '')));
@@ -731,7 +771,11 @@
     var bodyInfo = bodyKey && root.BODY_INFO ? root.BODY_INFO[bodyKey] : null;
     var bodyAttr = bodyAttributeOf(q);
     var out;
-    if (bodyInfo && bodyAttr && bodyInfo[bodyAttr.key]) {
+    var compare = /相比|对比|比较|区别|差异|碰撞|合并|撞/.test(q) && compareEntriesOf(targets).length >= 2;
+    var cmp = compare ? composeComparison(answer, ctx, cfg, targets, q) : null;
+    if (cmp) out = cmp;
+    else if (bodyInfo && bodyAttr && (bodyInfo[bodyAttr.key] ||
+      (bodyAttr.key === 'radius' && bodyInfo.diameter))) {
       /* 简单参数问题直接给数值，不进入活动/结构模板 */
       out = composeBodyParam(answer, ctx, bodyInfo, bodyAttr);
     } else if (intent === 'smalltalk') out = composeSmalltalk(answer, ctx, cfg);
@@ -742,7 +786,8 @@
     else if (intent === 'event') out = composeEvent(answer, ctx, cfg, q, targets);
     else if (intent === 'system-view') out = composeSystemView(answer, ctx, cfg, t0, q);
     else if (intent === 'photo-target') out = composePhoto(answer, ctx, cfg, t0, q);
-    else if (intent === 'gear') out = composeGear(answer, ctx, cfg);
+    else if (intent === 'gear' && !(t0 && isConceptTarget(t0))) out = composeGear(answer, ctx, cfg);
+    else if (intent === 'gear-fit' && (!t0 || isConceptTarget(t0))) out = composeOptics(answer, ctx, cfg, q);
     else if (intent === 'gear-fit') out = composeGearFit(answer, ctx, cfg, t0);
     else if (intent === 'chart') out = composeChart(answer, ctx, cfg, t0);
     else if (intent === 'unknown') out = composeFallback(answer, ctx, cfg);
@@ -997,6 +1042,7 @@
   function bodyAttributeOf(q) {
     var s = String(q || '');
     if (/质量|多重/.test(s)) return { key: 'mass', label: '质量' };
+    if (/半径/.test(s)) return { key: 'radius', label: '半径' };
     if (/直径|大小|多大/.test(s)) return { key: 'diameter', label: '直径' };
     if (/距离|多远|距日/.test(s)) return { key: 'distance', label: '距离' };
     if (/温度|多热|冷热/.test(s)) return { key: 'temp', label: '温度' };
@@ -1028,9 +1074,113 @@
     return '';
   }
 
+  /* 多目标对比：本地知识库已有多条对象资料时，直接组织成一份对比回答，
+   * 不再只取第一个目标而把另一个目标丢掉。 */
+  function entryForTargetItem(item) {
+    if (!item) return null;
+    if (item.kind === 'kb') return item.entry;
+    var nm = nameOf(item);
+    if (!nm) return null;
+    for (var i = 0; i < KB.entries.length; i++) {
+      var e = KB.entries[i];
+      if (e.cn === nm || e.en === nm || (e.aliases || []).indexOf(nm) >= 0) return e;
+    }
+    return null;
+  }
+  function compareEntriesOf(targets) {
+    var out = [], seen = {};
+    (targets || []).forEach(function (t) {
+      var e = entryForTargetItem(t && t.item);
+      if (!e || seen[e.id]) return;
+      seen[e.id] = 1;
+      out.push(e);
+    });
+    return out;
+  }
+  function factOfEntry(e, label) {
+    var f = (e && e.facts || []).filter(function (x) { return x && x[0] === label; })[0];
+    return f ? String(f[1]) : '';
+  }
+  function composeComparison(answer, ctx, cfg, targets, q) {
+    var entries = compareEntriesOf(targets).filter(function (e) {
+      return ['距离', '直径', '类型', '质量', '恒星数', '运动', '银心距离'].some(function (label) {
+        return !!factOfEntry(e, label);
+      });
+    });
+    if (entries.length < 2) return null;
+    var names = entries.map(function (e) {
+      return e.id === 'milkyway' && /银河系/.test(String(q || '')) ? '银河系' : e.cn;
+    });
+    var labelOf = {};
+    entries.forEach(function (e, i) { labelOf[e.id] = names[i]; });
+    var collision = /碰撞|合并|撞/.test(String(q || '')) &&
+      entries.some(function (e) { return /m31|仙女/i.test(e.id + ' ' + e.cn + ' ' + (e.en || '')); }) &&
+      entries.some(function (e) { return /milky|银河/i.test(e.id + ' ' + e.cn + ' ' + (e.en || '')); });
+
+    var head, sub = '';
+    if (collision) {
+      var motion = '';
+      entries.forEach(function (e) {
+        var m = factOfEntry(e, '运动');
+        if (m) motion = m;
+      });
+      head = '会。' + (motion ? '仙女座星系' + motion + '，' : '') +
+        '银河系与仙女座星系最终会合并；具体时间与轨道细节取决于质量、横向速度和暗物质分布的测量。';
+      sub = '这是长期引力作用的结果，不是短期内可见的天象。';
+    } else {
+      var types = entries.map(function (e) { return factOfEntry(e, '类型'); }).filter(Boolean);
+      var same = types.length === entries.length && types.every(function (t) { return t === types[0]; });
+      head = names.join(' 与 ') + ' 的主要区别在距离、大小和形态：' +
+        (same ? '两者都是' + types[0] + '，但' : '两者的') + '距离、直径与类型不同，具体测量值如下。';
+    }
+
+    var items = [], sources = [], srcSeen = {};
+    entries.forEach(function (e) {
+      ['距离', '直径', '类型', '恒星数', '运动', '银心距离', '质量'].forEach(function (label) {
+        var v = factOfEntry(e, label);
+        if (v) items.push({ label: labelOf[e.id] + ' · ' + label, value: v });
+      });
+      (e.sources || []).forEach(function (s) {
+        var k = String(s && (s.n || s.u) || '');
+        if (!k || srcSeen[k]) return;
+        srcSeen[k] = 1;
+        sources.push(s);
+      });
+    });
+
+    answer.trace.push(step('vega', '对比本地条目', names.join(' / ')));
+    answer.sections.push({ kind: 'verdict', head: head, sub: sub, chips: [] });
+    answer.sections.push({
+      kind: 'evidence', title: collision ? '接近与合并依据' : '对比数据',
+      items: items.slice(0, 10), para: '', sources: sources.slice(0, 4), register: 'pop'
+    });
+    answer.meta = {
+      agents: ['muse', 'vega'], confidence: collision ? 0.82 : 0.78,
+      freshness: 'static', register: 'pop', computed: false,
+      target: entries[0].cn, compared: names, status: 'established', verified: '2026-10'
+    };
+    return answer;
+  }
+
+  function primaryTargetOf(targets) {
+    var obj = (targets || []).filter(function (t) {
+      var it = t && t.item;
+      return !(it && it.kind === 'kb' && it.entry && it.entry.type === 'concept');
+    })[0];
+    return obj || (targets && targets[0]) || null;
+  }
+  function isConceptTarget(item) {
+    return !!(item && item.kind === 'kb' && item.entry && item.entry.type === 'concept');
+  }
+
   function composeBodyParam(answer, ctx, info, attr) {
     var name = info.cn || '太阳';
     var val = String(info[attr.key] || '');
+    /* BODY_INFO 提供直径；用户问半径时按直径的一半计算，并明确说明。 */
+    if (!val && attr.key === 'radius' && info.diameter) {
+      var m = String(info.diameter).replace(/,/g, '').match(/(\d+(?:\.\d+)?)/);
+      if (m) val = (Math.round(parseFloat(m[1]) / 2).toLocaleString('en-US')) + ' km（直径的一半）';
+    }
     answer.sections.push({
       kind: 'verdict',
       head: name + '的' + attr.label + '为 ' + val + '。',
@@ -1049,6 +1199,29 @@
     answer.meta.freshness = 'static';
     answer.meta.verified = info.updated || '2025-06';
     return answer;
+  }
+
+  /* 同一知识条目的 facts 顺序是固定展示顺序，但用户问哪个属性，
+   * 该属性应优先进入结论与依据，不能被截断在 4 条事实之外。 */
+  function orderedEntryFacts(entry, q) {
+    var wants = [];
+    if (/质量|多重/.test(q)) wants.push('质量');
+    if (/半径/.test(q)) wants.push('半径');
+    if (/直径|大小|多大/.test(q)) wants.push('直径', '视直径');
+    if (/距离|多远|距日/.test(q)) wants.push('距离');
+    if (/年龄/.test(q)) wants.push('年龄');
+    if (/金属|丰度/.test(q)) wants.push('金属丰度');
+    if (/温度|多热/.test(q)) wants.push('温度');
+    if (/卫星|几颗/.test(q)) wants.push('卫星数', '恒星数');
+    if (/视星等|亮度/.test(q)) wants.push('视星等');
+    if (/运动|碰撞|接近/.test(q)) wants.push('运动');
+    var facts = (entry && entry.facts || []).slice();
+    facts.sort(function (a, b) {
+      var ia = wants.indexOf(a && a[0]), ib = wants.indexOf(b && b[0]);
+      if (ia < 0 && ib < 0) return 0;
+      return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+    });
+    return facts;
   }
 
   function composeTarget(answer, ctx, cfg, t, intent) {
@@ -1097,7 +1270,7 @@
     }
 
     /* ---- verdict ---- */
-    var facts = entry ? entry.facts : [];
+    var facts = entry ? orderedEntryFacts(entry, answer.query) : [];
     var head, sub = '';
     var posLine = '';
     if (ep && target) {
@@ -2242,6 +2415,91 @@
       return as ? as / 60 : null;
     }
     return root.OBSPLAN.SIZE[key] || root.OBSPLAN.SIZE[String(key).toUpperCase()] || null;
+  }
+
+  /* 纯光学/观测参数计算：不需要天体坐标，也不该套科普模板。
+   * 公式：放大倍率 = 物镜焦距 / 目镜焦距；瑞利判据 θ = 1.22 λ / D。 */
+  function composeOptics(answer, ctx, cfg, q) {
+    function grab(re) {
+      var m = String(q || '').match(re);
+      return m ? parseFloat(m[1]) : null;
+    }
+    function allMm() {
+      var out = [], re = /(\d+(?:\.\d+)?)\s*(?:mm|毫米)/g, m;
+      while ((m = re.exec(q)) !== null) out.push(parseFloat(m[1]));
+      return out.filter(function (n) { return n > 0; });
+    }
+    var aperture = grab(/(\d+(?:\.\d+)?)\s*(?:mm|毫米)\s*(?:口径|物镜)/) ||
+      grab(/口径\s*(?:为|约|是)?\s*(\d+(?:\.\d+)?)/);
+    var focal = grab(/(\d+(?:\.\d+)?)\s*(?:mm|毫米)\s*(?:焦距|镜头)/) ||
+      grab(/焦距\s*(?:为|约|是)?\s*(\d+(?:\.\d+)?)/);
+    var eyepiece = grab(/(\d+(?:\.\d+)?)\s*(?:mm|毫米)\s*目镜/) ||
+      grab(/目镜\s*(?:为|约|是)?\s*(\d+(?:\.\d+)?)/);
+    var mm = allMm();
+    var askResolution = /分辨率|角秒|瑞利/.test(q);
+    var askField = /视场|视野/.test(q);
+    var askMag = /放大倍率|倍率/.test(q);
+    var head = '', sub = '', items = [], traceDetail = '';
+
+    if (askResolution) {
+      var list = aperture ? [aperture] : mm.slice(0, 2);
+      if (!list.length) list = [200];
+      var parts = list.map(function (d) {
+        var arcsec = 1.22 * 550e-9 / (d / 1000) * 206265;
+        items.push({ label: d + 'mm 口径分辨率', value: '约 ' + (Math.round(arcsec * 100) / 100) + ' 角秒' });
+        return d + 'mm 约 ' + (Math.round(arcsec * 100) / 100) + ' 角秒';
+      });
+      head = parts.join('；') + '（瑞利判据，取 550nm 可见光）。口径越大，理论分辨率越高。';
+      sub = '理论分辨率是衍射极限；实际观测还受视宁度、跟踪精度与光学质量影响。';
+      traceDetail = '瑞利判据 · ' + list.join('/') + 'mm';
+    } else if (focal && eyepiece) {
+      var mag = focal / eyepiece;
+      items.push({ label: '物镜焦距', value: focal + ' mm' });
+      items.push({ label: '目镜焦距', value: eyepiece + ' mm' });
+      items.push({ label: '放大倍率', value: (Math.round(mag * 10) / 10) + '×' });
+      if (askField) {
+        var tfov = 50 / mag;
+        head = '在 ' + (Math.round(mag * 10) / 10) + '× 下，若目镜表观视场为 50°，实际视场约 ' +
+          (Math.round(tfov * 100) / 100) + '°。表观视场不同时，按「实际视场 = 表观视场 / 倍率」换算。';
+        sub = '目镜表观视场未在问题中给出，50° 是常见假设；需要精确值请提供目镜 AFOV 或相机传感器尺寸。';
+      } else {
+        head = '放大倍率 = 物镜焦距 ' + focal + ' mm / 目镜焦距 ' + eyepiece + ' mm = ' +
+          (Math.round(mag * 10) / 10) + '×。';
+        sub = '实际可用倍率还受口径、视宁度与出瞳直径限制。';
+      }
+      traceDetail = '放大倍率 · ' + focal + '/' + eyepiece + ' = ' + (Math.round(mag * 10) / 10) + '×';
+    } else if (askField) {
+      head = '缺少目镜表观视场或相机传感器尺寸，无法给出唯一的视场范围。';
+      sub = '需要补充目镜 AFOV（常见 50°/68°/82°）或相机传感器尺寸；仅有口径和焦距只能确定放大倍率。';
+      traceDetail = '视场计算缺少目镜/传感器参数';
+    } else {
+      head = '这条问题需要口径、焦距、目镜或传感器参数才能计算。';
+      sub = '请给出至少两个参数，例如「200mm 口径、1000mm 焦距、25mm 目镜」。';
+      traceDetail = '光学参数不足';
+    }
+
+    if (aperture && !items.some(function (x) { return x.label === '口径'; })) {
+      items.push({ label: '口径', value: aperture + ' mm' });
+    }
+    if (focal && !items.some(function (x) { return x.label === '焦距' || x.label === '物镜焦距'; })) {
+      items.push({ label: '焦距', value: focal + ' mm' });
+    }
+    if (eyepiece && !items.some(function (x) { return x.label === '目镜' || x.label === '目镜焦距'; })) {
+      items.push({ label: '目镜', value: eyepiece + ' mm' });
+    }
+    if (items.length < 2) items.push({ label: '说明', value: sub });
+
+    answer.trace.push(step('kepler', '光学参数计算', traceDetail));
+    answer.sections.push({ kind: 'verdict', head: head, sub: sub, chips: [] });
+    answer.sections.push({
+      kind: 'evidence', title: '计算参数', items: items.slice(0, 8),
+      sources: [{ n: '光学公式（薄透镜 / 瑞利判据）', u: '' }], register: 'pop'
+    });
+    answer.meta = {
+      agents: ['muse', 'kepler'], confidence: 0.9, freshness: 'static',
+      register: 'pop', computed: true, target: null, status: 'established'
+    };
+    return answer;
   }
 
   function composeGearFit(answer, ctx, cfg, t) {

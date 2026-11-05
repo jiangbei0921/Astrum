@@ -1,0 +1,2386 @@
+{
+  "version": "V1.15",
+  "runAt": "2026-11-05T05:09:45.980Z",
+  "commit": "(local working tree)",
+  "provider": {
+    "status": "BLOCKED_API_KEY",
+    "keyPresent": false
+  },
+  "total": 34,
+  "pass": 22,
+  "fail": 0,
+  "blockedExternal": 7,
+  "blockedApiKey": 5,
+  "notRun": 0,
+  "categories": {
+    "A": {
+      "total": 6,
+      "pass": 6,
+      "fail": 0,
+      "blocked": 0,
+      "avgScore": 45
+    },
+    "B": {
+      "total": 6,
+      "pass": 6,
+      "fail": 0,
+      "blocked": 0,
+      "avgScore": 46.5
+    },
+    "C": {
+      "total": 4,
+      "pass": 4,
+      "fail": 0,
+      "blocked": 0,
+      "avgScore": 48
+    },
+    "D": {
+      "total": 6,
+      "pass": 0,
+      "fail": 0,
+      "blocked": 6,
+      "avgScore": 45.2
+    },
+    "E": {
+      "total": 6,
+      "pass": 0,
+      "fail": 0,
+      "blocked": 6,
+      "avgScore": 25
+    },
+    "F": {
+      "total": 6,
+      "pass": 6,
+      "fail": 0,
+      "blocked": 0,
+      "avgScore": 45.5
+    }
+  },
+  "cases": [
+    {
+      "status": "PASS",
+      "score": 45,
+      "scores": {
+        "understanding": 5,
+        "routing": 2,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 229,
+      "sections": "verdict,evidence",
+      "text": "南天星座，成员恒星距离各不相同，星座本身没有单一“距离”。离太阳最近的是半人马座α系统（约 4.37 光年），其中比邻星约 4.24 光年。\n\n最近的恒星系统 半人马座α（约 4.37 光年）\n比邻星 约 4.24 光年（离太阳最近的恒星）\n星座性质 由不同距离的恒星组成，不存在单一的星座距离\n最亮星 半人马座α（视星等约 -0.27）\n半人马座不是“一个天体”，而是天上一块区域。问它离我们多远，要先说清问的是哪颗星；最近的是比邻星，约 4.24 光年。",
+      "id": "A1",
+      "cat": "A",
+      "q": "半人马座距离地球有多远？",
+      "intent": "knowledge-target",
+      "route": {
+        "intent": "knowledge-target",
+        "mode": "single",
+        "complexity": 1,
+        "level": "L1",
+        "targets": [
+          "半人马座"
+        ],
+        "branches": [
+          {
+            "intent": "knowledge-target",
+            "target": "半人马座"
+          }
+        ],
+        "legacy": true,
+        "reason": "single + L1，跳过 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "score": 45,
+      "scores": {
+        "understanding": 5,
+        "routing": 2,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 254,
+      "sections": "verdict,evidence,consensus,boundary",
+      "text": "遥远星系的光谱向红端移动，红移量随距离增大，是宇宙膨胀的直接观测证据。\n共识等级：已成共识 · 数据核验 2026-10\n定义 z =（观测波长 − 发射波长）/ 发射波长\n哈勃定律 v 约等于 H₀ 乘距离（低红移近似）\n宇宙学红移 由空间膨胀造成，非运动多普勒效应\n纪录 JWST 已确认 z 约 14 的星系\n应用 红移巡天绘制宇宙大尺度结构\n光在旅途中被「拉长」了，颜色偏红。拉得越多，说明它走得越久、越远。\n数据核验日期 2026-10，数值与结论均来自条目所列论文或机构发布；未采用二手科普转述。",
+      "id": "A2",
+      "cat": "A",
+      "q": "什么是红移？",
+      "intent": "cosmos",
+      "route": {
+        "intent": "cosmos",
+        "mode": "single",
+        "complexity": 1,
+        "level": "L1",
+        "targets": [
+          "红移与宇宙膨胀"
+        ],
+        "branches": [
+          {
+            "intent": "cosmos",
+            "target": "红移与宇宙膨胀"
+          }
+        ],
+        "legacy": true,
+        "reason": "single + L1，跳过 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "score": 45,
+      "scores": {
+        "understanding": 5,
+        "routing": 2,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 218,
+      "sections": "verdict,evidence",
+      "text": "光年是天文学中的距离单位，等于光在真空中一年走过的距离，约 9.46 万亿公里。\n光年是天文学中的距离单位，等于光在真空中一年走过的距离，约 9.46 万亿公里…\n1 光年 9.4607 × 10¹² km\n1 天文单位（AU） 约 1.496 亿 km（日地平均距离）\n1 秒差距（pc） 约 3.26 光年\n最近恒星 南门二系统约 4.37 光年\n光年不是时间，是距离。光跑一年的距离。所以你看到的天狼星，是它 8.6 年前的样子。",
+      "id": "A3",
+      "cat": "A",
+      "q": "什么是光年？",
+      "intent": "intro-target",
+      "route": {
+        "intent": "intro-target",
+        "mode": "single",
+        "complexity": 1,
+        "level": "L1",
+        "targets": [
+          "光年与天文距离"
+        ],
+        "branches": [
+          {
+            "intent": "intro-target",
+            "target": "光年与天文距离"
+          }
+        ],
+        "legacy": true,
+        "reason": "single + L1，跳过 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "score": 45,
+      "scores": {
+        "understanding": 5,
+        "routing": 2,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 274,
+      "sections": "verdict,evidence",
+      "text": "恒星发出的光按波长展开形成的光谱；连续谱、吸收线和发射线共同反映恒星的温度、化学组成、运动与磁场。\n恒星发出的光按波长展开形成的光谱；连续谱、吸收线和发射线共同反映恒星的温度、化学组成、运动与磁场…\n连续谱 近似黑体辐射，峰值波长随温度升高向短波移动\n吸收线 恒星大气中的元素吸收特定波长，可用于测成分与视向速度\n光谱分类 主序星通常按 OBAFGKM 划分，对应有效温度与光谱特征\n多普勒效应 谱线位移可测视向速度与自转\n恒星光谱由光球连续谱、大气吸收线与色球/日冕发射线叠加而成；通过谱线强度与宽度可反演有效温度、表面重力、金属丰度与视向速度。",
+      "id": "A4",
+      "cat": "A",
+      "q": "什么是恒星光谱？",
+      "intent": "intro-target",
+      "route": {
+        "intent": "intro-target",
+        "mode": "single",
+        "complexity": 1,
+        "level": "L1",
+        "targets": [
+          "恒星光谱"
+        ],
+        "branches": [
+          {
+            "intent": "intro-target",
+            "target": "恒星光谱"
+          }
+        ],
+        "legacy": true,
+        "reason": "single + L1，跳过 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "score": 45,
+      "scores": {
+        "understanding": 5,
+        "routing": 2,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 481,
+      "sections": "verdict,evidence,consensus,boundary",
+      "text": "哈勃常数 H₀ 描述宇宙当前的膨胀率，常用单位是 km/s/Mpc；用早期宇宙与近邻距离阶梯测得的值不一致，形成「哈勃张力」。\n共识等级：前沿研究 · 数据核验 2026-10 · 结论可能随新数据变化\n早期宇宙 H₀ = 67.36 ± 0.54 km/s/Mpc（Planck 2018）\n近邻阶梯 H₀ = 73.04 ± 1.04（SH0ES 2022）；73.49 ± 0.93（JWST 校准，2025）\n替代测量 TRGB 法 70.39 ± 1.22（CCHP 2025）；JAGB 法 67.80 ± 2.17\n显著性 Planck 与 SH0ES 之间约 5σ\n候选解释 早期暗能量、额外相对论自由度、修改引力，或未被识别的系统误差\n同一个宇宙，两种量法算出两个膨胀速度，而且越测越精确、差距却不肯消失。这就是哈勃张力——目前没有人能确定谁错了。\n本条为「前沿研究」：本条为活跃争议：不同团队的数值与显著性表述存在差异，任何单一数字都不应被当作定论。 数据核验日期 2026-10，数值与结论均来自条目所列论文或机构发布；未采用二手科普转述。",
+      "id": "A5",
+      "cat": "A",
+      "q": "哈勃常数是什么意思？",
+      "intent": "cosmos",
+      "route": {
+        "intent": "cosmos",
+        "mode": "single",
+        "complexity": 1,
+        "level": "L1",
+        "targets": [
+          "哈勃张力"
+        ],
+        "branches": [
+          {
+            "intent": "cosmos",
+            "target": "哈勃张力"
+          }
+        ],
+        "legacy": true,
+        "reason": "single + L1，跳过 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "score": 45,
+      "scores": {
+        "understanding": 5,
+        "routing": 2,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 237,
+      "sections": "verdict,evidence",
+      "text": "衡量天体视亮度的对数标度：数值越小越亮，每差 5 等亮度相差 100 倍。\n衡量天体视亮度的对数标度：数值越小越亮，每差 5 等亮度相差 100 倍…\n定义 m = −2.5 log₁₀(E) + C\n参考 天狼星 −1.46，织女一 0.03，肉眼极限约 6\n规律 每差 1 等，亮度比约 2.512 倍\n注意 视星等不等于真实光度（绝对星等）\n星星的「亮度分数」，数字越小越亮。天狼星是 −1.46 分，你肉眼能看到的暗星大约是 6 分。差 5 分，亮度差 100 倍。",
+      "id": "A6",
+      "cat": "A",
+      "q": "什么是视星等？",
+      "intent": "intro-target",
+      "route": {
+        "intent": "intro-target",
+        "mode": "single",
+        "complexity": 1,
+        "level": "L1",
+        "targets": [
+          "视星等"
+        ],
+        "branches": [
+          {
+            "intent": "intro-target",
+            "target": "视星等"
+          }
+        ],
+        "legacy": true,
+        "reason": "single + L1，跳过 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "score": 45,
+      "scores": {
+        "understanding": 5,
+        "routing": 2,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 230,
+      "sections": "verdict,evidence",
+      "text": "距离约 254 万光年的旋涡星系，是本星系群中质量最大的成员，也是肉眼可见的最远天体之一。\n今晚 21:00，仙女座星系位于东（78°）方向、约 79° 高度，接近天顶。\n质量 约 1.5 × 10¹² 太阳质量（含暗物质，估计值）\n距离 约 254 万光年（约 780 kpc）\n直径 约 22 万光年\n类型 SA(s)b 旋涡星系\n你抬头能看到的最远的东西，可能就是它：250 万年前发出的光，今晚才落到你的眼睛里。它比我们银河系还大，正慢慢朝我们飘过来。",
+      "id": "B1",
+      "cat": "B",
+      "q": "M31 的质量大约是多少？",
+      "intent": "knowledge-target",
+      "route": {
+        "intent": "knowledge-target",
+        "mode": "single",
+        "complexity": 1,
+        "level": "L1",
+        "targets": [
+          "仙女座星系"
+        ],
+        "branches": [
+          {
+            "intent": "knowledge-target",
+            "target": "仙女座星系"
+          }
+        ],
+        "legacy": true,
+        "reason": "single + L1，跳过 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "score": 45,
+      "scores": {
+        "understanding": 5,
+        "routing": 2,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 209,
+      "sections": "verdict,evidence",
+      "text": "距离地球最近的巨型恒星形成区之一，位于猎户座「佩剑」中部，肉眼可见为朦胧光斑。\n今晚 21:00，猎户座大星云尚未升起；最佳观测窗口为 22:49–05:29，最高约 45°。\n距离 约 1344 光年\n直径 约 24 光年\n类型 H II 区 / 发射星云\n视星等 4.0（肉眼可见）\n在猎户座腰带下方挂着的那串「小星星」中间，有一团正在孕育新恒星的气体云——它就是 M42。用双筒望远镜看，像一团被月光照亮的薄雾。",
+      "id": "B2",
+      "cat": "B",
+      "q": "M42 距离地球有多远？",
+      "intent": "knowledge-target",
+      "route": {
+        "intent": "knowledge-target",
+        "mode": "single",
+        "complexity": 1,
+        "level": "L1",
+        "targets": [
+          "猎户座大星云"
+        ],
+        "branches": [
+          {
+            "intent": "knowledge-target",
+            "target": "猎户座大星云"
+          }
+        ],
+        "legacy": true,
+        "reason": "single + L1，跳过 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "score": 48,
+      "scores": {
+        "understanding": 5,
+        "routing": 5,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 236,
+      "sections": "verdict,evidence,observe,visual,boundary,mapref,followup,review",
+      "text": "北天最亮的球状星团，约含数十万颗恒星，是小口径望远镜下的经典目标。\n今晚 21:00，武仙座球状星团位于西北（308°）方向、约 12° 高度，位于低空。\n年龄 约 116 亿年\n金属丰度 [Fe/H] ≈ −1.53（低金属丰度）\n距离 约 2.22 万光年\n视星等 5.8\n它是一个「恒星的蜂巢」：几十万颗太阳挤在一个球里。你看到的每个光点，都是一颗太阳。\n目标视星等 5.8 暗于城市光害下的常见极限（约 4.5 等），在 北京 市区大概率不可见，需转移至暗夜地点。",
+      "id": "B3",
+      "cat": "B",
+      "q": "M13 的年龄和金属丰度是多少？",
+      "intent": "knowledge-target",
+      "route": {
+        "intent": "knowledge-target",
+        "mode": "research",
+        "complexity": 4,
+        "level": "L4",
+        "targets": [
+          "武仙座球状星团"
+        ],
+        "branches": [
+          {
+            "intent": "knowledge-target",
+            "topic": "research"
+          }
+        ],
+        "legacy": false,
+        "reason": "research / L4，进入 Planner",
+        "signals": {
+          "mentions": 2,
+          "compare": false,
+          "why": false,
+          "research": true,
+          "targetParam": false
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "score": 48,
+      "scores": {
+        "understanding": 5,
+        "routing": 5,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 294,
+      "sections": "verdict,evidence",
+      "text": "仙女座星系 与 三角座星系 的主要区别在距离、大小和形态：两者的距离、直径与类型不同，具体测量值如下。\n\n仙女座星系 · 距离 约 254 万光年（约 780 kpc）\n仙女座星系 · 直径 约 22 万光年\n仙女座星系 · 类型 SA(s)b 旋涡星系\n仙女座星系 · 运动 以约 110 km/s 向银河系接近\n仙女座星系 · 质量 约 1.5 × 10¹² 太阳质量（含暗物质，估计值）\n三角座星系 · 距离 约 273 万光年\n三角座星系 · 直径 约 6 万光年\n三角座星系 · 类型 SA(s)cd 无棒螺旋星系\n三角座星系 · 恒星数 约 400 亿（低于银河系的千亿量级）",
+      "id": "B4",
+      "cat": "B",
+      "q": "M33 与 M31 的主要区别是什么？",
+      "intent": "knowledge-target",
+      "route": {
+        "intent": "knowledge-target",
+        "mode": "compare",
+        "complexity": 3,
+        "level": "L3",
+        "targets": [
+          "仙女座星系",
+          "三角座星系"
+        ],
+        "branches": [
+          {
+            "intent": "knowledge-target",
+            "target": "仙女座星系"
+          },
+          {
+            "intent": "knowledge-target",
+            "target": "三角座星系"
+          }
+        ],
+        "legacy": false,
+        "reason": "compare / L3，进入 Planner",
+        "signals": {
+          "mentions": 2,
+          "compare": true,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "score": 48,
+      "scores": {
+        "understanding": 5,
+        "routing": 5,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 289,
+      "sections": "verdict,evidence,followup",
+      "text": "哈勃以可见光与紫外为主、口径 2.4 米；韦布以 0.6–28 微米红外为主、口径 6.5 米，位于日地 L2 点，专攻早期宇宙与大气光谱。\n哈勃以可见光与紫外为主、口径 2.4 米；韦布以 0.6–28 微米红外为主、口径 6.5 米，位于日地 L2 点，专攻早期宇宙与大气光谱…\n哈勃 1990 年发射，2.4 米，可见/紫外/近红外\n韦布 2021 年发射，6.5 米分段镜，0.6–28 微米红外\n位置 韦布位于日地 L2，距地约 150 万公里\n优势 红外可穿透尘埃，看到高红移星系\n哈勃像「可见光的眼睛」，韦布像「热成像的眼睛」，专门看更远、更冷、被尘埃挡住的东西。",
+      "id": "B5",
+      "cat": "B",
+      "q": "JWST 的主要观测波段有哪些？",
+      "intent": "observe-target",
+      "route": {
+        "intent": "observe-target",
+        "mode": "research",
+        "complexity": 3,
+        "level": "L3",
+        "targets": [
+          "哈勃与韦布的区别"
+        ],
+        "branches": [
+          {
+            "intent": "observe-target",
+            "topic": "research"
+          }
+        ],
+        "legacy": false,
+        "reason": "research / L3，进入 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": true,
+          "targetParam": false
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "score": 45,
+      "scores": {
+        "understanding": 5,
+        "routing": 2,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 101,
+      "sections": "verdict,evidence",
+      "text": "太阳的半径为 696,350 km（直径的一半）。\n来源：NASA Planetary Fact Sheet · 数据更新 2025-06\n类型 恒星（G2V）\n半径 696,350 km（直径的一半）",
+      "id": "B6",
+      "cat": "B",
+      "q": "太阳的半径是多少公里？",
+      "intent": "helios",
+      "route": {
+        "intent": "helios",
+        "mode": "single",
+        "complexity": 1,
+        "level": "L1",
+        "targets": [
+          "太阳的结构与活动"
+        ],
+        "branches": [
+          {
+            "intent": "helios",
+            "target": "太阳的结构与活动"
+          }
+        ],
+        "legacy": true,
+        "reason": "single + L1，跳过 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "score": 48,
+      "scores": {
+        "understanding": 5,
+        "routing": 5,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 216,
+      "sections": "verdict,evidence",
+      "text": "距离约 254 万光年的旋涡星系，是本星系群中质量最大的成员，也是肉眼可见的最远天体之一。\n今晚 21:00，仙女座星系位于东（78°）方向、约 79° 高度，接近天顶。\n距离 约 254 万光年（约 780 kpc）\n直径 约 22 万光年\n类型 SA(s)b 旋涡星系\n视星等 3.4（暗夜下肉眼可见）\n你抬头能看到的最远的东西，可能就是它：250 万年前发出的光，今晚才落到你的眼睛里。它比我们银河系还大，正慢慢朝我们飘过来。",
+      "id": "C1",
+      "cat": "C",
+      "q": "M31 距离地球有多远？",
+      "intent": "knowledge-target",
+      "route": {
+        "intent": "knowledge-target",
+        "mode": "single",
+        "complexity": 1,
+        "level": "L1",
+        "targets": [
+          "仙女座星系"
+        ],
+        "branches": [
+          {
+            "intent": "knowledge-target",
+            "target": "仙女座星系"
+          }
+        ],
+        "legacy": true,
+        "reason": "single + L1，跳过 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      },
+      "target": "仙女座星系"
+    },
+    {
+      "status": "PASS",
+      "score": 48,
+      "scores": {
+        "understanding": 5,
+        "routing": 5,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 216,
+      "sections": "verdict,evidence",
+      "text": "距离约 254 万光年的旋涡星系，是本星系群中质量最大的成员，也是肉眼可见的最远天体之一。\n今晚 21:00，仙女座星系位于东（78°）方向、约 79° 高度，接近天顶。\n直径 约 22 万光年\n距离 约 254 万光年（约 780 kpc）\n类型 SA(s)b 旋涡星系\n视星等 3.4（暗夜下肉眼可见）\n你抬头能看到的最远的东西，可能就是它：250 万年前发出的光，今晚才落到你的眼睛里。它比我们银河系还大，正慢慢朝我们飘过来。",
+      "id": "C2",
+      "cat": "C",
+      "q": "它的直径大约是多少？",
+      "intent": "knowledge-target",
+      "route": {
+        "intent": "unknown",
+        "mode": "single",
+        "complexity": 1,
+        "level": "L1",
+        "targets": [],
+        "branches": [
+          {
+            "intent": "unknown",
+            "target": null
+          }
+        ],
+        "legacy": true,
+        "reason": "intent=unknown 走旧兜底路径",
+        "signals": {
+          "mentions": 0,
+          "compare": false,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      },
+      "target": "仙女座星系"
+    },
+    {
+      "status": "PASS",
+      "score": 48,
+      "scores": {
+        "understanding": 5,
+        "routing": 5,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 238,
+      "sections": "verdict,evidence",
+      "text": "仙女座星系 与 银河系 的主要区别在距离、大小和形态：两者的距离、直径与类型不同，具体测量值如下。\n\n仙女座星系 · 距离 约 254 万光年（约 780 kpc）\n仙女座星系 · 直径 约 22 万光年\n仙女座星系 · 类型 SA(s)b 旋涡星系\n仙女座星系 · 运动 以约 110 km/s 向银河系接近\n仙女座星系 · 质量 约 1.5 × 10¹² 太阳质量（含暗物质，估计值）\n银河系 · 直径 约 10 万光年（恒星盘）\n银河系 · 银心距离 约 2.6 万光年",
+      "id": "C3",
+      "cat": "C",
+      "q": "和银河系相比呢？",
+      "intent": "intro-target",
+      "route": {
+        "intent": "intro-target",
+        "mode": "compare",
+        "complexity": 3,
+        "level": "L3",
+        "targets": [
+          "仙女座星系",
+          "仙女座",
+          "银河与银心"
+        ],
+        "branches": [
+          {
+            "intent": "intro-target",
+            "target": "仙女座星系"
+          },
+          {
+            "intent": "intro-target",
+            "target": "仙女座"
+          },
+          {
+            "intent": "intro-target",
+            "target": "银河与银心"
+          }
+        ],
+        "legacy": false,
+        "reason": "compare / L3，进入 Planner",
+        "signals": {
+          "mentions": 2,
+          "compare": false,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      },
+      "target": "仙女座星系"
+    },
+    {
+      "status": "PASS",
+      "score": 48,
+      "scores": {
+        "understanding": 5,
+        "routing": 5,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 282,
+      "sections": "verdict,evidence",
+      "text": "会。仙女座星系以约 110 km/s 向银河系接近，银河系与仙女座星系最终会合并；具体时间与轨道细节取决于质量、横向速度和暗物质分布的测量。\n这是长期引力作用的结果，不是短期内可见的天象。\n仙女座星系 · 距离 约 254 万光年（约 780 kpc）\n仙女座星系 · 直径 约 22 万光年\n仙女座星系 · 类型 SA(s)b 旋涡星系\n仙女座星系 · 运动 以约 110 km/s 向银河系接近\n仙女座星系 · 质量 约 1.5 × 10¹² 太阳质量（含暗物质，估计值）\n银河系 · 直径 约 10 万光年（恒星盘）\n银河系 · 银心距离 约 2.6 万光年",
+      "id": "C4",
+      "cat": "C",
+      "q": "它未来会和银河系碰撞吗？",
+      "intent": "intro-target",
+      "route": {
+        "intent": "intro-target",
+        "mode": "compare",
+        "complexity": 3,
+        "level": "L3",
+        "targets": [
+          "仙女座星系",
+          "仙女座",
+          "银河与银心"
+        ],
+        "branches": [
+          {
+            "intent": "intro-target",
+            "target": "仙女座星系"
+          },
+          {
+            "intent": "intro-target",
+            "target": "仙女座"
+          },
+          {
+            "intent": "intro-target",
+            "target": "银河与银心"
+          }
+        ],
+        "legacy": false,
+        "reason": "compare / L3，进入 Planner",
+        "signals": {
+          "mentions": 2,
+          "compare": false,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      },
+      "target": "仙女座星系"
+    },
+    {
+      "status": "BLOCKED_API_KEY",
+      "score": 50,
+      "scores": {
+        "understanding": 5,
+        "routing": 5,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 5,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 2,
+      "paperCount": 2,
+      "must": true,
+      "internal": false,
+      "textLength": 696,
+      "sections": "analysis,evidence,boundary,boundary,review,consensus,observe,sources,followup",
+      "text": "本轮核心结论来自英文摘要（保留原文，未作机器翻译）：Observational data from the James Webb Space Telescope (JWST) indicate a significant number of galaxies with redshifts $z > 10$。\n支持这一判断的论文包括：《Cosmological interpretation of JWST observations》（2024）；《JWST spots what could be a quasar from the early Universe》（2023）。\n综合来看，本次回答的限制是：2 篇论文仅获得摘要，未获取全文；没有 FITS 观测数据，缺少独立观测验证。\n最深记录 JADES-GS-z14-0，z = 14.32（2024，NIRSpec 确认）\n时间 对应大爆炸后约 2.9 亿年\n观测手段 近红外光谱红移确认 + 多波段测光\n争议 早熟星系的数量与亮度挑战星系形成模型\n现状 数据快速累积，理论解释仍在调整\n韦布望远镜看到了宇宙只有几亿岁时就已成形的星系，比很多人预期的更早、更亮。这不一定是「宇宙学错了」，更可能是我们低估了早期星系的本事。\n本条为「前沿研究」：本条为快速演进领域，记录数与红移纪录可能在数月内更新。 数据核验日期 2026-10，数值与结论均来自条目所列论文或机构发布；未采用二手科普转述。\n未完成/不确定：2 篇论文仅获得摘要，未获取全文；没有 FITS 观测数据，缺少独立观测验证。以上结论均保留原始来源，不把缺失数据当作事实。",
+      "id": "D1",
+      "cat": "D",
+      "q": "查找 JWST 关于早期宇宙星系的最新研究",
+      "intent": "cosmos",
+      "route": {
+        "intent": "cosmos",
+        "mode": "research",
+        "complexity": 3,
+        "level": "L3",
+        "targets": [
+          "早期宇宙与 JWST 深场",
+          "哈勃与韦布的区别"
+        ],
+        "branches": [
+          {
+            "intent": "cosmos",
+            "topic": "research"
+          }
+        ],
+        "legacy": false,
+        "reason": "research / L3，进入 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": true,
+          "targetParam": false
+        }
+      },
+      "externalErrors": [
+        {
+          "endpoint": "semanticscholar",
+          "name": "Semantic Scholar",
+          "query": "JWST early universe latest result",
+          "kind": "rate_limit",
+          "msg": "触发限流"
+        },
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "JWST early universe latest result",
+          "kind": "rate_limit",
+          "msg": "触发限流"
+        },
+        {
+          "endpoint": "wikimedia",
+          "name": "维基百科",
+          "query": "JWST early universe latest result",
+          "kind": "timeout",
+          "msg": "请求超时"
+        },
+        {
+          "endpoint": "wiki-action",
+          "name": "维基百科（备用）",
+          "query": "JWST early universe latest result",
+          "kind": "timeout",
+          "msg": "请求超时"
+        }
+      ],
+      "stopReason": "maxRounds"
+    },
+    {
+      "status": "BLOCKED_API_KEY",
+      "score": 50,
+      "scores": {
+        "understanding": 5,
+        "routing": 5,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 5,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 2,
+      "paperCount": 2,
+      "must": true,
+      "internal": false,
+      "textLength": 856,
+      "sections": "analysis,evidence,boundary,review,observe,visual,mapref,sources,followup",
+      "text": "本轮核心结论来自英文摘要（保留原文，未作机器翻译）：We determine the escape velocity of M31 to be $470\\pm{40}$ km s$^{-1}$ at a galacto-centric distance of 15 kpc, and also, derive the total potential of M31, estimating the virial mass and radius of the galaxy to be $0.8\\pm{0.1}\\times10^{12}…。\n支持这一判断的论文包括：《The need for speed: escape velocity and dynamical mass measurements of the Andro》（2018）；《The Geometric Distance and Proper Motion of the Triangulum Galaxy (M33)》（2005）。\n论文摘要报告：We measured the angular rotation and proper motion of the Triangulum Galaxy (M33) with the Very Long Baseline Array by observing two H2O mas…。\n综合来看，本次回答的限制是：2 篇论文仅获得摘要，未获取全文；没有 FITS 观测数据，缺少独立观测验证。\n距离 约 254 万光年（约 780 kpc）\n直径 约 22 万光年\n类型 SA(s)b 旋涡星系\n视星等 3.4（暗夜下肉眼可见）\n你抬头能看到的最远的东西，可能就是它：250 万年前发出的光，今晚才落到你的眼睛里。它比我们银河系还大，正慢慢朝我们飘过来。\n未完成/不确定：2 篇论文仅获得摘要，未获取全文；没有 FITS 观测数据，缺少独立观测验证。以上结论均保留原始来源，不把缺失数据当作事实。",
+      "id": "D2",
+      "cat": "D",
+      "q": "查找 M31 距离测量的代表性论文",
+      "intent": "knowledge-target",
+      "route": {
+        "intent": "knowledge-target",
+        "mode": "research",
+        "complexity": 3,
+        "level": "L3",
+        "targets": [
+          "仙女座星系"
+        ],
+        "branches": [
+          {
+            "intent": "knowledge-target",
+            "topic": "research"
+          }
+        ],
+        "legacy": false,
+        "reason": "research / L3，进入 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": true,
+          "targetParam": false
+        }
+      },
+      "externalErrors": [
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "M31 distance measurement mass",
+          "kind": "rate_limit",
+          "msg": "触发限流"
+        },
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "M31 distance measurement uncertainty method",
+          "kind": "rate_limit",
+          "msg": "触发限流"
+        },
+        {
+          "endpoint": "wikimedia",
+          "name": "维基百科",
+          "query": "M31 distance measurement mass",
+          "kind": "timeout",
+          "msg": "请求超时"
+        },
+        {
+          "endpoint": "wiki-action",
+          "name": "维基百科（备用）",
+          "query": "M31 distance measurement mass",
+          "kind": "timeout",
+          "msg": "请求超时"
+        }
+      ],
+      "stopReason": "maxCalls"
+    },
+    {
+      "status": "BLOCKED_API_KEY",
+      "score": 50,
+      "scores": {
+        "understanding": 5,
+        "routing": 5,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 5,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 2,
+      "paperCount": 2,
+      "must": true,
+      "internal": false,
+      "textLength": 629,
+      "sections": "analysis,evidence,boundary,boundary,review,observe,visual,mapref,sources,followup",
+      "text": "本轮核心结论来自英文摘要（保留原文，未作机器翻译）：Strömgren Photometry of Globular Clusters: The Distance and Age of M13, Evidence for Two Populations of Horizontal-Branch Stars。\n支持这一判断的论文包括：《Strömgren Photometry of Globular Clusters: The Distance and Age of M13, Evidence》（1998）；《Comparison of the Hubble Tension Measurement from Two Approaches: Distance Ladde》（2025）。\n综合来看，本次回答的限制是：2 篇论文仅获得摘要，未获取全文；没有 FITS 观测数据，缺少独立观测验证。\n年龄 约 116 亿年\n距离 约 2.22 万光年\n金属丰度 [Fe/H] ≈ −1.53（低金属丰度）\n视星等 5.8\n它是一个「恒星的蜂巢」：几十万颗太阳挤在一个球里。你看到的每个光点，都是一颗太阳。\n目标视星等 5.8 暗于城市光害下的常见极限（约 4.5 等），在 北京 市区大概率不可见，需转移至暗夜地点。\n未完成/不确定：2 篇论文仅获得摘要，未获取全文；没有 FITS 观测数据，缺少独立观测验证。以上结论均保留原始来源，不把缺失数据当作事实。",
+      "id": "D3",
+      "cat": "D",
+      "q": "比较不同论文对 M13 年龄的估计",
+      "intent": "knowledge-target",
+      "route": {
+        "intent": "knowledge-target",
+        "mode": "research",
+        "complexity": 3,
+        "level": "L3",
+        "targets": [
+          "武仙座球状星团"
+        ],
+        "branches": [
+          {
+            "intent": "knowledge-target",
+            "topic": "research"
+          }
+        ],
+        "legacy": false,
+        "reason": "research / L3，进入 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": true,
+          "why": false,
+          "research": true,
+          "targetParam": false
+        }
+      },
+      "externalErrors": [
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "M13 age comparison mass distance measurement",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "M13 age comparison measurement uncertainty method",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "semanticscholar",
+          "name": "Semantic Scholar",
+          "query": "M13 age comparison mass distance measurement",
+          "kind": "rate_limit",
+          "msg": "触发限流"
+        },
+        {
+          "endpoint": "wikimedia",
+          "name": "维基百科",
+          "query": "M13 age comparison mass distance measurement",
+          "kind": "timeout",
+          "msg": "请求超时"
+        },
+        {
+          "endpoint": "wiki-action",
+          "name": "维基百科（备用）",
+          "query": "M13 age comparison mass distance measurement",
+          "kind": "timeout",
+          "msg": "请求超时"
+        },
+        {
+          "endpoint": "semanticscholar",
+          "name": "Semantic Scholar",
+          "query": "M13 age comparison measurement uncertainty method",
+          "kind": "timeout",
+          "msg": "请求超时"
+        }
+      ],
+      "stopReason": "maxCalls"
+    },
+    {
+      "status": "BLOCKED_API_KEY",
+      "score": 46,
+      "scores": {
+        "understanding": 5,
+        "routing": 5,
+        "factual": 5,
+        "source": 5,
+        "evidence": 1,
+        "synthesis": 5,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 2,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 463,
+      "sections": "analysis,evidence,boundary,boundary,review,sources,followup",
+      "text": "本轮没有形成可复核的论文结论；以下先列出本地知识库中可核对的事实与方法。\n在证据来源上，本轮未获得可核验的论文；结论只覆盖已有本地事实与计算。\n综合来看，本次回答的限制是：没有 FITS 观测数据，缺少独立观测验证。\n数量 截至 2026-08-20，NASA Exoplanet Archive 确认 6,354 颗\n方法 凌星法（亮度周期下降）、视向速度法（光谱多普勒摆动）\n代表 51 Pegasi b（1995，首个主序星系外行星）、TRAPPIST-1 系统\n探测 Kepler、TESS、JWST 大气光谱\n别的太阳周围也有行星。我们怎么知道？看星星会不会周期性地「眨一下」——那是行星从它前面经过。\n本条目的时效等级为「需在线更新」（更新于 2025-11），本地快照可能滞后，关键日期请以官方数据源复核。 行星数量为动态数据，本地快照可能滞后，需以 NASA Exoplanet Archive 为准。\n未完成/不确定：没有 FITS 观测数据，缺少独立观测验证。以上结论均保留原始来源，不把缺失数据当作事实。",
+      "id": "D4",
+      "cat": "D",
+      "q": "查找系外行星大气检测的主要技术",
+      "intent": "intro-target",
+      "route": {
+        "intent": "intro-target",
+        "mode": "research",
+        "complexity": 3,
+        "level": "L3",
+        "targets": [
+          "系外行星"
+        ],
+        "branches": [
+          {
+            "intent": "intro-target",
+            "topic": "research"
+          }
+        ],
+        "legacy": false,
+        "reason": "research / L3，进入 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": true,
+          "targetParam": false
+        }
+      },
+      "externalErrors": [
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "exoplanet atmosphere technique",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wikimedia",
+          "name": "维基百科",
+          "query": "exoplanet atmosphere technique",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wiki-action",
+          "name": "维基百科（备用）",
+          "query": "exoplanet atmosphere technique",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "exoplanet atmosphere technique observation measurement",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wikimedia",
+          "name": "维基百科",
+          "query": "exoplanet atmosphere technique observation measurement",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wiki-action",
+          "name": "维基百科（备用）",
+          "query": "exoplanet atmosphere technique observation measurement",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        }
+      ],
+      "stopReason": "maxRounds"
+    },
+    {
+      "status": "BLOCKED_API_KEY",
+      "score": 50,
+      "scores": {
+        "understanding": 5,
+        "routing": 5,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 5,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 2,
+      "paperCount": 2,
+      "must": true,
+      "internal": false,
+      "textLength": 653,
+      "sections": "analysis,evidence,boundary,boundary,review,consensus,observe,visual,sources,followup",
+      "text": "核心结论：摘要缺少测量数值（检索到的摘要为「Disk-Accretion onto a Black Hole」）；未获取全文，不能据此引用具体数值。\n支持这一判断的论文包括：《Disk-Accretion onto a Black Hole. Time-Averaged Structure of Accretion Disk》（1974）；《Perturbed Accretion Disk Around the Massive Black Hole》（2007）。\n综合来看，本次回答的限制是：2 篇论文仅获得摘要，未获取全文；没有 FITS 观测数据，缺少独立观测验证。\n事件视界 史瓦西半径 r_s = 2GM/c²\n人马座 A* (4.297 ± 0.012) × 10⁶ 太阳质量（GRAVITY 2022）\nM87* (6.5 ± 0.7) × 10⁹ 太阳质量（EHT 2019）\n首张照片 M87*：2019-04-10 公布；人马座 A*：2022-05-12 公布\n诺奖 2020 年诺贝尔物理学奖（黑洞的形成与银河系中心致密天体）\n一个引力陷阱：掉进去的东西，连光都出不来。我们看到的「黑洞照片」，其实是它周围发光物质围成的圈，中间那个黑影才是它。\n数据核验日期 2026-10，数值与结论均来自条目所列论文或机构发布；未采用二手科普转述。\n未完成/不确定：2 篇论文仅获得摘要，未获取全文；没有 FITS 观测数据，缺少独立观测验证。以上结论均保留原始来源，不把缺失数据当作事实。",
+      "id": "D5",
+      "cat": "D",
+      "q": "总结近期关于黑洞吸积盘的研究进展",
+      "intent": "cosmos",
+      "route": {
+        "intent": "cosmos",
+        "mode": "research",
+        "complexity": 3,
+        "level": "L3",
+        "targets": [
+          "黑洞"
+        ],
+        "branches": [
+          {
+            "intent": "cosmos",
+            "topic": "research"
+          }
+        ],
+        "legacy": false,
+        "reason": "research / L3，进入 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": true,
+          "targetParam": false
+        }
+      },
+      "externalErrors": [
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "black hole accretion disk",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wikimedia",
+          "name": "维基百科",
+          "query": "black hole accretion disk",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "semanticscholar",
+          "name": "Semantic Scholar",
+          "query": "black hole accretion disk",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wiki-action",
+          "name": "维基百科（备用）",
+          "query": "black hole accretion disk",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "black hole accretion disk observation evidence",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wikimedia",
+          "name": "维基百科",
+          "query": "black hole accretion disk observation evidence",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        }
+      ],
+      "stopReason": "maxRounds"
+    },
+    {
+      "status": "BLOCKED_EXTERNAL",
+      "score": 25,
+      "scores": {
+        "understanding": 0,
+        "routing": 5,
+        "factual": 1,
+        "source": 1,
+        "evidence": 1,
+        "synthesis": 1,
+        "completeness": 1,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [
+        "empty-answer",
+        "missing-core-fact",
+        "no-external-evidence"
+      ],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": false,
+      "internal": false,
+      "textLength": 0,
+      "sections": "",
+      "text": "",
+      "id": "D6",
+      "cat": "D",
+      "q": "查找 DESI DR2 的主要科学结果",
+      "intent": "unknown",
+      "route": {
+        "intent": "unknown",
+        "mode": "research",
+        "complexity": 3,
+        "level": "L3",
+        "targets": [],
+        "branches": [
+          {
+            "intent": "unknown",
+            "topic": "research"
+          }
+        ],
+        "legacy": false,
+        "reason": "research / L3，进入 Planner",
+        "signals": {
+          "mentions": 0,
+          "compare": false,
+          "why": false,
+          "research": true,
+          "targetParam": false
+        }
+      },
+      "externalErrors": [
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "DESI DR2",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wikimedia",
+          "name": "维基百科",
+          "query": "DESI DR2",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "semanticscholar",
+          "name": "Semantic Scholar",
+          "query": "DESI DR2",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wiki-action",
+          "name": "维基百科（备用）",
+          "query": "DESI DR2",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "crossref",
+          "name": "Crossref",
+          "query": "DESI DR2",
+          "kind": "empty",
+          "msg": "无匹配结果"
+        }
+      ],
+      "stopReason": "noNew"
+    },
+    {
+      "status": "BLOCKED_EXTERNAL",
+      "score": 25,
+      "scores": {
+        "understanding": 0,
+        "routing": 5,
+        "factual": 1,
+        "source": 1,
+        "evidence": 1,
+        "synthesis": 1,
+        "completeness": 1,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [
+        "empty-answer",
+        "missing-core-fact",
+        "no-external-evidence"
+      ],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": false,
+      "internal": false,
+      "textLength": 0,
+      "sections": "",
+      "text": "",
+      "id": "E1",
+      "cat": "E",
+      "q": "综合目前的观测证据，分析早期宇宙星系形成模型",
+      "intent": "cosmos",
+      "route": {
+        "intent": "cosmos",
+        "mode": "research",
+        "complexity": 3,
+        "level": "L3",
+        "targets": [
+          "早期宇宙与 JWST 深场"
+        ],
+        "branches": [
+          {
+            "intent": "cosmos",
+            "topic": "research"
+          }
+        ],
+        "legacy": false,
+        "reason": "research / L3，进入 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": true,
+          "targetParam": false
+        }
+      },
+      "externalErrors": [
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "early universe galaxy formation observation",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wikimedia",
+          "name": "维基百科",
+          "query": "early universe galaxy formation observation",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "semanticscholar",
+          "name": "Semantic Scholar",
+          "query": "early universe galaxy formation observation",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wiki-action",
+          "name": "维基百科（备用）",
+          "query": "early universe galaxy formation observation",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "early universe galaxy formation observation evidence",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wikimedia",
+          "name": "维基百科",
+          "query": "early universe galaxy formation observation evidence",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        }
+      ],
+      "stopReason": "noNew"
+    },
+    {
+      "status": "BLOCKED_EXTERNAL",
+      "score": 25,
+      "scores": {
+        "understanding": 0,
+        "routing": 5,
+        "factual": 1,
+        "source": 1,
+        "evidence": 1,
+        "synthesis": 1,
+        "completeness": 1,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [
+        "empty-answer",
+        "missing-core-fact",
+        "no-external-evidence"
+      ],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": false,
+      "internal": false,
+      "textLength": 0,
+      "sections": "",
+      "text": "",
+      "id": "E2",
+      "cat": "E",
+      "q": "比较不同方法测量宇宙膨胀率的优缺点",
+      "intent": "cosmos",
+      "route": {
+        "intent": "cosmos",
+        "mode": "compare",
+        "complexity": 2,
+        "level": "L2",
+        "targets": [
+          "哈勃张力"
+        ],
+        "branches": [
+          {
+            "intent": "cosmos",
+            "target": "哈勃张力"
+          }
+        ],
+        "legacy": false,
+        "reason": "compare / L2，进入 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": true,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      },
+      "externalErrors": [
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "cosmic expansion measurement comparison method",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "crossref",
+          "name": "Crossref",
+          "query": "cosmic expansion measurement comparison method",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wikimedia",
+          "name": "维基百科",
+          "query": "cosmic expansion measurement comparison method",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "semanticscholar",
+          "name": "Semantic Scholar",
+          "query": "cosmic expansion measurement comparison method",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wiki-action",
+          "name": "维基百科（备用）",
+          "query": "cosmic expansion measurement comparison method",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "cosmic expansion measurement comparison method observation evidence",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        }
+      ],
+      "stopReason": "noNew"
+    },
+    {
+      "status": "BLOCKED_EXTERNAL",
+      "score": 25,
+      "scores": {
+        "understanding": 0,
+        "routing": 5,
+        "factual": 1,
+        "source": 1,
+        "evidence": 1,
+        "synthesis": 1,
+        "completeness": 1,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [
+        "empty-answer",
+        "missing-core-fact",
+        "no-external-evidence"
+      ],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": false,
+      "internal": false,
+      "textLength": 0,
+      "sections": "",
+      "text": "",
+      "id": "E3",
+      "cat": "E",
+      "q": "分析 JWST 对早期星系形成理论带来的影响",
+      "intent": "cosmos",
+      "route": {
+        "intent": "cosmos",
+        "mode": "research",
+        "complexity": 3,
+        "level": "L3",
+        "targets": [
+          "早期宇宙与 JWST 深场",
+          "哈勃与韦布的区别"
+        ],
+        "branches": [
+          {
+            "intent": "cosmos",
+            "topic": "research"
+          }
+        ],
+        "legacy": false,
+        "reason": "research / L3，进入 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": true,
+          "targetParam": false
+        }
+      },
+      "externalErrors": [
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "JWST galaxy formation",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "crossref",
+          "name": "Crossref",
+          "query": "JWST galaxy formation",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wikimedia",
+          "name": "维基百科",
+          "query": "JWST galaxy formation",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "semanticscholar",
+          "name": "Semantic Scholar",
+          "query": "JWST galaxy formation",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wiki-action",
+          "name": "维基百科（备用）",
+          "query": "JWST galaxy formation",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "JWST galaxy formation observation evidence",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        }
+      ],
+      "stopReason": "noNew"
+    },
+    {
+      "status": "BLOCKED_EXTERNAL",
+      "score": 25,
+      "scores": {
+        "understanding": 0,
+        "routing": 5,
+        "factual": 1,
+        "source": 1,
+        "evidence": 1,
+        "synthesis": 1,
+        "completeness": 1,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [
+        "empty-answer",
+        "missing-core-fact",
+        "no-external-evidence"
+      ],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": false,
+      "internal": false,
+      "textLength": 0,
+      "sections": "",
+      "text": "",
+      "id": "E4",
+      "cat": "E",
+      "q": "综合多篇论文分析系外行星大气组成的研究进展",
+      "intent": "knowledge-target",
+      "route": {
+        "intent": "knowledge-target",
+        "mode": "research",
+        "complexity": 3,
+        "level": "L3",
+        "targets": [
+          "系外行星"
+        ],
+        "branches": [
+          {
+            "intent": "knowledge-target",
+            "topic": "research"
+          }
+        ],
+        "legacy": false,
+        "reason": "research / L3，进入 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": true,
+          "targetParam": false
+        }
+      },
+      "externalErrors": [
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "exoplanet atmosphere",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "crossref",
+          "name": "Crossref",
+          "query": "exoplanet atmosphere",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wikimedia",
+          "name": "维基百科",
+          "query": "exoplanet atmosphere",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "semanticscholar",
+          "name": "Semantic Scholar",
+          "query": "exoplanet atmosphere",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wiki-action",
+          "name": "维基百科（备用）",
+          "query": "exoplanet atmosphere",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "exoplanet atmosphere observation evidence",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        }
+      ],
+      "stopReason": "noNew"
+    },
+    {
+      "status": "BLOCKED_EXTERNAL",
+      "score": 25,
+      "scores": {
+        "understanding": 0,
+        "routing": 5,
+        "factual": 1,
+        "source": 1,
+        "evidence": 1,
+        "synthesis": 1,
+        "completeness": 1,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [
+        "empty-answer",
+        "missing-core-fact",
+        "no-external-evidence"
+      ],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": false,
+      "internal": false,
+      "textLength": 0,
+      "sections": "",
+      "text": "",
+      "id": "E5",
+      "cat": "E",
+      "q": "分析不同观测方法在暗物质研究中的作用",
+      "intent": "cosmos",
+      "route": {
+        "intent": "cosmos",
+        "mode": "research",
+        "complexity": 3,
+        "level": "L3",
+        "targets": [
+          "暗物质"
+        ],
+        "branches": [
+          {
+            "intent": "cosmos",
+            "topic": "research"
+          }
+        ],
+        "legacy": false,
+        "reason": "research / L3，进入 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": true,
+          "targetParam": false
+        }
+      },
+      "externalErrors": [
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "dark matter observation method",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "crossref",
+          "name": "Crossref",
+          "query": "dark matter observation method",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wikimedia",
+          "name": "维基百科",
+          "query": "dark matter observation method",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "semanticscholar",
+          "name": "Semantic Scholar",
+          "query": "dark matter observation method",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wiki-action",
+          "name": "维基百科（备用）",
+          "query": "dark matter observation method",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "dark matter observation method evidence",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        }
+      ],
+      "stopReason": "noNew"
+    },
+    {
+      "status": "BLOCKED_EXTERNAL",
+      "score": 25,
+      "scores": {
+        "understanding": 0,
+        "routing": 5,
+        "factual": 1,
+        "source": 1,
+        "evidence": 1,
+        "synthesis": 1,
+        "completeness": 1,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [
+        "empty-answer",
+        "missing-core-fact",
+        "no-external-evidence"
+      ],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": false,
+      "internal": false,
+      "textLength": 0,
+      "sections": "",
+      "text": "",
+      "id": "E6",
+      "cat": "E",
+      "q": "比较黑洞形成模型的观测证据与主要差异",
+      "intent": "cosmos",
+      "route": {
+        "intent": "cosmos",
+        "mode": "research",
+        "complexity": 4,
+        "level": "L4",
+        "targets": [
+          "黑洞"
+        ],
+        "branches": [
+          {
+            "intent": "cosmos",
+            "topic": "research"
+          }
+        ],
+        "legacy": false,
+        "reason": "research / L4，进入 Planner",
+        "signals": {
+          "mentions": 2,
+          "compare": true,
+          "why": false,
+          "research": true,
+          "targetParam": false
+        }
+      },
+      "externalErrors": [
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "black hole observation comparison formation",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "crossref",
+          "name": "Crossref",
+          "query": "black hole observation comparison formation",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wikimedia",
+          "name": "维基百科",
+          "query": "black hole observation comparison formation",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "semanticscholar",
+          "name": "Semantic Scholar",
+          "query": "black hole observation comparison formation",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "wiki-action",
+          "name": "维基百科（备用）",
+          "query": "black hole observation comparison formation",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        },
+        {
+          "endpoint": "openalex",
+          "name": "OpenAlex",
+          "query": "black hole observation comparison formation evidence",
+          "kind": "cooling",
+          "msg": "熔断冷却中"
+        }
+      ],
+      "stopReason": "noNew"
+    },
+    {
+      "status": "PASS",
+      "score": 45,
+      "scores": {
+        "understanding": 5,
+        "routing": 2,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 261,
+      "sections": "verdict,evidence,observe,visual,mapref,followup",
+      "text": "今晚 21:00，猎户座大星云尚未升起；最佳观测窗口为 22:49–05:29，最高约 45°。\n距离地球最近的巨型恒星形成区之一，位于猎户座「佩剑」中部，肉眼可见为朦胧光斑。\n距离 约 1344 光年\n直径 约 24 光年\n类型 H II 区 / 发射星云\n视星等 4.0（肉眼可见）\n升 / 落（UTC+8） 21:05 / 08:33\n中天（UTC+8） 02:29 · 高度 45°\n在猎户座腰带下方挂着的那串「小星星」中间，有一团正在孕育新恒星的气体云——它就是 M42。用双筒望远镜看，像一团被月光照亮的薄雾。",
+      "id": "F1",
+      "cat": "F",
+      "q": "使用 200mm 口径望远镜观测 M42 有什么建议？",
+      "intent": "observe-target",
+      "route": {
+        "intent": "observe-target",
+        "mode": "single",
+        "complexity": 1,
+        "level": "L1",
+        "targets": [
+          "猎户座大星云"
+        ],
+        "branches": [
+          {
+            "intent": "observe-target",
+            "target": "猎户座大星云"
+          }
+        ],
+        "legacy": true,
+        "reason": "single + L1，跳过 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "score": 45,
+      "scores": {
+        "understanding": 5,
+        "routing": 2,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 105,
+      "sections": "verdict,evidence",
+      "text": "放大倍率 = 物镜焦距 1000 mm / 目镜焦距 25 mm = 40×。\n实际可用倍率还受口径、视宁度与出瞳直径限制。\n物镜焦距 1000 mm\n目镜焦距 25 mm\n放大倍率 40×\n口径 200 mm",
+      "id": "F2",
+      "cat": "F",
+      "q": "根据 200mm 口径、1000mm 焦距和 25mm 目镜计算放大倍率。",
+      "intent": "gear-fit",
+      "route": {
+        "intent": "gear-fit",
+        "mode": "single",
+        "complexity": 1,
+        "level": "L1",
+        "targets": [],
+        "branches": [
+          {
+            "intent": "gear-fit",
+            "target": null
+          }
+        ],
+        "legacy": true,
+        "reason": "single + L1，跳过 Planner",
+        "signals": {
+          "mentions": 0,
+          "compare": false,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "score": 45,
+      "scores": {
+        "understanding": 5,
+        "routing": 2,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 261,
+      "sections": "verdict,evidence,observe,visual,mapref,followup",
+      "text": "今晚 21:00，猎户座大星云尚未升起；最佳观测窗口为 22:49–05:29，最高约 45°。\n距离地球最近的巨型恒星形成区之一，位于猎户座「佩剑」中部，肉眼可见为朦胧光斑。\n距离 约 1344 光年\n直径 约 24 光年\n类型 H II 区 / 发射星云\n视星等 4.0（肉眼可见）\n升 / 落（UTC+8） 21:05 / 08:33\n中天（UTC+8） 02:29 · 高度 45°\n在猎户座腰带下方挂着的那串「小星星」中间，有一团正在孕育新恒星的气体云——它就是 M42。用双筒望远镜看，像一团被月光照亮的薄雾。",
+      "id": "F3",
+      "cat": "F",
+      "q": "根据北京今晚的观测条件分析 M42 是否适合观测。",
+      "intent": "observe-target",
+      "route": {
+        "intent": "observe-target",
+        "mode": "single",
+        "complexity": 1,
+        "level": "L1",
+        "targets": [
+          "光污染与波特尔等级",
+          "猎户座大星云"
+        ],
+        "branches": [
+          {
+            "intent": "observe-target",
+            "target": "光污染与波特尔等级"
+          }
+        ],
+        "legacy": true,
+        "reason": "single + L1，跳过 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "score": 48,
+      "scores": {
+        "understanding": 5,
+        "routing": 5,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 139,
+      "sections": "verdict,evidence",
+      "text": "80mm 约 1.73 角秒；200mm 约 0.69 角秒（瑞利判据，取 550nm 可见光）。口径越大，理论分辨率越高。\n理论分辨率是衍射极限；实际观测还受视宁度、跟踪精度与光学质量影响。\n80mm 口径分辨率 约 1.73 角秒\n200mm 口径分辨率 约 0.69 角秒",
+      "id": "F4",
+      "cat": "F",
+      "q": "比较 80mm 与 200mm 望远镜的理论分辨率。",
+      "intent": "gear-fit",
+      "route": {
+        "intent": "gear-fit",
+        "mode": "compare",
+        "complexity": 3,
+        "level": "L3",
+        "targets": [
+          "望远镜分辨率与集光力"
+        ],
+        "branches": [
+          {
+            "intent": "gear-fit",
+            "target": "望远镜分辨率与集光力"
+          }
+        ],
+        "legacy": false,
+        "reason": "compare / L3，进入 Planner",
+        "signals": {
+          "mentions": 2,
+          "compare": true,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "score": 45,
+      "scores": {
+        "understanding": 5,
+        "routing": 2,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 103,
+      "sections": "verdict,evidence",
+      "text": "缺少目镜表观视场或相机传感器尺寸，无法给出唯一的视场范围。\n需要补充目镜 AFOV（常见 50°/68°/82°）或相机传感器尺寸；仅有口径和焦距只能确定放大倍率。\n口径 200 mm\n焦距 1000 mm",
+      "id": "F5",
+      "cat": "F",
+      "q": "计算 200mm 口径、1000mm 焦距望远镜的视场范围。",
+      "intent": "gear-fit",
+      "route": {
+        "intent": "gear-fit",
+        "mode": "single",
+        "complexity": 1,
+        "level": "L1",
+        "targets": [],
+        "branches": [
+          {
+            "intent": "gear-fit",
+            "target": null
+          }
+        ],
+        "legacy": true,
+        "reason": "single + L1，跳过 Planner",
+        "signals": {
+          "mentions": 0,
+          "compare": false,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "score": 45,
+      "scores": {
+        "understanding": 5,
+        "routing": 2,
+        "factual": 5,
+        "source": 5,
+        "evidence": 5,
+        "synthesis": 3,
+        "completeness": 5,
+        "expression": 5,
+        "content": 5,
+        "context": 5
+      },
+      "severe": [],
+      "evidenceCount": 0,
+      "paperCount": 0,
+      "must": true,
+      "internal": false,
+      "textLength": 261,
+      "sections": "verdict,evidence,observe,visual,mapref,followup",
+      "text": "今晚 21:00，猎户座大星云尚未升起；最佳观测窗口为 22:49–05:29，最高约 45°。\n距离地球最近的巨型恒星形成区之一，位于猎户座「佩剑」中部，肉眼可见为朦胧光斑。\n距离 约 1344 光年\n直径 约 24 光年\n类型 H II 区 / 发射星云\n视星等 4.0（肉眼可见）\n升 / 落（UTC+8） 21:05 / 08:33\n中天（UTC+8） 02:29 · 高度 45°\n在猎户座腰带下方挂着的那串「小星星」中间，有一团正在孕育新恒星的气体云——它就是 M42。用双筒望远镜看，像一团被月光照亮的薄雾。",
+      "id": "F6",
+      "cat": "F",
+      "q": "用 10×50 双筒望远镜能看到 M42 的哪些细节？",
+      "intent": "observe-target",
+      "route": {
+        "intent": "observe-target",
+        "mode": "single",
+        "complexity": 1,
+        "level": "L1",
+        "targets": [
+          "猎户座大星云"
+        ],
+        "branches": [
+          {
+            "intent": "observe-target",
+            "target": "猎户座大星云"
+          }
+        ],
+        "legacy": true,
+        "reason": "single + L1，跳过 Planner",
+        "signals": {
+          "mentions": 1,
+          "compare": false,
+          "why": false,
+          "research": false,
+          "targetParam": false
+        }
+      }
+    }
+  ]
+}

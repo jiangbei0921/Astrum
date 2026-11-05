@@ -180,7 +180,7 @@ function buildVersion() {
     app: 'ASTRUM',
     appVersion: readAppVersion(),
     releaseVersion: 'V1.4',
-    featureVersion: 'V1.14',
+    featureVersion: 'V1.15',
     buildTime: new Date().toISOString(),
     buildMode: 'static-pages',
     deployEnv: process.env.GITHUB_ACTIONS ? 'github-actions' : 'local',
@@ -190,7 +190,7 @@ function buildVersion() {
     dirty: dirty,
     branch: process.env.GITHUB_REF_NAME || git(['branch', '--show-current']) || null,
     runId: process.env.GITHUB_RUN_ID || null,
-    features: ['V1', 'V1.1', 'V1.2', 'V1.3', 'V1.4', 'V1.5', 'V1.6', 'V1.7', 'V1.8', 'V1.9', 'V1.10', 'V1.11', 'V1.12', 'V1.13', 'V1.14']
+    features: ['V1', 'V1.1', 'V1.2', 'V1.3', 'V1.4', 'V1.5', 'V1.6', 'V1.7', 'V1.8', 'V1.9', 'V1.10', 'V1.11', 'V1.12', 'V1.13', 'V1.14', 'V1.15']
   };
 }
 

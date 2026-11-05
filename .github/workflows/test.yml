@@ -220,6 +220,10 @@ jobs:
       - name: V1.14 输出质量 v1-14-output-quality-test
         run: node tools/v1-14-output-quality-test.js
 
+      # V1.15：真实盲测修复回归（星座、对比、多轮、光学计算、检索限流）
+      - name: V1.15 回归 v1-15-regression-test
+        run: node tools/v1-15-regression-test.js
+
       # V1.11：流式协议、答案质量、每日增量更新
       - name: V1.11 流式协议 v1-11-stream-test
         run: node tools/v1-11-stream-test.js

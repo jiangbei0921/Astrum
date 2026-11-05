@@ -143,6 +143,35 @@
   function isAscii(s) {
     return /^[\x00-\x7F]+$/.test(String(s || ''));
   }
+
+  /* 中文问题里没有实体英文名时，尽量从问题本身提取英文检索词。
+   * 只做术语归一化，不替用户补造研究对象；提取不到时仍按原逻辑降级为百科检索。 */
+  var EN_QUERY_TERMS = [
+    ['暗能量', 'dark energy'], ['暗物质', 'dark matter'], ['早期宇宙', 'early universe'],
+    ['宇宙膨胀', 'cosmic expansion'], ['哈勃常数', 'Hubble constant'], ['宇宙微波背景', 'cosmic microwave background'],
+    ['系外行星', 'exoplanet'], ['大气', 'atmosphere'], ['黑洞', 'black hole'], ['吸积盘', 'accretion disk'],
+    ['星系形成', 'galaxy formation'], ['恒星形成', 'star formation'], ['星系团', 'galaxy cluster'],
+    ['超新星', 'supernova'], ['中子星', 'neutron star'], ['脉冲星', 'pulsar'], ['引力波', 'gravitational wave'],
+    ['类星体', 'quasar'], ['再电离', 'reionization'], ['金属丰度', 'metallicity'], ['红移', 'redshift'],
+    ['恒星光谱', 'stellar spectrum'], ['观测波段', 'wavelength bands'], ['半人马座', 'Centaurus'],
+    ['年龄', 'age'], ['距离', 'distance'], ['质量', 'mass'], ['测量', 'measurement'],
+    ['观测', 'observation'], ['争议', 'tension'], ['比较', 'comparison'], ['区别', 'comparison'],
+    ['技术', 'technique'], ['方法', 'method'], ['形成', 'formation'], ['演化', 'evolution']
+  ];
+  var EN_STOP = /^(a|an|the|and|or|of|in|on|to|for|with|from|by|is|are|was|were|what|which|who|how|why|latest|recent|result|results|paper|papers|study|studies|review|find|about|search)$/i;
+  function englishHint(q) {
+    var s = String(q || '');
+    var words = (s.match(/[A-Za-z][A-Za-z0-9._+-]{1,}/g) || []).filter(function (w) {
+      return !EN_STOP.test(w);
+    });
+    /* 优先保留天体编号、望远镜/巡天缩写，再补中文术语的英文规范名。 */
+    var ids = words.filter(function (w) {
+      return /^(?:M\d{1,3}|NGC\d{2,}|IC\d{2,}|DESI|JWST|HST|EHT|ALMA|SDSS|Planck|Gaia|Chandra|Fermi|LIGO|Virgo|CMB|SKA|VLT|Keck|Hubble|Webb)$/i.test(w);
+    });
+    var mapped = EN_QUERY_TERMS.filter(function (p) { return s.indexOf(p[0]) >= 0; })
+      .map(function (p) { return p[1]; });
+    return uniq(ids.concat(words.length > 10 ? [] : words).concat(mapped)).slice(0, 5).join(' ');
+  }
   function normTitle(s) {
     return String(s || '').toLowerCase()
       .replace(/[\s\-_·:：，,。.、；;（）()「」【】\[\]"'’“”]/g, '')
@@ -425,16 +454,27 @@
   }
 
   /* 生成一个子问题的检索词。
-   * 关键：论文类端点只认英文，拿不到英文词时不能硬查，否则会返回无关结果。 */
+   * 关键：论文类端点只认英文，拿不到英文词时不能硬查，否则会返回无关结果。
+   * 同时去掉重复词：baseEn 已经包含 distance measurement 时，不再拼第二遍。 */
+  function joinQuery(base, suffix) {
+    var seen = {}, out = [];
+    (String(base || '') + ' ' + String(suffix || '')).split(/\s+/).forEach(function (w) {
+      var k = String(w || '').toLowerCase();
+      if (!w || seen[k]) return;
+      seen[k] = 1;
+      out.push(w);
+    });
+    return out.join(' ').trim();
+  }
   function buildQuery(sub, baseEn, baseCn, types) {
     var suffix = sub.suffix || '';
     var wantsPaper = types.indexOf('paper') >= 0;
     if (isAscii(baseEn) && baseEn) {
-      return (baseEn + (suffix ? ' ' + suffix : '')).trim();
+      return joinQuery(baseEn, suffix);
     }
     /* 没有英文词：中文只能查百科 */
     if (!wantsPaper || types.indexOf('encyclopedia') >= 0) {
-      return (baseCn + (suffix ? ' ' + suffix : '')).trim();
+      return joinQuery(baseCn, suffix);
     }
     return '';
   }
@@ -447,7 +487,17 @@
     var profile = PROFILES[profileKey] || PROFILES.generic;
     var entityName = opts.entityName || '';
     var baseCn = entityName || q;
-    var baseEn = opts.entityEn || '';
+    var baseEn = opts.entityEn || englishHint(q);
+    var types = profile.types.slice();
+    var canPaper = !!(baseEn && isAscii(baseEn));
+
+    /* 英文检索词缺失时，不能把中文硬塞给论文/影像端点：
+     * 之前 degraded=true，但仍按 paper+encyclopedia 查询，OpenAlex 收到中文后
+     * 返回空结果，最终把「检索失败」误当成「没有研究」。 */
+    if (!canPaper && types.indexOf('paper') >= 0) {
+      types = types.filter(function (t) { return t !== 'paper' && t !== 'image'; });
+      if (!types.length) types = ['encyclopedia'];
+    }
 
     /* 纯本地问题：明确不检索 */
     if (profileKey === 'localOnly') {
@@ -459,14 +509,14 @@
     }
 
     var subs = profile.subs.map(function (s) {
-      var qy = buildQuery(s, baseEn, baseCn, profile.types);
-      return { id: s.id, label: s.label, query: qy, types: profile.types };
+      var qy = buildQuery(s, baseEn, baseCn, types);
+      return { id: s.id, label: s.label, query: qy, types: types };
     }).filter(function (s) { return s.query; });
 
     return {
       profile: profileKey,
       label: profile.label,
-      types: profile.types,
+      types: types,
       baseCn: baseCn,
       baseEn: baseEn,
       byDate: !!profile.byDate,
@@ -474,9 +524,9 @@
       subs: subs,
       queries: uniq(subs.map(function (s) { return s.query; })),
       skip: false,
-      /* 记录降级：没有英文词时论文端点查不了 */
-      degraded: profile.types.indexOf('paper') >= 0 && !isAscii(baseEn),
-      degradedReason: (profile.types.indexOf('paper') >= 0 && !isAscii(baseEn))
+      /* 记录降级：没有英文词时论文端点不可用 */
+      degraded: profile.types.indexOf('paper') >= 0 && !canPaper,
+      degradedReason: (profile.types.indexOf('paper') >= 0 && !canPaper)
         ? '未取到英文检索词，本轮只检索百科' : ''
     };
   }
@@ -533,7 +583,12 @@
     if (!root.Sources || !root.Sources.searchMany) {
       return Promise.resolve({ items: [], calls: 0, errors: [{ name: 'sources', msg: '检索模块不可用' }], truncated: false });
     }
-    return root.Sources.searchMany(queries, opts);
+    /* 研究流水线有自己的 maxCalls/budget；不能再被用户级 1.5s/20 次限流挡住，
+     * 否则连续问几个科研问题都会被误判为「检索过于频繁」。 */
+    var o = {};
+    Object.keys(opts || {}).forEach(function (k) { o[k] = opts[k]; });
+    o.internal = true;
+    return root.Sources.searchMany(queries, o);
   }
 
   /* run(question, opts) → Promise<result>
