@@ -761,7 +761,8 @@
       dateNote = '未指定地点，按「' + ctx.city + '」（' + ctx.lat.toFixed(2) + '°, ' + ctx.lon.toFixed(2) + '°）计算。';
     }
     var intent = detectIntent(q, targets);
-    var t0Wrap = targets.length ? primaryTargetOf(targets) : null;
+    var t0Wrap = targets.length ? (['helios', 'cosmos', 'nova', 'event', 'tonight'].indexOf(intent) >= 0
+      ? targets[0] : primaryTargetOf(targets)) : null;
     var t0 = t0Wrap ? t0Wrap.item : null;
     var answer = { query: q, intent: intent, ctx: ctx, targets: targets, trace: [], sections: [], meta: {}, _dateNote: dateNote, _when: when };
 
@@ -786,7 +787,7 @@
     else if (intent === 'event') out = composeEvent(answer, ctx, cfg, q, targets);
     else if (intent === 'system-view') out = composeSystemView(answer, ctx, cfg, t0, q);
     else if (intent === 'photo-target') out = composePhoto(answer, ctx, cfg, t0, q);
-    else if (intent === 'gear' && !(t0 && isConceptTarget(t0))) out = composeGear(answer, ctx, cfg);
+    else if (intent === 'gear') out = composeGear(answer, ctx, cfg);
     else if (intent === 'gear-fit' && (!t0 || isConceptTarget(t0))) out = composeOptics(answer, ctx, cfg, q);
     else if (intent === 'gear-fit') out = composeGearFit(answer, ctx, cfg, t0);
     else if (intent === 'chart') out = composeChart(answer, ctx, cfg, t0);

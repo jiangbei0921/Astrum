@@ -43,6 +43,7 @@ var HELPERS = `
     srcSeed:function(q,old){
       var at=old?Date.now()-11*60*1000:Date.now();
       var m={}; m['openalex|'+q]={at:at,items:[item('cached-openalex',1)],provider:'OpenAlex'};
+      m['crossref|'+q]={at:at,items:[item('cached-crossref',3)],provider:'Crossref'};
       m['semanticscholar|'+q]={at:at,items:[item('cached-s2',2)],provider:'Semantic Scholar'};
       put(srcKey(),m);
       return srcKey();
@@ -215,7 +216,7 @@ async function main() {
     ok('C1 sources 缓存键按端点+查询', typeof key === 'string' && key.indexOf('astrum.search.cache.v2') >= 0, key);
 
     var hit = await call(cdp, "__v15cache.srcHit('" + q + "')");
-    ok('C2 sources 命中且不消耗调用配额', hit && hit.calls === 0 && hit.items >= 2,
+    ok('C2 sources 命中且不消耗调用配额', hit && hit.calls === 0 && hit.items >= 3,
       'calls=' + (hit && hit.calls) + ' items=' + (hit && hit.items) + ' ms=' + (hit && hit.ms));
 
     var miss = await call(cdp, "__v15cache.srcMiss('" + q + "')");
