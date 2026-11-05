@@ -2670,7 +2670,11 @@
     }
 
     /* 第一句：结论 */
-    box.appendChild(el('p', 'narr-lead', esc(v.head)));
+    var leadText = String(v.head || '');
+    /* 多轮承接时明确点名上一轮主体，避免「它」的答案看起来像凭空出现。 */
+    var memTarget = (ans.meta && ans.meta.memory && ans.meta.memory.resolved) || '';
+    if (memTarget && leadText.indexOf(memTarget) < 0) leadText = memTarget + '：' + leadText;
+    box.appendChild(el('p', 'narr-lead', esc(leadText)));
 
     /* V1.14：同一事实只完整说一次。verdict 已经写出的数值/属性，
      * 不再在下方依据句里重复；只有 verdict 没提到的信息才补进正文。 */
