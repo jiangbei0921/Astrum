@@ -772,7 +772,9 @@
     var bodyInfo = bodyKey && root.BODY_INFO ? root.BODY_INFO[bodyKey] : null;
     var bodyAttr = bodyAttributeOf(q);
     var out;
-    var compare = /相比|对比|比较|区别|差异|碰撞|合并|撞/.test(q) && compareEntriesOf(targets).length >= 2;
+    var compare = /相比|对比|比较|区别|差异|碰撞|合并|撞/.test(q) &&
+      !/观测|建议|今晚|拍摄|怎么|器材|几点|升起|方位|高度|视场|能看/.test(q) &&
+      compareEntriesOf(targets).length >= 2;
     var cmp = compare ? composeComparison(answer, ctx, cfg, targets, q) : null;
     if (cmp) out = cmp;
     else if (bodyInfo && bodyAttr && (bodyInfo[bodyAttr.key] ||

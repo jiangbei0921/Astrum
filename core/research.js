@@ -155,7 +155,7 @@
     ['类星体', 'quasar'], ['再电离', 'reionization'], ['金属丰度', 'metallicity'], ['红移', 'redshift'],
     ['恒星光谱', 'stellar spectrum'], ['观测波段', 'wavelength bands'], ['半人马座', 'Centaurus'],
     ['年龄', 'age'], ['距离', 'distance'], ['质量', 'mass'], ['测量', 'measurement'],
-    ['观测', 'observation'], ['争议', 'tension'], ['比较', 'comparison'], ['区别', 'comparison'],
+    ['观测', 'observation'], ['争议', 'tension'],
     ['技术', 'technique'], ['方法', 'method'], ['形成', 'formation'], ['演化', 'evolution']
   ];
   var EN_STOP = /^(a|an|the|and|or|of|in|on|to|for|with|from|by|is|are|was|were|what|which|who|how|why|latest|recent|result|results|paper|papers|study|studies|review|find|about|search)$/i;

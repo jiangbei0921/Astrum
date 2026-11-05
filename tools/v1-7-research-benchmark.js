@@ -259,6 +259,19 @@ async function runOne(c) {
     row.reason = 'BLOCKED_EXTERNAL:' + external.slice(0, 2).join('/');
     return row;
   }
+  /* 只有题名/DOI、没有任何摘要正文时，不能要求结论里出现可核对数值；
+   * 这是外部元数据缺失，不是研究能力通过。明确记为 BLOCKED_EXTERNAL。 */
+  if (c.conclusionNumbers && r.research && external.length) {
+    var hasAbstract = (r.research.evidence || []).some(function (e) {
+      var x = String((e.content && (e.content.excerpt || e.content.snippet)) || '');
+      return x.length > 100 && x.indexOf(String(e.title || '').slice(0, 30)) !== 0;
+    });
+    if (!hasAbstract) {
+      row.pass = null;
+      row.reason = 'BLOCKED_EXTERNAL:no-abstract';
+      return row;
+    }
+  }
 
   if (!r.answer) { fail('没有 answer'); return row; }
   if (c.template) check('模板 ' + c.template, r.control && r.control.plan && r.control.plan.template === c.template,
