@@ -10,10 +10,462 @@
   'use strict';
 
   root.ASTRUM_DAILY = {
-    "updated": "2026-11-04",
-    "generatedAt": "2026-11-05T07:45:02.989Z",
+    "updated": "2026-11-05",
+    "generatedAt": "2026-11-05T07:45:21.706Z",
     "note": "每日 UTC 01:00 增量同步；内容未经本项目核验，不参与答案推理。",
     "papers": [
+      {
+        "id": "2611.05996",
+        "title": "Spacetime Evolution Induced by a Massive Cosmic String in Numerical Relativity",
+        "authors": [
+          "Yoshihiro Kishimoto",
+          "Cristian Joana",
+          "Teruaki Suyama"
+        ],
+        "summary": "Cosmic strings are one-dimensional topological defects formed during phase transitions in the early universe. ''Massive'' cosmic strings possess a sufficiently large tension to close their transverse space, forming a con…",
+        "cat": "gr-qc",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T05:40:34Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T05:40:34Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.05996",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "id": "2611.06232",
+        "title": "Orientation of the spin axes of large Kuiper belt bodies as an indicator of the mechanism of their origin",
+        "authors": [
+          "A. M. Kazantsev"
+        ],
+        "summary": "The paper analyses the orientation of the spin axes of Kuiper Belt (KB) bodies that have satellites. For most of these bodies, the axes orientations were estimated under the assumption that the orbital planes of the sate…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T09:39:27Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T09:39:27Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.06232",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "id": "2611.06304",
+        "title": "Euclid: Survey mask effects on clustering of galaxy clusters",
+        "authors": [
+          "A. Fumagalli",
+          "R. Ingrao",
+          "M. Costanzi"
+        ],
+        "summary": "Wide-area cluster catalogues from Stage-IV surveys will substantially improve the precision of cluster clustering measurements, making the control of observational systematic effects essential for cosmological inference.…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T10:38:09Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T10:38:09Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.06304",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "id": "2611.06329",
+        "title": "Primordial Black Holes and Induced Gravitational Waves from Inflation with History-Dependent Effective Dissipation",
+        "authors": [
+          "Narges Rashidi"
+        ],
+        "summary": "We study inflation with an exponential factor multiplying the scalar Lagrangian and depending on the accumulated expansion history through a field-dependent coupling. Variation of the complete action on a finite interval…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T10:59:22Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T10:59:22Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.06329",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "id": "2611.06330",
+        "title": "Horndeski Gravity as an Effective Dark Energy Fluid in Cosmological N-body Simulations",
+        "authors": [
+          "Vicente Pedreros Aballay"
+        ],
+        "summary": "Unraveling the nature of the cosmic expansion, driven by Dark Energy (DE), remains one of the key challenges in modern cosmology. Modified Gravity (MG) models provide an alternative to the standard cosmological constant…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T10:59:28Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T10:59:28Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.06330",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "id": "2611.06399",
+        "title": "Planting neutrino SE-EdS: A < 3% accurate clustering approximation for neutrinos and other hot dark matter",
+        "authors": [
+          "Amol Upadhye",
+          "Yvonne Y. Y. Wong"
+        ],
+        "summary": "The age of the cosmic neutrino is upon us. Aside from their fundamental importance to particle physics and the recent tensions in their mass scale $M_ν= \\sum m_ν$, neutrinos' degeneracies with other cosmological paramete…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T12:03:57Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T12:03:57Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.06399",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "id": "2611.06516",
+        "title": "Primary and Secondary Star Formation in the Spiral Waves of NGC 628",
+        "authors": [
+          "Bruce G. Elmegreen",
+          "Sean T. Linden",
+          "Kelsey E. Johnson"
+        ],
+        "summary": "To determine the role of spiral arms and stellar feedback on the formation of stars, we examine the positions of optically identified and emerging star clusters in NGC 628. We find that the youngest clusters extend furth…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T13:42:10Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T13:42:10Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.06516",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "id": "2611.06547",
+        "title": "The dwarf galaxy NGC 185: the flagship of Andromeda's dwarf galaxies for the study of evolved multiple stellar populations",
+        "authors": [
+          "Paolo Ventura",
+          "Chiara Ventura",
+          "Richard D'Souza"
+        ],
+        "summary": "Reaching galaxies at 10-15 Mpc with HST and JWST requires star formation history (SFH) diagnostics that do not rely on the faint main sequence turn-off. We investigate whether horizontal branch (HB), red clump (RC), and…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T14:13:15Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T14:13:15Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.06547",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "id": "2611.06549",
+        "title": "Population synthesis of substellar companions surviving common-envelope evolution",
+        "authors": [
+          "Nicolas F. Miranda",
+          "Alex Mauch-Soriano",
+          "Joaquin A. Barraza-Jorquera"
+        ],
+        "summary": "Predicting the population of substellar companions around white dwarfs (WDs) requires accounting for both companions that avoid engulfment during stellar evolution and those that survive common-envelope (CE) evolution. W…",
+        "cat": "astro-ph.SR",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T14:14:19Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T14:14:19Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.06549",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "id": "2611.06632",
+        "title": "Living near filaments: How environment shapes age profiles in low-mass galaxies",
+        "authors": [
+          "Elisa A. Tau",
+          "Diego Pallero",
+          "Rory Smith"
+        ],
+        "summary": "U-shaped radial age profiles have recently been reported in low-mass galaxies. This type of profile differs from the usually observed positive radial age gradients of the low-mass regime. We aim to characterise the envir…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T15:13:38Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T15:13:38Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.06632",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "id": "2611.06648",
+        "title": "Investigating the initial conditions of globular clusters via $N$-body simulations: I. half-mass radius and stellar density",
+        "authors": [
+          "Ruoyun Huang",
+          "Baitian Tang",
+          "Long Wang"
+        ],
+        "summary": "Born out of the turbulent, dense gas of the early Universe, globular clusters (GCs) represent a significantly different star-formation mode compared to the local Universe. To quantify the initial cluster conditions, we p…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T15:27:59Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T15:27:59Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.06648",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "id": "2611.06650",
+        "title": "The formation and evolution of Wolf-Rayet stars with temperature-dependent winds",
+        "authors": [
+          "Guy O. Flint",
+          "Avishai Gilkis",
+          "Tomer Shenar"
+        ],
+        "summary": "Massive stars strongly influence their environments through their radiation, stellar winds and core-collapse supernovae, while their own evolution is strongly shaped by wind mass loss. Wolf-Rayet (WR) stars are character…",
+        "cat": "astro-ph.SR",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T15:28:59Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T15:28:59Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.06650",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "id": "2611.06667",
+        "title": "Euclid Quick Data Release (Q1). Refining the strong lens sample with Space Warps crowd-sourced science",
+        "authors": [
+          "Euclid Collaboration",
+          "P. Holloway",
+          "A. Verma"
+        ],
+        "summary": "We demonstrate the efficacy of crowd-sourced refinement of strong gravitational lens candidate samples by citizen scientists. Binary (lens/non-lens) classification by citizen scientists has been conducted previously, and…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T15:43:33Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T15:43:33Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.06667",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "id": "2611.06750",
+        "title": "Inflationary attractors in metric-affine gravity",
+        "authors": [
+          "Ilaria Andrei",
+          "Christian Dioguardi"
+        ],
+        "summary": "We study single-field slow-roll inflation in metric-affine gravity (MAG). We consider the most general action up to operators linear in curvature and quadratic in the distortion, without propagating torsion and non-metri…",
+        "cat": "gr-qc",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T16:27:15Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T16:27:15Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.06750",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "id": "2611.06765",
+        "title": "Migration and eccentricity damping timescales in overstable resonant planetary systems: hydrodynamic and N-body simulations",
+        "authors": [
+          "Zahra Afkanpour",
+          "Sareh Ataiee",
+          "Anna B. T. Penzlin"
+        ],
+        "summary": "Tidal interactions between planets and discs modify semimajor axes and eccentricities. These effects are represented by migration and eccentricity damping timescales in analytical and Nbody models, although they are assu…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T16:42:56Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T16:42:56Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.06765",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "id": "2611.06787",
+        "title": "Cosmological Backreaction and the Separate Universe Conjecture: Dynamical volume partitioning of Newtonian cosmologies",
+        "authors": [
+          "Thomas Buchert",
+          "Jan J. Ostrowski",
+          "Alfred Bovon"
+        ],
+        "summary": "We provide a description of general Newtonian cosmologies for collisionless matter in terms of an exact and dynamical volume partitioning of global realizations of Newtonian models. Employing the formalism for the descri…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T17:00:06Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T17:00:06Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.06787",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "id": "2611.06792",
+        "title": "Magnetic Properties of Galactic Molecular Clouds",
+        "authors": [
+          "Philip C. Myers",
+          "Ian W. Stephens",
+          "Simon Coudé"
+        ],
+        "summary": "The earliest studies of molecular clouds (MCs) showed scaling relations between mass and radius M$\\sim$R^s with exponent s $\\approx$ 2, known as the third Larson relation. More recent CO surveys indicate 2 < s < 3 in the…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T17:11:01Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T17:11:01Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.06792",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "id": "2611.06872",
+        "title": "Magnetohydrodynamics During Reheating",
+        "authors": [
+          "Sovan Sau",
+          "Subhasis Maiti",
+          "Sahel Dey"
+        ],
+        "summary": "Reheating is a crucial phase that connects inflation with the hot Big Bang Universe. During this phase, the nonlinear interactions among the inflaton, the radiation plasma, and the primordial magnetic fields can influenc…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T18:26:57Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T18:26:57Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.06872",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "id": "2611.06915",
+        "title": "Preparing for the Gaia DR4 Epochalypse: Simulated Epoch Astrometry for Substellar Companion Orbit-Modeling Benchmarks",
+        "authors": [
+          "Daniel A. Yahalomi",
+          "Adrian M. Price-Whelan",
+          "Jessica Speedie"
+        ],
+        "summary": "Gaia's fourth data release (DR4) will provide epoch astrometry for billions of sources, enabling the detection of potentially tens of thousands of substellar companions. We present the epochalypse catalog: Gaia DR4-like…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T18:59:05Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T18:59:05Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.06915",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "id": "2611.06916",
+        "title": "ReveaLLAGN 3: Revealing the Infrared Spectral Energy Distributions of Low Luminosity AGN",
+        "authors": [
+          "David Ohlson",
+          "Anil C. Seth",
+          "Kameron Goold"
+        ],
+        "summary": "The spectral energy distributions of active galactic nuclei (AGN) provide valuable information on the emission mechanisms taking place in their inner regions. Here we use the James Webb Space Telescope to study the near…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-04",
+        "publishedAt": "2026-11-04T18:59:07Z",
+        "updated": "2026-11-04",
+        "updatedAt": "2026-11-04T18:59:07Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.06916",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
       {
         "id": "2611.02828",
         "title": "Targeting the future of spectroscopic galaxy surveys -- A cosmological study case with the Wide-field Spectroscopic Telescope",
@@ -469,6 +921,30 @@
     ],
     "news": [
       {
+        "title": "NASA is racing against time to save the Hubble Space Telescope",
+        "summary": "NASA is exploring a daring plan to save the legendary Hubble Space Telescope from its eventual fiery plunge into Earth's atmosphere. After more than 35 years of…",
+        "source": "ScienceDaily",
+        "date": "2026-11-04",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261104012254.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
+        "title": "A hidden star is plowing through Betelgeuse’s atmosphere, new evidence suggests",
+        "summary": "Something mysterious is disturbing Betelgeuse, and astronomers believe they have identified the culprit: a hidden companion star called Siwarha. New radio obser…",
+        "source": "ScienceDaily",
+        "date": "2026-11-04",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261103003149.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-05",
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
+      },
+      {
         "title": "Scientists just found a loophole that could let black holes split in two",
         "summary": "Scientists have discovered a possible loophole in the laws that normally prevent black holes from splitting apart, suggesting that extremely fast-spinning black…",
         "source": "ScienceDaily",
@@ -478,7 +954,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-03",
-        "fetchedAt": "2026-11-04T01:56:28.827Z"
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
       },
       {
         "title": "NASA smashed into an asteroid. Now Hera is closing in to see what happened",
@@ -490,7 +966,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-03",
-        "fetchedAt": "2026-11-04T01:56:28.827Z"
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
       },
       {
         "title": "NASA’s Voyager 1 is about to reach a historic one-light-day milestone",
@@ -502,7 +978,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-03",
-        "fetchedAt": "2026-11-04T01:56:28.827Z"
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
       },
       {
         "title": "All 5 genetic “letters” of DNA and RNA discovered in a 4.5-billion-year-old asteroid",
@@ -514,7 +990,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-03",
-        "fetchedAt": "2026-11-04T01:56:28.827Z"
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
       },
       {
         "title": "NASA’s Perseverance Mars rover breaks historic record after traveling 28 miles",
@@ -526,7 +1002,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-02",
-        "fetchedAt": "2026-11-04T01:56:28.827Z"
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
       },
       {
         "title": "IceCube detects ghost particles with 10 billion times the energy of solar neutrinos",
@@ -538,7 +1014,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-02",
-        "fetchedAt": "2026-11-04T01:56:28.827Z"
+        "fetchedAt": "2026-11-05T07:45:21.706Z"
       },
       {
         "title": "NASA's Hubble and Webb discover ancient worlds that remember their past",
@@ -685,13 +1161,13 @@
       }
     ],
     "sync": {
-      "lastAttemptAt": "2026-11-05T07:45:02.989Z",
-      "lastSuccessAt": "2026-11-04T01:56:28.827Z",
-      "newPapers": 0,
+      "lastAttemptAt": "2026-11-05T07:45:21.706Z",
+      "lastSuccessAt": "2026-11-05T07:45:21.706Z",
+      "newPapers": 20,
       "updatedPapers": 0,
-      "newNews": 0,
-      "totalPapers": 20,
-      "totalNews": 15,
+      "newNews": 2,
+      "totalPapers": 40,
+      "totalNews": 17,
       "sources": {
         "papers": [
           "astro-ph.GA(8)",
@@ -701,14 +1177,18 @@
           "astro-ph.SR(8)"
         ],
         "news": [
-          "ESA(8)",
           "ScienceDaily(8)"
         ]
       },
-      "failures": [],
-      "ok": null,
-      "partial": null,
-      "status": "running"
+      "failures": [
+        {
+          "source": "ESA",
+          "msg": "HTTP 404 https://www.esa.int/rssfeed/Our_Activities/Space_Science"
+        }
+      ],
+      "ok": true,
+      "partial": true,
+      "status": "partial"
     }
   };
 })(typeof window !== 'undefined' ? window : this);
