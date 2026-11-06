@@ -10,10 +10,465 @@
   'use strict';
 
   root.ASTRUM_DAILY = {
-    "updated": "2026-11-05",
-    "generatedAt": "2026-11-06T07:44:15.235Z",
+    "updated": "2026-11-06",
+    "generatedAt": "2026-11-06T07:44:31.868Z",
     "note": "每日 UTC 01:00 增量同步；内容未经本项目核验，不参与答案推理。",
     "papers": [
+      {
+        "id": "2611.07804",
+        "title": "Cepheid Metallicity in the Leavitt Law (C-MetaLL) survey: X First spectroscopic characterization of Galactic Type II Cepheids and calibration of the Period-Wesenheit-Metallicity relations",
+        "authors": [
+          "T. Sicignano",
+          "M. Romaniello",
+          "A. Bhardwaj"
+        ],
+        "summary": "Type II Cepheids (T2Cs) are Population II pulsating stars that serve as distance indicators through their period--luminosity relation. Along with RR Lyrae stars and the tip of the red giant branch, they offer an independ…",
+        "cat": "astro-ph.SR",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T10:47:10Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T10:47:10Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.07804",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
+      {
+        "id": "2611.07824",
+        "title": "GradFlex: a Gradient-Based Method for Weak Lensing Flexion Measurement",
+        "authors": [
+          "Jiarui Sun",
+          "Jun Zhang",
+          "Toshifumi Futamase"
+        ],
+        "summary": "Flexion, the second-order gravitational lensing distortion, probes small-scale mass distribution and complement the cosmic shear measurement. However, its detection is highly challenging due to the faint signal and the c…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T11:04:51Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T11:04:51Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.07824",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
+      {
+        "id": "2611.07839",
+        "title": "Multi-layer magnetic structure toward NGC 1333 revealed by a square-degree optical polarimetric survey",
+        "authors": [
+          "G. A. P. Franco",
+          "J. M. Girart",
+          "F. O. Alves"
+        ],
+        "summary": "Magnetic-field studies of star-forming regions are complicated by overlapping structures along the line of sight. We investigate the large-scale magnetic field toward NGC~1333 in Perseus, accounting for foreground polari…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T11:16:05Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T11:16:05Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.07839",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
+      {
+        "id": "2611.07852",
+        "title": "Long lived MeV scale bound state dark matter alleviates the ${}^7 Li$ tension",
+        "authors": [
+          "Pa. Gokhula Prasad",
+          "V. Suryanarayana Mummidi"
+        ],
+        "summary": "We investigate the impact of MeV scale unstable bound state dark matter on both thermal and non thermal Big Bang nucleosynthesis. Focusing on the weakly self interacting regime, we find that this framework can reproduce…",
+        "cat": "hep-ph",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T11:30:45Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T11:30:45Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.07852",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
+      {
+        "id": "2611.07936",
+        "title": "Survey of Surveys Data Release 3. Homogenised stellar parameters across nine spectroscopic surveys",
+        "authors": [
+          "A. Avdeeva",
+          "E. Pancino",
+          "A. Turchi"
+        ],
+        "summary": "Large spectroscopic surveys have measured atmospheric parameters for millions of Milky Way stars, but differences in instruments, wavelength ranges, analysis methods, and assumptions introduce survey-dependent systematic…",
+        "cat": "astro-ph.SR",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T12:38:44Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T12:38:44Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.07936",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
+      {
+        "id": "2611.07957",
+        "title": "Can $n_s$ hint at a parity-odd sector of gravity?",
+        "authors": [
+          "Christian Dioguardi"
+        ],
+        "summary": "We study slow-roll inflation in the context of metric-affine gravity. We consider the most general projectively invariant metric-affine theory at most quadratic in the distortion and linear in curvature with no propagati…",
+        "cat": "gr-qc",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T12:55:17Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T12:55:17Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.07957",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
+      {
+        "id": "2611.08008",
+        "title": "Multi-Probe Cosmological Constraints on Clustering DBI Dark Energy Scenario",
+        "authors": [
+          "Samit Ganguly",
+          "Surhud More",
+          "Goutam Manna"
+        ],
+        "summary": "We present a multi-probe observational analysis of a clustering tachyonic Dirac-Born-Infeld~(DBI) dark energy model. Its noncanonical kinetic term gives a subluminal sound speed, so dark energy perturbations can grow on…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T13:32:25Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T13:32:25Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.08008",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
+      {
+        "id": "2611.08041",
+        "title": "Results from a Stellar Occultation by (623) Chimaera",
+        "authors": [
+          "Phillip Oakey",
+          "Keya Garg",
+          "Andrey Moore"
+        ],
+        "summary": "We present results from a stellar occultation by the asteroid (623) Chimaera on October 21st, 2025, when it passed in front of V magnitude 13.86 star UCAC4 626-004193. Chimaera is the largest asteroid in the Chimaerid as…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T13:57:37Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T13:57:37Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.08041",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
+      {
+        "id": "2611.08115",
+        "title": "Octavius: A High-Performance Analysis Toolkit for Galaxy Simulations",
+        "authors": [
+          "Jean-Paul Duminy",
+          "Jakub Szpila",
+          "Romeel Davé"
+        ],
+        "summary": "Increased computing power and more efficient codes have allowed cosmological simulations of galaxy formation to grow massively in scale: the analysis of their outputs has consequently become a big data computational chal…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T14:48:46Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T14:48:46Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.08115",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
+      {
+        "id": "2611.08181",
+        "title": "G92.4+5.0: A Perseus Arm superbubble associated with the H II region CTB 102",
+        "authors": [
+          "Rebecca A. Booth",
+          "Jo-Anne Brown",
+          "Tom Landecker"
+        ],
+        "summary": "Superbubbles are vast hot cavities carved out by the stellar winds and supernovae of clusters of high-mass stars. We investigate G92.4+5.0 (the CTB 102 superbubble), a Perseus Arm superbubble associated with the HII regi…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T15:35:37Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T15:35:37Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.08181",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
+      {
+        "id": "2611.08197",
+        "title": "Rotational Excitation of HC$_5$NH$^+$ by He: Collision Dynamics and Astrophysical Applications",
+        "authors": [
+          "Ziyu Xiang",
+          "Liman Tian",
+          "Tong Sun"
+        ],
+        "summary": "Reliable collisional rate coefficients are crucial for interpreting the rotational emission spectra of molecules in interstellar clouds. In this work, we construct a two-dimensional potential energy surface (PES) for the…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T15:51:49Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T15:51:49Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.08197",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
+      {
+        "id": "2611.08223",
+        "title": "The box within the Universe: anisotropies in periodic cosmological simulations I. Dark-matter-only simulations",
+        "authors": [
+          "Gábor Rácz",
+          "Till Sawala"
+        ],
+        "summary": "The vast majority of cosmological simulations employ periodic boundary conditions to achieve statistical homogeneity and to mimic the infinite spatial extent of our Universe. In a cubic periodic domain the Green function…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T16:10:47Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T16:10:47Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.08223",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
+      {
+        "id": "2611.08267",
+        "title": "The slower rotation of planet-hosting stars revisited",
+        "authors": [
+          "Avraham Binnenfeld",
+          "Amitay Sussholz",
+          "Simchon Faigler"
+        ],
+        "summary": "Previous studies combined rotation periods derived from Kepler photometry, stellar parameters from previous Gaia Data Releases, and planet hosts from the NASA Exoplanet Archive to conclude that statistically planet-hosti…",
+        "cat": "astro-ph.SR",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T16:38:53Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T16:38:53Z",
+        "doi": "10.1093/mnras/stag2119",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.08267",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
+      {
+        "id": "2611.08282",
+        "title": "Mitigating scanning-induced systematics in Hipparcos and implications for Gaia astrometry",
+        "authors": [
+          "Avraham Binnenfeld",
+          "Sahar Shahaf",
+          "Richard I. Anderson"
+        ],
+        "summary": "Space-based astrometric missions such as Hipparcos and Gaia rely on one-dimensional scanning strategies that couple the measured signals with both observation times and scanning geometry. This coupling can introduce spur…",
+        "cat": "astro-ph.IM",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T16:47:38Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T16:47:38Z",
+        "doi": "10.1051/0004-6361/202661484",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.08282",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
+      {
+        "id": "2611.08336",
+        "title": "SDSS-V LVM: Spatial Resolution Effects on Diagnostic Diagrams in the Magellanic Clouds",
+        "authors": [
+          "A. Z. Lugo-Aranda",
+          "Lesly C. Castañeda",
+          "H. J. Ibarra-Medel"
+        ],
+        "summary": "We investigate how spatial resolution affects emission-line diagnostics in the interstellar medium (ISM) of the Small and Large Magellanic Clouds (SMC and LMC) using SDSS Local Volume Mapper (LVM) data obtained at and de…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T17:23:53Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T17:23:53Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.08336",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
+      {
+        "id": "2611.08346",
+        "title": "The cold substellar frontier in JWST Extragalactic surveys: a robust parallax measurement yields the most distant known ultra-cold Y dwarf",
+        "authors": [
+          "Feng-Yuan Frey Liu",
+          "Derek J. McLeod",
+          "Xueqing Chen"
+        ],
+        "summary": "We present an analysis of JADES-GS-BD-5, an extremely cold Y dwarf identified in the JADES/GOODS-South field. Using multi-epoch JWST/NIRCam imaging spanning a $\\simeq2$-yr baseline, we calibrate the JWST astrometry and o…",
+        "cat": "astro-ph.SR",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T17:31:30Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T17:31:30Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.08346",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
+      {
+        "id": "2611.08422",
+        "title": "Torsion talks only to spin: the CMB temperature as a test of energy exchange in Einstein-Cartan cosmology",
+        "authors": [
+          "Fernando Izaurieta",
+          "Samuel Lepe",
+          "Cristian Quinzacara"
+        ],
+        "summary": "The cosmic microwave background temperature at $z=0.886$ is known to $2\\%$ from molecular absorption towards PKS~1830$-$211; CO absorbers and Sunyaev-Zel'dovich clusters extend the measurement to $z\\simeq3$. We use them…",
+        "cat": "gr-qc",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T18:19:36Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T18:19:36Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.08422",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
+      {
+        "id": "2611.08481",
+        "title": "Joint analysis of the Macquart relation and the dispersion measure power spectrum: cross-covariance and redshift self-calibration",
+        "authors": [
+          "Amy Wayland",
+          "Robert Reischke"
+        ],
+        "summary": "The dispersion measures (DMs) of fast radio bursts (FRBs) trace ionised baryons along the line of sight, probing baryonic feedback. Two complementary observables can be constructed from an FRB catalogue: the DM-redshift…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T18:59:19Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T18:59:19Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.08481",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
+      {
+        "id": "2611.08484",
+        "title": "Evolution of Dust In Protoplanetary Disks With Magnetized Winds",
+        "authors": [
+          "Olcay Goksu",
+          "Ralph Pudritz",
+          "Timmy Delage"
+        ],
+        "summary": "Observations and theory increasingly indicate that protoplanetary disks are weakly turbulent, implying that magnetized disk winds may dominate their angular momentum transport and long-term evolution. Yet dust evolution…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T18:59:31Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T18:59:31Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.08484",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
+      {
+        "id": "2611.08489",
+        "title": "BeAR: The Bern Atmospheric Retrieval code - A GPU-accelerated framework for low-resolution, high-resolution, and joint retrievals of exoplanet atmospheres",
+        "authors": [
+          "Esther Wang",
+          "Daniel Kitzmann",
+          "H. Jens Hoeijmakers"
+        ],
+        "summary": "We present BeAR, the Bern Atmospheric Retrieval code and successor of Helios-r, and its new high-resolution cross-correlation framework for emission and transmission spectra. BeAR performs joint retrievals by adding the…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-05",
+        "publishedAt": "2026-11-05T18:59:48Z",
+        "updated": "2026-11-05",
+        "updatedAt": "2026-11-05T18:59:48Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.08489",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-06",
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
+      },
       {
         "id": "2611.05996",
         "title": "Spacetime Evolution Induced by a Massive Cosmic String in Numerical Relativity",
@@ -930,7 +1385,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-05",
-        "fetchedAt": "2026-11-05T11:46:15.954Z"
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
       },
       {
         "title": "A hidden star is plowing through Betelgeuse’s atmosphere, new evidence suggests",
@@ -942,7 +1397,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-05",
-        "fetchedAt": "2026-11-05T11:46:15.954Z"
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
       },
       {
         "title": "Scientists just found a loophole that could let black holes split in two",
@@ -954,7 +1409,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-03",
-        "fetchedAt": "2026-11-05T11:46:15.954Z"
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
       },
       {
         "title": "NASA smashed into an asteroid. Now Hera is closing in to see what happened",
@@ -966,7 +1421,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-03",
-        "fetchedAt": "2026-11-05T11:46:15.954Z"
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
       },
       {
         "title": "NASA’s Voyager 1 is about to reach a historic one-light-day milestone",
@@ -978,7 +1433,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-03",
-        "fetchedAt": "2026-11-05T11:46:15.954Z"
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
       },
       {
         "title": "All 5 genetic “letters” of DNA and RNA discovered in a 4.5-billion-year-old asteroid",
@@ -990,7 +1445,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-03",
-        "fetchedAt": "2026-11-05T11:46:15.954Z"
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
       },
       {
         "title": "NASA’s Perseverance Mars rover breaks historic record after traveling 28 miles",
@@ -1002,7 +1457,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-02",
-        "fetchedAt": "2026-11-05T11:46:15.954Z"
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
       },
       {
         "title": "IceCube detects ghost particles with 10 billion times the energy of solar neutrinos",
@@ -1014,7 +1469,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-02",
-        "fetchedAt": "2026-11-05T11:46:15.954Z"
+        "fetchedAt": "2026-11-06T07:44:31.868Z"
       },
       {
         "title": "NASA's Hubble and Webb discover ancient worlds that remember their past",
@@ -1161,12 +1616,12 @@
       }
     ],
     "sync": {
-      "lastAttemptAt": "2026-11-06T07:44:15.235Z",
-      "lastSuccessAt": "2026-11-05T11:46:15.954Z",
-      "newPapers": 0,
+      "lastAttemptAt": "2026-11-06T07:44:31.868Z",
+      "lastSuccessAt": "2026-11-06T07:44:31.868Z",
+      "newPapers": 20,
       "updatedPapers": 0,
       "newNews": 0,
-      "totalPapers": 40,
+      "totalPapers": 60,
       "totalNews": 17,
       "sources": {
         "papers": [
@@ -1186,9 +1641,9 @@
           "msg": "HTTP 404 https://www.esa.int/rssfeed/Our_Activities/Space_Science"
         }
       ],
-      "ok": null,
-      "partial": null,
-      "status": "running"
+      "ok": true,
+      "partial": true,
+      "status": "partial"
     }
   };
 })(typeof window !== 'undefined' ? window : this);
