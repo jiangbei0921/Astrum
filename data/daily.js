@@ -11,7 +11,7 @@
 
   root.ASTRUM_DAILY = {
     "updated": "2026-11-09",
-    "generatedAt": "2026-11-09T12:25:38.249Z",
+    "generatedAt": "2026-11-09T12:25:54.545Z",
     "note": "每日 UTC 01:00 增量同步；内容未经本项目核验，不参与答案推理。",
     "papers": [
       {
@@ -35,7 +35,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.09198",
@@ -58,7 +58,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.09362",
@@ -81,7 +81,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.09397",
@@ -104,7 +104,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.09449",
@@ -127,7 +127,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.09475",
@@ -150,7 +150,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.09531",
@@ -173,7 +173,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.09546",
@@ -195,7 +195,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.09588",
@@ -218,7 +218,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.09657",
@@ -241,7 +241,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.09720",
@@ -264,7 +264,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.09743",
@@ -287,7 +287,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.09827",
@@ -310,7 +310,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.09829",
@@ -332,7 +332,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.09852",
@@ -355,7 +355,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.09856",
@@ -378,7 +378,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.09871",
@@ -401,7 +401,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.09875",
@@ -424,7 +424,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.09884",
@@ -447,7 +447,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.09893",
@@ -469,7 +469,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "id": "2611.07804",
@@ -1833,6 +1833,30 @@
     ],
     "news": [
       {
+        "title": "NASA reveals bold new plan to return astronauts to the Moon in 2028",
+        "summary": "NASA has revealed an accelerated plan to land astronauts on the Moon in 2028, with SpaceX and Blue Origin developing competing lunar landers and a crucial orbit…",
+        "source": "ScienceDaily",
+        "date": "2026-11-09",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261108233054.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
+      },
+      {
+        "title": "Caltech robot makes history by building a structure in space",
+        "summary": "For the first time, a robot has autonomously built part of a structure in space, demonstrating a breakthrough that could fundamentally change space exploration.…",
+        "source": "ScienceDaily",
+        "date": "2026-11-09",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261108233043.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
+      },
+      {
         "title": "A nuclear blast could save Earth from an asteroid, but there's a catch",
         "summary": "A nuclear explosion might save Earth from a deadly asteroid, but new research suggests that hitting the wrong side could make the difference between success and…",
         "source": "ScienceDaily",
@@ -1842,7 +1866,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "title": "Mysterious gas leaks suggest Mars may still be volcanically alive",
@@ -1854,7 +1878,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "title": "Einstein's equations reveal how gravity could break, reconnect, and release energy",
@@ -1866,7 +1890,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "title": "Rubin Observatory discovers two hidden companions of the Milky Way. Hundreds more may be waiting",
@@ -1902,7 +1926,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-06",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "title": "NASA’s Swift telescope falls to Earth after nearly 22 years in space",
@@ -1914,7 +1938,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-06",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "title": "Dead stars could break one of physics' most famous limits",
@@ -1938,7 +1962,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-05",
-        "fetchedAt": "2026-11-09T07:42:54.701Z"
+        "fetchedAt": "2026-11-09T12:25:54.545Z"
       },
       {
         "title": "A hidden star is plowing through Betelgeuse’s atmosphere, new evidence suggests",
@@ -2169,13 +2193,13 @@
       }
     ],
     "sync": {
-      "lastAttemptAt": "2026-11-09T12:25:38.249Z",
-      "lastSuccessAt": "2026-11-09T07:42:54.701Z",
+      "lastAttemptAt": "2026-11-09T12:25:54.545Z",
+      "lastSuccessAt": "2026-11-09T12:25:54.545Z",
       "newPapers": 0,
-      "updatedPapers": 0,
-      "newNews": 0,
+      "updatedPapers": 20,
+      "newNews": 2,
       "totalPapers": 80,
-      "totalNews": 25,
+      "totalNews": 27,
       "sources": {
         "papers": [
           "astro-ph.GA(8)",
@@ -2194,9 +2218,9 @@
           "msg": "HTTP 404 https://www.esa.int/rssfeed/Our_Activities/Space_Science"
         }
       ],
-      "ok": null,
-      "partial": null,
-      "status": "running"
+      "ok": true,
+      "partial": true,
+      "status": "partial"
     }
   };
 })(typeof window !== 'undefined' ? window : this);
