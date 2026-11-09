@@ -10,10 +10,467 @@
   'use strict';
 
   root.ASTRUM_DAILY = {
-    "updated": "2026-11-08",
-    "generatedAt": "2026-11-09T07:42:34.750Z",
+    "updated": "2026-11-09",
+    "generatedAt": "2026-11-09T07:42:54.701Z",
     "note": "每日 UTC 01:00 增量同步；内容未经本项目核验，不参与答案推理。",
     "papers": [
+      {
+        "id": "2611.08847",
+        "title": "Unlocking Pandora's Secrets: Probing the Thermodynamics of Abell 2744",
+        "authors": [
+          "Randall Rojas Bolivar",
+          "Akos Bogdan",
+          "Daniel Wik"
+        ],
+        "summary": "Abell 2744 (Pandora's Cluster) is a massive galaxy cluster undergoing multiple mergers, characterized by a highly disturbed X-ray morphology, elevated intracluster medium (ICM) temperatures, and several radio relics asso…",
+        "cat": "astro-ph.HE",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T01:11:50Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T01:11:50Z",
+        "doi": "10.3847/1538-4357/aebd83",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.08847",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "id": "2611.09198",
+        "title": "New optimisations for exact, scalable 2D Gaussian process inference, with applications to astronomical time-series",
+        "authors": [
+          "Mark Fortune",
+          "Neale P. Gibson",
+          "Benjamin Pope"
+        ],
+        "summary": "Astronomical datasets often consist of a grid of datapoints in two or more dimensions, such as images, spectroscopic time-series, and imaging time-series. Gaussian processes (GPs) are a powerful tool for dealing with cor…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T09:20:44Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T09:20:44Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.09198",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "id": "2611.09362",
+        "title": "Primordial non-Gaussianity as a large-scale cosmic-web bias",
+        "authors": [
+          "Kilian Peraza Vera",
+          "Francisco-Shu Kitaura",
+          "Francesco Sinigaglia"
+        ],
+        "summary": "Primordial non-Gaussianity is a unique probe of the physics of inflation, but its large-scale-structure signature is difficult to measure because it appears on the largest, most cosmic-variance-limited modes. The standar…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T12:01:52Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T12:01:52Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.09362",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "id": "2611.09397",
+        "title": "Where the red rise stops: JWST/MIRI reveals a near-infrared turnover in the Little Red Dot Abell2744-QSO1",
+        "authors": [
+          "E. Iani",
+          "P. Rinaldi",
+          "A. Torralba"
+        ],
+        "summary": "Little Red Dots (LRDs) are compact sources with a blue rest-frame UV, a steep red optical continuum and, often, broad hydrogen lines. They have been interpreted as dense stellar systems, dust-reddened active galactic nuc…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T12:34:16Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T12:34:16Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.09397",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "id": "2611.09449",
+        "title": "CO gaps in cold transition disks around low-mass stars",
+        "authors": [
+          "A. A. Rota",
+          "N. van der Marel",
+          "E. F. van Dishoeck"
+        ],
+        "summary": "Transition disks with large inner dust cavities are promising targets to study planet formation, as these disks are likely hosting massive planetary companions. The structure of gas and dust inside the cavity are crucial…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T13:23:38Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T13:23:38Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.09449",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "id": "2611.09475",
+        "title": "Validation of Habitable Zone Limits with a New Radiative-Convective Equilibrium Climate Model",
+        "authors": [
+          "Jacob Haqq-Misra",
+          "Eric T. Wolf",
+          "Ravi K. Kopparapu"
+        ],
+        "summary": "The habitable zone (HZ) boundaries calculated with the Clima one-dimensional radiative-convective equilibrium (RCE) model have served as a standard reference for exoplanet target selection for three decades, but they hav…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T13:55:59Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T13:55:59Z",
+        "doi": "10.3847/1538-4357/aeb5e4",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.09475",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "id": "2611.09531",
+        "title": "Violent relaxation redux",
+        "authors": [
+          "Michael L. Nastac",
+          "Yonadav Barry Ginat",
+          "Robert J. Ewart"
+        ],
+        "summary": "Collisionless self-gravitating systems, such as merging galaxies, have long seemed an exception to the statistical-mechanical principle that chaotic many-body systems relax to maximum-entropy states: Lynden-Bell's statis…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T14:40:54Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T14:40:54Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.09531",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "id": "2611.09546",
+        "title": "Through Ups and Downs: the Transient Lensing Behaviour of SIDM halos undergoing Core Collapse",
+        "authors": [
+          "Frank C. van den Bosch",
+          "Yarone M. Tokayer"
+        ],
+        "summary": "Self-interacting dark matter (SIDM) haloes can become extremely dense following gravothermal core collapse, motivating their use as explanations for unusually concentrated gravitational lenses. Using an emulator calibrat…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T14:54:10Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T14:54:10Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.09546",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "id": "2611.09588",
+        "title": "SQUALO II: Probing Accretion Through CO Molecular Outflows in Massive Star-forming Clumps",
+        "authors": [
+          "S. Mercimek",
+          "G. A. Fuller",
+          "A. Traficante"
+        ],
+        "summary": "Molecular outflows probe protostellar accretion and mass transfer from clump scales to forming stars. We present an ALMA study of CO (J=2-1) outflows toward 13 massive clumps from the SQUALO sample, spanning a broad evol…",
+        "cat": "astro-ph.SR",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T15:22:12Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T15:22:12Z",
+        "doi": "10.1093/mnras/stag2146",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.09588",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "id": "2611.09657",
+        "title": "Advances in High-Precision Astrometry for Exoplanet Detection for Astrometric Missions",
+        "authors": [
+          "Fabien Malbet",
+          "Jerôme Amiaux",
+          "Florence Ardellier-Desages"
+        ],
+        "summary": "High-precision astrometry is a cornerstone for detecting Earth-like exoplanets in the habitable zones of nearby solar-type stars and probing the nature of dark matter in galactic environments. Achieving sub-microarcsecon…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T16:06:25Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T16:06:25Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.09657",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "id": "2611.09720",
+        "title": "Forecasting Fundamental-Plane Tests of Intermediate-mass Black Holes in Radio-selected Dwarf Galaxies",
+        "authors": [
+          "Ramananda Santra",
+          "Samik Mitra",
+          "Shahram Abbassi"
+        ],
+        "summary": "A radio/X-ray Fundamental Plane (FP) test of an intermediate-mass black hole is informative only when the compact radio emission, hard X-rays, accretion state, and host association refer to the same accretor. We used pub…",
+        "cat": "astro-ph.HE",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T16:59:46Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T16:59:46Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.09720",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "id": "2611.09743",
+        "title": "Does DESI point towards transient cosmic acceleration?",
+        "authors": [
+          "Muhammad Ahmad",
+          "Saddam Hussain",
+          "Ayodeji Ibitoye"
+        ],
+        "summary": "We investigate an oscillatory equation of state for dark energy that oscillates around the mean value $-1$ and includes a source term proportional to the cube of the number of e-folds. Due to this source term, the oscill…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T17:16:01Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T17:16:01Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.09743",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "id": "2611.09827",
+        "title": "Effects of a Nuclear Detonation in Low Earth Orbit",
+        "authors": [
+          "Zachary Petersen",
+          "Hong Qin",
+          "Sarah Thiele"
+        ],
+        "summary": "More than 13,000 satellites operate in low Earth orbit (LEO), and concern has grown that nuclear weapons could be used in space to target them. Beyond the initial X-ray burst, electrons released by radioactive fission pr…",
+        "cat": "physics.soc-ph",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T18:14:20Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T18:14:20Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.09827",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "id": "2611.09829",
+        "title": "Odd Loops: What Structures Can Produce a Parity-Violating Inflationary Trispectrum?",
+        "authors": [
+          "William Ortolá Leonard",
+          "Zachary Slepian"
+        ],
+        "summary": "Non-Gaussian perturbations generated during inflation can often be described perturbatively via integrals of kernels acting on Gaussian fields. In this work, we investigate, in a model-independent manner, whether these k…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T18:16:06Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T18:16:06Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.09829",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "id": "2611.09852",
+        "title": "The AIDA-TNG project: Galactic bar pattern speeds in self-interacting dark matter",
+        "authors": [
+          "Asiyeh Habibi",
+          "Mahmood Roshan",
+          "Giulia Despali"
+        ],
+        "summary": "Cosmological simulations within the standard cold dark matter (CDM) paradigm systematically predict higher values of the dimensionless bar-speed parameter, $\\boldsymbol{R} \\equiv R_{\\mathrm{cr}}/R_{\\mathrm{bar}}$ (where…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T18:35:32Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T18:35:32Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.09852",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "id": "2611.09856",
+        "title": "Lessons from double-plane lenses for galaxy profiles, the Hubble tension, and the mass-sheet degeneracy",
+        "authors": [
+          "Daniel P. Johnson",
+          "Martin Millon",
+          "Pierre Fleury"
+        ],
+        "summary": "Double-plane lenses, like single-plane lenses, are subject to the mass-sheet degeneracy, a fundamental limit to our knowledge of the deflector mass profiles from lensing. However, with a prior on the relative expansion h…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T18:40:15Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T18:40:15Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.09856",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "id": "2611.09871",
+        "title": "Multi-phase Carbon Structure and Dynamics in NGC 6334: Insights from CO, [C I], and [C II]",
+        "authors": [
+          "S. Neupane",
+          "F. Wyrowski",
+          "N. Schneider"
+        ],
+        "summary": "We present high-angular and velocity resolution observations of the emission lines of [CII] at 158 micron, [CI] at 609 micron, and the 12CO and 13CO (J=3-2) transitions toward the central region of NGC 6334, providing a…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T18:48:43Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T18:48:43Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.09871",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "id": "2611.09875",
+        "title": "SN 2026ahvu in NGC 1433 May Be a Prompt Type Ia Supernova with a Delay Time Under 100 Myr",
+        "authors": [
+          "Sumit K. Sarbadhicary",
+          "Kiana Henny",
+          "Adam Leroy"
+        ],
+        "summary": "SN 2026ahvu is a Type Ia supernova (SN) that occurred in the nearby galaxy NGC 1433. Using archival Hubble and JWST imaging from the PHANGS survey, we show that the SN lies within 0.19$''$ and 0.26$''$ of two UV-bright s…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T18:52:29Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T18:52:29Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.09875",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "id": "2611.09884",
+        "title": "VLT and Keck recovery and characterisation of 2025 SC$_{79}$: linking 'Ayló'chaxnim and Atira asteroids",
+        "authors": [
+          "Bryce T. Bolin",
+          "Leo Y. Alcorn",
+          "Davide Farnocchia"
+        ],
+        "summary": "Asteroids near the boundary between the Atira and 'Ayló'chaxnim classes can trace dynamical links between the two populations, but their small solar elongations make recovery and physical characterisation difficult. We r…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T18:57:13Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T18:57:13Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.09884",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "id": "2611.09893",
+        "title": "Challenges for minimal warm inflation in the Standard Model and beyond",
+        "authors": [
+          "Anish Ghoshal",
+          "Alessandro Strumia"
+        ],
+        "summary": "A minimal realisation of warm inflation, even within the Standard Model, assumes that the inflaton $φ$ couples via the effective operator $φ\\, G\\tilde G$. We show that the SM solutions are in tension with the plasma calc…",
+        "cat": "hep-ph",
+        "published": "2026-11-06",
+        "publishedAt": "2026-11-06T18:59:55Z",
+        "updated": "2026-11-06",
+        "updatedAt": "2026-11-06T18:59:55Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.09893",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
       {
         "id": "2611.07804",
         "title": "Cepheid Metallicity in the Leavitt Law (C-MetaLL) survey: X First spectroscopic characterization of Galactic Type II Cepheids and calibration of the Period-Wesenheit-Metallicity relations",
@@ -1376,6 +1833,42 @@
     ],
     "news": [
       {
+        "title": "A nuclear blast could save Earth from an asteroid, but there's a catch",
+        "summary": "A nuclear explosion might save Earth from a deadly asteroid, but new research suggests that hitting the wrong side could make the difference between success and…",
+        "source": "ScienceDaily",
+        "date": "2026-11-08",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261106174532.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "title": "Mysterious gas leaks suggest Mars may still be volcanically alive",
+        "summary": "Mysterious gas emissions and fresh volcanic fissures suggest that Mars may not be geologically dead after all, with hot magma potentially still active deep unde…",
+        "source": "ScienceDaily",
+        "date": "2026-11-08",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261106174525.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
+        "title": "Einstein's equations reveal how gravity could break, reconnect, and release energy",
+        "summary": "More than a century after Einstein revolutionized our understanding of gravity, scientists have uncovered a surprising new phenomenon hidden within his equation…",
+        "source": "ScienceDaily",
+        "date": "2026-11-08",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261104084011.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-09",
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
+      },
+      {
         "title": "Rubin Observatory discovers two hidden companions of the Milky Way. Hundreds more may be waiting",
         "summary": "The Vera C. Rubin Observatory has already uncovered two previously unknown companions of the Milky Way using preliminary observations covering just 7% of the ni…",
         "source": "ScienceDaily",
@@ -1385,7 +1878,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-07",
-        "fetchedAt": "2026-11-08T10:58:08.344Z"
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
       },
       {
         "title": "A dead star's mysterious rings reveal what could happen when our Sun dies",
@@ -1397,7 +1890,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-07",
-        "fetchedAt": "2026-11-08T10:58:08.344Z"
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
       },
       {
         "title": "Don't miss: Meteor showers, fireballs, and a supermoon light up November's night sky",
@@ -1409,7 +1902,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-06",
-        "fetchedAt": "2026-11-08T10:58:08.344Z"
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
       },
       {
         "title": "NASA’s Swift telescope falls to Earth after nearly 22 years in space",
@@ -1421,7 +1914,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-06",
-        "fetchedAt": "2026-11-08T10:58:08.344Z"
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
       },
       {
         "title": "Dead stars could break one of physics' most famous limits",
@@ -1445,7 +1938,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-05",
-        "fetchedAt": "2026-11-08T10:58:08.344Z"
+        "fetchedAt": "2026-11-09T07:42:54.701Z"
       },
       {
         "title": "A hidden star is plowing through Betelgeuse’s atmosphere, new evidence suggests",
@@ -1676,13 +2169,13 @@
       }
     ],
     "sync": {
-      "lastAttemptAt": "2026-11-09T07:42:34.750Z",
-      "lastSuccessAt": "2026-11-08T10:58:08.344Z",
-      "newPapers": 0,
+      "lastAttemptAt": "2026-11-09T07:42:54.701Z",
+      "lastSuccessAt": "2026-11-09T07:42:54.701Z",
+      "newPapers": 20,
       "updatedPapers": 0,
-      "newNews": 0,
-      "totalPapers": 60,
-      "totalNews": 22,
+      "newNews": 3,
+      "totalPapers": 80,
+      "totalNews": 25,
       "sources": {
         "papers": [
           "astro-ph.GA(8)",
@@ -1701,9 +2194,9 @@
           "msg": "HTTP 404 https://www.esa.int/rssfeed/Our_Activities/Space_Science"
         }
       ],
-      "ok": null,
-      "partial": null,
-      "status": "running"
+      "ok": true,
+      "partial": true,
+      "status": "partial"
     }
   };
 })(typeof window !== 'undefined' ? window : this);
