@@ -11,7 +11,7 @@
 
   root.ASTRUM_DAILY = {
     "updated": "2026-11-10",
-    "generatedAt": "2026-11-10T11:59:46.585Z",
+    "generatedAt": "2026-11-10T12:00:04.795Z",
     "note": "每日 UTC 01:00 增量同步；内容未经本项目核验，不参与答案推理。",
     "papers": [
       {
@@ -35,7 +35,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.12556",
@@ -57,7 +57,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.12594",
@@ -80,7 +80,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.12595",
@@ -103,7 +103,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.12637",
@@ -126,7 +126,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.12655",
@@ -149,7 +149,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.12734",
@@ -172,7 +172,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.12765",
@@ -195,7 +195,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.12772",
@@ -218,7 +218,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.12787",
@@ -240,7 +240,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.12792",
@@ -262,7 +262,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.12819",
@@ -283,7 +283,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.12831",
@@ -305,7 +305,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.12841",
@@ -328,7 +328,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.12845",
@@ -351,7 +351,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.12846",
@@ -374,7 +374,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.12849",
@@ -397,7 +397,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.12860",
@@ -420,7 +420,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.12861",
@@ -443,7 +443,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.12881",
@@ -466,7 +466,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-10",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "id": "2611.08847",
@@ -2296,7 +2296,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "title": "Caltech robot makes history by building a structure in space",
@@ -2308,7 +2308,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "title": "A nuclear blast could save Earth from an asteroid, but there's a catch",
@@ -2320,7 +2320,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "title": "Mysterious gas leaks suggest Mars may still be volcanically alive",
@@ -2332,7 +2332,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "title": "Einstein's equations reveal how gravity could break, reconnect, and release energy",
@@ -2344,7 +2344,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "title": "Rubin Observatory discovers two hidden companions of the Milky Way. Hundreds more may be waiting",
@@ -2380,7 +2380,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-06",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "title": "NASA’s Swift telescope falls to Earth after nearly 22 years in space",
@@ -2392,7 +2392,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-06",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "title": "Dead stars could break one of physics' most famous limits",
@@ -2416,7 +2416,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-05",
-        "fetchedAt": "2026-11-10T08:04:13.341Z"
+        "fetchedAt": "2026-11-10T12:00:04.795Z"
       },
       {
         "title": "A hidden star is plowing through Betelgeuse’s atmosphere, new evidence suggests",
@@ -2647,10 +2647,10 @@
       }
     ],
     "sync": {
-      "lastAttemptAt": "2026-11-10T11:59:46.585Z",
-      "lastSuccessAt": "2026-11-10T08:04:13.341Z",
+      "lastAttemptAt": "2026-11-10T12:00:04.795Z",
+      "lastSuccessAt": "2026-11-10T12:00:04.795Z",
       "newPapers": 0,
-      "updatedPapers": 0,
+      "updatedPapers": 20,
       "newNews": 0,
       "totalPapers": 100,
       "totalNews": 27,
@@ -2672,9 +2672,9 @@
           "msg": "HTTP 404 https://www.esa.int/rssfeed/Our_Activities/Space_Science"
         }
       ],
-      "ok": null,
-      "partial": null,
-      "status": "running"
+      "ok": true,
+      "partial": true,
+      "status": "partial"
     }
   };
 })(typeof window !== 'undefined' ? window : this);
