@@ -10,10 +10,464 @@
   'use strict';
 
   root.ASTRUM_DAILY = {
-    "updated": "2026-11-09",
-    "generatedAt": "2026-11-10T08:03:48.026Z",
+    "updated": "2026-11-10",
+    "generatedAt": "2026-11-10T08:04:13.341Z",
     "note": "每日 UTC 01:00 增量同步；内容未经本项目核验，不参与答案推理。",
     "papers": [
+      {
+        "id": "2611.12470",
+        "title": "The Connection between Halo Assembly History and the Stellar Distribution II: A Radially Stratified Fossil Record of Past Halo Mass",
+        "authors": [
+          "Shuo Xu",
+          "Song Huang",
+          "Conghao Zhou"
+        ],
+        "summary": "The spatial stellar distribution in massive central galaxies preserves a stratified fossil record of their host halos' assembly history. Using a halo-mass-complete sample from the IllustrisTNG-300 hydrodynamical simulati…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T14:20:48Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T14:20:48Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12470",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
+      {
+        "id": "2611.12556",
+        "title": "BAO and Type Ia Supernovae in LTB Cosmology: Constraints on Radial Inhomogeneity and Acoustic-Ruler Evolution",
+        "authors": [
+          "Myrto Magklara",
+          "Leandros Perivolaropoulos"
+        ],
+        "summary": "We investigate how baryon acoustic oscillations (BAO) and Type Ia supernovae constrain radial density profiles and acoustic-ruler evolution in Lemaitre-Tolman-Bondi (LTB) cosmology with a cosmological constant. Extending…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T15:23:52Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T15:23:52Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12556",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
+      {
+        "id": "2611.12594",
+        "title": "Investigating the timescales traced by dynamical ages in young stellar systems",
+        "authors": [
+          "Isabella Armstrong",
+          "Alison Sills",
+          "Claude Cournoyer-Cloutier"
+        ],
+        "summary": "Stars form in clustered environments, and then the stars may congregate into star clusters. The timescale on which individual stars form is not necessarily the same as the timescale on which star clusters assemble. There…",
+        "cat": "astro-ph.SR",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T15:43:34Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T15:43:34Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12594",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
+      {
+        "id": "2611.12595",
+        "title": "The Edge of the Warm Corona in Active Galactic Nuclei",
+        "authors": [
+          "Parikshit Partha Biswas",
+          "Agata Różańska",
+          "Debora Lančová"
+        ],
+        "summary": "A model of warm, dissipative corona on top of an accretion disk is investigated, to explain the soft X-ray excess (SXE) emission observed in active galactic nuclei (AGN). The final ray-traced spectrum, computed through p…",
+        "cat": "astro-ph.HE",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T15:44:16Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T15:44:16Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12595",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
+      {
+        "id": "2611.12637",
+        "title": "The Swift/UVOT Observation Campaign of Comet C/2013 US10 (Catalina) and Near-nucleus UV Excess",
+        "authors": [
+          "Shawn Oset",
+          "Zexi Xing",
+          "John Wm. Noonan"
+        ],
+        "summary": "We present results of a multi-wavelength extended monitoring campaign of dynamically new long-period comet C/2013 US$_{10}$ (Catalina), captured with the Ultraviolet and Optical Telescope (UVOT) on board the Swift spacec…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T16:14:45Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T16:14:45Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12637",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
+      {
+        "id": "2611.12655",
+        "title": "Testing Models of Disk Formation and Gravito-Viscous Evolution Against Observations of Young Protoplanetary Disks",
+        "authors": [
+          "Fabiola Antonietta Gerosa",
+          "Paola Pinilla",
+          "Eduard I. Vorobyov"
+        ],
+        "summary": "Young protoplanetary disks have received increasing attention in recent years, due to observations revealing the presence of substructures in disks younger than one million years, suggesting that planet formation may beg…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T16:24:07Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T16:24:07Z",
+        "doi": "10.1093/mnras/stag2130",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12655",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
+      {
+        "id": "2611.12734",
+        "title": "The Cool Circumgalactic Echo of the Stellar-to-Halo Mass Relatio",
+        "authors": [
+          "Zeyu Chen",
+          "Enci Wang",
+          "Huiyuan Wang"
+        ],
+        "summary": "The stellar-to-halo mass relation (SHMR), a key prediction of galaxy formation models, peaks at $M_* \\sim 3 \\times 10^{10}\\,M_\\odot$. This scale is often attributed to circumgalactic baryonic feedback processes, however…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T17:19:54Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T17:19:54Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12734",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
+      {
+        "id": "2611.12765",
+        "title": "Quality time in extra dimensions: axion quality and radion cosmology",
+        "authors": [
+          "Falguni Biswas",
+          "Yeshan Juberi",
+          "Ahmed Rakin Kamal"
+        ],
+        "summary": "Higher-form symmetries can protect extra-dimensional axions, but additional symmetry breaking can still spoil the solution to the strong CP problem. We focus on electrically charged matter and magnetic gauging in a five-…",
+        "cat": "hep-ph",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T17:39:02Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T17:39:02Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12765",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
+      {
+        "id": "2611.12772",
+        "title": "Gravitational waves and the exit from de Sitter in Inflation without an Inflaton",
+        "authors": [
+          "Daniele Bertacca",
+          "Raul Jimenez",
+          "Sabino Matarrese"
+        ],
+        "summary": "In Inflation without an Inflaton (IWI), second-order de Sitter (dS) gravitons generate primordial curvature as the Coulomb-type potential of their gradient stress. Each pair contributes $(p/k)^2$, yielding exponential en…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T17:46:07Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T17:46:07Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12772",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
+      {
+        "id": "2611.12787",
+        "title": "MarsNet: Learning the Martian Atmosphere from Observations Alone",
+        "authors": [
+          "Sebastian Mengwall",
+          "J. Michael Battalio"
+        ],
+        "summary": "We present MarsNet, a machine-learned model of the Martian atmosphere trained only on observations. Existing reanalyses assimilate spacecraft retrievals into general circulation models (GCMs), so where observations are s…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T17:57:01Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T17:57:01Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12787",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
+      {
+        "id": "2611.12792",
+        "title": "Coupled dark energy and apparent phantom crossing: a potential-independent lower bound",
+        "authors": [
+          "Domenico Sapone",
+          "Esteban Arratia"
+        ],
+        "summary": "Baryon acoustic oscillation measurements from the Dark Energy Spectroscopic Instrument (DESI), combined with the cosmic microwave background (CMB) and type Ia supernovae, prefer a dark energy whose equation of state was…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T17:59:27Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T17:59:27Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12792",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
+      {
+        "id": "2611.12819",
+        "title": "Simulation of a Jovian Planet Undergoing Gas Accretion",
+        "authors": [
+          "Fabian Menezes"
+        ],
+        "summary": "To understand the process of planet formation in the Solar System or any other stellar system, we need to comprehend the interaction between forming planets and the protoplanetary disk. This work presents a study of the…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T18:21:38Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T18:21:38Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12819",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
+      {
+        "id": "2611.12831",
+        "title": "Numerical-Relativity Particle-in-Cell Simulations: Self-Gravitating Collisionless Matter in Dynamical Spacetimes",
+        "authors": [
+          "Jiaxi Wu",
+          "Elias R. Most"
+        ],
+        "summary": "Gravitational collapse and instability, black-hole dynamics in systems with large scale separations, and questions surrounding extremal black hole formation require full nonlinear studies using accurate and adapted numer…",
+        "cat": "gr-qc",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T18:30:08Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T18:30:08Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12831",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
+      {
+        "id": "2611.12841",
+        "title": "Joint Gaia-Hipparcos astrometry, RV, and Imaging posteriors from the G23H Hipparcos sample",
+        "authors": [
+          "William Thompson",
+          "Dori Blakely",
+          "Alexandre Bouchard-Côté"
+        ],
+        "summary": "We present uniform posteriors indicating the presence or absence of stellar and planetary companions over a sample of $10^5$ stars in Hipparcos and Gaia. We use the \"G23H\" catalog to fit a model that incorporates absolut…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T18:38:15Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T18:38:15Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12841",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
+      {
+        "id": "2611.12845",
+        "title": "AGN Feedback Turbulence in Cool-core Clusters: Evidence from XRISM",
+        "authors": [
+          "Congyao Zhang",
+          "Eugene Churazov",
+          "Irina Zhuravleva"
+        ],
+        "summary": "The XRISM X-ray Observatory has revealed evidence for a \"double-cascade\" scenario in the Perseus cluster, in which active galactic nucleus (AGN) feedback and mergers drive turbulence over distinct radial ranges and spati…",
+        "cat": "astro-ph.HE",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T18:39:54Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T18:39:54Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12845",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
+      {
+        "id": "2611.12846",
+        "title": "Forward modeling linear variable filter data: High resolution PAH and Paschen-$α$ maps from SPHEREx",
+        "authors": [
+          "Andrew K. Saydjari",
+          "Connor Hainje",
+          "Benjamin Dodge"
+        ],
+        "summary": "Polycyclic aromatic hydrocarbon (PAH) emission is a powerful tool for the study of the interstellar medium (ISM) in both Galactic and extragalactic contexts. It can reveal ionization state, radiation field, metallicity…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T18:40:04Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T18:40:04Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12846",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
+      {
+        "id": "2611.12849",
+        "title": "The Tierras Observatory: Ultra-Precise Photometry for Characterizing Exoplanets and Their Host Stars",
+        "authors": [
+          "Juliana García-Mejía",
+          "Patrick Tamburo",
+          "David Charbonneau"
+        ],
+        "summary": "The Tierras Observatory is a fully robotic 1.3-m telescope at the Fred Lawrence Whipple Observatory in southern Arizona. Tierras achieves sub-part-per-thousand (ppt) photometric precision on two timescales: intra-night…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T18:41:56Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T18:41:56Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12849",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
+      {
+        "id": "2611.12860",
+        "title": "Search for a Dispersion Measure Excess Toward Nearby Galaxy Halos Using Fast Radio Bursts from the Second CHIME/FRB Baseband Catalog",
+        "authors": [
+          "Affan Khadir",
+          "Ayush Pandhi",
+          "Jason Hessels"
+        ],
+        "summary": "Fast radio bursts (FRBs) probe foreground ionized baryons via their dispersion measures (DM). Using 1748 sub-arcminute-localized sources from the Second CHIME/FRB Baseband Catalog, we conduct a statistical stacking study…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T18:49:50Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T18:49:50Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12860",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
+      {
+        "id": "2611.12861",
+        "title": "Little Red Dots from Primordial Black Holes: Non-Gaussianity and Accretion Evade $μ$-Distortion Constraints",
+        "authors": [
+          "Shyam Balaji",
+          "Bryce Cyr",
+          "Sarah R. Geller"
+        ],
+        "summary": "Recent JWST observations of \"Little Red Dots\" (LRDs) at $z \\gtrsim 4$ suggest the existence of early supermassive black holes (SMBHs) with masses $\\gtrsim 10^6\\,M_\\odot$. Their rapid emergence challenges conventional see…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T18:50:22Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T18:50:22Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12861",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
+      {
+        "id": "2611.12881",
+        "title": "The Brown Dwarf Desert is a Mass-Ratio Desert: Astrometric Demographics of 63,254 Stars",
+        "authors": [
+          "William Thompson",
+          "Alexandre Bouchard-Côté",
+          "Dori Blakely"
+        ],
+        "summary": "Brown dwarfs are rare as close companions to stars compared to planets and stellar companions, a paucity known as the brown dwarf desert. Whether the desert sits at a fixed companion mass or a fixed companion-to-star mas…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-09",
+        "publishedAt": "2026-11-09T18:59:28Z",
+        "updated": "2026-11-09",
+        "updatedAt": "2026-11-09T18:59:28Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.12881",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-10",
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
+      },
       {
         "id": "2611.08847",
         "title": "Unlocking Pandora's Secrets: Probing the Thermodynamics of Abell 2744",
@@ -1842,7 +2296,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T12:25:54.545Z"
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
       },
       {
         "title": "Caltech robot makes history by building a structure in space",
@@ -1854,7 +2308,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T12:25:54.545Z"
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
       },
       {
         "title": "A nuclear blast could save Earth from an asteroid, but there's a catch",
@@ -1866,7 +2320,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T12:25:54.545Z"
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
       },
       {
         "title": "Mysterious gas leaks suggest Mars may still be volcanically alive",
@@ -1878,7 +2332,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T12:25:54.545Z"
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
       },
       {
         "title": "Einstein's equations reveal how gravity could break, reconnect, and release energy",
@@ -1890,7 +2344,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-09T12:25:54.545Z"
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
       },
       {
         "title": "Rubin Observatory discovers two hidden companions of the Milky Way. Hundreds more may be waiting",
@@ -1926,7 +2380,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-06",
-        "fetchedAt": "2026-11-09T12:25:54.545Z"
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
       },
       {
         "title": "NASA’s Swift telescope falls to Earth after nearly 22 years in space",
@@ -1938,7 +2392,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-06",
-        "fetchedAt": "2026-11-09T12:25:54.545Z"
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
       },
       {
         "title": "Dead stars could break one of physics' most famous limits",
@@ -1962,7 +2416,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-05",
-        "fetchedAt": "2026-11-09T12:25:54.545Z"
+        "fetchedAt": "2026-11-10T08:04:13.341Z"
       },
       {
         "title": "A hidden star is plowing through Betelgeuse’s atmosphere, new evidence suggests",
@@ -2193,12 +2647,12 @@
       }
     ],
     "sync": {
-      "lastAttemptAt": "2026-11-10T08:03:48.026Z",
-      "lastSuccessAt": "2026-11-09T12:25:54.545Z",
-      "newPapers": 0,
+      "lastAttemptAt": "2026-11-10T08:04:13.341Z",
+      "lastSuccessAt": "2026-11-10T08:04:13.341Z",
+      "newPapers": 20,
       "updatedPapers": 0,
       "newNews": 0,
-      "totalPapers": 80,
+      "totalPapers": 100,
       "totalNews": 27,
       "sources": {
         "papers": [
@@ -2218,9 +2672,9 @@
           "msg": "HTTP 404 https://www.esa.int/rssfeed/Our_Activities/Space_Science"
         }
       ],
-      "ok": null,
-      "partial": null,
-      "status": "running"
+      "ok": true,
+      "partial": true,
+      "status": "partial"
     }
   };
 })(typeof window !== 'undefined' ? window : this);
