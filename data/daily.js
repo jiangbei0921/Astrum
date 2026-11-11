@@ -10,10 +10,464 @@
   'use strict';
 
   root.ASTRUM_DAILY = {
-    "updated": "2026-11-10",
-    "generatedAt": "2026-11-11T07:33:11.227Z",
+    "updated": "2026-11-11",
+    "generatedAt": "2026-11-11T07:33:29.016Z",
     "note": "每日 UTC 01:00 增量同步；内容未经本项目核验，不参与答案推理。",
     "papers": [
+      {
+        "id": "2611.13756",
+        "title": "Self-Interacting Neutrinos in NEDE and DRMD Cosmologies: Posteriors, profiles and evidence using CLiENT",
+        "authors": [
+          "Magnus Uggerhøj",
+          "Tobias Johannessen",
+          "Jeppe Pagaard Thybo"
+        ],
+        "summary": "A large number of extensions of the $Λ$CDM model have been proposed as solutions to the Hubble tension, but they are almost always tested separately. Combinations of such models are rarely studied, and one reason is that…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T08:57:41Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T08:57:41Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.13756",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "id": "2611.13770",
+        "title": "ExoPlanetLab: Bayesian orbit fitting of Gaia-DR4 epoch astrometry, radial velocities and relative astrometry",
+        "authors": [
+          "David Hobbs"
+        ],
+        "summary": "Gaia Data Release 4 (DR4) provides epoch astrometry from which thousands of giant planets and many substellar and stellar companions can be characterised. We present ExoPlanetLab, an open-source package for Bayesian orbi…",
+        "cat": "astro-ph.IM",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T09:09:59Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T09:09:59Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.13770",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "id": "2611.13771",
+        "title": "Breaking the Chain: The Dynamical History of the Barnard's Star Planetary System",
+        "authors": [
+          "Tian Yi",
+          "Qiran Huang",
+          "Shuo Huang"
+        ],
+        "summary": "Barnard's Star is the nearest single-star system to the Sun and hosts four recently detected sub-Earth-mass planets. The system exhibits architectural imprints of a \"broken resonant chain\". We explore scenarios in which…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T09:10:41Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T09:10:41Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.13771",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "id": "2611.13806",
+        "title": "Impact of Primordial Magnetic Field-induced Small-scale Power on Non-linear Structure Formation and Cosmic Reionization",
+        "authors": [
+          "Hiten",
+          "Kanhaiya Lal Pandey",
+          "Rajesh Mondal"
+        ],
+        "summary": "Primordial magnetic fields (PMFs) can enhance small-scale matter perturbations and alter halo formation and reionization. We evolve PMF-modified initial spectra with collisionless $N$-body simulations and use the halo ca…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T09:38:12Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T09:38:12Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.13806",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "id": "2611.13829",
+        "title": "Stable cosmology under flexible covariances: Rescaling and cross-survey correlations in DESI BAO and supernova data",
+        "authors": [
+          "Eleni-Anna Kolonia",
+          "Haoye Li",
+          "Hanyu Zhang"
+        ],
+        "summary": "Combinations of cosmic microwave background (CMB), baryon acoustic oscillation (BAO), and Type Ia supernova (SN) data currently favor evolving dark energy over $Λ$CDM at the $\\sim 3$--$4σ$ level, making it important to t…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T09:56:25Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T09:56:25Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.13829",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "id": "2611.13842",
+        "title": "Ultra-Heavy Dark Matter Through Exponential Production Mechanism",
+        "authors": [
+          "Disha Bhatia",
+          "Ranjeet Kumar",
+          "Rahul Srivastava"
+        ],
+        "summary": "Exponential production of dark matter has been introduced recently as one of the alternatives to the widely studied thermal production of dark matter scenarios. This non-thermal production mechanism leads to the exponent…",
+        "cat": "hep-ph",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T10:04:23Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T10:04:23Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.13842",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "id": "2611.14086",
+        "title": "Cosmic String Networks with Time-Varying Tension: Field-Theory Simulations and an Analytic Model",
+        "authors": [
+          "José Correia",
+          "Ivan Rybak"
+        ],
+        "summary": "Cosmic string networks are predicted in some early-Universe scenarios, and in certain models, the string tension becomes a function of time. Here, for the first time, we perform numerical field-theory simulations of cosm…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T13:49:54Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T13:49:54Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.14086",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "id": "2611.14151",
+        "title": "Response of Circular Binaries to Monochromatic Gravitational Waves",
+        "authors": [
+          "Corey McInerney",
+          "Phil J. Sutton"
+        ],
+        "summary": "The exchange in specific orbital energy between a test particle in a Keplerian binary orbit and a continuously incident linearized gravitational wave (GW) is considered. Analytical expressions for the rate of change of e…",
+        "cat": "gr-qc",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T14:40:56Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T14:40:56Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.14151",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "id": "2611.14203",
+        "title": "Empirical constraints on cosmic-ray scattering in NGC 1333 from dust polarisation",
+        "authors": [
+          "Szu-Ting Chen",
+          "Ellis R. Owen",
+          "Alison M. W. Mitchell"
+        ],
+        "summary": "Cosmic rays (CRs) regulate molecular-cloud ionization and chemistry. Gyro-resonant scattering by magnetic fluctuations sets their mean free path and, on larger scales, their effective diffusion coefficient. However, coef…",
+        "cat": "astro-ph.HE",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T15:22:42Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T15:22:42Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.14203",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "id": "2611.14229",
+        "title": "The PAU Survey: Dissecting strong-lensing systems with narrow-band photometric redshifts",
+        "authors": [
+          "Shuaibo Geng",
+          "Pablo Renard",
+          "Qiuhan He"
+        ],
+        "summary": "Wide-field imaging surveys such as Euclid will identify large samples of strong-lens candidates, whose scientific use requires redshifts for both deflectors and lensed sources. Source redshifts are challenging because fa…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T15:43:41Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T15:43:41Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.14229",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "id": "2611.14278",
+        "title": "Shot noise, aperture and resolution in Fourier measurements of disc lopsidedness: TNG50-1 and TNG100-1 analysed with TNGGalaxyLab",
+        "authors": [
+          "Abbos Omonov",
+          "Karamat Mirtadjieva",
+          "Salakhutdin Nuritdinov"
+        ],
+        "summary": "We present TNGGalaxyLab, an open-source Python pipeline for particle-based Fourier decomposition of the stellar surface density of simulated disc galaxies. It measures m = 1-4 amplitude and phase profiles in the Rix and…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T16:20:33Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T16:20:33Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.14278",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "id": "2611.14280",
+        "title": "DustER: Dust Extinction with Photometric Red Galaxies",
+        "authors": [
+          "Ivan Espinoza-Bustamante",
+          "Eli S. Rykoff",
+          "Eduardo Rozo"
+        ],
+        "summary": "We present DustER, a new method for reconstructing dust reddening maps from photometric galaxy survey data. DustER uses red galaxies as \"standard crayons\". That is, it relies on the mean color of red-sequence galaxies be…",
+        "cat": "astro-ph.IM",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T16:22:23Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T16:22:23Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.14280",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "id": "2611.14330",
+        "title": "An Archival Search for Outer Solar System Objects in the NOIRLab Source Catalog DR2: 65 Candidates, Including Four L4 Neptune Trojans",
+        "authors": [
+          "Gioele Cerati"
+        ],
+        "summary": "I search the single-epoch detections of the NOIRLab Source Catalog DR2 (DECam, 2012-2019) for outer Solar System objects. Single-night detections are linked with a bound orbit model, vetted against artefacts, static sour…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T16:55:06Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T16:55:06Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.14330",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "id": "2611.14332",
+        "title": "Tracing the Epoch of Reionization through extreme emission line galaxies around Cosmic Noon",
+        "authors": [
+          "M. Delgado Mancheño",
+          "J. Gallego",
+          "S. Pascual"
+        ],
+        "summary": "Star-forming galaxies at z>6 are thought to be the main drivers of cosmic reionization, but their faintness makes detailed study challenging even with JWST. Extreme Emission Line Galaxies (EELGs) are compact, low-mass sy…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T16:56:06Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T16:56:06Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.14332",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "id": "2611.14343",
+        "title": "Leveraging Lensing-driven Early Warnings: Joint Detectability of lensed Gravitational Waves and their LSST Optical Counterparts",
+        "authors": [
+          "Sourabh Magare",
+          "Anindya",
+          "Anupreeta More"
+        ],
+        "summary": "Gravitational lensing of gravitational waves (GWs) can be leveraged to provide early-warning times of $\\mathcal{O}(\\mathrm{hours})$ to $\\mathcal{O}(\\mathrm{days})$ prior to the mergers of binary neutron stars (BNSs) and…",
+        "cat": "astro-ph.HE",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T17:08:59Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T17:08:59Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.14343",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "id": "2611.14435",
+        "title": "A Statistical Analysis of Lopsidedness in Disk Galaxies",
+        "authors": [
+          "Abbos Omonov",
+          "Karomat Mirtadjieva",
+          "Salakhutdin Nuritdinov"
+        ],
+        "summary": "We present a statistical analysis of Fourier lopsidedness in disk galaxies based on a deduplicated compilation of 606 unique objects: 442 have a measured m = 1 amplitude (A1), and 302 of these also have a measured m = 2…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T18:08:26Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T18:08:26Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.14435",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "id": "2611.14437",
+        "title": "Dwarf galaxy simulations with stellar-core mass- and metallicity-dependent core-collapse supernova explosion energies",
+        "authors": [
+          "Natalia Lahén",
+          "Kiril Maltsev",
+          "Thorsten Naab"
+        ],
+        "summary": "Core-collapse supernovae (CCSNe) are a critical source of thermal and kinetic energy and chemically enriched material in galaxies. Leveraging recent advances in CCSN modelling, we implement a novel core-mass- and metalli…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T18:09:11Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T18:09:11Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.14437",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "id": "2611.14441",
+        "title": "Nucleation of water ice under weak ionization via clustering on negative ions",
+        "authors": [
+          "André Nicolov",
+          "Efstratios M. Kritikos",
+          "William A. Goddard III."
+        ],
+        "summary": "Water-ice grains are shown to form spontaneously in a cold, weakly-ionized laboratory plasma with trace water admixture when neutrals and ions are cooled below $\\sim$200 K. These conditions serve as an analog of ice nucl…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T18:11:44Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T18:11:44Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.14441",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "id": "2611.14456",
+        "title": "Connecting field-level and n-point function measurements of galaxy bias",
+        "authors": [
+          "Hsiang-Ming Huang",
+          "Henrique Rubira",
+          "Fabian Schmidt"
+        ],
+        "summary": "Precise measurements of galaxy bias parameters are essential for extracting cosmological information from galaxy surveys. Field-level analyses infer bias coefficients at a finite cutoff $Λ$, typically related to the latt…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T18:23:46Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T18:23:46Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.14456",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "id": "2611.14472",
+        "title": "r-Process Abundance Variations in Globular Clusters as Fossils of Turbulent Mixing",
+        "authors": [
+          "Lailani Kenoly",
+          "Isabelle Connor",
+          "Melinda Soares-Furtado"
+        ],
+        "summary": "Several metal-poor Galactic globular clusters exhibit substantial star-to-star $r$-process abundance variations at nearly fixed [Fe/H], with the ensemble suggesting smaller variations toward increasing metallicity. We in…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-10",
+        "publishedAt": "2026-11-10T18:37:09Z",
+        "updated": "2026-11-10",
+        "updatedAt": "2026-11-10T18:37:09Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.14472",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
       {
         "id": "2611.12470",
         "title": "The Connection between Halo Assembly History and the Stellar Distribution II: A Radially Stratified Fossil Record of Past Halo Mass",
@@ -2287,6 +2741,54 @@
     ],
     "news": [
       {
+        "title": "NASA’s CHAPEA Mars crew finally emerges after more than a year in isolation",
+        "summary": "After more than a year of simulated life on Mars, four NASA volunteers have finally emerged from isolation, bringing a remarkable space exploration experiment t…",
+        "source": "ScienceDaily",
+        "date": "2026-11-10",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261109205406.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "title": "NASA offers $500,000 to develop next-generation electric rocket engines",
+        "summary": "NASA is putting $500,000 on the line in a new competition to accelerate the development of advanced electric rocket engines for satellites and future space expl…",
+        "source": "ScienceDaily",
+        "date": "2026-11-10",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261109205404.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "title": "Astronomers discover hidden alien planet in James Webb images",
+        "summary": "A breakthrough in telescope imaging could reveal countless alien worlds that have been hiding in plain sight. Scientists developed a new technique that uses a d…",
+        "source": "ScienceDaily",
+        "date": "2026-11-10",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261108233028.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
+        "title": "A mysterious 93-billion-mile cosmic structure may be the wreckage of colliding worlds",
+        "summary": "NASA's Hubble Space Telescope has revealed surprising new details about a mysterious, 93-billion-mile-long cloud of dark, fluffy dust that may have formed when…",
+        "source": "ScienceDaily",
+        "date": "2026-11-10",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261105224555.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-11",
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
+      },
+      {
         "title": "NASA reveals bold new plan to return astronauts to the Moon in 2028",
         "summary": "NASA has revealed an accelerated plan to land astronauts on the Moon in 2028, with SpaceX and Blue Origin developing competing lunar landers and a crucial orbit…",
         "source": "ScienceDaily",
@@ -2296,7 +2798,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-10T12:00:04.795Z"
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
       },
       {
         "title": "Caltech robot makes history by building a structure in space",
@@ -2308,7 +2810,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-10T12:00:04.795Z"
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
       },
       {
         "title": "A nuclear blast could save Earth from an asteroid, but there's a catch",
@@ -2320,7 +2822,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-10T12:00:04.795Z"
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
       },
       {
         "title": "Mysterious gas leaks suggest Mars may still be volcanically alive",
@@ -2332,7 +2834,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-10T12:00:04.795Z"
+        "fetchedAt": "2026-11-11T07:33:29.016Z"
       },
       {
         "title": "Einstein's equations reveal how gravity could break, reconnect, and release energy",
@@ -2647,13 +3149,13 @@
       }
     ],
     "sync": {
-      "lastAttemptAt": "2026-11-11T07:33:11.227Z",
-      "lastSuccessAt": "2026-11-10T12:00:04.795Z",
-      "newPapers": 0,
+      "lastAttemptAt": "2026-11-11T07:33:29.016Z",
+      "lastSuccessAt": "2026-11-11T07:33:29.016Z",
+      "newPapers": 20,
       "updatedPapers": 0,
-      "newNews": 0,
-      "totalPapers": 100,
-      "totalNews": 27,
+      "newNews": 4,
+      "totalPapers": 120,
+      "totalNews": 31,
       "sources": {
         "papers": [
           "astro-ph.GA(8)",
@@ -2672,9 +3174,9 @@
           "msg": "HTTP 404 https://www.esa.int/rssfeed/Our_Activities/Space_Science"
         }
       ],
-      "ok": null,
-      "partial": null,
-      "status": "running"
+      "ok": true,
+      "partial": true,
+      "status": "partial"
     }
   };
 })(typeof window !== 'undefined' ? window : this);
