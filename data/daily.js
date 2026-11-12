@@ -11,7 +11,7 @@
 
   root.ASTRUM_DAILY = {
     "updated": "2026-11-12",
-    "generatedAt": "2026-11-12T12:03:54.646Z",
+    "generatedAt": "2026-11-12T12:05:03.972Z",
     "note": "每日 UTC 01:00 增量同步；内容未经本项目核验，不参与答案推理。",
     "papers": [
       {
@@ -2750,7 +2750,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-12",
-        "fetchedAt": "2026-11-12T08:00:20.463Z"
+        "fetchedAt": "2026-11-12T12:05:03.972Z"
       },
       {
         "title": "NASA’s Parker Solar Probe discovers a hidden pattern in the Sun’s chaotic magnetic fields",
@@ -2762,7 +2762,19 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-12",
-        "fetchedAt": "2026-11-12T08:00:20.463Z"
+        "fetchedAt": "2026-11-12T12:05:03.972Z"
+      },
+      {
+        "title": "Earth's fiery birth may have created hundreds of oceans' worth of water",
+        "summary": "Earth's water may have been born in the planet's fiery atmosphere rather than delivered by icy comets or asteroids. Scientists discovered that rocky pebbles rea…",
+        "source": "ScienceDaily",
+        "date": "2026-11-12",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261110042549.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-12",
+        "fetchedAt": "2026-11-12T12:05:03.972Z"
       },
       {
         "title": "A radical theory says the universe is twice as old as we thought",
@@ -2774,7 +2786,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-12",
-        "fetchedAt": "2026-11-12T08:00:20.463Z"
+        "fetchedAt": "2026-11-12T12:05:03.972Z"
       },
       {
         "title": "NASA’s CHAPEA Mars crew finally emerges after more than a year in isolation",
@@ -2786,7 +2798,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-11",
-        "fetchedAt": "2026-11-12T08:00:20.463Z"
+        "fetchedAt": "2026-11-12T12:05:03.972Z"
       },
       {
         "title": "NASA offers $500,000 to develop next-generation electric rocket engines",
@@ -2798,7 +2810,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-11",
-        "fetchedAt": "2026-11-12T08:00:20.463Z"
+        "fetchedAt": "2026-11-12T12:05:03.972Z"
       },
       {
         "title": "Astronomers discover hidden alien planet in James Webb images",
@@ -2834,7 +2846,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-12T08:00:20.463Z"
+        "fetchedAt": "2026-11-12T12:05:03.972Z"
       },
       {
         "title": "Caltech robot makes history by building a structure in space",
@@ -2846,7 +2858,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-09",
-        "fetchedAt": "2026-11-12T08:00:20.463Z"
+        "fetchedAt": "2026-11-12T12:05:03.972Z"
       },
       {
         "title": "A nuclear blast could save Earth from an asteroid, but there's a catch",
@@ -3185,34 +3197,53 @@
       }
     ],
     "sync": {
-      "lastAttemptAt": "2026-11-12T12:03:54.646Z",
-      "lastSuccessAt": "2026-11-12T08:00:20.463Z",
+      "lastAttemptAt": "2026-11-12T12:05:03.972Z",
+      "lastSuccessAt": "2026-11-12T12:05:03.972Z",
       "newPapers": 0,
       "updatedPapers": 0,
-      "newNews": 0,
+      "newNews": 1,
       "totalPapers": 120,
-      "totalNews": 34,
+      "totalNews": 35,
       "sources": {
-        "papers": [
-          "astro-ph.GA(8)",
-          "astro-ph.CO(8)",
-          "astro-ph.EP(8)",
-          "astro-ph.HE(8)",
-          "astro-ph.SR(8)"
-        ],
+        "papers": [],
         "news": [
           "ScienceDaily(8)"
         ]
       },
       "failures": [
         {
+          "source": "arXiv",
+          "category": "astro-ph.GA",
+          "msg": "HTTP 429 https://export.arxiv.org/api/query?search_query=cat%3Aastro-ph.GA&sortBy=submittedDate&sortOrder=descending&max"
+        },
+        {
+          "source": "arXiv",
+          "category": "astro-ph.CO",
+          "msg": "HTTP 429 https://export.arxiv.org/api/query?search_query=cat%3Aastro-ph.CO&sortBy=submittedDate&sortOrder=descending&max"
+        },
+        {
+          "source": "arXiv",
+          "category": "astro-ph.EP",
+          "msg": "HTTP 429 https://export.arxiv.org/api/query?search_query=cat%3Aastro-ph.EP&sortBy=submittedDate&sortOrder=descending&max"
+        },
+        {
+          "source": "arXiv",
+          "category": "astro-ph.HE",
+          "msg": "HTTP 429 https://export.arxiv.org/api/query?search_query=cat%3Aastro-ph.HE&sortBy=submittedDate&sortOrder=descending&max"
+        },
+        {
+          "source": "arXiv",
+          "category": "astro-ph.SR",
+          "msg": "timeout https://export.arxiv.org/api/query?search_query=cat%3Aastro-ph.SR&sortBy=submittedDate&sortOrder=descending&max_"
+        },
+        {
           "source": "ESA",
           "msg": "HTTP 404 https://www.esa.int/rssfeed/Our_Activities/Space_Science"
         }
       ],
-      "ok": null,
-      "partial": null,
-      "status": "running"
+      "ok": true,
+      "partial": true,
+      "status": "partial"
     }
   };
 })(typeof window !== 'undefined' ? window : this);
