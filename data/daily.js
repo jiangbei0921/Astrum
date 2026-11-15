@@ -10,8 +10,8 @@
   'use strict';
 
   root.ASTRUM_DAILY = {
-    "updated": "2026-11-14",
-    "generatedAt": "2026-11-15T07:37:33.231Z",
+    "updated": "2026-11-15",
+    "generatedAt": "2026-11-15T07:37:49.974Z",
     "note": "每日 UTC 01:00 增量同步；内容未经本项目核验，不参与答案推理。",
     "papers": [
       {
@@ -35,7 +35,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.16783",
@@ -58,7 +58,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.16893",
@@ -81,7 +81,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.16949",
@@ -104,7 +104,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.17033",
@@ -126,7 +126,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.17069",
@@ -149,7 +149,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.17085",
@@ -172,7 +172,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.17135",
@@ -195,7 +195,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.17177",
@@ -218,7 +218,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.17202",
@@ -241,7 +241,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.17204",
@@ -264,7 +264,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.17208",
@@ -287,7 +287,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.17209",
@@ -310,7 +310,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.17224",
@@ -333,7 +333,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.17242",
@@ -356,7 +356,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.17290",
@@ -379,7 +379,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.17299",
@@ -402,7 +402,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.17300",
@@ -425,7 +425,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.17305",
@@ -448,7 +448,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.17337",
@@ -470,7 +470,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "id": "2611.13756",
@@ -3199,6 +3199,30 @@
     ],
     "news": [
       {
+        "title": "Euclid discovers ancient cosmic beacons from the dawn of time, shining like a trillion suns",
+        "summary": "ESA’s Euclid space telescope has discovered 31 ancient quasars, including two record-breaking objects that shone with the brightness of a trillion Suns when the…",
+        "source": "ScienceDaily",
+        "date": "2026-11-15",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261112230504.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-15",
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
+      },
+      {
+        "title": "A giant icy world hiding beyond Pluto could be our sixth dwarf planet",
+        "summary": "Astronomers have uncovered a potentially enormous new dwarf planet beyond Pluto, hidden for years in one of the most crowded regions of the night sky. The disco…",
+        "source": "ScienceDaily",
+        "date": "2026-11-14",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261112230447.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-15",
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
+      },
+      {
         "title": "The Sun unleashed a monster storm. Earth may have made it worse",
         "summary": "The massive solar storm that illuminated skies worldwide in May 2024 has uncovered an unexpected twist: Earth's own atmosphere may have helped make the storm so…",
         "source": "ScienceDaily",
@@ -3208,7 +3232,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-14",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "title": "Dark energy may have flipped from negative to positive 9.5 billion years ago",
@@ -3220,7 +3244,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-14",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "title": "NASA’s Perseverance confirms a key ingredient for life hidden in ancient Mars rocks",
@@ -3232,7 +3256,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "title": "A massive new simulation reveals how the universe emerged from darkness",
@@ -3244,7 +3268,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-12",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "title": "NASA’s Parker Solar Probe discovers a hidden pattern in the Sun’s chaotic magnetic fields",
@@ -3256,7 +3280,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-12",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "title": "Earth's fiery birth may have created hundreds of oceans' worth of water",
@@ -3268,7 +3292,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-12",
-        "fetchedAt": "2026-11-14T11:08:47.705Z"
+        "fetchedAt": "2026-11-15T07:37:49.974Z"
       },
       {
         "title": "A radical theory says the universe is twice as old as we thought",
@@ -3691,13 +3715,13 @@
       }
     ],
     "sync": {
-      "lastAttemptAt": "2026-11-15T07:37:33.231Z",
-      "lastSuccessAt": "2026-11-14T11:08:47.705Z",
+      "lastAttemptAt": "2026-11-15T07:37:49.974Z",
+      "lastSuccessAt": "2026-11-15T07:37:49.974Z",
       "newPapers": 0,
-      "updatedPapers": 0,
-      "newNews": 0,
+      "updatedPapers": 20,
+      "newNews": 2,
       "totalPapers": 140,
-      "totalNews": 38,
+      "totalNews": 40,
       "sources": {
         "papers": [
           "astro-ph.GA(8)",
@@ -3716,9 +3740,9 @@
           "msg": "HTTP 404 https://www.esa.int/rssfeed/Our_Activities/Space_Science"
         }
       ],
-      "ok": null,
-      "partial": null,
-      "status": "running"
+      "ok": true,
+      "partial": true,
+      "status": "partial"
     }
   };
 })(typeof window !== 'undefined' ? window : this);
