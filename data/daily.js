@@ -10,10 +10,462 @@
   'use strict';
 
   root.ASTRUM_DAILY = {
-    "updated": "2026-11-15",
-    "generatedAt": "2026-11-16T07:42:54.917Z",
+    "updated": "2026-11-16",
+    "generatedAt": "2026-11-16T07:43:14.404Z",
     "note": "每日 UTC 01:00 增量同步；内容未经本项目核验，不参与答案推理。",
     "papers": [
+      {
+        "id": "2611.17665",
+        "title": "SN Progenitors of SNRs in OB Associations in the LMC. I. Assessment of Methodology Using N63A",
+        "authors": [
+          "Yuka Terada",
+          "You-Hua Chu"
+        ],
+        "summary": "Color--magnitude diagrams (CMDs) can constrain the progenitor masses of supernova remnants (SNRs), but mass estimates for massive stars are affected by limited temperature sensitivity, extinction, crowding, and nebular c…",
+        "cat": "astro-ph.SR",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T02:19:23Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T02:19:23Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.17665",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "id": "2611.17740",
+        "title": "Counter-rotating Ionized and Neutral Gas in a Star-forming Elliptical Galaxy",
+        "authors": [
+          "Pralay Biswas",
+          "Yogesh Wadadekar",
+          "Omkar Bait"
+        ],
+        "summary": "In early-type galaxies, gas that is kinematically misaligned with the stars generally rotates together across all gas phases, implying a single external origin. Using upgraded Giant Metrewave Radio Telescope (uGMRT) 21 c…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T04:45:08Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T04:45:08Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.17740",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "id": "2611.17835",
+        "title": "Beyond the Inner Slope $γ$: A Schwarzschild-based Probe of the Core-Cusp Problem in the Milky Way Dwarf Spheroidal Galaxies",
+        "authors": [
+          "Rin Miyazaki",
+          "Masashi Chiba",
+          "Shunichi Horigome"
+        ],
+        "summary": "We present a spherical Schwarzschild orbit-superposition framework for constraining the dark matter density profiles and stellar orbital structures of the Milky Way dwarf spheroidal galaxies. We model the line-of-sight v…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T07:16:43Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T07:16:43Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.17835",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "id": "2611.17894",
+        "title": "Euclid Data Release 1 (DR1). AstroVink-TREX: Automated strong gravitational lens segmentation as input for mass modelling pipelines",
+        "authors": [
+          "Euclid Collaboration",
+          "S. H. Vincken",
+          "N. E. P. Lines"
+        ],
+        "summary": "Strong gravitational lens modelling requires the lens light, lensed source light, and contaminants to be separated in each image before mass modelling codes can fit the system. Within Euclid this separation has so far be…",
+        "cat": "astro-ph.IM",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T08:31:30Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T08:31:30Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.17894",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "id": "2611.17922",
+        "title": "Improved Bounds on the Dark Matter-Neutrino Cross Section using LSBGs",
+        "authors": [
+          "Akari Suezaki",
+          "Shunsaku Horiuchi"
+        ],
+        "summary": "We derive new constraints on the interaction cross section between dark matter and neutrinos ($σ_{νχ}$) that improve upon existing limits. We adopt a mechanism where neutrinos emitted from core-collapse supernovae transf…",
+        "cat": "hep-ph",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T09:02:12Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T09:02:12Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.17922",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "id": "2611.17995",
+        "title": "Asteroseismology of blue straggler stars in $ω$ Centauri. Stellar collisions as a possible formation scenario",
+        "authors": [
+          "Jadwiga Daszynska-Daszkiewicz",
+          "P. Gora",
+          "P. Walczak"
+        ],
+        "summary": "Context. Blue stragglers are intriguing stars that appear more massive and younger than expected from single-star evolution, yet their evolutionary histories remain elusive because of the multiple possible formation chan…",
+        "cat": "astro-ph.SR",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T10:23:33Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T10:23:33Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.17995",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "id": "2611.17996",
+        "title": "WISE-VAULT: Decade-long Mid-Infrared Variability of WISE AGN",
+        "authors": [
+          "Suvendu Rakshit"
+        ],
+        "summary": "Mid-infrared (MIR) variability provides a powerful probe of accretion processes and dust reprocessing in active galactic nuclei (AGNs), as it is less affected by extinction than optical flux. Using multi-epoch photometry…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T10:23:54Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T10:23:54Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.17996",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "id": "2611.18281",
+        "title": "bihalofit-JAX: A Differentiable Code for the Nonlinear Matter Bispectrum and its Projected Statistics",
+        "authors": [
+          "Alexander Roskill",
+          "Matteo Zennaro"
+        ],
+        "summary": "Theoretical predictions for the nonlinear matter bispectrum and related projected statistics have been historically very expensive to evaluate, leading many analyses to rely on emulators to speed up slow numerical codes.…",
+        "cat": "astro-ph.IM",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T15:12:50Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T15:12:50Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.18281",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "id": "2611.18286",
+        "title": "Extending an X-ray & Mid-Infrared diagnostic for absorption in Active Galactic Nuclei to higher redshifts using NuSTAR and XMM-Newton",
+        "authors": [
+          "Ryan J. Turney",
+          "Claire L. Greenwell",
+          "David M. Alexander"
+        ],
+        "summary": "Determining the Compton thick fraction ($f_{CT}$) within the population of Active Galactic Nuclei (AGN) provides insight into the evolution and growth of Supermassive Black Holes. Measuring $f_{CT}$ requires methods of m…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T15:14:03Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T15:14:03Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.18286",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "id": "2611.18314",
+        "title": "A Multiscale Analysis of an Interplanetary Shock from IMAP, SOLAR-1, and the L1 Constellation to Earth",
+        "authors": [
+          "Savvas Raptis",
+          "Drew L. Turner",
+          "Domenico Trotta"
+        ],
+        "summary": "Collisionless shocks are primary sites of particle acceleration throughout the Universe. Transient, mesoscale structures forming around these shocks influence their energy conversion efficiency, yet remain poorly observe…",
+        "cat": "physics.space-ph",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T15:31:47Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T15:31:47Z",
+        "doi": "10.3847/1538-4365/aec14e",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.18314",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "id": "2611.18337",
+        "title": "Gravitational production of dark QED by the trace anomaly",
+        "authors": [
+          "Simon Cléry",
+          "Aliaksei Kachanovich",
+          "Michel HG Tytgat"
+        ],
+        "summary": "We revisit the production of fermionic dark matter $χ$ through the graviton portal, sourced by inflaton annihilation at the end of inflation. Because the production rate is helicity-suppressed, $\\propto m_χ^2$, the dark…",
+        "cat": "hep-ph",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T15:48:48Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T15:48:48Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.18337",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "id": "2611.18407",
+        "title": "Distinguishing cosmologies with topological analysis of 21-cm hydrogen 2D brightness fields at Cosmic Dawn",
+        "authors": [
+          "Maksym Tsizh",
+          "Anton Rudakovskyi",
+          "Vitalii Tymchyshyn"
+        ],
+        "summary": "The 21-cm hydrogen line brightness field is a potentially valuable source of information about astrophysical parameters during the cosmological Dark Ages and the Epoch of Reionization. However, it can also be a source of…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T16:53:01Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T16:53:01Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.18407",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "id": "2611.18431",
+        "title": "The effect of vertical mixing on oxygen sequestration by refractory elements in the atmosphere of giant planets",
+        "authors": [
+          "Paolo Simonetti",
+          "Diego Turrini",
+          "Eugenio Schisano"
+        ],
+        "summary": "The most widely used route to study the formation history of giant exoplanets is the C/O ratio, usually derived from H$_2$O, CO, CO$_2$ and CH$_4$. However, refractory elements can sequester a significant fraction of O…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T17:10:43Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T17:10:43Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.18431",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "id": "2611.18452",
+        "title": "Eleven Trans-Neptunian Objects and Eight Candidates Discovered by TESS",
+        "authors": [
+          "Te Han",
+          "Jeroen Audenaert",
+          "Avi Shporer"
+        ],
+        "summary": "We report a blind search for trans-Neptunian objects (TNOs) in Transiting Exoplanet Survey Satellite (TESS) full-frame images from 2018 July 25 through 2026 November 6. We search 572 CCD fields near the ecliptic across 9…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T17:23:55Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T17:23:55Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.18452",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "id": "2611.18481",
+        "title": "TOI-1699A: a sub-Neptune and a super-Jovian in an S-type planetary system",
+        "authors": [
+          "Angelica Psaridi",
+          "Manu Stalport",
+          "Giacomo Mantovan"
+        ],
+        "summary": "We present the detection and characterization of the TOI-1699A (TYC 3415-00428-1) S-type planetary system, hosted by the G5 V primary of a wide binary with an M3 V stellar companion at a projected separation of $\\sim$348…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T17:52:47Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T17:52:47Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.18481",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "id": "2611.18487",
+        "title": "Precise Deep-Learning Reconstruction of Galaxy Cluster Mass Maps and Substructures from Optical Observations",
+        "authors": [
+          "Atulit Srivastava",
+          "Weiguang Cui",
+          "Daniel de Andres"
+        ],
+        "summary": "Accurately mapping the total mass distribution within galaxy clusters, including dark matter, is fundamental to understanding structure formation and constraining cosmological parameters. Conventional mass-mapping techni…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T18:00:06Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T18:00:06Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.18487",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "id": "2611.18512",
+        "title": "Probing baryonic feedback using fast radio bursts and galaxy surveys",
+        "authors": [
+          "Haruki Ebina",
+          "Martin White"
+        ],
+        "summary": "The dispersion measure (DM) of fast radio bursts (FRB) provides a noisy measure of the free-electron column density to the burst. With next-generation FRB surveys the number of bursts will drastically increase and measur…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T18:29:42Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T18:29:42Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.18512",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "id": "2611.18515",
+        "title": "Parity conservation of the isotropic galaxy 4PCF in redshift space",
+        "authors": [
+          "Chanasorn Kongprachaya",
+          "Nicola Bartolo",
+          "Daniele Bertacca"
+        ],
+        "summary": "Recent observational investigation of cosmological Parity Violation (PV) through the galaxy Four-point Correlation Function (4PCF) has motivated a careful theoretical examination of potential systematic contributions. In…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T18:32:52Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T18:32:52Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.18515",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "id": "2611.18557",
+        "title": "Does Dark Energy Evolve $\\textit{and}$ Cluster?",
+        "authors": [
+          "Maria Luisa Gallavotti",
+          "Alessandra Silvestri"
+        ],
+        "summary": "Recent cosmological observations have renewed interest in dynamical dark energy, and naturally raise the question of whether departures from the standard expansion history are accompanied by modifications of gravitationa…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T18:58:50Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T18:58:50Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.18557",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "id": "2611.18558",
+        "title": "Reconstruction of Dynamical Dark Energy and Gravity from latest cosmological data",
+        "authors": [
+          "Maria Luisa Gallavotti",
+          "Alessandra Silvestri"
+        ],
+        "summary": "Recent cosmological observations have renewed interest in non-standard late-time evolution. We investigate whether departures from the standard expansion history are accompanied by modifications of gravitational dynamics…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-13",
+        "publishedAt": "2026-11-13T18:58:51Z",
+        "updated": "2026-11-13",
+        "updatedAt": "2026-11-13T18:58:51Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.18558",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
       {
         "id": "2611.16782",
         "title": "Combining TTVs, RVs, and astrometry to characterize distant giant companions of transiting hot Jupiters: Application to WASP-4",
@@ -3199,6 +3651,30 @@
     ],
     "news": [
       {
+        "title": "Uranus and Neptune’s bizarre magnetic fields may finally be explained",
+        "summary": "The strange, wildly tilted magnetic fields of Uranus and Neptune have puzzled scientists since NASA's Voyager 2 spacecraft explored the planets in the 1980s. Ne…",
+        "source": "ScienceDaily",
+        "date": "2026-11-15",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261114202204.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
+        "title": "Astronomers discover a dead star spinning every 8 minutes and sending mysterious radio pulses",
+        "summary": "Scientists have discovered a strange stellar pair more than 5,000 light-years away, where a dead star spinning every eight minutes produces mysterious radio pul…",
+        "source": "ScienceDaily",
+        "date": "2026-11-15",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261114202136.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-16",
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
+      },
+      {
         "title": "Euclid discovers ancient cosmic beacons from the dawn of time, shining like a trillion suns",
         "summary": "ESA’s Euclid space telescope has discovered 31 ancient quasars, including two record-breaking objects that shone with the brightness of a trillion Suns when the…",
         "source": "ScienceDaily",
@@ -3208,7 +3684,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-15",
-        "fetchedAt": "2026-11-15T11:42:12.353Z"
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
       },
       {
         "title": "A giant icy world hiding beyond Pluto could be our sixth dwarf planet",
@@ -3220,7 +3696,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-15",
-        "fetchedAt": "2026-11-15T11:42:12.353Z"
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
       },
       {
         "title": "The Sun unleashed a monster storm. Earth may have made it worse",
@@ -3232,7 +3708,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-14",
-        "fetchedAt": "2026-11-15T11:42:12.353Z"
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
       },
       {
         "title": "Dark energy may have flipped from negative to positive 9.5 billion years ago",
@@ -3244,7 +3720,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-14",
-        "fetchedAt": "2026-11-15T11:42:12.353Z"
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
       },
       {
         "title": "NASA’s Perseverance confirms a key ingredient for life hidden in ancient Mars rocks",
@@ -3256,7 +3732,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-13",
-        "fetchedAt": "2026-11-15T11:42:12.353Z"
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
       },
       {
         "title": "A massive new simulation reveals how the universe emerged from darkness",
@@ -3292,7 +3768,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-12",
-        "fetchedAt": "2026-11-15T11:42:12.353Z"
+        "fetchedAt": "2026-11-16T07:43:14.404Z"
       },
       {
         "title": "A radical theory says the universe is twice as old as we thought",
@@ -3715,13 +4191,13 @@
       }
     ],
     "sync": {
-      "lastAttemptAt": "2026-11-16T07:42:54.917Z",
-      "lastSuccessAt": "2026-11-15T11:42:12.353Z",
-      "newPapers": 0,
+      "lastAttemptAt": "2026-11-16T07:43:14.404Z",
+      "lastSuccessAt": "2026-11-16T07:43:14.404Z",
+      "newPapers": 20,
       "updatedPapers": 0,
-      "newNews": 0,
-      "totalPapers": 140,
-      "totalNews": 40,
+      "newNews": 2,
+      "totalPapers": 160,
+      "totalNews": 42,
       "sources": {
         "papers": [
           "astro-ph.GA(8)",
@@ -3740,9 +4216,9 @@
           "msg": "HTTP 404 https://www.esa.int/rssfeed/Our_Activities/Space_Science"
         }
       ],
-      "ok": null,
-      "partial": null,
-      "status": "running"
+      "ok": true,
+      "partial": true,
+      "status": "partial"
     }
   };
 })(typeof window !== 'undefined' ? window : this);
