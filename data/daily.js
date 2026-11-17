@@ -11,7 +11,7 @@
 
   root.ASTRUM_DAILY = {
     "updated": "2026-11-16",
-    "generatedAt": "2026-11-16T12:21:10.754Z",
+    "generatedAt": "2026-11-17T08:52:22.831Z",
     "note": "每日 UTC 01:00 增量同步；内容未经本项目核验，不参与答案推理。",
     "papers": [
       {
@@ -4203,11 +4203,11 @@
       }
     ],
     "sync": {
-      "lastAttemptAt": "2026-11-16T12:21:10.754Z",
+      "lastAttemptAt": "2026-11-17T08:52:22.831Z",
       "lastSuccessAt": "2026-11-16T12:21:10.754Z",
       "newPapers": 0,
-      "updatedPapers": 20,
-      "newNews": 1,
+      "updatedPapers": 0,
+      "newNews": 0,
       "totalPapers": 160,
       "totalNews": 43,
       "sources": {
@@ -4228,9 +4228,9 @@
           "msg": "HTTP 404 https://www.esa.int/rssfeed/Our_Activities/Space_Science"
         }
       ],
-      "ok": true,
-      "partial": true,
-      "status": "partial"
+      "ok": null,
+      "partial": null,
+      "status": "running"
     }
   };
 })(typeof window !== 'undefined' ? window : this);
