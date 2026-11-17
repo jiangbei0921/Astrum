@@ -11,7 +11,7 @@
 
   root.ASTRUM_DAILY = {
     "updated": "2026-11-17",
-    "generatedAt": "2026-11-17T12:41:19.968Z",
+    "generatedAt": "2026-11-17T12:42:56.779Z",
     "note": "每日 UTC 01:00 增量同步；内容未经本项目核验，不参与答案推理。",
     "papers": [
       {
@@ -35,7 +35,30 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
+      },
+      {
+        "id": "2611.20934",
+        "title": "XRISM/Xtend detection of solar wind charge exchange induced by multiple coronal mass ejections in 2024 August",
+        "authors": [
+          "Daijiro Kanno",
+          "Daiki Ishi",
+          "Yuichiro Ezoe"
+        ],
+        "summary": "Solar wind charge exchange (SWCX) emission is often a major component of the soft X-ray background, but it also provides a remote diagnostic of the composition and ionization state of solar wind plasma. We present an ana…",
+        "cat": "astro-ph.SR",
+        "published": "2026-11-16",
+        "publishedAt": "2026-11-16T11:42:40Z",
+        "updated": "2026-11-16",
+        "updatedAt": "2026-11-16T11:42:40Z",
+        "doi": "10.1093/pasj/psag143",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.20934",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-17",
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "id": "2611.20940",
@@ -56,7 +79,30 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
+      },
+      {
+        "id": "2611.20968",
+        "title": "Simulating high-speed solar wind streams from coronal holes using an L5-L1 configuration of Lagrangian points",
+        "authors": [
+          "Tatiana Podladchikova",
+          "Astrid M. Veronig",
+          "Manuela Temmer"
+        ],
+        "summary": "Coronal holes (CHs) are known to be sources of high-speed solar wind streams (HSSs), yet the physical mechanisms linking CH position and characteristics to solar wind (SW) behaviour remain unclear. Our results reveal tha…",
+        "cat": "astro-ph.SR",
+        "published": "2026-11-16",
+        "publishedAt": "2026-11-16T12:08:56Z",
+        "updated": "2026-11-16",
+        "updatedAt": "2026-11-16T12:08:56Z",
+        "doi": "10.1038/s41598-025-97246-2",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.20968",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-17",
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "id": "2611.21052",
@@ -79,7 +125,30 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
+      },
+      {
+        "id": "2611.21062",
+        "title": "Observing Earth's ionospheric irregularities from the Moon",
+        "authors": [
+          "Rong Yang",
+          "Zhihong Li",
+          "Andrea Nardin"
+        ],
+        "summary": "Radio signals that propagate through the Earth's ionosphere carry information about possible irregular plasma structures. Such irregularities manifest themselves as amplitude signatures that depend on the propagation and…",
+        "cat": "eess.SP",
+        "published": "2026-11-16",
+        "publishedAt": "2026-11-16T13:13:01Z",
+        "updated": "2026-11-16",
+        "updatedAt": "2026-11-16T13:13:01Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.21062",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-17",
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "id": "2611.21226",
@@ -102,7 +171,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "id": "2611.21279",
@@ -125,7 +194,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "id": "2611.21323",
@@ -148,7 +217,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "id": "2611.21336",
@@ -169,7 +238,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "id": "2611.21337",
@@ -191,7 +260,29 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
+      },
+      {
+        "id": "2611.21342",
+        "title": "No Supersoft X-rays Before SN 2026ahvu: Constraints on a Potentially Prompt Type Ia Progenitor",
+        "authors": [
+          "Akos Bogdan",
+          "Tonima Ananna"
+        ],
+        "summary": "The nearby Type Ia supernova SN 2026ahvu offers a rare opportunity to probe its progenitor that may have evolved unusually rapidly. If the progenitor formed in either of the two young stellar clusters near the explosion…",
+        "cat": "astro-ph.HE",
+        "published": "2026-11-16",
+        "publishedAt": "2026-11-16T16:23:36Z",
+        "updated": "2026-11-16",
+        "updatedAt": "2026-11-16T16:23:36Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.21342",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-17",
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "id": "2611.21350",
@@ -214,7 +305,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "id": "2611.21353",
@@ -283,7 +374,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "id": "2611.21433",
@@ -329,7 +420,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "id": "2611.21468",
@@ -352,7 +443,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "id": "2611.21510",
@@ -375,7 +466,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "id": "2611.21534",
@@ -398,7 +489,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "id": "2611.21575",
@@ -421,7 +512,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "id": "2611.21580",
@@ -467,7 +558,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "id": "2611.17665",
@@ -4106,6 +4197,30 @@
     ],
     "news": [
       {
+        "title": "A mysterious twist in the universe’s oldest light could reveal new physics",
+        "summary": "Scientists have spotted hints of a mysterious rotation in the universe’s oldest light that could reveal new physics and shed light on dark matter and dark energ…",
+        "source": "ScienceDaily",
+        "date": "2026-11-17",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261116023348.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-17",
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
+      },
+      {
+        "title": "ESA’s Hera spacecraft is flying rectangles around NASA’s asteroid crash site",
+        "summary": "Europe’s Hera spacecraft has arrived at the scene of NASA’s historic asteroid collision to uncover what really happened when a spacecraft slammed into Dimorphos…",
+        "source": "ScienceDaily",
+        "date": "2026-11-17",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261115085545.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-17",
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
+      },
+      {
         "title": "NASA smashed into an asteroid. Now Hera has revealed a strange new world",
         "summary": "A European spacecraft has revealed a mysterious, crater-covered side of the asteroid Didymos as it prepares to investigate the aftermath of NASA’s historic 2022…",
         "source": "ScienceDaily",
@@ -4115,7 +4230,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "title": "NASA is offering $1 million for bold ideas to help build a Moon base",
@@ -4127,7 +4242,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "title": "The secret to building Moon bases may be hiding in emergency blankets",
@@ -4139,7 +4254,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-16",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "title": "Uranus and Neptune’s bizarre magnetic fields may finally be explained",
@@ -4151,7 +4266,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-16",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "title": "Astronomers discover a dead star spinning every 8 minutes and sending mysterious radio pulses",
@@ -4163,7 +4278,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-16",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "title": "Euclid discovers ancient cosmic beacons from the dawn of time, shining like a trillion suns",
@@ -4175,7 +4290,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-15",
-        "fetchedAt": "2026-11-17T08:52:38.816Z"
+        "fetchedAt": "2026-11-17T12:42:56.779Z"
       },
       {
         "title": "A giant icy world hiding beyond Pluto could be our sixth dwarf planet",
@@ -4682,19 +4797,17 @@
       }
     ],
     "sync": {
-      "lastAttemptAt": "2026-11-17T12:41:19.968Z",
-      "lastSuccessAt": "2026-11-17T08:52:38.816Z",
-      "newPapers": 0,
-      "updatedPapers": 0,
-      "newNews": 0,
-      "totalPapers": 180,
-      "totalNews": 45,
+      "lastAttemptAt": "2026-11-17T12:42:56.779Z",
+      "lastSuccessAt": "2026-11-17T12:42:56.779Z",
+      "newPapers": 4,
+      "updatedPapers": 16,
+      "newNews": 2,
+      "totalPapers": 184,
+      "totalNews": 47,
       "sources": {
         "papers": [
-          "astro-ph.GA(8)",
           "astro-ph.CO(8)",
           "astro-ph.EP(8)",
-          "astro-ph.HE(8)",
           "astro-ph.SR(8)"
         ],
         "news": [
@@ -4703,13 +4816,23 @@
       },
       "failures": [
         {
+          "source": "arXiv",
+          "category": "astro-ph.GA",
+          "msg": "timeout https://export.arxiv.org/api/query?search_query=cat%3Aastro-ph.GA&sortBy=submittedDate&sortOrder=descending&max_"
+        },
+        {
+          "source": "arXiv",
+          "category": "astro-ph.HE",
+          "msg": "timeout https://export.arxiv.org/api/query?search_query=cat%3Aastro-ph.HE&sortBy=submittedDate&sortOrder=descending&max_"
+        },
+        {
           "source": "ESA",
           "msg": "HTTP 404 https://www.esa.int/rssfeed/Our_Activities/Space_Science"
         }
       ],
-      "ok": null,
-      "partial": null,
-      "status": "running"
+      "ok": true,
+      "partial": true,
+      "status": "partial"
     }
   };
 })(typeof window !== 'undefined' ? window : this);
