@@ -10,10 +10,464 @@
   'use strict';
 
   root.ASTRUM_DAILY = {
-    "updated": "2026-11-17",
-    "generatedAt": "2026-11-18T08:16:55.700Z",
+    "updated": "2026-11-18",
+    "generatedAt": "2026-11-18T08:17:12.447Z",
     "note": "每日 UTC 01:00 增量同步；内容未经本项目核验，不参与答案推理。",
     "papers": [
+      {
+        "id": "2611.22375",
+        "title": "Resolving Individual Massive Stars in an M31 Star Cluster Exhibiting Wolf-Rayet Features",
+        "authors": [
+          "Yunning Zhao",
+          "Yulong Gao",
+          "Wei Zhang"
+        ],
+        "summary": "The observed ratio of Wolf-Rayet (WR) star subtypes (e.g., WC/WN) in M31 is significantly higher than the predictions of standard stellar evolution models, yet this key diagnostic discrepancy remains unresolved. This is…",
+        "cat": "astro-ph.SR",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T08:27:15Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T08:27:15Z",
+        "doi": "10.3390/universe12080228",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.22375",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
+      {
+        "id": "2611.22378",
+        "title": "Bent-tailed radio galaxies as tracers of the intrafilament medium",
+        "authors": [
+          "Katlego Morakile",
+          "Kshitij Thorat",
+          "Etienne Bonnassieux"
+        ],
+        "summary": "Bent-tailed radio galaxies have traditionally been associated with, and used as tracers of, the dense intracluster medium. In recent years, however, such sources have also been identified outside of clusters, with only a…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T08:30:06Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T08:30:06Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.22378",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
+      {
+        "id": "2611.22454",
+        "title": "Unveiling the mutual inclination distribution in astrometric surveys",
+        "authors": [
+          "Jean-Baptiste Delisle"
+        ],
+        "summary": "Mutual inclination in three (or more) body systems (triple stars, circumbinary planets, multi-planetary systems, etc.) is a tracer of their formation and evolution. Gaia Data Release 4 will provide for the first time a c…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T09:18:52Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T09:18:52Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.22454",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
+      {
+        "id": "2611.22487",
+        "title": "Dual and Binary AGN at Cosmic Dawn: The need for a JWST Program to resolve the merger channel of Early Black Hole Growth",
+        "authors": [
+          "Filippo Mannucci",
+          "Matteo Ceci",
+          "Norman A. Grogin"
+        ],
+        "summary": "The discovery with JWST of accreting black holes (BHs) at z=4-9 in numbers far exceeding pre-JWST expectations, many of them overmassive relative to their hosts and linked to the enigmatic Little Red Dots (LRDs), raises…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T09:43:05Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T09:43:05Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.22487",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
+      {
+        "id": "2611.22571",
+        "title": "Planet Formation in a Warped Disc: Gravitational Instability and Misaligned Infall",
+        "authors": [
+          "Sahl Rowther",
+          "Josh Calcino",
+          "Richard Alexander"
+        ],
+        "summary": "We perform three-dimensional smoothed particle hydrodynamics simulations to investigate the impact of misaligned infall on a gravitationally unstable protoplanetary disc. The interaction between the disc and the infallin…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T10:57:41Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T10:57:41Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.22571",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
+      {
+        "id": "2611.22771",
+        "title": "Black hole ADaptive Multi-relation Mass Estimation based on Timing Analysis (BADMET)",
+        "authors": [
+          "Ruisong Xia",
+          "Yongquan Xue",
+          "Hao Liu"
+        ],
+        "summary": "Active galactic nucleus (AGN) variability is widely recognized as a promising avenue for constraining black hole mass, yet its practical application remains limited. Although the correlation between black hole mass and v…",
+        "cat": "astro-ph.HE",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T13:40:02Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T13:40:02Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.22771",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
+      {
+        "id": "2611.22800",
+        "title": "New Historical Guest-Star Candidates from Reassessed Chinese Records: Lunar Occultation of Planets",
+        "authors": [
+          "Jiahao Guo",
+          "Wenhui Jing",
+          "Yu Liu"
+        ],
+        "summary": "Ancient Chinese records of lunar occultations of planets have been used to test planetary theories and investigate long-term changes in Earth's rotation. However, certain records contain identification errors whose origi…",
+        "cat": "astro-ph.HE",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T13:58:25Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T13:58:25Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.22800",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
+      {
+        "id": "2611.22887",
+        "title": "Euclid: Quick Data Release (Q1) -- The evolution of the radio-loud AGN fraction-stellar mass relation to $z\\sim3$ in the Euclid Deep Field North",
+        "authors": [
+          "S. Visser",
+          "H. J. A. Rottgering",
+          "L. Wang"
+        ],
+        "summary": "The incidence of radio-loud active galactic nuclei (RLAGN) and their energetic output via AGN feedback are crucial in understanding the evolution of galaxies and the large-scale structure of the Universe. In the local Un…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T14:57:53Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T14:57:53Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.22887",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
+      {
+        "id": "2611.22913",
+        "title": "A novel method for dust evolution in protoplanetary disks and a new criterion for gap opening",
+        "authors": [
+          "SM Gopika",
+          "Paul C. Duffell"
+        ],
+        "summary": "We present the Grain Residence-Time Method (GRTM), a computationally efficient particle-tracking approach for studying dust evolution and trapping in protoplanetary disks. By reconstructing steady-state dust distribution…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T15:14:57Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T15:14:57Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.22913",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
+      {
+        "id": "2611.22914",
+        "title": "FastSpecFit: Spectrophotometric Modeling of 38 Million Extragalactic Targets from the Dark Energy Spectroscopic Instrument Second Data Release",
+        "authors": [
+          "John Moustakas",
+          "Jeremy Buhler",
+          "Dirk Scholte"
+        ],
+        "summary": "Optical spectrophotometry provides a direct window into the physical conditions, kinematics, and formation histories of galaxies and quasars. FastSpecFit is an open-source Python software package that forward-models each…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T15:16:32Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T15:16:32Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.22914",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
+      {
+        "id": "2611.22952",
+        "title": "Observational diagnostics of external photoevaporation at millimetre wavelengths",
+        "authors": [
+          "Luke Keyte",
+          "Thomas J. Haworth",
+          "Tyger Peake"
+        ],
+        "summary": "External photoevaporation is increasingly recognised as an important influence on protoplanetary disk evolution. However, there are no established molecular line diagnostics that can reliably distinguish external irradia…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T15:41:44Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T15:41:44Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.22952",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
+      {
+        "id": "2611.22999",
+        "title": "\\texttt{StochAXtic}: a JAX-Accelerated, End-to-End Differentiable Framework for Gravitational-Wave Backgrounds from Compact Binary Populations",
+        "authors": [
+          "Haowen Zhong",
+          "Ethan Vislosky",
+          "Emanuele Berti"
+        ],
+        "summary": "We present \\texttt{StochAXtic}, a package for computing the dimensionless energy density spectrum $Ω_{\\mathrm{GW}}(f)$ of the stochastic gravitational-wave background generated by compact binary coalescences. Rather than…",
+        "cat": "gr-qc",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T16:13:23Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T16:13:23Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.22999",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
+      {
+        "id": "2611.23082",
+        "title": "Probing Lorentz-violating electrodynamics with CMB polarization. II. Updated constraints and forecasts for the Simons Observatory and LiteBIRD",
+        "authors": [
+          "Margherita Lembo",
+          "Luca Caloni",
+          "Martina Gerbino"
+        ],
+        "summary": "We update the constraints on Lorentz-violating electrodynamics from the polarization of the cosmic microwave background (CMB). Within the minimal Standard Model Extension, we consider the renormalizable CPT-odd and CPT-e…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T17:07:27Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T17:07:27Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.23082",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
+      {
+        "id": "2611.23084",
+        "title": "An Efficient Method for Directly Integrating the Vlasov Equation in Collisionless and Weakly-Collisional Simulations",
+        "authors": [
+          "Philip F. Hopkins"
+        ],
+        "summary": "We describe and test a new numerical method to solve the Vlasov/Boltzmann equation in systems with arbitrary levels of collisionality. The method combines recent ideas to evolve the distribution function (DF) directly in…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T17:09:37Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T17:09:37Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.23084",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
+      {
+        "id": "2611.23104",
+        "title": "Testing general relativity with galaxy cluster clustering from the DESI Legacy Imaging Surveys",
+        "authors": [
+          "Eleni Tsaprazi",
+          "Federico Marulli",
+          "Pier-Stefano Corasaniti"
+        ],
+        "summary": "Deviations from general relativity on cosmological scales have been proposed as possible explanations for dark energy and dark matter. Galaxy cluster clustering offers an independent probe of gravitational growth, benefi…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T17:26:10Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T17:26:10Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.23104",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
+      {
+        "id": "2611.23110",
+        "title": "Convergence of the quasinormal-mode expansion of the Kerr Green function",
+        "authors": [
+          "Davide Ciattaglia",
+          "Adrien Kuntz",
+          "Enrico Barausse"
+        ],
+        "summary": "Black-hole ringdown is usually modeled as a linear superposition of quasinormal modes, and fits to gravitational-wave observations increasingly include high overtones. However, the overtone sum does not necessarily conve…",
+        "cat": "gr-qc",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T17:30:38Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T17:30:38Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.23110",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
+      {
+        "id": "2611.23150",
+        "title": "oMEGACat-JWST I.: Project description and photometric data release",
+        "authors": [
+          "Maximilian Häberle",
+          "Callie Clontz",
+          "Massimo Griggio"
+        ],
+        "summary": "Omega Centauri (NGC 5139, $ω$ Cen) is the most massive globular cluster in the Milky Way and the likely stripped nucleus of an accreted dwarf galaxy. Extensive HST observations have uncovered many of its peculiar feature…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T18:03:37Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T18:03:37Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.23150",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
+      {
+        "id": "2611.23200",
+        "title": "A Universal Ratio Linking Cosmic Expansion and the Growth of Structure",
+        "authors": [
+          "Anjan A Sen",
+          "Purba Mukherjee"
+        ],
+        "summary": "We identify a universal relation between the onset of cosmic acceleration ($z_t$) and the turnover ($z_{\\rm pk}$) of the linear growth observable $fσ_{8}$. In a spatially flat $Λ$CDM Universe, these two redshifts obey $R…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T18:40:53Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T18:40:53Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.23200",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
+      {
+        "id": "2611.23217",
+        "title": "Near Resonance, Less Ordered: Radius and Mass Ordering in Compact Multi-planet Systems",
+        "authors": [
+          "Agustin Heron",
+          "Songhu Wang",
+          "Cristobal Petrovich"
+        ],
+        "summary": "Compact multi-planet systems exhibit a tendency for planetary radii to follow ordered sequences with orbital position, suggesting that these non-random patterns preserve a fossil record of their formation. Here, we inves…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T18:56:45Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T18:56:45Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.23217",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
+      {
+        "id": "2611.23220",
+        "title": "Complete Cosmological Collider Signatures from Right-handed Neutrino Loops",
+        "authors": [
+          "Linghao Song",
+          "Jingtao You",
+          "Ming Cheng"
+        ],
+        "summary": "We study the complete cosmological collider (CC) signatures from right-handed neutrino loops with chemical-potential enhancement. These CC signals are induced by the inflaton-right-handed-neutrino interaction and can be…",
+        "cat": "hep-ph",
+        "published": "2026-11-17",
+        "publishedAt": "2026-11-17T18:57:11Z",
+        "updated": "2026-11-17",
+        "updatedAt": "2026-11-17T18:57:11Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.23220",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-18",
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
+      },
       {
         "id": "2611.20919",
         "title": "Cosmological Collider Signals from Fermion Bubble Loops with a Chemical Potential",
@@ -4206,7 +4660,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T12:42:56.779Z"
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
       },
       {
         "title": "ESA’s Hera spacecraft is flying rectangles around NASA’s asteroid crash site",
@@ -4218,7 +4672,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T12:42:56.779Z"
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
       },
       {
         "title": "NASA smashed into an asteroid. Now Hera has revealed a strange new world",
@@ -4230,7 +4684,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T12:42:56.779Z"
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
       },
       {
         "title": "NASA is offering $1 million for bold ideas to help build a Moon base",
@@ -4242,7 +4696,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-17T12:42:56.779Z"
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
       },
       {
         "title": "The secret to building Moon bases may be hiding in emergency blankets",
@@ -4254,7 +4708,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-16",
-        "fetchedAt": "2026-11-17T12:42:56.779Z"
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
       },
       {
         "title": "Uranus and Neptune’s bizarre magnetic fields may finally be explained",
@@ -4266,7 +4720,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-16",
-        "fetchedAt": "2026-11-17T12:42:56.779Z"
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
       },
       {
         "title": "Astronomers discover a dead star spinning every 8 minutes and sending mysterious radio pulses",
@@ -4278,7 +4732,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-16",
-        "fetchedAt": "2026-11-17T12:42:56.779Z"
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
       },
       {
         "title": "Euclid discovers ancient cosmic beacons from the dawn of time, shining like a trillion suns",
@@ -4290,7 +4744,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-15",
-        "fetchedAt": "2026-11-17T12:42:56.779Z"
+        "fetchedAt": "2026-11-18T08:17:12.447Z"
       },
       {
         "title": "A giant icy world hiding beyond Pluto could be our sixth dwarf planet",
@@ -4732,18 +5186,6 @@
         ],
         "firstSeen": "2026-10-20",
         "fetchedAt": "2026-11-04T01:56:28.827Z"
-      },
-      {
-        "title": "Celebrating BepiColombo, three words at a time",
-        "summary": "Video: 00:03:32 BepiColombo launched on 20 October 2018. This year, the anniversary is special. After eight years of travelling through the inner Solar System…",
-        "source": "ESA",
-        "date": "2026-10-19",
-        "url": "https://www.esa.int/ESA_Multimedia/Videos/2026/10/Celebrating_BepiColombo_three_words_at_a_time",
-        "sources": [
-          "ESA"
-        ],
-        "firstSeen": "2026-10-19",
-        "fetchedAt": "2026-11-04T01:56:28.827Z"
       }
     ],
     "community": [
@@ -4797,17 +5239,19 @@
       }
     ],
     "sync": {
-      "lastAttemptAt": "2026-11-18T08:16:55.700Z",
-      "lastSuccessAt": "2026-11-17T12:42:56.779Z",
-      "newPapers": 0,
+      "lastAttemptAt": "2026-11-18T08:17:12.447Z",
+      "lastSuccessAt": "2026-11-18T08:17:12.447Z",
+      "newPapers": 20,
       "updatedPapers": 0,
       "newNews": 0,
-      "totalPapers": 184,
-      "totalNews": 47,
+      "totalPapers": 204,
+      "totalNews": 46,
       "sources": {
         "papers": [
+          "astro-ph.GA(8)",
           "astro-ph.CO(8)",
           "astro-ph.EP(8)",
+          "astro-ph.HE(8)",
           "astro-ph.SR(8)"
         ],
         "news": [
@@ -4816,23 +5260,13 @@
       },
       "failures": [
         {
-          "source": "arXiv",
-          "category": "astro-ph.GA",
-          "msg": "timeout https://export.arxiv.org/api/query?search_query=cat%3Aastro-ph.GA&sortBy=submittedDate&sortOrder=descending&max_"
-        },
-        {
-          "source": "arXiv",
-          "category": "astro-ph.HE",
-          "msg": "timeout https://export.arxiv.org/api/query?search_query=cat%3Aastro-ph.HE&sortBy=submittedDate&sortOrder=descending&max_"
-        },
-        {
           "source": "ESA",
           "msg": "HTTP 404 https://www.esa.int/rssfeed/Our_Activities/Space_Science"
         }
       ],
-      "ok": null,
-      "partial": null,
-      "status": "running"
+      "ok": true,
+      "partial": true,
+      "status": "partial"
     }
   };
 })(typeof window !== 'undefined' ? window : this);
