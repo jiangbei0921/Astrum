@@ -11,7 +11,7 @@
 
   root.ASTRUM_DAILY = {
     "updated": "2026-11-20",
-    "generatedAt": "2026-11-20T12:24:22.849Z",
+    "generatedAt": "2026-11-20T12:24:40.089Z",
     "note": "每日 UTC 01:00 增量同步；内容未经本项目核验，不参与答案推理。",
     "papers": [
       {
@@ -35,7 +35,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.25803",
@@ -58,7 +58,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.26025",
@@ -79,7 +79,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.26372",
@@ -100,7 +100,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.26416",
@@ -123,7 +123,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.26421",
@@ -145,7 +145,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.26424",
@@ -168,7 +168,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.26461",
@@ -191,7 +191,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.26468",
@@ -214,7 +214,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.26483",
@@ -237,7 +237,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.26488",
@@ -260,7 +260,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.26494",
@@ -283,7 +283,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.26495",
@@ -305,7 +305,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.26548",
@@ -328,7 +328,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.26550",
@@ -351,7 +351,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.26576",
@@ -374,7 +374,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.26593",
@@ -397,7 +397,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.26594",
@@ -419,7 +419,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.26618",
@@ -442,7 +442,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.26620",
@@ -465,7 +465,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "id": "2611.24581",
@@ -5571,7 +5571,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-19",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "title": "A mysterious twist in the universe’s oldest light could reveal new physics",
@@ -5583,7 +5583,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "title": "ESA’s Hera spacecraft is flying rectangles around NASA’s asteroid crash site",
@@ -5595,7 +5595,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "title": "NASA smashed into an asteroid. Now Hera has revealed a strange new world",
@@ -5607,7 +5607,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "title": "NASA is offering $1 million for bold ideas to help build a Moon base",
@@ -5619,7 +5619,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "title": "The secret to building Moon bases may be hiding in emergency blankets",
@@ -5631,7 +5631,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-16",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "title": "Uranus and Neptune’s bizarre magnetic fields may finally be explained",
@@ -5643,7 +5643,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-16",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "title": "Astronomers discover a dead star spinning every 8 minutes and sending mysterious radio pulses",
@@ -5655,7 +5655,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-16",
-        "fetchedAt": "2026-11-20T08:10:40.826Z"
+        "fetchedAt": "2026-11-20T12:24:40.089Z"
       },
       {
         "title": "Euclid discovers ancient cosmic beacons from the dawn of time, shining like a trillion suns",
@@ -6150,10 +6150,10 @@
       }
     ],
     "sync": {
-      "lastAttemptAt": "2026-11-20T12:24:22.849Z",
-      "lastSuccessAt": "2026-11-20T08:10:40.826Z",
+      "lastAttemptAt": "2026-11-20T12:24:40.089Z",
+      "lastSuccessAt": "2026-11-20T12:24:40.089Z",
       "newPapers": 0,
-      "updatedPapers": 0,
+      "updatedPapers": 20,
       "newNews": 0,
       "totalPapers": 244,
       "totalNews": 46,
@@ -6175,9 +6175,9 @@
           "msg": "HTTP 404 https://www.esa.int/rssfeed/Our_Activities/Space_Science"
         }
       ],
-      "ok": null,
-      "partial": null,
-      "status": "running"
+      "ok": true,
+      "partial": true,
+      "status": "partial"
     }
   };
 })(typeof window !== 'undefined' ? window : this);
