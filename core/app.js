@@ -8454,6 +8454,10 @@
         }
       } catch (e) { /* 面板失败不阻断启动 */ }
     }
+    /* P2：科研技能面板；模块未加载时完全不影响旧行为。 */
+    if (window.AstroSkillUI && window.AstroSkillUI.mount) {
+      try { window.AstroSkillUI.mount(); } catch (e) { /* 面板失败不阻断启动 */ }
+    }
     /* 行星真实贴图：异步解码，完成后重绘两条渲染链 */
     if (window.PlanetTextures && window.PlanetTextures.init) window.PlanetTextures.init();
     /* 银河背景异步重建完成后，用「当前」相机参数重绘，避免被过期快照覆盖视角 */

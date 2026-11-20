@@ -42,12 +42,15 @@
     'task.cancel': true,
     'task.delete': true,
 
-    'skill.propose': false,
-    'skill.create': false,
-    'skill.test': false,
-    'skill.evaluate': false,
-    'skill.publish': false,
-    'skill.rollback': false,
+    'skill.read': true,
+    'skill.propose': true,
+    'skill.create': true,
+    'skill.test': true,
+    'skill.evaluate': true,
+    'skill.approve': true,
+    'skill.publish': true,
+    'skill.execute': true,
+    'skill.rollback': true,
 
     'report.create': false,
     'report.evaluate': false,
@@ -62,13 +65,15 @@
   /* ---------------- 角色策略：未列出 = 拒绝 ---------------- */
   var ROLE_POLICY = {
     muse: ['project.read', 'task.read', 'task.create', 'task.execute', 'task.resume', 'task.cancel',
-      'evidence.read', 'claim.read', 'memory.read', 'memory.propose', 'tool.llm', 'tool.calculate'],
+      'evidence.read', 'claim.read', 'memory.read', 'memory.propose', 'tool.llm', 'tool.calculate',
+      'skill.read', 'skill.propose', 'skill.create', 'skill.execute'],
     scholar: ['project.read', 'task.read', 'task.create', 'task.execute', 'task.resume', 'task.cancel',
-      'evidence.read', 'claim.read', 'memory.read', 'memory.propose', 'tool.search', 'tool.external_api'],
+      'evidence.read', 'claim.read', 'memory.read', 'memory.propose', 'tool.search', 'tool.external_api',
+      'skill.read', 'skill.propose', 'skill.create', 'skill.execute'],
     critic: ['project.read', 'task.read', 'evidence.read', 'claim.read', 'memory.read', 'memory.propose',
-      'tool.calculate'],
+      'tool.calculate', 'skill.read', 'skill.test', 'skill.evaluate', 'skill.execute'],
     curator: ['project.read', 'task.read', 'evidence.read', 'claim.read', 'memory.read', 'memory.propose',
-      'tool.read_local'],
+      'tool.read_local', 'skill.read', 'skill.propose', 'skill.create', 'skill.execute'],
     vega: ['project.read', 'task.read', 'evidence.read', 'tool.read_local', 'tool.calculate'],
     kepler: ['tool.calculate'],
     horizon: ['tool.calculate', 'tool.read_local'],
@@ -83,7 +88,9 @@
   var USER_POLICY = [
     'project.read', 'project.create', 'project.update', 'project.archive',
     'memory.read', 'memory.propose', 'memory.approve', 'memory.update',
-    'task.read', 'task.resume', 'task.cancel', 'task.delete'
+    'task.read', 'task.resume', 'task.cancel', 'task.delete',
+    'skill.read', 'skill.propose', 'skill.create', 'skill.test', 'skill.evaluate',
+    'skill.approve', 'skill.publish', 'skill.execute', 'skill.rollback'
   ];
 
   /* ---------------- 工具 → 能力 ---------------- */
@@ -275,6 +282,15 @@
         audit(principal, action, resource, result);
         return result;
       }
+    }
+
+    /* P2：技能审批/发布/回滚为人工动作，任何 Agent 一律拒绝（角色策略只是第二道）。 */
+    if (resource && resource.resourceType === 'skill' &&
+      ['approve', 'publish', 'rollback'].indexOf(action) >= 0 &&
+      principal.principalType !== 'user') {
+      result = decision(false, 'USER_ONLY');
+      audit(principal, action, resource, result);
+      return result;
     }
 
     if (resource && resource.ownerProfileId && resource.ownerProfileId !== principal.profileId) {

@@ -233,9 +233,81 @@
     step.error = { kind: kind, message: message, retriable: !!retriable };
   }
 
+  /* P2：kind='skill' 步骤走 SkillRuntime；既有工具步骤路径完全不变。 */
+  async function executeSkillStep(planStep, state, opts, step, T) {
+    var signal = opts.signal || null;
+    if (signal && signal.aborted) {
+      step.status = 'aborted';
+      step.cancelled = true;
+      step.endedAt = nowIso();
+      step.error = { kind: 'cancelled', message: '任务已取消', retriable: false };
+      T.appendEvent(state, 'step.cancelled', { reason: 'cancelled' }, planStep.id);
+      return { ok: false, aborted: true, critical: !!planStep.critical, reason: 'cancelled' };
+    }
+    step.status = 'running';
+    step.toolId = 'skill:' + planStep.skillId;
+    step.startedAt = nowIso();
+    step.endedAt = null;
+    step.durationMs = null;
+    T.appendEvent(state, 'step.started', { skillId: planStep.skillId }, planStep.id);
+
+    var rt = root.AstroSkillRuntime;
+    var store = opts.skillStore || null;
+    if (!store && root.AstroSkillStore) {
+      try { store = root.AstroSkillStore.create({ projectId: state.projectId || null }); } catch (e) { store = null; }
+    }
+    if (!rt || !store) {
+      step.endedAt = nowIso();
+      step.durationMs = durationOf(step.startedAt, step.endedAt);
+      setFailure(step, 'skill_module_missing', 'SkillRuntime/Store 未加载', false);
+      T.appendEvent(state, 'step.failed', { reason: 'skill_module_missing' }, planStep.id);
+      return { ok: false, critical: !!planStep.critical, reason: 'skill_module_missing' };
+    }
+
+    var exec = await rt.execute(planStep.skillId, planStep.args || {}, {
+      store: store,
+      principal: opts.principal || null,
+      projectId: state.projectId || null,
+      taskId: state.id,
+      registry: opts.registry,
+      signal: signal,
+      fixtures: opts.fixtures || null,
+      traceId: state.id
+    });
+
+    step.endedAt = nowIso();
+    step.durationMs = durationOf(step.startedAt, step.endedAt);
+    if (exec.status === 'ok') {
+      step.status = 'ok';
+      step.result = exec;
+      step.outputHash = exec.outputHash || null;
+      step.evidenceRefs = [];
+      T.appendEvent(state, 'step.ok', { skillId: planStep.skillId }, planStep.id);
+      return { ok: true, result: exec, evidenceRefs: [] };
+    }
+    if (exec.status === 'cancelled') {
+      step.status = 'aborted';
+      step.cancelled = true;
+      step.error = { kind: 'cancelled', message: '任务已取消', retriable: false };
+      T.appendEvent(state, 'step.cancelled', { reason: 'cancelled' }, planStep.id);
+      return { ok: false, aborted: true, critical: !!planStep.critical, reason: 'cancelled' };
+    }
+    step.status = 'failed';
+    step.error = {
+      kind: exec.failureCategory || 'skill_failed',
+      message: exec.failureReason || 'skill failed',
+      retriable: false
+    };
+    T.appendEvent(state, 'step.failed', { reason: step.error.kind }, planStep.id);
+    return { ok: false, critical: !!planStep.critical, reason: step.error.message, kind: step.error.kind };
+  }
+
   async function executeOne(planStep, state, opts) {
     var T = root.AstroTask;
     var step = stateStep(state, planStep.id);
+    if (planStep && planStep.kind === 'skill') {
+      return executeSkillStep(planStep, state, opts, step, T);
+    }
     var spec = opts.registry ? opts.registry.get(planStep.tool) : null;
     var signal = opts.signal || null;
 
