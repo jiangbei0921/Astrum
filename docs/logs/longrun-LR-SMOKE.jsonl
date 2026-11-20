@@ -1,2 +1,1 @@
-{"t":"2026-11-01T11:54:14.730Z","elapsedMin":1,"tasks":250,"ok":219,"fail":0,"cancelled":31,"running":0,"appends":31,"replans":0,"idbOk":292,"idbFail":0,"cacheHit":42,"cacheMiss":42,"heap":14.6,"pageErrors":0,"unhandled":0,"ws":"n/a","maxTaskMs":2221}
-{"t":"2026-11-01T11:54:14.837Z","elapsedMin":1,"tasks":250,"ok":219,"fail":0,"cancelled":31,"running":0,"appends":31,"replans":0,"idbOk":292,"idbFail":0,"cacheHit":42,"cacheMiss":42,"heap":14.6,"pageErrors":0,"unhandled":0,"ws":"n/a","maxTaskMs":2221}
+{"t":"2026-11-04T07:13:12.176Z","elapsedMin":1,"tasks":346,"ok":303,"fail":0,"cancelled":43,"running":0,"appends":43,"replans":43,"idbOk":404,"idbFail":0,"cacheHit":58,"cacheMiss":58,"heap":6.1,"pageErrors":0,"unhandled":0,"ws":"n/a","maxTaskMs":479}

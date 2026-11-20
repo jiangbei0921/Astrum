@@ -234,6 +234,11 @@
 
   function texturePixel(tex, u, v, lat, lon, b, base, seed) {
     var n, c;
+    /* 优先使用真实行星贴图（若已解码）；未就绪时退回程序化纹理 */
+    if (root.PlanetTextures && root.PlanetTextures.sampleReal) {
+      var rc = root.PlanetTextures.sampleReal(b.key, u, v);
+      if (rc) return rc;
+    }
     switch (tex) {
       case 'sun': {
         var gran = fbm(u * 190, v * 95, seed, 4);
@@ -449,7 +454,8 @@
   var SPRITE_CACHE = {};
   function drawSphereDetail(g, b, bpos, cx, cy, R, basis, lightDir, phase) {
     var size = Math.min(Math.ceil(R * 2), 460);
-    var sizeKey = Math.max(24, Math.round(size / 8) * 8);
+    /* 精灵分辨率档位：4px 一档（原来 8px），小行星在「全系」视图也能多出细节 */
+    var sizeKey = Math.max(32, Math.round(size / 4) * 4);
     var phKey = Math.round(phase / (2 * Math.PI) * 96);
     var camDir = vnorm(vsub(basis.pos, bpos));
     var cKey = Math.round(camDir.x * 12) + '_' + Math.round(camDir.y * 12) + '_' + Math.round(camDir.z * 12);
@@ -1007,6 +1013,8 @@
     st.dirty = true;
   }
   function onWheel(e) {
+    /* Ctrl/⌘ + 滚轮交给浏览器做页面缩放，不抢默认行为 */
+    if (e.ctrlKey || e.metaKey) return;
     e.preventDefault();
     if (e.shiftKey) {
       setBoost(st.boost * (e.deltaY < 0 ? 1.15 : 0.87));
@@ -1015,7 +1023,9 @@
     zoom(e.deltaY < 0 ? 0.86 : 1.16);
   }
   function zoom(f) {
-    cam.dist = clamp(cam.dist * f, 0.00002, 160);
+    /* 必须改「目标距离」cam.gdist：渲染循环每帧把 cam.dist 缓动回 cam.gdist，
+     * 过去只改 cam.dist 会被下一帧立刻拉回，导致滚轮与按钮都像没反应。 */
+    cam.gdist = clamp(cam.gdist * f, 0.00002, 160);
     st.dirty = true;
     emit('change');
   }
@@ -1228,6 +1238,15 @@
     setLayout: setLayout, zoom: zoom, sizeCanvas: sizeCanvas, info: info,
     levelBoost: LEVEL_BOOST,
     state: st,
+    /* 只读诊断：相机距离与目标距离，供测试确认缩放是否生效 */
+    camera: function () { return { dist: cam.dist, target: cam.gdist, fov: cam.fov }; },
+    /* 真实行星贴图解码完成后调用：作废已烘焙的纹理与精灵缓存 */
+    refreshTextures: function () {
+      st.textures = {};
+      SPRITE_CACHE = {};
+      st.dirty = true;
+      return true;
+    },
     on: function (type, fn) { (listeners[type] = listeners[type] || []).push(fn); },
     version: '1.0.0'
   };

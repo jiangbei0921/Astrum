@@ -104,7 +104,7 @@
     register: 'auto', depth: 'standard', skymap: 'labeled', precision: 'visual',
     showTrace: true, showConfidence: true, showJD: true, autoScroll: true,
     compact: false, largeText: false, city: '北京', gear: 'binocular',
-    place: null, showObs: true, sidebarCollapsed: false
+    place: null, showObs: true, sidebarCollapsed: false, layers: null
   };
 
   var store = load();
@@ -145,11 +145,6 @@
     });
   }
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
-  function hexA(hex, a) {
-    var h = String(hex || '#3b3bd6').replace('#', '');
-    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
-    return 'rgba(' + parseInt(h.substring(0, 2), 16) + ',' + parseInt(h.substring(2, 4), 16) + ',' + parseInt(h.substring(4, 6), 16) + ',' + a + ')';
-  }
   function statusLabel(s) { return tn({ established: '已成共识', emerging: '前沿研究', speculative: '未定论' }[s] || '已成共识'); }
   function sourceById(id) {
     var all = S.list();
@@ -730,6 +725,15 @@
       state.cacheKey = ''; persist(); refreshPanels();
     });
 
+    /* 观测配置（阶段 6）：选择即应用；保存/删除只动本机 localStorage */
+    if ($('#wsSelect')) {
+      $('#wsSelect').addEventListener('change', function (e) {
+        if (e.target.value) applyWorkspace(e.target.value);
+      });
+    }
+    if ($('#wsSave')) $('#wsSave').addEventListener('click', saveCurrentWorkspace);
+    if ($('#wsDel')) $('#wsDel').addEventListener('click', deleteCurrentWorkspace);
+
     /* 恢复上次地点，否则尝试按 IP 定位 */
     if (state.settings.place) {
       setPlace(state.settings.place);
@@ -766,53 +770,8 @@
     return { x: cx + r * Math.sin(a), y: cy - r * Math.cos(a), r: r };
   }
 
-  /* ============================================================
-     星图：地平视角（站在地面仰望）
-     投影：方位线性、高度按 0.72 次幂压缩，地平线在下方
-     ============================================================ */
-  var _starIdx = null;
-  function starByKey(k) {
-    if (!_starIdx) { _starIdx = {}; C.stars.forEach(function (s) { _starIdx[s.k] = s; }); }
-    return _starIdx[k];
-  }
-
-  /* 银道坐标 -> 赤道坐标（J2000） */
-  function galToEq(l, b) {
-    var D = A.RAD;
-    var aG = 192.85948 * D, dG = 27.12825 * D, lN = 122.93192 * D;
-    var lb = l * D, bb = b * D;
-    var sinDec = Math.sin(dG) * Math.sin(bb) + Math.cos(dG) * Math.cos(bb) * Math.cos(lN - lb);
-    var dec = Math.asin(Math.max(-1, Math.min(1, sinDec))) / D;
-    var y = Math.cos(bb) * Math.sin(lN - lb);
-    var x = Math.cos(dG) * Math.sin(bb) - Math.sin(dG) * Math.cos(bb) * Math.cos(lN - lb);
-    var ra = (aG + Math.atan2(y, x)) / D;
-    return { ra: A.norm360(ra) / 15, dec: dec };
-  }
-
-  /* ============================================================
-     星图 v3：天球（球体）视图
-     以观测者所在位置建立地平坐标系，正交投影一个完整球面；
-     相机可绕球旋转，地平圈以下压暗，球面网格与天赤道一并绘出。
-     ============================================================ */
-  function vsub(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
-  function vcross(a, b) {
-    return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
-  }
-  function vdot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
-  function vnorm(a) { var l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; }
-
-  /* 颜色工具 */
-  function hexRGB(hex) {
-    var h = String(hex).replace('#', '');
-    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
-    return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
-  }
-  function mixColor(hex, target, t) {
-    var a = hexRGB(hex), b = hexRGB(target);
-    return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * t) + ',' +
-      Math.round(a[1] + (b[1] - a[1]) * t) + ',' +
-      Math.round(a[2] + (b[2] - a[2]) * t) + ')';
-  }
+  /* 星图投影、星表索引与颜色工具已迁到 core/sky-viewmodel.js / core/sky-renderer.js
+   * （V2-SKY 阶段 1）：这里只保留与天体导航共用的 bodyList。 */
 
   /* ============================================================
      实时星图 v4：站在地面的透视场景
@@ -843,85 +802,11 @@
     return out;
   }
 
-  /* ---- 天象模型缓存 ----
-   * alt/az 只依赖 (时刻, 地点)，与相机无关。
-   * 把它们一次性算好缓存起来，拖动相机时只做投影，帧内不再调用三角函数。
-   * 原来每帧 ~3300 次 altAz（含银河 540 + 背景星场 2400 + 恒星/深空/星座），
-   * 现在只在时刻或地点变化时算一次。 */
-  var SKY_CACHE = { key: '', model: null };
-
+  /* ---- 天象模型（V2-SKY 阶段 1）----
+   * 缓存与 alt/az 计算已迁到 core/sky-viewmodel.js；这里保留旧函数名，
+   * 预热与诊断的调用语义不变。 */
   function skyModel(jd, lat, lon) {
-    var key = jd.toFixed(5) + '|' + lat.toFixed(4) + '|' + lon.toFixed(4);
-    if (SKY_CACHE.key === key && SKY_CACHE.model) return SKY_CACHE.model;
-    var t0 = (typeof performance !== 'undefined' ? performance.now() : 0);
-    var m = { milky: [[], [], []], dust: [], stars: [], dso: [], cons: [], planets: [], sun: null, built: Date.now() };
-
-    /* 银河带 */
-    for (var b = 0; b < 3; b++) {
-      for (var l = 0; l <= 360; l += 2) {
-        var eq = galToEq(l, 0);
-        var aa = A.altAz(eq.ra, eq.dec, jd, lat, lon);
-        m.milky[b].push(aa);
-      }
-    }
-    /* 背景星场（示意密度，非实测星表） */
-    var seed = 20261022;
-    function rnd() {
-      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-      return seed / 0x7fffffff;
-    }
-    for (var i = 0; i < 2400; i++) {
-      var gl = rnd() * 360;
-      var gb = (rnd() + rnd() + rnd() - 1.5) * 11;
-      if (rnd() < 0.34) gb = (rnd() - 0.5) * 155;
-      var geq = galToEq(gl, gb);
-      var gaa = A.altAz(geq.ra, geq.dec, jd, lat, lon);
-      if (gaa.alt < 0.5) continue;
-      m.dust.push({ az: gaa.az, alt: gaa.alt, magF: 4.2 + rnd() * 2.8 });
-    }
-    /* 恒星 */
-    C.stars.forEach(function (st) {
-      var a = A.altAz(st.ra, st.dec, jd, lat, lon);
-      if (a.alt < -1) return;
-      m.stars.push({ st: st, az: a.az, alt: a.alt });
-    });
-    /* 深空天体 */
-    C.dso.forEach(function (dd) {
-      var a = A.altAz(dd.ra, dd.dec, jd, lat, lon);
-      if (a.alt < 0) return;
-      m.dso.push({ d: dd, az: a.az, alt: a.alt });
-    });
-    /* 星座连线 */
-    C.constellations.forEach(function (c) {
-      var segs = [];
-      c.lines.forEach(function (seg) {
-        var s1 = starByKey(seg[0]), s2 = starByKey(seg[1]);
-        if (!s1 || !s2) return;
-        var a1 = A.altAz(s1.ra, s1.dec, jd, lat, lon);
-        var a2 = A.altAz(s2.ra, s2.dec, jd, lat, lon);
-        if (a1.alt < -1 || a2.alt < -1) return;
-        segs.push([a1.az, a1.alt, a2.az, a2.alt]);
-      });
-      if (segs.length) m.cons.push({ c: c, segs: segs });
-    });
-    /* 太阳 */
-    var sp = A.sun(jd);
-    var saa = A.altAz(sp.ra, sp.dec, jd, lat, lon);
-    m.sun = { ra: sp.ra, dec: sp.dec, az: saa.az, alt: saa.alt, pos: sp };
-    /* 行星 */
-    A.planets(jd).forEach(function (pl) {
-      var a = A.altAz(pl.ra, pl.dec, jd, lat, lon);
-      m.planets.push({ pl: pl, az: a.az, alt: a.alt });
-    });
-    /* 月球 */
-    var mp = A.moonPhase(jd);
-    var maa = A.altAz(mp.ra, mp.dec, jd, lat, lon);
-    m.moon = { ra: mp.ra, dec: mp.dec, dist: mp.dist, phase: mp, az: maa.az, alt: maa.alt };
-
-    SKY_CACHE.key = key;
-    SKY_CACHE.model = m;
-    PERF.sky.modelBuild = Math.round((performance.now() - t0) * 100) / 100;
-    return m;
+    return window.SkyVM.model(jd, lat, lon);
   }
 
   /* ---- 渲染性能统计（可观测性：渲染耗时、帧率、模型命中率） ---- */
@@ -937,640 +822,28 @@
     b.avg = b.avg ? b.avg * 0.85 + ms * 0.15 : ms;
   }
 
+  /* ============================================================
+     星图绘制入口（V2-SKY 阶段 1 兼容包装）
+     旧签名 drawSky(canvas, options) 与命中区语义保持不变：
+     视图数据由 SkyVM.build 生成，绘制与命中区由 SkyRender.draw 负责。
+     ============================================================ */
+  var skyLayers = window.SkyLayers.create();
+
   function drawSky(canvas, p) {
     var perfT0 = (typeof performance !== 'undefined' ? performance.now() : 0);
-    var g = canvas.getContext('2d');
-    var W = canvas.width, H = canvas.height;
-    g.clearRect(0, 0, W, H);
-
-    var jd = p.jd, lat = p.lat, lon = p.lon;
-    var model = skyModel(jd, lat, lon);   /* 位置一次算好，帧内只投影 */
-    var style = p.style || 'labeled';
-    var detail = !!p.detail || style === 'full';
-    var compact = !!p.compact;
-    var showLabels = style !== 'minimal';
-
-    var yaw = p.yaw == null ? 180 : p.yaw;
-    var pitch = Math.max(-6, Math.min(78, p.pitch == null ? 12 : p.pitch));
-    var fov = Math.max(30, Math.min(178, p.fov || 145));
-    var D = A.RAD;
-    var cx = W / 2, cy = H / 2;
-    var Rmax = Math.min(W, H) * 0.49;      /* 视场半径 */
-    var halfFov = fov / 2 * D;
-    var k = (Rmax / 450) * (100 / fov) * 1.45;   /* 字号与线宽随视场缩放 */
-
-    var cp = Math.cos(pitch * D), sp = Math.sin(pitch * D);
-    var fwd = [cp * Math.sin(yaw * D), cp * Math.cos(yaw * D), sp];
-    /* 右手系：right 指向观测者右手侧（面南时西在右），up 指向天顶 */
-    var right = vnorm(vcross(fwd, [0, 0, 1]));
-    var upv = vcross(right, fwd);
-
-    /* 等距鱼眼：与视线夹角线性映射到半径，广角时不失真、可容纳整个天穹 */
-    function proj(az, alt) {
-      var ca = Math.cos(alt * D);
-      var v = [ca * Math.sin(az * D), ca * Math.cos(az * D), Math.sin(alt * D)];
-      var cosA = Math.max(-1, Math.min(1, vdot(v, fwd)));
-      var ang = Math.acos(cosA);
-      if (ang > halfFov * 1.02) return null;
-      var xr = vdot(v, right), yr = vdot(v, upv);
-      var len = Math.hypot(xr, yr);
-      var rr = ang / halfFov * Rmax;
-      if (len < 1e-6) return { x: cx, y: cy, z: cosA, ang: ang };
-      return { x: cx + xr / len * rr, y: cy - yr / len * rr, z: cosA, ang: ang };
-    }
-
-    /* ---- 天空 ---- */
-    var sky = g.createLinearGradient(0, 0, 0, H);
-    sky.addColorStop(0, '#03050a');
-    sky.addColorStop(0.45, '#071020');
-    sky.addColorStop(0.72, '#122036');
-    sky.addColorStop(1, '#1a2a42');
-    g.fillStyle = sky;
-    g.fillRect(0, 0, W, H);
-
-    /* ---- 银河 ---- */
-    (function milky() {
-      var bands = [[9, 'rgba(120,150,205,0.085)'], [5, 'rgba(160,185,230,0.095)'], [2.2, 'rgba(205,218,242,0.10)']];
-      g.save();
-      g.globalCompositeOperation = 'lighter';
-      g.lineCap = 'round';
-      bands.forEach(function (bd, bi) {
-        g.lineWidth = bd[0] * k * 4;
-        g.strokeStyle = bd[1];
-        var drawing = false;
-        g.beginPath();
-        var pts = model.milky[bi];
-        for (var i = 0; i < pts.length; i++) {
-          var q = proj(pts[i].az, pts[i].alt);
-          if (!q) { drawing = false; continue; }
-          if (!drawing) { g.moveTo(q.x, q.y); drawing = true; } else g.lineTo(q.x, q.y);
-        }
-        g.stroke();
-      });
-      g.restore();
-    })();
-
-    /* ---- 背景星场（示意密度，非实测星表；沿银道面聚集） ----
-     * 性能要点：逐点 fill 会产生上千次绘制调用，这里按亮度分桶合并成少量 Path2D，
-     * 每桶一次 fill，绘制调用从 ~1200 次降到 ~6 次。 */
-    (function dust() {
-      var n = compact ? 700 : (p.interactive ? 600 : model.dust.length);
-      var BUCKETS = 6;
-      var hasP2D = (typeof Path2D !== 'undefined');
-      var paths = [], i;
-      for (i = 0; i < BUCKETS; i++) paths.push(hasP2D ? new Path2D() : null);
-      var fallback = [];
-      for (i = 0; i < n; i++) {
-        var dp = model.dust[i];
-        var q = proj(dp.az, dp.alt);
-        if (!q || q.z < 0.04) continue;
-        if (q.x < -20 || q.x > W + 20 || q.y < -20 || q.y > H + 20) continue;
-        var al = (0.2 + ((dp.magF * 37) % 100) / 100 * 0.34) * Math.min(1, (dp.alt + 5) / 22) * (q.z * 0.5 + 0.5);
-        var bi = Math.min(BUCKETS - 1, Math.max(0, Math.floor(al * BUCKETS)));
-        var sz = Math.max(0.6, (5.9 - dp.magF) * 0.95 * k);
-        if (hasP2D) {
-          paths[bi].moveTo(q.x + sz, q.y);
-          paths[bi].arc(q.x, q.y, sz, 0, Math.PI * 2);
-        } else {
-          fallback.push({ x: q.x, y: q.y, r: sz, b: bi });
-        }
-      }
-      for (i = 0; i < BUCKETS; i++) {
-        if (hasP2D) {
-          if (!paths[i]) continue;
-          g.fillStyle = 'rgba(207,221,245,' + (0.2 + (i + 0.5) / BUCKETS * 0.34).toFixed(3) + ')';
-          g.fill(paths[i]);
-        }
-      }
-      if (!hasP2D) {
-        for (i = 0; i < fallback.length; i++) {
-          var f = fallback[i];
-          g.beginPath(); g.arc(f.x, f.y, f.r, 0, Math.PI * 2);
-          g.fillStyle = 'rgba(207,221,245,' + (0.2 + (f.b + 0.5) / BUCKETS * 0.34).toFixed(3) + ')';
-          g.fill();
-        }
-      }
-    })();
-
-    /* ---- 恒星（按亮度分桶批量绘制） ---- */
-    var hits = [], starPts = [];
-    (function stars() {
-      var hasP2D = (typeof Path2D !== 'undefined');
-      var BUCKETS = 5;
-      var paths = [], i;
-      for (i = 0; i < BUCKETS; i++) paths.push(hasP2D ? new Path2D() : null);
-      var fb = [];
-      model.stars.forEach(function (rec) {
-        var st = rec.st, aa = { az: rec.az, alt: rec.alt };
-        var q = proj(aa.az, aa.alt);
-        if (!q) return;
-        if (q.x < -60 || q.x > W + 60 || q.y < -60 || q.y > H + 60) return;
-        var size = Math.max(1.0 * k, (4.9 - (st.mag + 1.5) * 0.56) * k);
-        var alpha = (st.mag < 1 ? 1 : st.mag < 2 ? 0.9 : st.mag < 3 ? 0.68 : 0.42)
-          * (aa.alt < 8 ? 0.6 + aa.alt / 16 : 1);
-        var bi = Math.min(BUCKETS - 1, Math.max(0, Math.floor((1 - alpha) * BUCKETS)));
-        if (hasP2D) {
-          paths[bi].moveTo(q.x + size, q.y);
-          paths[bi].arc(q.x, q.y, size, 0, Math.PI * 2);
-        } else {
-          fb.push({ x: q.x, y: q.y, r: size, b: bi });
-        }
-        starPts.push({ s: st, pt: q, alt: aa.alt });
-        if (aa.alt > 0 && size > 1.9 * k) {
-          hits.push({ x: q.x, y: q.y, r: Math.max(9 * k, size + 5 * k), obj: { type: 'star', data: st } });
-        }
-      });
-      var alphas = [1, 0.9, 0.68, 0.42, 0.2];
-      for (i = 0; i < BUCKETS; i++) {
-        if (hasP2D) {
-          if (!paths[i]) continue;
-          g.fillStyle = 'rgba(226,234,248,' + alphas[i] + ')';
-          g.fill(paths[i]);
-        }
-      }
-      if (!hasP2D) {
-        for (i = 0; i < fb.length; i++) {
-          var f = fb[i];
-          g.beginPath(); g.arc(f.x, f.y, f.r, 0, Math.PI * 2);
-          g.fillStyle = 'rgba(226,234,248,' + alphas[f.b] + ')';
-          g.fill();
-        }
-      }
-    })();
-
-    /* ---- 深空天体 ---- */
-    var dsoPts = [];
-    if (detail || style === 'deep') {
-      model.dso.forEach(function (rec) {
-        var dd = rec.d, aa = { az: rec.az, alt: rec.alt };
-        var q = proj(aa.az, aa.alt);
-        if (!q || q.x < -40 || q.x > W + 40 || q.y < -40 || q.y > H + 40) return;
-        var r = Math.max(2.2, (dd.mag < 5 ? 4 : dd.mag < 8 ? 3.2 : 2.6) * k);
-        g.beginPath();
-        g.moveTo(q.x, q.y - r); g.lineTo(q.x + r, q.y);
-        g.lineTo(q.x, q.y + r); g.lineTo(q.x - r, q.y); g.closePath();
-        g.strokeStyle = 'rgba(186,166,232,0.8)'; g.lineWidth = Math.max(0.6, 0.9 * k); g.stroke();
-        g.fillStyle = 'rgba(186,166,232,0.16)'; g.fill();
-        dsoPts.push({ d: dd, pt: q });
-        hits.push({ x: q.x, y: q.y, r: 11 * k, obj: { type: 'dso', data: dd } });
-      });
-    }
-
-    /* ---- 星座连线 ---- */
-    g.lineWidth = Math.max(0.6, (detail ? 1.1 : 0.9) * k);
-    g.strokeStyle = 'rgba(140,170,235,' + (detail ? 0.26 : 0.18) + ')';
-    model.cons.forEach(function (rec) {
-      rec.segs.forEach(function (sg) {
-        var p1 = proj(sg[0], sg[1]), p2 = proj(sg[2], sg[3]);
-        if (!p1 || !p2) return;
-        g.beginPath(); g.moveTo(p1.x, p1.y); g.lineTo(p2.x, p2.y); g.stroke();
-      });
+    var vm = window.SkyVM.build(p.jd, p.lat, p.lon, {
+      width: canvas.width, height: canvas.height,
+      yaw: p.yaw, pitch: p.pitch, fov: p.fov,
+      compact: p.compact, detail: p.detail, style: p.style,
+      interactive: p.interactive, phase: p.phase, highlight: p.highlight,
+      layers: p.layers || skyLayers.all()
     });
-
-    /* ---- 太阳方向（用于照明） ---- */
-    var sunPos = model.sun.pos;
-    var sunAA = { az: model.sun.az, alt: model.sun.alt };
-    var sunQ = proj(sunAA.az, sunAA.alt);
-
-    /* ---- 天体：画成球体 ---- */
-    var mp = p.phase || model.moon.phase;
-    var INFO = window.BODY_INFO || {};
-    var list = [];
-    model.planets.forEach(function (rec) {
-      list.push({
-        kind: 'planet', key: rec.pl.key, name: rec.pl.cn, info: INFO[rec.pl.key] || {},
-        ra: rec.pl.ra, dec: rec.pl.dec, dist: rec.pl.dist, mag: rec.pl.mag,
-        az: rec.az, alt: rec.alt
-      });
-    });
-    list.push({
-      kind: 'moon', key: 'moon', name: '月球', info: INFO.moon || {},
-      ra: model.moon.ra, dec: model.moon.dec, mag: -12.7, phase: mp,
-      az: model.moon.az, alt: model.moon.alt
-    });
-    if (sunAA.alt > -3) {
-      list.push({
-        kind: 'sun', key: 'sun', name: '太阳', info: INFO.sun || {},
-        ra: sunPos.ra, dec: sunPos.dec, mag: -26.7, az: sunAA.az, alt: sunAA.alt
-      });
-    }
-
-    var drawn = [];
-    list.forEach(function (b) {
-      var aa = { az: b.az, alt: b.alt };
-      var q = proj(aa.az, aa.alt);
-      if (!q) return;
-      if (q.x < -80 || q.x > W + 80) return;
-      var scale = (b.info.scale || 0.4);
-      var r = Math.max(3.2, 16 * scale * k * (b.kind === 'moon' || b.kind === 'sun' ? 1.55 : 1));
-      var below = aa.alt < 0;
-      var alpha = below ? 0.35 : 1;
-
-      /* 光照方向：朝太阳 */
-      var lx = -0.45, ly = -0.6;
-      if (sunQ) {
-        var dx = sunQ.x - q.x, dy = sunQ.y - q.y;
-        var dl = Math.hypot(dx, dy) || 1;
-        lx = dx / dl; ly = dy / dl;
-      }
-
-      g.save();
-      g.globalAlpha = alpha;
-
-      /* 光晕 */
-      var halo = g.createRadialGradient(q.x, q.y, r * 0.8, q.x, q.y, r * 3.4);
-      halo.addColorStop(0, hexA(b.info.glow || b.info.color || '#ffffff', 0.24));
-      halo.addColorStop(1, hexA(b.info.glow || b.info.color || '#ffffff', 0));
-      g.beginPath(); g.arc(q.x, q.y, r * 3.4, 0, Math.PI * 2);
-      g.fillStyle = halo; g.fill();
-
-      /* 土星环（后半） */
-      if (b.info.ring) {
-        g.save();
-        g.translate(q.x, q.y); g.rotate(-0.38);
-        g.strokeStyle = 'rgba(226,208,164,0.55)';
-        g.lineWidth = Math.max(1, r * 0.26);
-        g.beginPath(); g.ellipse(0, 0, r * 1.95, r * 0.62, 0, Math.PI, Math.PI * 2); g.stroke();
-        g.restore();
-      }
-
-      if (b.kind === 'moon') {
-        var ang = Math.atan2(ly, lx);
-        g.save(); g.translate(q.x, q.y); g.rotate(ang);
-        miniMoon(g, 0, 0, r, mp.illum, true);
-        g.restore();
-      } else {
-        var base = b.info.color || '#cfcfcf';
-        var sph = g.createRadialGradient(q.x + lx * r * 0.42, q.y + ly * r * 0.42, r * 0.08,
-          q.x, q.y, r * 1.06);
-        sph.addColorStop(0, mixColor(base, '#ffffff', b.kind === 'sun' ? 0.75 : 0.42));
-        sph.addColorStop(0.55, base);
-        sph.addColorStop(1, mixColor(base, '#05070d', 0.62));
-        g.beginPath(); g.arc(q.x, q.y, r, 0, Math.PI * 2);
-        g.fillStyle = sph; g.fill();
-
-        /* 木星条纹 */
-        if (b.info.bands) {
-          g.save();
-          g.beginPath(); g.arc(q.x, q.y, r, 0, Math.PI * 2); g.clip();
-          g.globalAlpha = alpha * 0.28;
-          g.fillStyle = '#8f6b45';
-          [[-0.42, 0.16], [0.05, 0.20], [0.48, 0.14]].forEach(function (bd) {
-            g.fillRect(q.x - r, q.y + bd[0] * r, r * 2, bd[1] * r);
-          });
-          g.restore();
-        }
-        /* 地表纹理（火星/金星淡淡一条） */
-        if (b.key === 'mars') {
-          g.save();
-          g.beginPath(); g.arc(q.x, q.y, r, 0, Math.PI * 2); g.clip();
-          g.globalAlpha = alpha * 0.22;
-          g.fillStyle = '#f2e3d2';
-          g.beginPath(); g.ellipse(q.x, q.y - r * 0.75, r * 0.5, r * 0.22, 0, 0, Math.PI * 2); g.fill();
-          g.restore();
-        }
-      }
-
-      /* 土星环（前半） */
-      if (b.info.ring) {
-        g.save();
-        g.translate(q.x, q.y); g.rotate(-0.38);
-        g.strokeStyle = 'rgba(236,220,182,0.75)';
-        g.lineWidth = Math.max(1, r * 0.26);
-        g.beginPath(); g.ellipse(0, 0, r * 1.95, r * 0.62, 0, 0, Math.PI); g.stroke();
-        g.restore();
-      }
-
-      /* 地平线以下：虚线环标记，仍可点开查看资料 */
-      if (below) {
-        g.save();
-        g.setLineDash([3 * k, 3 * k]);
-        g.strokeStyle = hexA(b.info.color || '#ffffff', 0.45);
-        g.lineWidth = Math.max(0.8, 1 * k);
-        g.beginPath(); g.arc(q.x, q.y, r * 1.34, 0, Math.PI * 2); g.stroke();
-        g.restore();
-      }
-
-      g.restore();
-      b.pt = { x: q.x, y: q.y };
-      b.r = r; b.alt = aa.alt; b.az = aa.az; b.below = below;
-      drawn.push(b);
-      hits.push({ x: q.x, y: q.y, r: Math.max(r * 1.35, 14 * k), obj: { type: b.kind === 'moon' ? 'moon' : b.kind, data: b } });
-    });
-
-    /* ---- 地平线与地面 ---- */
-    var hzPts = [];
-    for (var haz = yaw - 88; haz <= yaw + 88; haz += 1.5) {
-      var qh = proj(haz, 0);
-      if (!qh) continue;
-      hzPts.push(qh);
-    }
-    hzPts.sort(function (a, b) { return a.x - b.x; });
-    if (hzPts.length > 1) {
-      var hMin = Math.min.apply(null, hzPts.map(function (q) { return q.y; }));
-      /* 只在天穹圆内绘制地面，圆外留黑，避免出现贯穿画面的假地平线 */
-      g.save();
-      g.beginPath(); g.arc(cx, cy, Rmax, 0, Math.PI * 2); g.clip();
-
-      /* 地平光害：以地平线为中心的柔和带，两侧渐隐避免硬边 */
-      var glowH = Math.max(80, H * 0.22);
-      var gl = g.createLinearGradient(0, hMin - glowH, 0, hMin + glowH * 0.35);
-      gl.addColorStop(0, 'rgba(198,152,98,0)');
-      gl.addColorStop(0.62, 'rgba(198,152,98,0.10)');
-      gl.addColorStop(0.82, 'rgba(206,160,104,0.20)');
-      gl.addColorStop(1, 'rgba(206,160,104,0)');
-      g.fillStyle = gl;
-      g.fillRect(0, hMin - glowH, W, glowH * 1.35);
-
-      /* 地面底色 */
-      g.beginPath();
-      g.moveTo(-10, H + 10);
-      hzPts.forEach(function (q) { g.lineTo(q.x, q.y); });
-      g.lineTo(W + 10, H + 10);
-      g.closePath();
-      var gnd = g.createLinearGradient(0, hMin, 0, H);
-      gnd.addColorStop(0, '#0a1422');
-      gnd.addColorStop(0.35, '#050a12');
-      gnd.addColorStop(1, '#010204');
-      g.fillStyle = gnd;
-      g.fill();
-
-      /* 地面方位辐线：从地平线向脚下收敛，给出「站在地表」的纵深 */
-      g.strokeStyle = 'rgba(132,172,214,0.15)';
-      g.lineWidth = Math.max(0.6, 0.85 * k);
-      for (var sa = Math.ceil((yaw - 92) / 30) * 30; sa <= yaw + 92; sa += 30) {
-        var sOn = false;
-        g.beginPath();
-        for (var sAlt = -2; sAlt >= -64; sAlt -= 2) {
-          var qs = proj(sa, sAlt);
-          if (!qs) { sOn = false; continue; }
-          if (!sOn) { g.moveTo(qs.x, qs.y); sOn = true; } else g.lineTo(qs.x, qs.y);
-        }
-        g.stroke();
-      }
-
-      /* 负高度圈：地平面以下的刻度，读起来像脚下的球面 */
-      g.strokeStyle = 'rgba(132,172,214,0.12)';
-      [-15, -30, -45].forEach(function (altLv) {
-        var on2 = false;
-        g.beginPath();
-        for (var az2 = yaw - 95; az2 <= yaw + 95; az2 += 2) {
-          var qa2 = proj(az2, altLv);
-          if (!qa2) { on2 = false; continue; }
-          if (!on2) { g.moveTo(qa2.x, qa2.y); on2 = true; } else g.lineTo(qa2.x, qa2.y);
-        }
-        g.stroke();
-        var qt = proj(yaw, altLv);
-        if (qt && qt.x > 40 && qt.x < W - 40 && qt.y < H - 4) {
-          g.textAlign = 'center';
-          g.font = '400 ' + Math.max(9, 11 * k) + 'px "PingFang SC",sans-serif';
-          g.fillStyle = 'rgba(150,178,210,0.40)';
-          g.fillText('−' + Math.abs(altLv) + '°', qt.x, qt.y - 5);
-          g.textAlign = 'left';
-        }
-      });
-
-      /* 两层山脊：远山略亮、近山更暗，形成纵深 */
-      function ridge(seed, amp, offset, fill) {
-        g.beginPath();
-        g.moveTo(-10, H + 10);
-        hzPts.forEach(function (q) {
-          var t = q.x / W;
-          var hgt = offset + Math.sin(t * Math.PI * (2.2 + seed) + seed) * amp
-            + Math.sin(t * Math.PI * (6.1 + seed) + seed * 2) * amp * 0.35;
-          g.lineTo(q.x, q.y + hgt);
-        });
-        g.lineTo(W + 10, H + 10);
-        g.closePath();
-        g.fillStyle = fill;
-        g.fill();
-      }
-      ridge(0.3, H * 0.016, H * 0.004, '#0c1522');
-      ridge(1.7, H * 0.028, H * 0.026, '#05080f');
-
-      /* 地平线 */
-      g.beginPath();
-      hzPts.forEach(function (q, i) { if (i === 0) g.moveTo(q.x, q.y); else g.lineTo(q.x, q.y); });
-      g.strokeStyle = 'rgba(226,190,132,0.8)';
-      g.lineWidth = Math.max(1.2, 1.4 * k);
-      g.stroke();
-      g.restore();
-    }
-
-    /* ---- 方位标注 ---- */
-    g.textAlign = 'center';
-    g.font = '500 ' + Math.max(11, 15 * k) + 'px "PingFang SC",sans-serif';
-    [['N', 0], ['NE', 45], ['E', 90], ['SE', 135], ['S', 180], ['SW', 225], ['W', 270], ['NW', 315]].forEach(function (dir) {
-      var q = proj(dir[1], 0);
-      if (!q || q.x < 10 || q.x > W - 10) return;
-      g.fillStyle = 'rgba(216,226,244,0.55)';
-      g.fillText(dir[0], q.x, q.y + 20 * k);
-    });
-    g.textAlign = 'left';
-
-    /* ---- 标签（避让） ---- */
-    var placed = [];
-    function fits(x, y, w, h) {
-      for (var i = 0; i < placed.length; i++) {
-        var b2 = placed[i];
-        if (x < b2.x + b2.w && x + w > b2.x && y < b2.y + b2.h && y + h > b2.y) return false;
-      }
-      return true;
-    }
-    function put(text, x, y, font, color, align) {
-      g.font = font;
-      var w = g.measureText(text).width;
-      var bx = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
-      var hh = parseInt(font.match(/(\d+)px/)[1], 10) + 6;
-      if (bx + w > W - 4) bx = W - 4 - w;
-      if (bx < 4) bx = 4;
-      if (!fits(bx - 4, y - hh + 4, w + 8, hh)) return false;
-      placed.push({ x: bx - 4, y: y - hh + 4, w: w + 8, h: hh });
-      g.shadowColor = 'rgba(4,7,12,0.95)'; g.shadowBlur = 6;
-      g.fillStyle = color;
-      g.fillText(text, bx, y);
-      g.shadowBlur = 0;
-      return true;
-    }
-    var FS = '500 ' + Math.max(11, 14 * k) + 'px "PingFang SC","Microsoft YaHei",sans-serif';
-    var FSsm = '400 ' + Math.max(9.5, 12 * k) + 'px "PingFang SC","Microsoft YaHei",sans-serif';
-
-    if (showLabels) {
-      /* 行星名（优先占位） */
-      drawn.forEach(function (b) {
-        put((b.below ? '↓ ' : '') + b.name + (detail ? ' ' + Math.round(b.alt) + '°' : ''),
-          b.pt.x, b.pt.y - b.r - 8 * k, FS,
-          hexA(b.info.color || '#ffffff', b.below ? 0.55 : 0.95), 'center');
-      });
-      /* 高亮目标 */
-      if (p.highlight) {
-        var ha = A.altAz(p.highlight.ra, p.highlight.dec, jd, lat, lon);
-        var hq = proj(ha.az, ha.alt);
-        if (hq) {
-          g.beginPath(); g.arc(hq.x, hq.y, 15 * k, 0, Math.PI * 2);
-          g.strokeStyle = 'rgba(232,200,148,0.85)'; g.lineWidth = 2 * k; g.stroke();
-          g.beginPath(); g.arc(hq.x, hq.y, 23 * k, 0, Math.PI * 2);
-          g.strokeStyle = 'rgba(232,200,148,0.22)'; g.lineWidth = 1; g.stroke();
-          put(p.highlight.label, hq.x, hq.y - 26 * k, FS, '#e8c894', 'center');
-        }
-      }
-      if (detail) {
-        dsoPts.sort(function (a, b) { return a.d.mag - b.d.mag; }).forEach(function (x) {
-          put(x.d.id.replace('NGC ', 'N'), x.pt.x + 6 * k, x.pt.y + 4 * k, FSsm, 'rgba(198,182,232,0.78)');
-        });
-        starPts.sort(function (a, b) { return a.s.mag - b.s.mag; }).forEach(function (x) {
-          if (x.s.mag < 3.6 && x.alt > 4) {
-            put(x.s.cn || x.s.en, x.pt.x + 5 * k, x.pt.y + 4 * k, FSsm, 'rgba(222,229,242,0.6)');
-          }
-        });
-        C.constellations.forEach(function (c) {
-          var sx = 0, sy = 0, n = 0;
-          c.lines.reduce(function (a, s2) { return a.concat(s2); }, []).forEach(function (kk) {
-            var sp = starPts.filter(function (z) { return z.s.k === kk; })[0];
-            if (!sp || sp.alt < 12) return;
-            sx += sp.pt.x; sy += sp.pt.y; n++;
-          });
-          if (n >= 3) {
-            put(c.cn.replace('（北斗七星）', '') + ' ' + c.abbr, sx / n, sy / n,
-              'italic 400 ' + Math.max(11, 14 * k) + 'px Georgia,"Songti SC",serif',
-              'rgba(152,176,222,0.32)', 'center');
-          }
-        });
-      }
-    }
-
-    /* ---- 地球小窗 ---- */
-    if (p.showGlobe) {
-      var gr = Math.min(W, H) * 0.075;
-      drawGlobe(g, W - gr - 14, gr + 14, gr, lat, lon, jd, Math.max(0.7, gr / 46), compact);
-    }
-
-    canvas._hits = hits;
-    canvas._bodies = drawn;
-    canvas._meta = { yaw: yaw, pitch: pitch, fov: fov, hz: (typeof hzPts !== 'undefined' ? hzPts.length : -1), hit: true };
+    var out = window.SkyRender.draw(canvas, p, vm);
+    canvas._hits = out.hits;
+    canvas._bodies = out.bodies;
+    canvas._meta = out.meta;
+    PERF.sky.modelBuild = window.SkyVM.cache().buildMs;
     if (perfT0) perfPush('sky', performance.now() - perfT0);
-  }
-
-  /* 星图内的小月相 */
-  function miniMoon(g, x, y, r, illum, waxing) {
-    g.save();
-    g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2);
-    g.fillStyle = '#eae5d7'; g.fill();
-    g.clip();
-    var c = (1 - 2 * illum) * r;
-    g.fillStyle = 'rgba(5,8,14,0.95)';
-    for (var dx = -r; dx <= r; dx += 0.8) {
-      var chord = Math.sqrt(Math.max(0, r * r - dx * dx));
-      var spans = [];
-      if (Math.abs(c) < 0.5) { if (dx >= 0) spans.push([-chord, chord]); }
-      else if (c > 0) {
-        if (dx > 0) {
-          var t1 = dx / c;
-          if (t1 >= 1) spans.push([-chord, chord]);
-          else { var y1 = r * Math.sqrt(1 - t1 * t1); spans.push([-chord, -y1], [y1, chord]); }
-        }
-      } else {
-        if (dx >= 0) spans.push([-chord, chord]);
-        else {
-          var t2 = dx / c;
-          if (t2 < 1) { var y2 = r * Math.sqrt(1 - t2 * t2); spans.push([-y2, y2]); }
-        }
-      }
-      spans.forEach(function (sp) {
-        if (sp[1] - sp[0] > 0.3) g.fillRect(x + dx, y + sp[0], 0.9, sp[1] - sp[0]);
-      });
-    }
-    if (!waxing) { /* 已按 waxing 绘制，亏月时整体镜像 */ }
-    g.restore();
-    g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2);
-    g.strokeStyle = 'rgba(234,229,215,0.5)'; g.lineWidth = 0.8; g.stroke();
-  }
-
-  /* 地球小窗：以观测者为球心，含昼夜线与「你在这里」 */
-  function drawGlobe(g, cx, cy, R, lat, lon, jd, k, compact) {
-    var D = A.RAD;
-    var sun = A.sun(jd);
-    var gmst = A.lstHours(jd, 0) * 15;
-    var subLon = A.norm180(sun.ra * 15 - gmst);
-    var subLat = sun.dec;
-
-    g.save();
-    g.beginPath(); g.arc(cx, cy, R, 0, Math.PI * 2);
-    g.clip();
-
-    var sea = g.createRadialGradient(cx - R * 0.3, cy - R * 0.35, R * 0.2, cx, cy, R);
-    sea.addColorStop(0, '#1c3b57');
-    sea.addColorStop(1, '#0b1a2a');
-    g.fillStyle = sea;
-    g.fillRect(cx - R, cy - R, R * 2, R * 2);
-
-    /* 经纬网 */
-    function proj(latD, lonD) {
-      var dL = (lonD - lon) * D, p1 = latD * D, p0 = lat * D;
-      var x = Math.cos(p1) * Math.sin(dL);
-      var y = Math.cos(p0) * Math.sin(p1) - Math.sin(p0) * Math.cos(p1) * Math.cos(dL);
-      var z = Math.sin(p0) * Math.sin(p1) + Math.cos(p0) * Math.cos(p1) * Math.cos(dL);
-      return { x: cx + x * R, y: cy - y * R, vis: z > 0 };
-    }
-    g.strokeStyle = 'rgba(160,200,235,0.18)';
-    g.lineWidth = Math.max(0.5, 0.7 * k);
-    for (var la = -60; la <= 60; la += 30) {
-      g.beginPath();
-      var started = false;
-      for (var lo = -180; lo <= 180; lo += 6) {
-        var q = proj(la, lo);
-        if (!q.vis) { started = false; continue; }
-        if (!started) { g.moveTo(q.x, q.y); started = true; } else g.lineTo(q.x, q.y);
-      }
-      g.stroke();
-    }
-    for (var lo2 = -180; lo2 < 180; lo2 += 30) {
-      g.beginPath();
-      var st2 = false;
-      for (var la2 = -90; la2 <= 90; la2 += 6) {
-        var q2 = proj(la2, lo2);
-        if (!q2.vis) { st2 = false; continue; }
-        if (!st2) { g.moveTo(q2.x, q2.y); st2 = true; } else g.lineTo(q2.x, q2.y);
-      }
-      g.stroke();
-    }
-
-    /* 昼夜：采样网格填充夜半球 */
-    g.fillStyle = 'rgba(2,6,14,0.62)';
-    var step = 5;
-    for (var lt = -85; lt <= 85; lt += step) {
-      for (var ln = -180; ln < 180; ln += step) {
-        var sLat = lt * D, sLon = (ln - subLon) * D;
-        var cosZ = Math.sin(lat * D) * Math.sin(sLat) +
-          Math.cos(lat * D) * Math.cos(sLat) * Math.cos((ln - lon) * D);
-        var sunElev = Math.sin(sLat) * Math.sin(subLat * D) +
-          Math.cos(sLat) * Math.cos(subLat * D) * Math.cos(sLon);
-        if (sunElev > 0) continue;
-        var q3 = proj(lt, ln);
-        if (!q3.vis) continue;
-        var cell = R * step * D * 1.6;
-        g.fillRect(q3.x - cell / 2, q3.y - cell / 2, cell * 1.15, cell * 1.15);
-      }
-    }
-
-    /* 观测者（球心） */
-    g.beginPath(); g.arc(cx, cy, Math.max(2, 2.2 * k), 0, Math.PI * 2);
-    g.fillStyle = '#ffd79a'; g.fill();
-    g.beginPath(); g.arc(cx, cy, Math.max(5, 6 * k), 0, Math.PI * 2);
-    g.strokeStyle = 'rgba(255,215,154,0.5)'; g.lineWidth = 1; g.stroke();
-
-    g.restore();
-
-    g.beginPath(); g.arc(cx, cy, R, 0, Math.PI * 2);
-    g.strokeStyle = 'rgba(180,205,235,0.35)'; g.lineWidth = Math.max(0.6, 0.8 * k); g.stroke();
-
-    if (!compact) {
-      g.font = '400 ' + (11 * k) + 'px "PingFang SC",sans-serif';
-      g.fillStyle = 'rgba(196,210,230,0.6)';
-      g.textAlign = 'center';
-      g.fillText('你在这里', cx, cy + R + 14 * k);
-      g.textAlign = 'left';
-    }
   }
 
   function drawMoon(canvas, ph) {
@@ -3307,7 +2580,14 @@
     if (planHas(item.name)) {
       plan = plan.filter(function (p) { return p.name !== item.name; });
     } else {
-      plan.push({ name: item.name, sub: item.sub, alt: item.alt, mag: item.mag, ra: item.ra, dec: item.dec, at: Date.now() });
+      /* 记录当时的时刻、地点与视角，便于日后复现（阶段 6） */
+      var ctx = state.ctx || readCtx();
+      var jd = A.fromLocal(ctx.y, ctx.mo, ctx.d, ctx.h, ctx.mi, ctx.tz);
+      var snapCtx = { jd: jd, lat: ctx.lat, lon: ctx.lon, tz: ctx.tz, city: ctx.city, gear: ctx.gear };
+      var snapView = { fov: vw.fov, yaw: vw.yaw, pitch: vw.pitch };
+      plan.push(window.Workspace
+        ? window.Workspace.snapshot(item, snapCtx, snapView)
+        : { name: item.name, sub: item.sub, alt: item.alt, mag: item.mag, ra: item.ra, dec: item.dec, at: Date.now() });
     }
     savePlan();
     renderPlan();
@@ -3391,7 +2671,24 @@
     plan.forEach(function (p, i) {
       var row = el('div', 'mini-item');
       row.innerHTML = '<span class="r">' + pad(i + 1) + '</span><span class="n">' + esc(objEn(p.name)) + '</span>' +
-        '<span class="m">' + (p.alt != null && p.alt > 0 ? T('高 {0}°', Math.round(p.alt)) : L('待升')) + '</span>';
+        '<span class="m">' + (p.alt != null && p.alt > 0 ? T('高 {0}°', Math.round(p.alt)) : L('待升')) + '</span>' +
+        (p.fov != null ? '<button class="mini-btn" title="' + esc(L('回到加入时的视角')) + '">↺</button>' : '');
+      var back = row.querySelector('button');
+      if (back) {
+        back.addEventListener('click', function (e) {
+          e.stopPropagation();
+          if (p.ra == null) return;
+          openViewerAt(p.ra, p.dec, p.name);
+          /* openViewer 的复位会重设视角，等它画完再套用快照 */
+          setTimeout(function () {
+            if (p.fov != null) vw.fov = p.fov;
+            if (p.yaw != null) vw.yaw = p.yaw;
+            if (p.pitch != null) vw.pitch = p.pitch;
+            drawViewer();
+            applyViewerTransform();
+          }, 140);
+        });
+      }
       row.addEventListener('click', function () {
         if (p.ra != null) openViewerAt(p.ra, p.dec, p.name);
       });
@@ -3424,6 +2721,98 @@
     document.body.appendChild(a); a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 400);
     toast('已导出 {0} 项观测计划', plan.length);
+  }
+
+  /* ================= 观测工作空间（阶段 6） =================
+   * 存「地点 + 器材 + 视角」组合，与档案（Profile）解耦。
+   * 纯逻辑在 core/workspace.js，这里只做存储与 UI。 */
+  var WS_KEY = (window.Workspace && window.Workspace.KEY) || 'astrum.workspaces.v1';
+  var workspaces = [];
+
+  function loadWorkspaces() {
+    try {
+      var raw = JSON.parse(localStorage.getItem(WS_KEY) || '[]');
+      workspaces = window.Workspace ? window.Workspace.list(raw) : (Array.isArray(raw) ? raw : []);
+    } catch (e) { workspaces = []; }
+  }
+  function saveWorkspaces() {
+    try { localStorage.setItem(WS_KEY, JSON.stringify(workspaces)); } catch (e) { }
+  }
+  function renderWorkspaces() {
+    var sel = $('#wsSelect');
+    if (!sel) return;
+    var cur = sel.value;
+    sel.innerHTML = '';
+    var opt0 = document.createElement('option');
+    opt0.value = '';
+    opt0.textContent = workspaces.length ? L('（未选择）') : L('（无配置）');
+    sel.appendChild(opt0);
+    workspaces.forEach(function (w) {
+      var o = document.createElement('option');
+      o.value = w.id;
+      o.textContent = w.name;
+      sel.appendChild(o);
+    });
+    if (cur && workspaces.some(function (w) { return w.id === cur; })) sel.value = cur;
+    var hint = $('#wsHint');
+    if (hint) hint.textContent = T('已存 {0} 套', workspaces.length);
+  }
+  function applyWorkspace(id) {
+    var w = workspaces.filter(function (x) { return x.id === id; })[0];
+    if (!w) return false;
+    setPlace({ n: w.city || w.name, lat: w.lat, lon: w.lon, tz: w.tz, bortle: 6 },
+      { toast: T('已切换到配置「{0}」', w.name) });
+    if ($('#ctxGear')) $('#ctxGear').value = w.gear;
+    state.settings.gear = w.gear;
+    cfg.horizon.gear = w.gear;
+    persist();
+    vw.fov = w.fov; vw.yaw = w.yaw; vw.pitch = w.pitch;
+    if ($('#viewer') && $('#viewer').classList.contains('on')) {
+      drawViewer();
+      applyViewerTransform();
+    }
+    state.cacheKey = '';
+    refreshPanels();
+    return true;
+  }
+  function saveCurrentWorkspace() {
+    var ctx = state.ctx || readCtx();
+    var def = (ctx.city || '') + ' ' + Math.round(vw.fov) + '°';
+    var name = window.prompt(L('配置名称'), def);
+    if (name == null) return;
+    var item = {
+      id: 'ws_' + Date.now().toString(36),
+      name: name, lat: ctx.lat, lon: ctx.lon, tz: ctx.tz, city: ctx.city,
+      gear: ctx.gear, fov: vw.fov, yaw: vw.yaw, pitch: vw.pitch
+    };
+    workspaces = window.Workspace ? window.Workspace.upsert(workspaces, item) : workspaces.concat([item]);
+    saveWorkspaces();
+    renderWorkspaces();
+    if ($('#wsSelect')) $('#wsSelect').value = item.id;
+    toast(T('已保存配置「{0}」', (item.name || def)));
+  }
+  function deleteCurrentWorkspace() {
+    var sel = $('#wsSelect');
+    var id = sel && sel.value;
+    if (!id) { toast(L('请先选择一个配置')); return; }
+    workspaces = window.Workspace ? window.Workspace.remove(workspaces, id) : workspaces;
+    saveWorkspaces();
+    renderWorkspaces();
+    if (sel) sel.value = '';
+    toast(L('已删除该配置'));
+  }
+
+  /* 观测计划 CSV（阶段 6）：与文本计划单并存 */
+  function exportPlanCsv() {
+    if (!plan.length) { toast('观测清单为空'); return; }
+    var csv = window.Workspace ? window.Workspace.planCsv(plan) : '';
+    var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'astrum-observation-plan.csv';
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+    toast('已导出 CSV：{0} 项', plan.length);
   }
 
   /* ================= 天象模型预热 =================
@@ -5031,7 +4420,12 @@
   }
 
   function applyViewerTransform() {
-    $('#vwVal').textContent = Math.round(vw.fov) + '°';
+    var f = Math.round(vw.fov);
+    $('#vwVal').textContent = f + '°';
+    /* 快捷档位高亮：与当前视场取整后一致的按钮点亮 */
+    $$('#vwFovPresets button').forEach(function (b) {
+      b.classList.toggle('on', Math.abs(+b.dataset.fov - f) <= 1);
+    });
   }
 
   function aimAt(ra, dec) {
@@ -5326,7 +4720,15 @@
   }
 
   function zoomViewer(factor) {
-    vw.fov = Math.max(40, Math.min(178, vw.fov / factor));
+    vw.fov = Math.max(30, Math.min(178, vw.fov / factor));
+    drawViewer();
+    applyViewerTransform();
+  }
+
+  /* 视场角快捷档位：直接设值，绕开滚轮的连续缩放比，
+   * 让 30° 在桌面端也可达（投影器下限为 30°）。 */
+  function setViewerFov(f) {
+    vw.fov = Math.max(30, Math.min(178, f));
     drawViewer();
     applyViewerTransform();
   }
@@ -5400,6 +4802,8 @@
     }
     if (e.key === 'ArrowLeft') { SV.zoom(1.12); return; }
     if (e.key === 'ArrowRight') { SV.zoom(0.89); return; }
+    if (e.key === '+' || e.key === '=') { e.preventDefault(); SV.zoom(0.8); return; }
+    if (e.key === '-' || e.key === '_') { e.preventDefault(); SV.zoom(1.25); return; }
   }
 
   var S_ALL_KEYS = [];
@@ -6417,6 +5821,37 @@
         })
     ]);
 
+    /* 星图图层：状态由 SkyLayers 持有，这里只做开关与持久化。
+     * 默认全开，与阶段 1 之前的表现一致。 */
+    group('星图图层', (function () {
+      var LABELS = [
+        ['stars', '恒星', '关闭后不画恒星与 L1 亮星表'],
+        ['milkyWay', '银河', '关闭后用程序化银河带降级绘制'],
+        ['constellations', '星座连线', ''],
+        ['deepSkyObjects', '深空天体', ''],
+        ['planets', '行星与太阳系', ''],
+        ['horizon', '地平线与方位', ''],
+        ['labels', '标签', '行星名、星座名与高亮目标']
+      ];
+      var rows = [];
+      if (!s.layers) {
+        s.layers = {};
+        LABELS.forEach(function (x) { s.layers[x[0]] = true; });
+      }
+      LABELS.forEach(function (x) {
+        var key = x[0];
+        if (typeof s.layers[key] !== 'boolean') s.layers[key] = true;
+        rows.push(switchRow(x[1], x[2], s.layers[key], function (v) {
+          s.layers[key] = v;
+          if (window.SkyLayers && skyLayers) skyLayers.set(key, v);
+          persist();
+          refreshPanels();
+          if ($('#viewer') && $('#viewer').classList.contains('on')) drawViewer();
+        }));
+      });
+      return rows;
+    })(), '图层开关只影响显示，不改变任何数值与命中结果。');
+
     /* 地点与器材档位已在观测台（#ctxPlace / #ctxGear），此处不再重复提供 */
     group('计算口径', [
       selectRow('数值精度', [['visual', '目视级'], ['photo', '摄影级']], s.precision, function (v) {
@@ -6439,14 +5874,21 @@
     ['DESI Collaboration 2025, PRD 112, 083515', '暗能量演化约束'],
     ['NASA Exoplanet Archive（2026-08-20）', '系外行星 6,354 颗'],
     ['GeoNames（2026-10-22）', '全球 779 个地点坐标与时区'],
+    ['Bright Star Catalogue 5th Rev. Ed.（NASA HEASARC 修订版）', '恒星位置与 B-V／光谱型 · 美国政府作品（公有领域）'],
+    ['NASA SVS Deep Star Maps 2020', '银河背景纹理 · 公有领域（NASA/Goddard SVS，Ernie Wright）'],
+    ['Solar System Scope', '行星与月球等距贴图 · CC BY 4.0（solarsystemscope.com/textures）'],
     ['IMO / NASA Eclipse', '流星雨与日月食年度表']].forEach(function (x) {
       var row = el('div', 'row-item');
       row.innerHTML = '<div class="top"><span class="n" style="font-size:11.5px">' + esc(x[0]) + '</span></div><div class="tx">' + esc(x[1]) + '</div>';
       dataGroup.appendChild(row);
     });
+    dataGroup.appendChild(el('div', 'note-box',
+      '恒星颜色由 B-V 色指数或光谱型近似换算，用于区分冷暖色调，并非肉眼实景颜色；银河为深空摄影合成，亮度经过压缩以适配屏幕。'));
     var tools = el('div', 'ed-actions');
     var exp = el('button', 'btn-ghost', '导出配置（不含对话与密钥）');
     exp.addEventListener('click', exportAll);
+    var planCsv = el('button', 'btn-ghost', '导出观测计划（CSV）');
+    planCsv.addEventListener('click', exportPlanCsv);
     var imp = el('button', 'btn-ghost', '导入配置');
     var file = document.createElement('input');
     file.type = 'file'; file.accept = '.json'; file.style.display = 'none';
@@ -6458,7 +5900,7 @@
       cfg = AC.defaultConfig(); AC.setCustomAgents(state.custom);
       applySettings(); renderSettings(); refreshPanels();
     });
-    tools.appendChild(exp); tools.appendChild(imp); tools.appendChild(reset); tools.appendChild(file);
+    tools.appendChild(exp); tools.appendChild(planCsv); tools.appendChild(imp); tools.appendChild(reset); tools.appendChild(file);
     dataGroup.appendChild(tools);
     pushSection('数据与核验', dataGroup);
     }
@@ -6762,6 +6204,12 @@
     }
     document.body.classList.toggle('obs-collapsed', !s.showObs);
     applySidebarCollapse(s.sidebarCollapsed);
+    /* 恢复星图图层开关（阶段 2B）：只回放已持久化的布尔值，缺键按默认全开 */
+    if (s.layers && window.SkyLayers && skyLayers) {
+      Object.keys(s.layers).forEach(function (k) {
+        if (typeof s.layers[k] === 'boolean') skyLayers.set(k, s.layers[k]);
+      });
+    }
     persist();
   }
 
@@ -6856,6 +6304,9 @@
     $('#vwClose').addEventListener('click', closeViewer);
     $('#vwIn').addEventListener('click', function () { zoomViewer(1.25); });
     $('#vwOut').addEventListener('click', function () { zoomViewer(0.8); });
+    $$('#vwFovPresets button').forEach(function (b) {
+      b.addEventListener('click', function () { setViewerFov(+b.dataset.fov); });
+    });
     $('#vwReset').addEventListener('click', resetViewer);
 
     /* 太阳系观测视图 */
@@ -6868,6 +6319,15 @@
     $('#solarOrbits').addEventListener('click', function () {
       if (!SV) return;
       SV.setOrbits(!SV.state.orbits); syncSolarTools();
+    });
+    /* 太阳系视图放大/缩小：直接推拉相机距离（与滚轮同一条路径） */
+    if ($('#solarZoomIn')) $('#solarZoomIn').addEventListener('click', function () {
+      if (!SV) return;
+      SV.zoom(0.8); syncSolarTools();
+    });
+    if ($('#solarZoomOut')) $('#solarZoomOut').addEventListener('click', function () {
+      if (!SV) return;
+      SV.zoom(1.25); syncSolarTools();
     });
     $('#solarPause').addEventListener('click', function () {
       if (!SV) return;
@@ -6931,6 +6391,8 @@
     var pointers = {};      /* 多指手势：两点捏合缩放 */
     var pinchStart = null;
     stage.addEventListener('wheel', function (e) {
+      /* Ctrl/⌘ + 滚轮交给浏览器做页面缩放，不抢默认行为 */
+      if (e.ctrlKey || e.metaKey) return;
       e.preventDefault();
       zoomViewer(e.deltaY < 0 ? 1.12 : 0.89);
     }, { passive: false });
@@ -8945,6 +8407,27 @@
     watchErrors();
     loadPlan();
     renderPlan();
+    loadWorkspaces();
+    renderWorkspaces();
+    /* 行星真实贴图：异步解码，完成后重绘两条渲染链 */
+    if (window.PlanetTextures && window.PlanetTextures.init) window.PlanetTextures.init();
+    /* 银河背景异步重建完成后，用「当前」相机参数重绘，避免被过期快照覆盖视角 */
+    if (window.SkyRender && window.SkyRender.setRepaintHook) {
+      var repainting = false;
+      window.SkyRender.setRepaintHook(function () {
+        if (repainting) return;
+        repainting = true;
+        try {
+          if ($('#viewer') && $('#viewer').classList.contains('on')) drawViewerNow();
+          else refreshPanels();
+        } finally { repainting = false; }
+      });
+    }
+    window.addEventListener('planet-textures-ready', function (e) {
+      if (SV && SV.refreshTextures) SV.refreshTextures();
+      if ($('#viewer') && $('#viewer').classList.contains('on')) drawViewer();
+      if (state.settings && state.settings.viewMode === 'solar' && SV) SV.render && SV.render();
+    });
     renderCatalog();
     warmupSkyModel();
     renderAgents();
@@ -9003,13 +8486,32 @@
       addFiles: addFiles, removeAttach: removeAttach, clearAttach: clearAttach,
       attachments: function () { return (state.attachments || []).slice(); },
       refresh: refreshPanels, focusObject: focusObject,
+      /* 星图拆分后的只读诊断入口（V2-SKY 阶段 1）：不参与业务逻辑，供测试与排查 */
+      skyLayers: function () { return skyLayers.all(); },
+      skyModules: function () {
+        return {
+          viewModel: window.SkyVM ? window.SkyVM.version : null,
+          renderer: window.SkyRender ? window.SkyRender.version : null,
+          layers: window.SkyLayers ? window.SkyLayers.version : null,
+          planets: window.PlanetVisuals ? window.PlanetVisuals.summary() : null
+        };
+      },
       perf: function () {
+        var skyCache = window.SkyVM.cache();
         return {
           sky: { calls: PERF.sky.calls, last: Math.round(PERF.sky.last * 100) / 100, avg: Math.round(PERF.sky.avg * 100) / 100, modelBuild: PERF.sky.modelBuild },
           solar: { calls: PERF.solar.calls, last: Math.round(PERF.solar.last * 100) / 100, avg: Math.round(PERF.solar.avg * 100) / 100 },
-          model: { key: SKY_CACHE.key, built: SKY_CACHE.model ? SKY_CACHE.model.built : 0, stars: SKY_CACHE.model ? SKY_CACHE.model.stars.length : 0, dust: SKY_CACHE.model ? SKY_CACHE.model.dust.length : 0 }
+          /* 银河背景只读统计：重建次数、上次耗时、栅格尺寸。
+           * 供实机验收观察「静止是否仍在重建」，不是屏幕帧率。 */
+          background: (window.SkyBackground && window.SkyBackground.stats) ? window.SkyBackground.stats() : null,
+          model: {
+            key: skyCache.key,
+            built: skyCache.model ? skyCache.model.built : 0,
+            stars: skyCache.model ? skyCache.model.stars.length : 0,
+            dust: skyCache.model ? skyCache.model.dust.length : 0
+          }
         };
-      }
+      },
     };
 
     var params = {};

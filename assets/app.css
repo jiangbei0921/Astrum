@@ -178,6 +178,9 @@ body.obs-collapsed .obspanel { flex-basis: 0px; }
 .topbar {
   display: flex; align-items: center; gap: 14px;
   padding: 0 16px 0 18px;
+  /* 作为 .app 栅格项时必须允许收缩；否则顶栏 min-content 会把整列撑宽， */
+  /* 在 390px 移动视口下导致主区溢出并被裁切。 */
+  min-width: 0;
   background: var(--glass-strong);
   border-bottom: 1px solid var(--line);
   backdrop-filter: saturate(160%) blur(14px);

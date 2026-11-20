@@ -1,0 +1,41 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2026-11-05T09:03:10.198Z",
+  "tool": "tools/build-milkyway-bg.js",
+  "toolVersion": "1.0.0",
+  "source": {
+    "name": "NASA SVS Deep Star Maps 2020 — milkyway_2020_4k_print.jpg",
+    "page": "https://svs.gsfc.nasa.gov/4851/",
+    "download": "https://svs.gsfc.nasa.gov/vis/a000000/a004800/a004851/milkyway_2020_4k_print.jpg",
+    "license": "Public domain (NASA SVS Help: https://svs.gsfc.nasa.gov/help/)",
+    "credit": "NASA/Goddard Space Flight Center Scientific Visualization Studio; Ernie Wright",
+    "file": "milkyway_2020_4k_print.jpg",
+    "sha256": "1ebe95804f5f0e6e23f77488aaa33fdb4aaef3fd336821fb41b261ddeaee2df0",
+    "width": 1024,
+    "height": 512,
+    "bytes": 71247
+  },
+  "texture": {
+    "width": 512,
+    "height": 256,
+    "format": "rgb565",
+    "byteOrder": "little-endian",
+    "encoding": "base64",
+    "bytes": 262144,
+    "base64Bytes": 349528,
+    "projection": "equatorial plate carree, center RA 0h, RA increases left",
+    "uv": "u = (0.5 - raHours/24) mod 1; v = 0.5 - decDeg/180"
+  },
+  "processing": {
+    "resize": "1024x512 -> 512x256 (Lanczos)",
+    "color": "RGB -> RGB565 little-endian",
+    "brightness": "none",
+    "crop": "none"
+  },
+  "reference": {
+    "NGP": 11.08,
+    "SGP": 12.3,
+    "GC": 117.11,
+    "ANTI": 55.86
+  }
+}

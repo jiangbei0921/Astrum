@@ -1,32 +1,7 @@
 {
-  "generatedAt": "2026-11-03T11:00:57.153Z",
-  "provider": "deepseek",
-  "key": "present",
-  "mode": "REAL_PROVIDER",
-  "real": {
-    "provider": "deepseek",
-    "model": "deepseek-chat",
-    "calls": 5,
-    "success": 4,
-    "failed": 1,
-    "blockedProvider": 0,
-    "avgLatencyMs": 1270,
-    "tokens": 4139,
-    "errors": [
-      "auth"
-    ],
-    "usage": {
-      "prompt": 3791,
-      "completion": 348,
-      "total": 4139,
-      "any": true
-    },
-    "latencies": [
-      1076,
-      1725,
-      1240,
-      1039
-    ]
-  },
-  "status": "PASS"
+  "generatedAt": "2026-11-05T09:19:49.294Z",
+  "provider": "openai-compatible",
+  "key": "missing",
+  "mode": "OFFLINE_PROTOCOL_ONLY",
+  "status": "BLOCKED_API_KEY"
 }

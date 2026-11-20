@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#f6f4ef" />
 <meta name="referrer" content="no-referrer" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-8bmn+C3+dsG0AJzfifsQ4nZmJNYXGMsc7+La8KSAby4=' 'sha256-giWvPkDv3Kb5e1tFJXlHjc6KIjB1HPCSTrmxTDMDVLc='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' http://localhost:* http://127.0.0.1:* https://localhost:* https://127.0.0.1:* https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com https://api.deepseek.com https://api.moonshot.cn https://open.bigmodel.cn https://dashscope.aliyuncs.com https://api.mistral.ai https://api.groq.com https://api.x.ai https://images-api.nasa.gov https://api.openalex.org https://api.semanticscholar.org https://api.wikimedia.org https://zh.wikipedia.org https://ipapi.co https://ipwho.is https://ipinfo.io https://api.ipapi.is https://geocoding-api.open-meteo.com https://photon.komoot.io https://timeapi.io https://simbad.u-strasbg.fr https://simbad.harvard.edu https://arxiv.org https://export.arxiv.org https://api.open-meteo.com https://api.github.com; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-8bmn+C3+dsG0AJzfifsQ4nZmJNYXGMsc7+La8KSAby4=' 'sha256-GdjuQGIR975pwgpk/xOF7NK3LvcR/Vlms7p0tCKand8='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' http://localhost:* http://127.0.0.1:* https://localhost:* https://127.0.0.1:* https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com https://api.deepseek.com https://api.moonshot.cn https://open.bigmodel.cn https://dashscope.aliyuncs.com https://api.mistral.ai https://api.groq.com https://api.x.ai https://images-api.nasa.gov https://api.openalex.org https://api.semanticscholar.org https://api.wikimedia.org https://zh.wikipedia.org https://ipapi.co https://ipwho.is https://ipinfo.io https://api.ipapi.is https://geocoding-api.open-meteo.com https://photon.komoot.io https://timeapi.io https://simbad.u-strasbg.fr https://simbad.harvard.edu https://arxiv.org https://export.arxiv.org https://api.open-meteo.com https://api.github.com; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'" />
 <title>ASTRUM · 天文多智能体工作台</title>
 <meta name="description" content="天文问答工作台：星历本地复算，事实带来源与核验日期，联网检索多源取证并标注证据强弱。纯静态、可离线。" />
 <meta property="og:type" content="website" />
@@ -221,6 +221,17 @@
           </div>
 
           <div class="ctx-gear">
+            <label class="ctx-line"><span class="k">配置</span>
+              <select id="wsSelect" aria-label="观测配置"></select>
+            </label>
+            <div class="place-sub">
+              <span id="wsHint">—</span>
+              <button class="mini-btn" id="wsSave" title="保存当前地点、器材与视角">保存</button>
+              <button class="mini-btn" id="wsDel" title="删除所选配置">删除</button>
+            </div>
+          </div>
+
+          <div class="ctx-gear">
             <label class="ctx-line"><span class="k">方式</span>
               <select id="ctxGear">
                 <option value="naked">肉眼</option>
@@ -313,6 +324,8 @@
       </div>
       <button class="mini-btn wide-btn" id="solarLabels" aria-pressed="true">标签</button>
       <button class="mini-btn wide-btn" id="solarOrbits" aria-pressed="true">轨道</button>
+      <button class="mini-btn" id="solarZoomOut" aria-label="缩小视图" title="缩小视图（−）">−</button>
+      <button class="mini-btn" id="solarZoomIn" aria-label="放大视图" title="放大视图（＋）">＋</button>
       <button class="mini-btn wide-btn" id="solarLayout" aria-pressed="false">真实等比</button>
       <label class="solar-boost" title="统一缩放系数：所有天体共用，直径比例恒真">
         <span>放大</span>
@@ -352,6 +365,14 @@
       <div class="seg-mini" id="viewerLabels">
         <button data-lv="labeled" class="on">标准标注</button>
         <button data-lv="full">全部标注</button>
+      </div>
+      <div class="seg-mini" id="vwFovPresets" role="group" aria-label="视场角快捷档位">
+        <button data-fov="30">30°</button>
+        <button data-fov="50">50°</button>
+        <button data-fov="70">70°</button>
+        <button data-fov="100">100°</button>
+        <button data-fov="140">140°</button>
+        <button data-fov="170">170°</button>
       </div>
       <button class="mini-btn" id="vwOut" aria-label="缩小">−</button>
       <span class="zoom-val" id="vwVal">100%</span>
@@ -521,6 +542,17 @@
 <script src="core/content-i18n.js"></script>
 <script src="core/knowledge-sources.js"></script>
 <script src="core/feedback.js"></script>
+<script src="data/sky-stars-l1.js"></script>
+<script src="core/sky-star-data.js"></script>
+<script src="core/sky-layers.js"></script>
+<script src="core/sky-viewmodel.js"></script>
+<script src="core/planet-visuals.js"></script>
+<script src="data/planet-textures.js"></script>
+<script src="core/planet-textures.js"></script>
+<script src="data/milkyway-bg.js"></script>
+<script src="core/sky-background.js"></script>
+<script src="core/sky-renderer.js"></script>
+<script src="core/workspace.js"></script>
 <script src="core/app.js"></script>
 
 <!-- 启动守卫：核心模块未加载时给出明确修复指引（避免退化成无样式裸页面） -->
@@ -528,7 +560,7 @@
 window.addEventListener('DOMContentLoaded', function () {
 (function () {
   'use strict';
-  var MISSING = ['Astro', 'CATALOG', 'KNOWLEDGE', 'AgentCore', 'Sources', 'SolarView']
+  var MISSING = ['Astro', 'CATALOG', 'KNOWLEDGE', 'AgentCore', 'Sources', 'SolarView', 'SkyLayers', 'SkyVM', 'SkyRender', 'SkyBackground']
     .filter(function (k) { return typeof window[k] === 'undefined'; });
   if (!MISSING.length) return;
 
