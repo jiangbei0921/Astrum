@@ -10,10 +10,463 @@
   'use strict';
 
   root.ASTRUM_DAILY = {
-    "updated": "2026-11-19",
-    "generatedAt": "2026-11-20T08:10:22.696Z",
+    "updated": "2026-11-20",
+    "generatedAt": "2026-11-20T08:10:40.826Z",
     "note": "每日 UTC 01:00 增量同步；内容未经本项目核验，不参与答案推理。",
     "papers": [
+      {
+        "id": "2611.25602",
+        "title": "Dependence of Dust Growth on Magnetic field Strength in Protoplanetary Disks",
+        "authors": [
+          "Takashi Shimokawa",
+          "Masahiro Machida",
+          "Yoshihiro Kawasaki"
+        ],
+        "summary": "We performed one-dimensional calculations to investigate how the magnetorotational instability (MRI) affects dust growth in protoplanetary disks. We simultaneously solved the evolution of the dust size distribution and t…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T06:48:59Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T06:48:59Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.25602",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
+      {
+        "id": "2611.25803",
+        "title": "The Atmospheric Circulation of Cloudy Hot and Ultra-hot Jupiters: the Need for Dissipation of Large-scale Flows to Reduce the Nightside Brightness Temperatures of Ultra-hot Jupiters",
+        "authors": [
+          "Xianyu Tan",
+          "Yanhong Lai",
+          "Jinghao Zhang"
+        ],
+        "summary": "We perform general circulation modeling of hot and ultra-hot Jupiters across equilibrium temperatures of T_eq=1600 to 2800 K, incorporating cloud formation and its feedback on atmospheric dynamics. This study specificall…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T09:26:08Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T09:26:08Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.25803",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
+      {
+        "id": "2611.26025",
+        "title": "The Ionospheric Cut-off as a Potential Radio Technosignature",
+        "authors": [
+          "Michael A. Garrett"
+        ],
+        "summary": "Radio emission generated on a planetary surface must cross the planet's ionosphere before escaping into space: below the local plasma frequency it is reflected back towards the surface. We investigate this process for br…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T12:38:04Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T12:38:04Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26025",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
+      {
+        "id": "2611.26372",
+        "title": "Lower-Mass Giants Can Spare Inner Planets during High-Eccentricity Migration",
+        "authors": [
+          "Qunfeng Jiang"
+        ],
+        "summary": "The survival of an inner planet next to a close-in giant is commonly used to argue against high-eccentricity migration (HEM), because the eccentric giant is expected to destabilize the inner system. Existing survival cal…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T16:35:02Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T16:35:02Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26372",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
+      {
+        "id": "2611.26416",
+        "title": "Peanut/X-shaped bulges: Returning to the vertical resonance and separatrix",
+        "authors": [
+          "Sergei A. Rusakov",
+          "Viktor D. Zozulia",
+          "Natalia Ya. Sotnikova"
+        ],
+        "summary": "We investigate the vertical structure and evolution of an $N$-body galactic bar by analyzing pure resonant orbits that form the skeleton of boxy/peanut/X-shaped (BP/X) bulges in Cartesian and action-angle spaces ($θ_\\tex…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T17:01:42Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T17:01:42Z",
+        "doi": "10.1051/0004-6361/202662841",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26416",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
+      {
+        "id": "2611.26421",
+        "title": "Eigenspectra of Poisson-sampled stellar population models: Statistical fingerprints of cool giant stars in unresolved early-type galaxies",
+        "authors": [
+          "Anastasia Gvozdenko",
+          "Russell J. Smith"
+        ],
+        "summary": "The light of unresolved galaxies carries the imprint of their underlying stellar populations, yet isolating contributions from specific stellar types remains challenging. If multiple spectra of the same population are av…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T17:03:08Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T17:03:08Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26421",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
+      {
+        "id": "2611.26424",
+        "title": "On the feasibility of using [Eu/$α$] to identify accreted and in-situ extragalactic globular clusters",
+        "authors": [
+          "Anastasia Gvozdenko",
+          "Michael A. Beasley",
+          "Katja Fahrion"
+        ],
+        "summary": "The chemical abundance ratio [Eu/$α$] has been proposed as a discriminator between ex-situ and in-situ stellar populations in the Milky Way and external galaxies. Here we show with a high-quality, homogeneous dataset of…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T17:03:35Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T17:03:35Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26424",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
+      {
+        "id": "2611.26461",
+        "title": "Splitting the action: A fully nonlinear fluid method for clustering dark energy",
+        "authors": [
+          "Yunhao Gao",
+          "Baojiu Li",
+          "Jie Wang"
+        ],
+        "summary": "While the background evolution of dark energy is relatively straightforward to model, its perturbations, especially on nonlinear scales, generally require significantly more sophisticated treatment. Existing simulation m…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T17:23:48Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T17:23:48Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26461",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
+      {
+        "id": "2611.26468",
+        "title": "Multimessenger constraints on the origin of long gamma-ray bursts with plateaus: three cases",
+        "authors": [
+          "Aleksander Łukasz Lenart",
+          "Maria Giovanna Dainotti",
+          "Maurice van Putten"
+        ],
+        "summary": "The central engines of long gamma-ray bursts (LGRBs) with X-ray plateaus remain uncertain. They involve a magnetar or black hole (BH), powered by spin energy and/or accretion. We examine how gravitational waves (GWs) dis…",
+        "cat": "astro-ph.HE",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T17:29:06Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T17:29:06Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26468",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
+      {
+        "id": "2611.26483",
+        "title": "The Galaxy Activity, Torus, and Outflow Survey: N. Little Red Dots are not dust deficient: constraints from Seyfert 1 JWST spectra",
+        "authors": [
+          "C. Ramos Almeida",
+          "R. Maiolino",
+          "I. García-Bernete"
+        ],
+        "summary": "Little Red Dots (LRDs) are compact, red sources discovered by JWST. Most show broad permitted emission lines characteristic of AGN, but other properties differ from local AGN, such as X-ray and radio weakness and an appa…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T17:40:48Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T17:40:48Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26483",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
+      {
+        "id": "2611.26488",
+        "title": "Constraints and biases: impact of light-cone effects on power spectrum and bispectrum forecasts",
+        "authors": [
+          "Chris Addis",
+          "Chris Clarkson",
+          "Dionysios Karagiannis"
+        ],
+        "summary": "Next-generation galaxy surveys will map large-scale structure over unprecedented volumes, bringing two goals within reach: constraining primordial non-Gaussianity (PNG) and detecting relativistic effects on the largest s…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T17:44:18Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T17:44:18Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26488",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
+      {
+        "id": "2611.26494",
+        "title": "Near Infrared HST Images Resolve the Filamentary Emission Knots in Pa 30, the Remnant of the Galactic Supernova of 1181 AD",
+        "authors": [
+          "Robert A. Fesen",
+          "Dan Milisavljevic",
+          "Peter Garnavich"
+        ],
+        "summary": "We report the results of a near-infrared HST WFC3/IR imaging program investigating the sub-arcsecond structure of optical filaments in the Galactic nebula, Pa 30, believed to be a SNIax remnant of the historic supernova…",
+        "cat": "astro-ph.HE",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T17:47:11Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T17:47:11Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26494",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
+      {
+        "id": "2611.26495",
+        "title": "Inhomogeneous Cutoff Regularization of Loops in Cosmological Correlators",
+        "authors": [
+          "Jacopo Fumagalli",
+          "Keisuke Inomata"
+        ],
+        "summary": "We revisit the use of cutoff regularization in computing loop corrections to cosmological correlators. We argue that a cutoff corresponding to a fixed physical scale must be defined with respect to the local background g…",
+        "cat": "hep-th",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T17:48:45Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T17:48:45Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26495",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
+      {
+        "id": "2611.26548",
+        "title": "Demographic inference in exoplanet chemistry is shaped by retrieval assumptions",
+        "authors": [
+          "Dwaipayan Dubey",
+          "Karan Molaverdikhani",
+          "Barbara Ercolano"
+        ],
+        "summary": "Understanding the chemical diversity of exoplanet atmospheres is crucial for linking atmospheric composition to planetary formation history. Atmospheric C/O can provide clues about where and how planets form, particularl…",
+        "cat": "astro-ph.EP",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T18:20:48Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T18:20:48Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26548",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
+      {
+        "id": "2611.26550",
+        "title": "Chemical Cartography Across Time: The Age-Dependent Chemical Structure of the Milky Way with a Homogeneous Sample of 580,000 Giants from Five Surveys",
+        "authors": [
+          "Jeff Shen",
+          "Neige Frankel",
+          "David W. Hogg"
+        ],
+        "summary": "Mapping the distribution of elements in the Milky Way and understanding how that distribution has changed over time can give us insight into the formation and evolution of our Galaxy. Here we use homogeneously estimated…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T18:22:30Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T18:22:30Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26550",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
+      {
+        "id": "2611.26576",
+        "title": "Modeling the gravitational wave spectrum from slowly-evolving sources in the early Universe: constant-in-time and coherent-decay models",
+        "authors": [
+          "Antonino S. Midiri",
+          "Alberto Roper Pol",
+          "Madeline Salomé"
+        ],
+        "summary": "We study the production of gravitational wave (GW) backgrounds from slowly-evolving sources in the early Universe, following the Constant-in-Time (CiT) model, presented and validated against simulations of decaying turbu…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T18:42:17Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T18:42:17Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26576",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
+      {
+        "id": "2611.26593",
+        "title": "Star-forming disc galaxies align tangentially with the cosmic tidal field",
+        "authors": [
+          "Calum Murray",
+          "Roman Paviot",
+          "Martin Kilbinger"
+        ],
+        "summary": "The alignments of galaxy shapes, with one another and with the large-scale structure of the Universe, have been a topic of considerable investigation within cosmology and extragalactic astrophysics for the last 60 years.…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T18:48:05Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T18:48:05Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26593",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
+      {
+        "id": "2611.26594",
+        "title": "UV Bounds on Inflationary Parity Violation",
+        "authors": [
+          "Alexander Cassem",
+          "Mark P. Hertzberg"
+        ],
+        "summary": "A question of fundamental interest is whether parity is violated on large scales in the Universe. This possibility has been motivated by recent analyses of the four-point matter correlation function. It has also been sug…",
+        "cat": "hep-th",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T18:51:13Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T18:51:13Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26594",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
+      {
+        "id": "2611.26618",
+        "title": "Every galaxy is a radio source: a stellar-mass dependent minimum 150 MHz luminosity identified in the LoTSS Deep Fields",
+        "authors": [
+          "Shravya Shenoy",
+          "Daniel J. B. Smith",
+          "Martin J. Hardcastle"
+        ],
+        "summary": "The second data release of the LOFAR Two-metre Sky Survey (LoTSS) Deep Fields includes the deepest wide-field 150 MHz mosaics in existence, covering the ELAIS-N1 field. Combining these radio observations with star-format…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T18:58:31Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T18:58:31Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26618",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
+      {
+        "id": "2611.26620",
+        "title": "Little Red Dots from Primordial Vacuum Bubbles",
+        "authors": [
+          "Miguel Barroso Varela",
+          "Katherine Freese",
+          "Matthew Kleban"
+        ],
+        "summary": "Quantum tunneling transverse to the inflaton trajectory can produce $10^6$--$10^8M_\\odot$ primordial black holes at the abundance of JWST's little red dots, without the enhanced curvature perturbations excluded by limits…",
+        "cat": "astro-ph.CO",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T18:58:36Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T18:58:36Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26620",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-20",
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
+      },
       {
         "id": "2611.24581",
         "title": "Cosmological First-Order Phase Transitions with Full Nonlinear Gravity",
@@ -5118,7 +5571,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-19",
-        "fetchedAt": "2026-11-19T12:23:41.410Z"
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
       },
       {
         "title": "A mysterious twist in the universe’s oldest light could reveal new physics",
@@ -5130,7 +5583,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-19T12:23:41.410Z"
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
       },
       {
         "title": "ESA’s Hera spacecraft is flying rectangles around NASA’s asteroid crash site",
@@ -5142,7 +5595,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-19T12:23:41.410Z"
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
       },
       {
         "title": "NASA smashed into an asteroid. Now Hera has revealed a strange new world",
@@ -5154,7 +5607,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-19T12:23:41.410Z"
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
       },
       {
         "title": "NASA is offering $1 million for bold ideas to help build a Moon base",
@@ -5166,7 +5619,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-19T12:23:41.410Z"
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
       },
       {
         "title": "The secret to building Moon bases may be hiding in emergency blankets",
@@ -5178,7 +5631,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-16",
-        "fetchedAt": "2026-11-19T12:23:41.410Z"
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
       },
       {
         "title": "Uranus and Neptune’s bizarre magnetic fields may finally be explained",
@@ -5190,7 +5643,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-16",
-        "fetchedAt": "2026-11-19T12:23:41.410Z"
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
       },
       {
         "title": "Astronomers discover a dead star spinning every 8 minutes and sending mysterious radio pulses",
@@ -5202,7 +5655,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-16",
-        "fetchedAt": "2026-11-19T12:23:41.410Z"
+        "fetchedAt": "2026-11-20T08:10:40.826Z"
       },
       {
         "title": "Euclid discovers ancient cosmic beacons from the dawn of time, shining like a trillion suns",
@@ -5697,12 +6150,12 @@
       }
     ],
     "sync": {
-      "lastAttemptAt": "2026-11-20T08:10:22.696Z",
-      "lastSuccessAt": "2026-11-19T12:23:41.410Z",
-      "newPapers": 0,
+      "lastAttemptAt": "2026-11-20T08:10:40.826Z",
+      "lastSuccessAt": "2026-11-20T08:10:40.826Z",
+      "newPapers": 20,
       "updatedPapers": 0,
       "newNews": 0,
-      "totalPapers": 224,
+      "totalPapers": 244,
       "totalNews": 46,
       "sources": {
         "papers": [
@@ -5722,9 +6175,9 @@
           "msg": "HTTP 404 https://www.esa.int/rssfeed/Our_Activities/Space_Science"
         }
       ],
-      "ok": null,
-      "partial": null,
-      "status": "running"
+      "ok": true,
+      "partial": true,
+      "status": "partial"
     }
   };
 })(typeof window !== 'undefined' ? window : this);
