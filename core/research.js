@@ -601,6 +601,25 @@
    */
   function run(question, opts) {
     opts = opts || {};
+    /* P0：浏览器中检索必须携带可信 Principal；Node 测试无 Profile，保持离线行为。 */
+    if (root.Profile && root.ProfileContext && root.Security) {
+      var auth = root.Security.authorize({
+        principal: opts.principal || null,
+        action: 'tool.call',
+        resource: { resourceType: 'tool', resourceId: 'research.search' },
+        context: { capability: 'tool.search' }
+      });
+      if (!auth.allowed) {
+        return Promise.resolve({
+          question: String(question || ''),
+          intent: opts.intent || 'unknown',
+          plan: null, rounds: [], budget: null,
+          stopReason: 'denied', evidence: [], conflicts: [],
+          citations: null, terms: [], ms: 0,
+          error: auth.reason
+        });
+      }
+    }
     var budget = {
       maxRounds: opts.maxRounds != null ? opts.maxRounds : 2,
       maxCalls: opts.maxCalls != null ? opts.maxCalls : 6,

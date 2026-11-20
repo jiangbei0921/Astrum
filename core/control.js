@@ -23,6 +23,31 @@
     return String(q == null ? '' : q).trim();
   }
 
+  /* P0：身份只由可信上下文构造；无 Profile 的 Node 测试返回 null 并跳过校验。 */
+  function principalOf(opts) {
+    opts = opts || {};
+    if (opts.principal) return opts.principal;
+    if (root.Security && root.Security.makePrincipal) {
+      return root.Security.makePrincipal({ agentId: opts.agentId || 'muse' });
+    }
+    return null;
+  }
+
+  function authorized(principal, action, task) {
+    if (!principal || !root.Security) return { allowed: true };
+    var projectId = task && task.projectId ? task.projectId : null;
+    return root.Security.authorize({
+      principal: principal,
+      action: action,
+      resource: {
+        resourceType: 'task',
+        resourceId: task && task.id ? task.id : '',
+        ownerProfileId: task && task.ownerProfileId ? task.ownerProfileId : principal.profileId,
+        projectId: projectId
+      }
+    });
+  }
+
   function prepare(query, ctx, cfg, opts) {
     opts = opts || {};
     var AC = root.AgentCore;
@@ -67,7 +92,8 @@
       route: route,
       state: state,
       plan: null,
-      legacy: true
+      legacy: true,
+      principal: opts.principal || null
     };
 
     if (route.legacy) {
@@ -118,7 +144,7 @@
       ? root.AstroRegistry.createDefault({ adapter: adapter, agentCore: AC, network: opts.network })
       : null);
     var store = opts.store || null;
-    return { adapter: adapter, registry: registry, store: store };
+    return { adapter: adapter, registry: registry, store: store, principal: opts.principal || null };
   }
 
   function successfulStepResults(state) {
@@ -136,8 +162,15 @@
     }
   }
 
-  function saveState(store, state) {
+  function saveState(store, state, principal) {
     if (!store || typeof store.save !== 'function') return Promise.resolve(null);
+    if (principal && root.Security) {
+      if (!root.Security.ensureSession(principal).allowed) return Promise.resolve(null);
+      if (typeof store.ownerProfileId === 'function' && store.ownerProfileId() &&
+        store.ownerProfileId() !== principal.profileId) {
+        return Promise.resolve(null);
+      }
+    }
     return Promise.resolve(store.save(state)).catch(function () { return null; });
   }
 
@@ -177,15 +210,34 @@
     var O = root.AstroOrchestrator;
     if (!AC || !T || !O) throw new Error('AstroControl.run 依赖未加载');
 
-    var rt = makeRuntime(opts);
+    var principal = principalOf(opts);
+    var rt = makeRuntime(Object.assign({}, opts, { principal: principal }));
     var prepared = prepare(query, ctx, cfg, {
       registry: rt.registry,
       capabilities: opts.capabilities,
       routeData: opts.routeData || null,
-      forceCompare: !!opts.forceCompare
+      forceCompare: !!opts.forceCompare,
+      principal: principal
     });
     var state = prepared.state;
     var eventIndex = 0;
+
+    /* P0：任务创建前置授权。无 Profile 的 Node 环境 principal=null，保持旧行为。 */
+    var createDecision = principal ? authorized(principal, 'create', null) : { allowed: true };
+    if (!createDecision.allowed) {
+      T.transition(state, 'LEGACY');
+      T.transition(state, 'DONE');
+      var deniedAnswer = rt.adapter ? rt.adapter.deliver(prepared.query, ctx, cfg) : null;
+      await saveState(rt.store, state, principal);
+      return {
+        query: prepared.query, ctx: ctx, cfg: cfg,
+        intent: prepared.intent, targets: prepared.targets,
+        route: prepared.route, plan: null, state: state,
+        runner: null, answer: deniedAnswer, legacy: true,
+        delivery: null, denied: createDecision.reason,
+        verdict: 'PARTIAL'
+      };
+    }
     /* V1.2：FITS 附件 Evidence 注入 compose args；不新增任务模板。 */
     if (opts.attachmentsEvidence && opts.attachmentsEvidence.length) {
       state.evidence = opts.attachmentsEvidence.slice();
@@ -212,11 +264,11 @@
       });
       state.plan = prepared.plan;
     }
-    await saveState(rt.store, state);
+    await saveState(rt.store, state, rt.principal);
 
     if (prepared.legacy) {
       var legacyAnswer = rt.adapter.deliver(prepared.query, ctx, cfg);
-      await saveState(rt.store, state);
+      await saveState(rt.store, state, rt.principal);
       return {
         query: prepared.query, ctx: ctx, cfg: cfg,
         intent: prepared.intent, targets: prepared.targets,
@@ -231,14 +283,15 @@
     T.transition(state, 'EXECUTE');
     var runner = await O.runPlan(prepared.plan, state, {
       registry: rt.registry, ctx: ctx, cfg: cfg, adapter: rt.adapter,
-      signal: opts.signal || null
+      signal: opts.signal || null,
+      principal: rt.principal
     });
 
     if (runner && runner.aborted) {
       T.appendEvent(state, 'task.cancelled', { reason: 'user' });
       T.transition(state, 'ABORTED');
       emitNew(state, eventIndex, opts);
-      await saveState(rt.store, state);
+      await saveState(rt.store, state, rt.principal);
       return resultOf(prepared, state, runner, null, null, {
         cancelled: true, verdict: 'ABORTED', legacy: false
       });
@@ -288,7 +341,7 @@
         T.appendEvent(state, 'task.cancelled', { reason: 'user' });
         T.transition(state, 'ABORTED');
         emitNew(state, eventIndex, opts);
-        await saveState(rt.store, state);
+        await saveState(rt.store, state, rt.principal);
         return resultOf(prepared, state, runner, null, null, {
           cancelled: true, verdict: 'ABORTED', legacy: false
         });
@@ -354,7 +407,7 @@
         T.appendEvent(state, 'task.cancelled', { reason: 'user' });
         T.transition(state, 'ABORTED');
         emitNew(state, eventIndex, opts);
-        await saveState(rt.store, state);
+        await saveState(rt.store, state, rt.principal);
         return resultOf(prepared, state, runner, null, null, {
           cancelled: true, verdict: 'ABORTED', legacy: false
         });
@@ -394,7 +447,7 @@
     if (!answer) {
       T.transition(state, 'FAILED');
       emitNew(state, eventIndex, opts);
-      await saveState(rt.store, state);
+      await saveState(rt.store, state, rt.principal);
       return resultOf(prepared, state, runner, null, null, {
         verdict: 'FAIL', legacy: false, delivery: null
       });
@@ -406,7 +459,7 @@
     T.transition(state, 'COMPOSE');
     T.transition(state, finalVerdict === 'PASS' ? 'DONE' : 'PARTIAL');
     emitNew(state, eventIndex, opts);
-    await saveState(rt.store, state);
+    await saveState(rt.store, state, rt.principal);
 
     return resultOf(prepared, state, runner, answer, delivery, {
       verdict: finalVerdict, legacy: false, replanned: replans > 0
@@ -422,23 +475,58 @@
     opts = opts || {};
     var store = opts.store || defaultStore();
     if (!store || !taskId) return null;
+    var rec = store.getRecord ? await store.getRecord(taskId) : null;
     var state = await store.get(taskId);
     if (!state) return null;
+    var principal = principalOf(opts);
+    if (principal) {
+      var d = authorized(principal, 'read', {
+        id: taskId,
+        ownerProfileId: rec ? rec.ownerProfileId : (store.ownerProfileId ? store.ownerProfileId() : null),
+        projectId: rec ? rec.projectId : null
+      });
+      if (!d.allowed) return null;
+    }
     var resumable = store.isResumable ? store.isResumable(state) : false;
-    return { state: state, resumable: resumable, viewOnly: !resumable };
+    return {
+      state: state, resumable: resumable, viewOnly: !resumable,
+      ownerProfileId: rec ? rec.ownerProfileId : null,
+      projectId: rec ? rec.projectId : null,
+      principal: principal
+    };
   }
 
   async function resume(taskId, ctx, cfg, opts) {
     opts = opts || {};
     var T = root.AstroTask;
     var O = root.AstroOrchestrator;
-    var loaded = await load(taskId, opts);
+    var principal = principalOf(opts);
+    var loaded = await load(taskId, Object.assign({}, opts, { principal: principal }));
     if (!loaded) return null;
     if (!loaded.resumable) {
       return { state: loaded.state, answer: null, resumable: false, viewOnly: true, verdict: 'VIEW_ONLY' };
     }
 
-    var rt = makeRuntime(opts);
+    /* P0：恢复前重新校验所有权与操作能力，不依赖创建时的判断。 */
+    if (principal) {
+      var d = authorized(principal, 'resume', {
+        id: taskId, ownerProfileId: loaded.ownerProfileId, projectId: loaded.projectId
+      });
+      if (!d.allowed) {
+        return {
+          state: loaded.state, answer: null, resumable: true, viewOnly: true,
+          verdict: 'DENIED', error: d.reason
+        };
+      }
+      if (!root.Security.ensureSession(principal).allowed) {
+        return {
+          state: loaded.state, answer: null, resumable: true, viewOnly: true,
+          verdict: 'DENIED', error: 'SESSION_CHANGED'
+        };
+      }
+    }
+
+    var rt = makeRuntime(Object.assign({}, opts, { principal: principal }));
     var state = loaded.state;
     var eventIndex = 0;
     (state.steps || []).forEach(function (s) {
@@ -451,13 +539,14 @@
     T.appendEvent(state, 'task.recovered', { reason: 'resume' });
     var runner = await O.runPlan(state.plan, state, {
       registry: rt.registry, ctx: ctx || {}, cfg: cfg, adapter: rt.adapter,
-      signal: opts.signal || null
+      signal: opts.signal || null,
+      principal: rt.principal
     });
     if (runner && runner.aborted) {
       T.appendEvent(state, 'task.cancelled', { reason: 'user' });
       T.transition(state, 'ABORTED');
       emitNew(state, eventIndex, opts);
-      await saveState(rt.store, state);
+      await saveState(rt.store, state, rt.principal);
       return { state: state, answer: null, runner: runner, cancelled: true, verdict: 'ABORTED', resumable: false };
     }
 
@@ -483,14 +572,14 @@
     if (!answer) {
       T.transition(state, 'FAILED');
       emitNew(state, eventIndex, opts);
-      await saveState(rt.store, state);
+      await saveState(rt.store, state, rt.principal);
       return { state: state, answer: null, runner: runner, verdict: 'FAIL', resumable: false };
     }
     var finalVerdict = rawVerdict === 'PASS' ? 'PASS' : 'PARTIAL';
     T.transition(state, 'COMPOSE');
     T.transition(state, finalVerdict === 'PASS' ? 'DONE' : 'PARTIAL');
     emitNew(state, eventIndex, opts);
-    await saveState(rt.store, state);
+    await saveState(rt.store, state, rt.principal);
     return {
       state: state, answer: answer, runner: runner, delivery: delivery,
       verdict: finalVerdict, resumed: true, resumable: false

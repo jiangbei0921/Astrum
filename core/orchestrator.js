@@ -109,6 +109,22 @@
     return { steps: batch, parallel: batch.length > 1 };
   }
 
+  /* 工具域 → 专业执行角色（P0：编排主体按域委托，不直接把全部工具权授予 Muse） */
+  var TOOL_AGENT = {
+    'kepler.ephemeris': 'kepler',
+    'kepler.visibility': 'kepler',
+    'kb.lookup': 'curator',
+    'fits.parse': 'curator',
+    'compare.curate': 'curator',
+    'evidence.search': 'scholar',
+    'paper.search': 'scholar',
+    'simbad.tap': 'scholar',
+    'llm.compose': 'muse',
+    'compose.target': 'muse',
+    'compose.domain': 'muse',
+    'compose.simple': 'muse'
+  };
+
   function nowIso() { return new Date().toISOString(); }
 
   function abortedResult() {
@@ -300,6 +316,22 @@
       if (!T.canAfford(state.budget, cost)) break;
 
       var raw = await withTimeout(function () {
+        /* P0：有可信身份时统一走 ToolGateway；Node 旧测试无 principal，保持原路径。
+         * 编排主体（Muse）按工具域委托给专业角色，能力不扩权。 */
+        if (root.ToolGateway && opts.principal) {
+          var execPrincipal = opts.principal;
+          if (root.Security && root.Security.delegate) {
+            var specialist = TOOL_AGENT[planStep.tool];
+            if (specialist) {
+              execPrincipal = root.Security.delegate(opts.principal, specialist,
+                opts.principal.projectId) || opts.principal;
+            }
+          }
+          return root.ToolGateway.invoke(execPrincipal, planStep.tool, planStep.args || {}, {
+            registry: opts.registry, ctx: opts.ctx, cfg: opts.cfg,
+            depResults: depResults, signal: signal, taskId: state.id, attempt: attempts
+          });
+        }
         return spec.run(planStep.args || {}, opts.ctx, spec, opts.cfg, depResults, {
           signal: signal, taskId: state.id, attempt: attempts
         });
@@ -416,6 +448,16 @@
 
       var batch = nextBatch(plan, state, state.budget.limit.parallel);
       if (!batch) break;
+
+      /* P0：每批执行前重新验证页面会话，防止切换档案后旧任务继续写结果。 */
+      if (opts.principal && root.Security &&
+        !root.Security.ensureSession(opts.principal).allowed) {
+        abortPending(plan, state, T, '会话已变化');
+        return {
+          ok: false, aborted: true, criticalFailed: false, budgetStop: false,
+          answer: null, state: state, completed: false, reason: 'SESSION_CHANGED'
+        };
+      }
 
       if (signal && signal.aborted) return cancelledRun();
       var results = await runBatch(batch, state, opts);

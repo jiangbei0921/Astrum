@@ -186,8 +186,19 @@
     if (!info || !info.control || !root.AstroControl) {
       return { mode: 'legacy', route: info && info.route || null, answer: null, control: null };
     }
+    var principal = opts.principal || (root.Security && root.Security.makePrincipal
+      ? root.Security.makePrincipal({ agentId: opts.agentId || 'muse' })
+      : null);
+    if (opts.store && principal && typeof opts.store.ownerProfileId === 'function' &&
+      opts.store.ownerProfileId() && opts.store.ownerProfileId() !== principal.profileId) {
+      return {
+        mode: 'control', route: info.route, answer: null, research: null,
+        control: null, cancelled: false, verdict: 'DENIED', error: 'PROFILE_MISMATCH'
+      };
+    }
     var store = opts.store != null ? opts.store : (root.AstroTaskStore ? root.AstroTaskStore.create({}) : null);
     var result = await root.AstroControl.run(queryForAnswer, ctx, cfg, {
+      principal: principal,
       routeData: info.routeData,
       signal: opts.signal,
       store: store,
@@ -221,9 +232,16 @@
   async function resume(taskId, ctx, cfg, opts) {
     opts = opts || {};
     if (!root.AstroControl) return null;
+    var principal = opts.principal || (root.Security && root.Security.makePrincipal
+      ? root.Security.makePrincipal({ agentId: opts.agentId || 'muse' })
+      : null);
+    if (opts.store && principal && typeof opts.store.ownerProfileId === 'function' &&
+      opts.store.ownerProfileId() && opts.store.ownerProfileId() !== principal.profileId) {
+      return { state: null, answer: null, resumable: false, verdict: 'DENIED', error: 'PROFILE_MISMATCH' };
+    }
     var store = opts.store != null ? opts.store : (root.AstroTaskStore ? root.AstroTaskStore.create({}) : null);
     var r = await root.AstroControl.resume(taskId, ctx, cfg, {
-      store: store, signal: opts.signal, signalOnly: opts.signalOnly
+      store: store, signal: opts.signal, signalOnly: opts.signalOnly, principal: principal
     });
     return r;
   }

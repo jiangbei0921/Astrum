@@ -939,6 +939,8 @@
   function setCustomAgents(list) {
     CUSTOM = Array.isArray(list) ? list : [];
     CUSTOM.forEach(function (a) {
+      /* P0：内置 Agent 的 id 是保留标识，自定义 Agent 不得覆盖。 */
+      if (AGENT_BY_ID[a.id] && AGENT_BY_ID[a.id].custom !== true) return;
       AGENT_BY_ID[a.id] = {
         id: a.id, name: a.name, cn: a.cn, sigil: a.sigil || (a.name || 'A').slice(0, 1).toUpperCase(),
         role: a.role || '自定义智能体', color: a.color || '#d8b47a', desc: a.persona || '', custom: true
@@ -2685,8 +2687,13 @@
   function pad(n) { return n < 10 ? '0' + n : '' + n; }
   function uniq(v, i, a) { return a.indexOf(v) === i; }
 
+  function agentById(id) {
+    return AGENT_BY_ID[id] || null;
+  }
+
   root.AgentCore = {
     AGENTS: AGENTS, ATTRS: ATTRS, CITIES: CITIES, AGENT_BY_ID: AGENT_BY_ID,
+    agentById: agentById,
     setGear: setGear,
     settleVerdict: settleVerdict,
     setSkillResolver: setSkillResolver,

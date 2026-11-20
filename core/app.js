@@ -4094,7 +4094,9 @@
         Research.run(q, {
           intent: ans.intent,
           entityName: ent.name,
-          entityEn: ent.en
+          entityEn: ent.en,
+          principal: window.Security && window.Security.makePrincipal
+            ? window.Security.makePrincipal({ agentId: 'scholar' }) : null
         }).then(function (rec) {
           taskEnd(tWeb);
           applyResearch(ans, rec, q, cfgRun);
@@ -4172,7 +4174,9 @@
         /* 先检索取证，再把证据交给模型 —— 模型只依据「本地事实 + 本轮证据」作答，
            避免它只复述本地知识库，也避免它自己编造外部资料。 */
         Research.run(q, {
-          intent: ans.intent, entityName: ent2.name, entityEn: ent2.en
+          intent: ans.intent, entityName: ent2.name, entityEn: ent2.en,
+          principal: window.Security && window.Security.makePrincipal
+            ? window.Security.makePrincipal({ agentId: 'scholar' }) : null
         }).then(function (rec) {
           applyResearch(ans, rec, q, cfgRun);
           /* 契约：没有任何可核实事实时不外发模型。
@@ -8340,6 +8344,16 @@
   /* V1.1：刷新后只提示未完成任务，用户点击才恢复，避免启动时自动跑长任务。 */
   function offerResumeTask() {
     if (!window.AstroTaskStore || !window.AstroControlBridge) return;
+    /* P0：旧任务归属未知，先复制到隔离区，避免被当前档案当成自己的任务。 */
+    if (window.AstroTaskStore.migrateLegacy) {
+      try {
+        window.AstroTaskStore.migrateLegacy().then(function (m) {
+          if (m && m.quarantined) {
+            toast('发现 ' + m.quarantined + ' 个旧版本任务，已隔离保存，避免跨档案串用。');
+          }
+        }).catch(function () { /* 迁移失败不阻断启动 */ });
+      } catch (e) { /* ignore */ }
+    }
     var store = null;
     try { store = window.AstroTaskStore.create({}); } catch (e) { return; }
     store.init().then(function () { return store.list({ limit: 10 }); }).then(function (list) {
