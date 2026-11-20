@@ -249,7 +249,7 @@
     step.startedAt = nowIso();
     step.endedAt = null;
     step.durationMs = null;
-    T.appendEvent(state, 'step.started', { skillId: planStep.skillId }, planStep.id);
+    T.appendEvent(state, 'step.started', {}, planStep.id);
 
     var rt = root.AstroSkillRuntime;
     var store = opts.skillStore || null;
@@ -282,7 +282,7 @@
       step.result = exec;
       step.outputHash = exec.outputHash || null;
       step.evidenceRefs = [];
-      T.appendEvent(state, 'step.ok', { skillId: planStep.skillId }, planStep.id);
+      T.appendEvent(state, 'step.ok', { reason: 'skill' }, planStep.id);
       return { ok: true, result: exec, evidenceRefs: [] };
     }
     if (exec.status === 'cancelled') {
