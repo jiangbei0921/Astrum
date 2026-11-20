@@ -364,6 +364,7 @@
     return {
       schemaVersion: 1,
       id: input.id || nextId(),
+      projectId: input.projectId || null,
       question: typeof input.question === 'string' ? input.question : '',
       mode: input.mode || 'single',
       phase: input.phase || 'INIT',
@@ -645,10 +646,42 @@
     return evt;
   }
 
+  /* P1：检查点只记录可恢复所需的最小快照，不复制正文。
+   * 调用方负责避免在 running 中间态写入。 */
+  function addCheckpoint(state, meta) {
+    meta = meta || {};
+    if (!isArray(state.checkpoints)) fail('E_STATE_CHECKPOINTS', '$.checkpoints 必须是数组', '$.checkpoints');
+    var snapshot = {
+      phase: state.phase,
+      steps: (state.steps || []).map(function (s) {
+        return { id: s.id, status: s.status, attempt: s.attempt, outputHash: s.outputHash || null };
+      }),
+      claims: (state.claims || []).length,
+      evidence: (state.evidence || []).length
+    };
+    var cp = {
+      checkpointId: 'chk_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6),
+      at: nowIso(),
+      phase: state.phase,
+      stepId: meta.stepId || null,
+      inputHash: meta.inputHash || computeInputHash(snapshot),
+      stateHash: sha256Hex(canonicalJSON(snapshot)),
+      budgetUsed: JSON.parse(JSON.stringify(state.budget && state.budget.used ? state.budget.used : {})),
+      projectId: state.projectId || meta.projectId || null,
+      taskStatus: meta.taskStatus || state.phase,
+      version: (state.checkpoints.length || 0) + 1,
+      memoryIds: cloneArray(meta.memoryIds),
+      evidenceIds: cloneArray(meta.evidenceIds),
+      claimIds: cloneArray(meta.claimIds)
+    };
+    state.checkpoints.push(cp);
+    state.updatedAt = nowIso();
+    return cp;
+  }
+
   /* ============================================================
      6. 预算辅助（只做结构约束，不实现调度）
      ============================================================ */
-
   function canAfford(budget, delta) {
     delta = delta || {};
     var k;
@@ -696,6 +729,7 @@
     canTransition: canTransition,
     transition: transition,
     appendEvent: appendEvent,
+    addCheckpoint: addCheckpoint,
     canAfford: canAfford,
     spend: spend,
     computeInputHash: computeInputHash,

@@ -1292,12 +1292,70 @@
     return LOG.slice();
   }
 
+  /* P1：从研究结果提取候选记忆（只产出 draft，不落库、不标记 verified）。
+   * opts = { profileId, projectId, sourceThreadId, sourceTaskId, originAgent } */
+  function candidatesFromAnswer(ans, opts) {
+    opts = opts || {};
+    var out = [];
+    var claims = (ans && ans.claims) || [];
+    var evidence = (ans && ans.evidence) || [];
+    var evById = {};
+    evidence.forEach(function (e) { if (e && e.evidenceId) evById[e.evidenceId] = e; });
+
+    function push(type, content, refs) {
+      if (out.length >= 20) return;
+      var text = String(content || '').trim();
+      if (!text) return;
+      var input = {
+        profileId: opts.profileId || null,
+        projectId: opts.projectId || null,
+        type: type,
+        content: text,
+        summary: text.slice(0, 200),
+        source: { kind: opts.sourceKind || 'thread', refs: refs || [] },
+        sourceThreadId: opts.sourceThreadId || null,
+        sourceTaskId: opts.sourceTaskId || null,
+        evidenceIds: (opts.evidenceIds || []).slice(),
+        claimIds: (opts.claimIds || []).slice(),
+        confidence: { level: 'low', basis: 'auto-extracted' },
+        metadata: { tags: [], originAgent: opts.originAgent || null }
+      };
+      var m = root.AstroMemory && typeof root.AstroMemory.makeCandidate === 'function'
+        ? root.AstroMemory.makeCandidate(input)
+        : Object.assign(input, {
+          memoryId: 'mem_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8),
+          status: 'draft', version: 1
+        });
+      out.push(m);
+    }
+
+    claims.forEach(function (c) {
+      if (!c || !c.text) return;
+      var evIds = (c.support || []).map(function (s) { return s && s.eid; }).filter(Boolean);
+      var refs = evIds.map(function (id) {
+        var e = evById[id];
+        return { kind: e && e.sourceType === 'paper' ? 'paper' : 'thread', id: id, uri: e ? e.uri : '' };
+      });
+      push(c.type === 'quantitative' ? 'calculation' : 'conclusion', c.text, refs.length ? refs : []);
+      if (out.length) {
+        out[out.length - 1].claimIds = c.id ? [c.id] : [];
+        out[out.length - 1].evidenceIds = evIds;
+      }
+    });
+
+    if (out.length < 20 && ans && ans.research && ans.research.summary) {
+      push('progress', ans.research.summary, [{ kind: 'thread', id: opts.sourceThreadId || '', uri: '' }]);
+    }
+    return out;
+  }
+
   /* ============================================================
      10. 导出
      ============================================================ */
   root.Research = {
     plan: plan,
     run: run,
+    candidatesFromAnswer: candidatesFromAnswer,
     dedupe: dedupe,
     rank: rank,
     termsOf: termsOf,

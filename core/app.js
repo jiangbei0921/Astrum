@@ -3804,7 +3804,29 @@
     });
 
     var store = null;
-    try { store = window.AstroTaskStore ? window.AstroTaskStore.create({}) : null; } catch (e) { store = null; }
+    var activeProject = window.AstroProjectUI && window.AstroProjectUI.current
+      ? window.AstroProjectUI.current() : null;
+    try {
+      store = window.AstroTaskStore ? window.AstroTaskStore.create({ projectId: activeProject }) : null;
+    } catch (e) { store = null; }
+
+    /* P1：发起课题召回并登记为 pending；编排器最多等 3 秒，失败不影响研究。 */
+    if (activeProject && window.AstroResearchContext && window.Security &&
+      typeof window.Security.makePrincipal === 'function') {
+      var recallPrincipal = window.Security.makePrincipal({ principalType: 'user', projectId: activeProject });
+      if (recallPrincipal) {
+        var recallPromise = window.AstroResearchContext.recall({
+          principal: recallPrincipal,
+          projectId: activeProject,
+          threadId: window.Thread && window.Thread.current() ? window.Thread.current().id : null,
+          query: qForAns
+        }).then(function (b) {
+          window.AstroResearchContext.setCurrent(b && b.ok ? b : null);
+          return b;
+        }).catch(function () { return null; });
+        if (window.AstroResearchContext.setPending) window.AstroResearchContext.setPending(recallPromise);
+      }
+    }
 
     /* 实时步骤进度：只消费 Control 发出的真实事件，不生成模拟百分比。 */
     var progress = el('div', 'run-progress');
@@ -8423,6 +8445,15 @@
     renderPlan();
     loadWorkspaces();
     renderWorkspaces();
+    /* P1：课题面板；未加载新模块时完全不影响旧行为。 */
+    if (window.AstroProjectUI && window.AstroProjectUI.mount) {
+      try {
+        window.AstroProjectUI.mount();
+        if (window.Thread && window.Thread.setProjectId) {
+          window.Thread.setProjectId(window.AstroProjectUI.current());
+        }
+      } catch (e) { /* 面板失败不阻断启动 */ }
+    }
     /* 行星真实贴图：异步解码，完成后重绘两条渲染链 */
     if (window.PlanetTextures && window.PlanetTextures.init) window.PlanetTextures.init();
     /* 银河背景异步重建完成后，用「当前」相机参数重绘，避免被过期快照覆盖视角 */

@@ -16,6 +16,7 @@
   var SCHEMA = 1;
 
   var cur = null;        /* 当前线程对象 */
+  var curProjectId = null; /* P1：当前课题，创建新 Thread 时写入 */
 
   function readCur() {
     try { return root.localStorage.getItem(CUR_KEY) || ''; } catch (e) { return ''; }
@@ -24,14 +25,15 @@
     try { root.localStorage.setItem(CUR_KEY, id); } catch (e) {}
   }
 
-  function makeThread(title) {
+  function makeThread(title, projectId) {
     var t = {
       id: S.nowId(),
       title: title || '新对话',
       createdAt: Date.now(),
       updatedAt: Date.now(),
       schema: SCHEMA,
-      count: 0
+      count: 0,
+      projectId: projectId || curProjectId || null
     };
     return t;
   }
@@ -129,6 +131,16 @@
     });
   }
 
+  function setProjectId(projectId) {
+    curProjectId = projectId || null;
+    if (cur) cur.projectId = curProjectId;
+    return curProjectId;
+  }
+
+  function currentProjectId() {
+    return (cur && cur.projectId) || curProjectId || null;
+  }
+
   function rename(id, title) {
     return S.getThread(id).then(function (t) {
       if (!t) return null;
@@ -153,6 +165,7 @@
     loadMessages: loadMessages,
     list: list, setCurrent: setCurrent, rename: rename, remove: remove,
     clearCurrent: clearCurrent, clearAll: clearAll,
+    setProjectId: setProjectId, currentProjectId: currentProjectId,
     current: function () { return cur; },
     backend: function () { return S.backend(); },
     titleFrom: titleFrom,

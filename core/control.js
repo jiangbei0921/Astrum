@@ -67,6 +67,7 @@
       question: q,
       mode: route.mode,
       level: route.level,
+      projectId: opts.projectId || null,
       context: contextOf(ctx),
       budget: T.makeBudget(route.level)
     });
@@ -174,6 +175,22 @@
     return Promise.resolve(store.save(state)).catch(function () { return null; });
   }
 
+  /* P1：检查点写入失败不得影响任务执行（审计性数据，不阻断主链路）。 */
+  function safeCheckpoint(state, meta) {
+    if (!root.AstroTask || typeof root.AstroTask.addCheckpoint !== 'function') return null;
+    try { return root.AstroTask.addCheckpoint(state, meta || {}); }
+    catch (e) { return null; }
+  }
+
+  function checkpointCriticalSteps(state, written) {
+    (state.steps || []).forEach(function (s) {
+      if (s.status === 'ok' && s.critical && !written[s.id]) {
+        written[s.id] = 1;
+        safeCheckpoint(state, { stepId: s.id, taskStatus: state.phase });
+      }
+    });
+  }
+
   function extractDelivery(state) {
     var delivery = null;
     for (var i = 0; i < state.steps.length; i++) {
@@ -217,10 +234,12 @@
       capabilities: opts.capabilities,
       routeData: opts.routeData || null,
       forceCompare: !!opts.forceCompare,
+      projectId: opts.projectId || null,
       principal: principal
     });
     var state = prepared.state;
     var eventIndex = 0;
+    var cpWritten = {};
 
     /* P0：任务创建前置授权。无 Profile 的 Node 环境 principal=null，保持旧行为。 */
     var createDecision = principal ? authorized(principal, 'create', null) : { allowed: true };
@@ -265,6 +284,7 @@
       state.plan = prepared.plan;
     }
     await saveState(rt.store, state, rt.principal);
+    if (!prepared.legacy) safeCheckpoint(state, { stepId: 'plan', taskStatus: 'PLAN' });
 
     if (prepared.legacy) {
       var legacyAnswer = rt.adapter.deliver(prepared.query, ctx, cfg);
@@ -348,6 +368,8 @@
       }
     }
 
+    checkpointCriticalSteps(state, cpWritten);
+
     /* V1.5：Research Loop。只在显式启用时运行，保持旧测试与旧调用默认行为不变。
      * 只追加 evidence.search，不改写已完成步骤；受 appends/searches 预算与 2 轮上限约束。 */
     var appendRounds = 0;
@@ -403,6 +425,7 @@
         signal: opts.signal || null
       });
       appendRounds += 1;
+      checkpointCriticalSteps(state, cpWritten);
       if (runner && runner.aborted) {
         T.appendEvent(state, 'task.cancelled', { reason: 'user' });
         T.transition(state, 'ABORTED');
@@ -439,6 +462,7 @@
     var progressed = state.phase === 'PROGRESS';
     if (progressed) T.transition(state, 'EXECUTE');
     T.transition(state, 'PROGRESS');
+    safeCheckpoint(state, { taskStatus: 'PROGRESS' });
     var review = answer && answer.meta && answer.meta.review ? answer.meta.review : null;
     var rawVerdict = review && review.verdict ? review.verdict : (answer ? 'PARTIAL' : 'FAIL');
     T.appendEvent(state, 'verdict.issued', { verdict: rawVerdict });
@@ -526,6 +550,40 @@
       }
     }
 
+    /* P1：恢复前校验任务版本与所属课题状态，避免恢复已归档/删除课题的任务。 */
+    if (!loaded.state || loaded.state.schemaVersion !== 1) {
+      return {
+        state: loaded.state, answer: null, resumable: false, viewOnly: true,
+        verdict: 'DENIED', error: 'SCHEMA_INCOMPATIBLE'
+      };
+    }
+    if (loaded.projectId && root.AstroResearchStore && principal) {
+      var proj = null;
+      try {
+        var rs = root.AstroResearchStore.create({});
+        proj = await rs.getProject(loaded.projectId, principal);
+      } catch (e) { proj = null; }
+      if (!proj || proj.status === 'archived' || proj.status === 'deleted') {
+        if (root.AuditLog) {
+          root.AuditLog.record({
+            action: 'task.resume', resourceType: 'task', resourceId: taskId,
+            projectId: loaded.projectId, decision: 'deny',
+            reason: proj ? 'PROJECT_NOT_ACTIVE' : 'PROJECT_NOT_FOUND'
+          });
+        }
+        return {
+          state: loaded.state, answer: null, resumable: true, viewOnly: true,
+          verdict: 'DENIED', error: proj ? 'PROJECT_NOT_ACTIVE' : 'PROJECT_NOT_FOUND'
+        };
+      }
+    }
+    if (root.AuditLog) {
+      root.AuditLog.record({
+        action: 'task.resume', resourceType: 'task', resourceId: taskId,
+        projectId: loaded.projectId || null, decision: 'allow', reason: 'ALLOW'
+      });
+    }
+
     var rt = makeRuntime(Object.assign({}, opts, { principal: principal }));
     var state = loaded.state;
     var eventIndex = 0;
@@ -542,6 +600,7 @@
       signal: opts.signal || null,
       principal: rt.principal
     });
+    checkpointCriticalSteps(state, {});
     if (runner && runner.aborted) {
       T.appendEvent(state, 'task.cancelled', { reason: 'user' });
       T.transition(state, 'ABORTED');
@@ -565,6 +624,7 @@
       } catch (e) { answer = null; }
     }
     T.transition(state, 'PROGRESS');
+    safeCheckpoint(state, { taskStatus: 'PROGRESS' });
     var review = answer && answer.meta && answer.meta.review ? answer.meta.review : null;
     var rawVerdict = review && review.verdict ? review.verdict : (answer ? 'PARTIAL' : 'FAIL');
     T.appendEvent(state, 'verdict.issued', { verdict: rawVerdict });

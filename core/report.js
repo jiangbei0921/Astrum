@@ -323,7 +323,7 @@
     var core = conclusions.filter(function (c) { return c.level === 'verified'; }).slice(0, 3)
       .map(function (c) { return c.text; }).join('；');
 
-    return {
+    var out = {
       reportId: 'rep_' + hashShort({
         q: input.question || '',
         evidence: evidenceList.map(function (e) { return e.evidenceId; })
@@ -366,6 +366,8 @@
       gaps: gaps,
       disclaimer: '以上结论均基于列出的检索/观测/计算结果；摘要类论文未读全文；缺失数据不编造。'
     };
+    if (input.projectId) out.projectId = input.projectId;
+    return out;
   }
 
   root.AstroReport = {

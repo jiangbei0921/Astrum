@@ -15,14 +15,14 @@
   /* ---------------- 能力字典：true=已实现，false=仅定义 ---------------- */
   var CAPABILITIES = {
     'project.read': true,
-    'project.create': false,
-    'project.update': false,
-    'project.archive': false,
+    'project.create': true,
+    'project.update': true,
+    'project.archive': true,
 
     'memory.read': true,
-    'memory.propose': false,
-    'memory.approve': false,
-    'memory.update': false,
+    'memory.propose': true,
+    'memory.approve': true,
+    'memory.update': true,
 
     'evidence.read': true,
     'evidence.create': false,
@@ -62,11 +62,13 @@
   /* ---------------- 角色策略：未列出 = 拒绝 ---------------- */
   var ROLE_POLICY = {
     muse: ['project.read', 'task.read', 'task.create', 'task.execute', 'task.resume', 'task.cancel',
-      'evidence.read', 'claim.read', 'tool.llm', 'tool.calculate'],
+      'evidence.read', 'claim.read', 'memory.read', 'memory.propose', 'tool.llm', 'tool.calculate'],
     scholar: ['project.read', 'task.read', 'task.create', 'task.execute', 'task.resume', 'task.cancel',
-      'evidence.read', 'claim.read', 'memory.read', 'tool.search', 'tool.external_api'],
-    critic: ['project.read', 'task.read', 'evidence.read', 'claim.read', 'tool.calculate'],
-    curator: ['project.read', 'task.read', 'evidence.read', 'claim.read', 'tool.read_local'],
+      'evidence.read', 'claim.read', 'memory.read', 'memory.propose', 'tool.search', 'tool.external_api'],
+    critic: ['project.read', 'task.read', 'evidence.read', 'claim.read', 'memory.read', 'memory.propose',
+      'tool.calculate'],
+    curator: ['project.read', 'task.read', 'evidence.read', 'claim.read', 'memory.read', 'memory.propose',
+      'tool.read_local'],
     vega: ['project.read', 'task.read', 'evidence.read', 'tool.read_local', 'tool.calculate'],
     kepler: ['tool.calculate'],
     horizon: ['tool.calculate', 'tool.read_local'],
@@ -78,7 +80,11 @@
     navigator: []
   };
 
-  var USER_POLICY = ['project.read', 'task.read', 'task.resume', 'task.cancel', 'task.delete'];
+  var USER_POLICY = [
+    'project.read', 'project.create', 'project.update', 'project.archive',
+    'memory.read', 'memory.propose', 'memory.approve', 'memory.update',
+    'task.read', 'task.resume', 'task.cancel', 'task.delete'
+  ];
 
   /* ---------------- 工具 → 能力 ---------------- */
   var TOOL_CAPABILITY = {

@@ -257,7 +257,7 @@
         updatedAt: state.updatedAt || nowIso(),
         template: state.plan ? state.plan.template : '',
         ownerProfileId: owner,
-        projectId: projectId,
+        projectId: state.projectId || projectId,
         state: T.toJSON(state)
       };
     }
@@ -292,6 +292,9 @@
 
     async function save(state) {
       await init();
+      if (projectId && state.projectId && state.projectId !== projectId) {
+        throw storeError('PROJECT_MISMATCH', 'task project mismatch');
+      }
       var rec = makeRecord(state);
       if (enforce) {
         var prev = await rawGet(rec.id);
@@ -338,6 +341,38 @@
       return recs.slice(0, limit).map(summarize);
     }
 
+    async function listByProject(pid, opts) {
+      opts = opts || {};
+      await init();
+      var recs = [];
+      if (backend === 'idb') recs = await idbReq(db, STORE, 'readonly', function (os) { return os.getAll(); });
+      else if (backend === 'ls') {
+        var map = lsRead(lsKey);
+        recs = Object.keys(map).map(function (k) { return map[k]; });
+      } else recs = Object.keys(memory).map(function (k) { return memory[k]; });
+      recs = recs.filter(function (r) {
+        if (!r || r.projectId !== pid) return false;
+        if (enforce && r.ownerProfileId !== owner) return false;
+        return true;
+      });
+      recs.sort(function (a, b) {
+        return String(b.updatedAt || '').localeCompare(String(a.updatedAt || ''));
+      });
+      var limit = typeof opts.limit === 'number' ? opts.limit : 50;
+      recs = recs.slice(0, limit);
+      if (opts.raw) {
+        return recs.map(function (r) {
+          return { id: r.id, projectId: r.projectId, ownerProfileId: r.ownerProfileId, state: r.state };
+        });
+      }
+      return recs.map(function (r) {
+        var s = summarize(r);
+        s.projectId = r.projectId;
+        s.ownerProfileId = r.ownerProfileId;
+        return s;
+      });
+    }
+
     async function remove(id) {
       await init();
       var rec = await rawGet(id);
@@ -362,6 +397,7 @@
       get: get,
       getRecord: getRecord,
       list: list,
+      listByProject: listByProject,
       remove: remove,
       clear: clear,
       summarize: summarize,

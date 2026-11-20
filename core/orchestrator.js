@@ -420,6 +420,24 @@
     var answer = null;
     var budgetStop = false;
 
+    /* P1：若 UI 注册了召回 Promise，先等它落定（最多 3 秒）再读取 current()。
+     * wait 内部自带超时与异常兜底，不会阻塞执行。 */
+    if (root.AstroResearchContext && typeof root.AstroResearchContext.wait === 'function') {
+      try { await root.AstroResearchContext.wait(3000); } catch (e) { /* 召回失败不阻断 */ }
+    }
+    /* P1：跨 Thread 召回结果只注入 compose 步骤，不影响调度与工具选择。 */
+    var bundle = opts.contextBundle ||
+      (root.AstroResearchContext && typeof root.AstroResearchContext.current === 'function'
+        ? root.AstroResearchContext.current() : null);
+    if (bundle && plan && Array.isArray(plan.steps)) {
+      plan.steps.forEach(function (s) {
+        if (s && typeof s.tool === 'string' && s.tool.indexOf('compose.') === 0) {
+          s.args = s.args || {};
+          if (!s.args.contextBundle) s.args.contextBundle = bundle;
+        }
+      });
+    }
+
     function cancelledRun() {
       abortPending(plan, state, T, '任务已取消');
       return {
