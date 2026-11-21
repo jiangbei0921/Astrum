@@ -9,6 +9,49 @@
 (function (root) {
   'use strict';
 
+  /* 当前标签页内正在执行的任务 → AbortController。
+   * 仅用于协作式中断；跨标签页暂停仍以 pausedAt 为安全边界。 */
+  var activeRuns = Object.create(null);
+
+  function makeRunController(taskId, external, state) {
+    var ctl = null;
+    if (typeof AbortController === 'function') {
+      ctl = new AbortController();
+      activeRuns[taskId] = { ctl: ctl, state: state || null };
+      if (external) {
+        if (external.aborted) {
+          try { ctl.abort(external.reason || 'user'); } catch (e) { /* ignore */ }
+        } else if (external.addEventListener) {
+          external.addEventListener('abort', function () {
+            try { ctl.abort(external.reason || 'user'); } catch (e) { /* ignore */ }
+          });
+        }
+      }
+    }
+    return ctl;
+  }
+
+  function runSignalOf(ctl, opts) {
+    return ctl ? ctl.signal : (opts && opts.signal ? opts.signal : null);
+  }
+
+  function releaseRun(taskId, ctl) {
+    var entry = activeRuns[taskId];
+    if (ctl && entry && entry.ctl === ctl) delete activeRuns[taskId];
+  }
+
+  function activeState(taskId) {
+    var entry = activeRuns[taskId];
+    return entry ? entry.state : null;
+  }
+
+  function abortActive(taskId, reason) {
+    var entry = activeRuns[taskId];
+    if (!entry || !entry.ctl || entry.ctl.signal.aborted) return false;
+    try { entry.ctl.abort(reason || 'cancel'); } catch (e) { return false; }
+    return true;
+  }
+
   function contextOf(ctx) {
     ctx = ctx || {};
     return {
@@ -286,10 +329,20 @@
     var state = prepared.state;
     var eventIndex = 0;
     var cpWritten = {};
+    /* B4：本次运行的所有保存都携带同一个修订号，旧修订写入会被 STALE_WRITE 拒绝。 */
+    var expectedRev = 0;
+    var persist = function () {
+      return saveState(rt.store, state, rt.principal, {
+        expectedRevision: expectedRev, rethrow: true
+      }).then(function (id) {
+        if (id) expectedRev += 1;
+        return id;
+      });
+    };
     /* P4：每个批次结束后落盘；critical 成功步骤同时生成检查点。 */
     var onBatchSettled = async function () {
       checkpointCriticalSteps(state, cpWritten);
-      await saveState(rt.store, state, rt.principal);
+      await persist();
     };
 
     /* P0：任务创建前置授权。无 Profile 的 Node 环境 principal=null，保持旧行为。 */
@@ -334,12 +387,12 @@
       });
       state.plan = prepared.plan;
     }
-    await saveState(rt.store, state, rt.principal);
+    await persist();
     if (!prepared.legacy) safeCheckpoint(state, { stepId: 'plan', taskStatus: 'PLAN' });
 
     if (prepared.legacy) {
       var legacyAnswer = rt.adapter.deliver(prepared.query, ctx, cfg);
-      await saveState(rt.store, state, rt.principal);
+      await persist();
       return {
         query: prepared.query, ctx: ctx, cfg: cfg,
         intent: prepared.intent, targets: prepared.targets,
@@ -352,18 +405,23 @@
     }
 
     T.transition(state, 'EXECUTE');
+    /* B2：本次运行持有可中止控制器，pause() 可立即中止在飞请求。
+     * activeRuns / makeRunController / runSignalOf / releaseRun 均定义在本文件顶部。 */
+    var runCtl = makeRunController(state.id, opts.signal || null, state);
+    var runSignal = runSignalOf(runCtl, opts);
     var runner = await O.runPlan(prepared.plan, state, {
       registry: rt.registry, ctx: ctx, cfg: cfg, adapter: rt.adapter,
-      signal: opts.signal || null,
+      signal: runSignal,
       principal: rt.principal,
       onBatchSettled: onBatchSettled
     });
 
     if (runner && runner.aborted) {
+      releaseRun(state.id, runCtl);
       T.appendEvent(state, 'task.cancelled', { reason: 'user' });
       T.transition(state, 'ABORTED');
       emitNew(state, eventIndex, opts);
-      await saveState(rt.store, state, rt.principal);
+      await persist();
       return resultOf(prepared, state, runner, null, null, {
         cancelled: true, verdict: 'ABORTED', legacy: false
       });
@@ -371,8 +429,9 @@
 
     /* P3：暂停/待审批时不推进阶段，持久化后原样返回，等待用户恢复。 */
     if (runner && (runner.paused || runner.waitingApproval)) {
+      releaseRun(state.id, runCtl);
       emitNew(state, eventIndex, opts);
-      await saveState(rt.store, state, rt.principal);
+      await persist();
       return resultOf(prepared, state, runner, null, null, {
         paused: !!runner.paused,
         waitingApproval: !!runner.waitingApproval,
@@ -387,7 +446,7 @@
     var replans = 0;
     var limit = maxReplansOf(state, opts);
     var currentPlan = prepared.plan;
-    while (runner && runner.criticalFailed && replans < limit && !(opts.signal && opts.signal.aborted)) {
+    while (runner && runner.criticalFailed && replans < limit && !(runSignal && runSignal.aborted)) {
       var newPlan = null;
       try {
         newPlan = root.AstroPlanner.replan(currentPlan, state, 'critical_failed', {
@@ -419,18 +478,27 @@
       replans += 1;
       runner = await O.runPlan(newPlan, state, {
         registry: rt.registry, ctx: ctx, cfg: cfg, adapter: rt.adapter,
-        signal: opts.signal || null,
+        signal: runSignal,
         onBatchSettled: onBatchSettled
       });
       currentPlan = newPlan;
 
       if (runner && runner.aborted) {
+        releaseRun(state.id, runCtl);
         T.appendEvent(state, 'task.cancelled', { reason: 'user' });
         T.transition(state, 'ABORTED');
         emitNew(state, eventIndex, opts);
-        await saveState(rt.store, state, rt.principal);
+        await persist();
         return resultOf(prepared, state, runner, null, null, {
           cancelled: true, verdict: 'ABORTED', legacy: false
+        });
+      }
+      if (runner && runner.paused) {
+        releaseRun(state.id, runCtl);
+        emitNew(state, eventIndex, opts);
+        await persist();
+        return resultOf(prepared, state, runner, null, null, {
+          paused: true, verdict: 'PAUSED', resumable: true, legacy: false
         });
       }
     }
@@ -450,7 +518,7 @@
         decision = root.AstroEvaluator.decide({
           state: state, plan: currentPlan,
           research: research || null,
-          opts: { query: prepared.query, signal: opts.signal, maxAppends: 2 }
+          opts: { query: prepared.query, signal: runSignal, maxAppends: 2 }
         });
       } catch (e) { decision = null; }
       if (!decision) break;
@@ -491,18 +559,27 @@
       T.transition(state, 'EXECUTE');
       runner = await O.runPlan(expanded, state, {
         registry: rt.registry, ctx: ctx, cfg: cfg, adapter: rt.adapter,
-        signal: opts.signal || null,
+        signal: runSignal,
         onBatchSettled: onBatchSettled
       });
       appendRounds += 1;
       checkpointCriticalSteps(state, cpWritten);
       if (runner && runner.aborted) {
+        releaseRun(state.id, runCtl);
         T.appendEvent(state, 'task.cancelled', { reason: 'user' });
         T.transition(state, 'ABORTED');
         emitNew(state, eventIndex, opts);
-        await saveState(rt.store, state, rt.principal);
+        await persist();
         return resultOf(prepared, state, runner, null, null, {
           cancelled: true, verdict: 'ABORTED', legacy: false
+        });
+      }
+      if (runner && runner.paused) {
+        releaseRun(state.id, runCtl);
+        emitNew(state, eventIndex, opts);
+        await persist();
+        return resultOf(prepared, state, runner, null, null, {
+          paused: true, verdict: 'PAUSED', resumable: true, legacy: false
         });
       }
 
@@ -517,6 +594,7 @@
       } catch (e) { /* 刷新失败不阻断；下一轮沿用已有 research */ }
     }
 
+    releaseRun(state.id, runCtl);
     var answer = runner ? runner.answer : null;
     var delivery = extractDelivery(state);
     if (freshAnswer) { answer = freshAnswer.answer; delivery = freshAnswer.delivery; }
@@ -543,7 +621,7 @@
     if (!answer) {
       T.transition(state, 'FAILED');
       emitNew(state, eventIndex, opts);
-      await saveState(rt.store, state, rt.principal);
+      await persist();
       return resultOf(prepared, state, runner, null, null, {
         verdict: 'FAIL', legacy: false, delivery: null
       });
@@ -555,7 +633,7 @@
     T.transition(state, 'COMPOSE');
     T.transition(state, finalVerdict === 'PASS' ? 'DONE' : 'PARTIAL');
     emitNew(state, eventIndex, opts);
-    await saveState(rt.store, state, rt.principal);
+    await persist();
 
     return resultOf(prepared, state, runner, answer, delivery, {
       verdict: finalVerdict, legacy: false, replanned: replans > 0
@@ -621,6 +699,26 @@
     if (state.pausedAt) {
       return { state: state, verdict: 'PAUSED', paused: true, already: true };
     }
+    /* 同标签页有活跃运行时，直接改其内存状态并由该运行统一落盘，
+     * 避免 pause 的独立保存与 B4 的 expectedRevision 产生假冲突。 */
+    var live = activeState(taskId);
+    if (live) {
+      if (live.pausedAt) {
+        return { state: live, verdict: 'PAUSED', paused: true, already: true };
+      }
+      live.pausedAt = new Date().toISOString();
+      if (T) T.appendEvent(live, 'task.paused', { reason: 'user' });
+      safeCheckpoint(live, { taskStatus: 'PAUSED', paused: true });
+      var interruptedLive = abortActive(taskId, 'pause');
+      if (root.AuditLog) {
+        root.AuditLog.record({
+          action: 'task.pause', resourceType: 'task', resourceId: taskId,
+          projectId: live.projectId || null, decision: 'allow', reason: 'ALLOW'
+        });
+      }
+      return { state: live, verdict: 'PAUSED', paused: true, interrupted: interruptedLive };
+    }
+
     state.pausedAt = new Date().toISOString();
     if (T) T.appendEvent(state, 'task.paused', { reason: 'user' });
     /* P4：暂停与检查点一次保存，恢复时检查点可作为完整性锚点。 */
@@ -633,7 +731,7 @@
         projectId: state.projectId || null, decision: 'allow', reason: 'ALLOW'
       });
     }
-    return { state: state, verdict: 'PAUSED', paused: true };
+    return { state: state, verdict: 'PAUSED', paused: true, interrupted: false };
   }
 
   async function resume(taskId, ctx, cfg, opts) {
@@ -690,6 +788,16 @@
     var state = loaded.state;
     var eventIndex = 0;
     var cps = state.checkpoints || [];
+    /* B4：恢复后的每次保存都基于恢复起点修订号递增。 */
+    var expectedRev = loaded.revision || 1;
+    var persist = function () {
+      return saveState(rt.store, state, rt.principal, {
+        expectedRevision: expectedRev, rethrow: true
+      }).then(function (id) {
+        if (id) expectedRev += 1;
+        return id;
+      });
+    };
 
     /* P4：取最新检查点；旧任务无检查点时保持 P3 兼容（允许恢复）。 */
     var latestCp = null;
@@ -781,7 +889,9 @@
     var strategies = { reuse: [], rerun: [], blocked: [] };
     if (root.AstroRecovery) {
       var applied = root.AstroRecovery.apply({
-        state: state, checkpoint: latestCp, registry: rt.registry
+        state: state, checkpoint: latestCp, registry: rt.registry,
+        /* ASTRUM-004：未知幂等性复用前必须校验结果哈希与工具版本。 */
+        validateUnknown: opts.validateUnknownIdempotency !== false
       });
       strategies = applied.applied;
     } else {
@@ -801,6 +911,7 @@
       await saveState(rt.store, state, rt.principal, {
         expectedRevision: loaded.revision, rethrow: true
       });
+      expectedRev = (loaded.revision || 1) + 1;
     } catch (e) {
       if (e && e.code === 'STALE_WRITE') {
         return {
@@ -819,26 +930,39 @@
     var cpWritten = {};
     var onBatchSettled = async function () {
       checkpointCriticalSteps(state, cpWritten);
-      await saveState(rt.store, state, rt.principal);
+      await persist();
     };
+    var runCtl = makeRunController(state.id, opts.signal || null, state);
+    var runSignal = runSignalOf(runCtl, opts);
     var runner = await O.runPlan(state.plan, state, {
       registry: rt.registry, ctx: ctx || {}, cfg: cfg, adapter: rt.adapter,
-      signal: opts.signal || null,
+      signal: runSignal,
       principal: rt.principal,
       onBatchSettled: onBatchSettled
     });
     checkpointCriticalSteps(state, cpWritten);
     var recoveryInfo = { attempt: state.recoveries, limit: recLimit, strategies: strategies };
     if (runner && runner.aborted) {
+      releaseRun(state.id, runCtl);
       T.appendEvent(state, 'task.cancelled', { reason: 'user' });
       T.transition(state, 'ABORTED');
       emitNew(state, eventIndex, opts);
-      await saveState(rt.store, state, rt.principal);
+      await persist();
       return {
         state: state, answer: null, runner: runner, cancelled: true,
         verdict: 'ABORTED', resumable: false, recovery: recoveryInfo
       };
     }
+    if (runner && runner.paused) {
+      releaseRun(state.id, runCtl);
+      emitNew(state, eventIndex, opts);
+      await persist();
+      return {
+        state: state, answer: null, runner: runner, paused: true,
+        verdict: 'PAUSED', resumable: true, recovery: recoveryInfo
+      };
+    }
+    releaseRun(state.id, runCtl);
 
     var answer = runner ? runner.answer : null;
     var delivery = null;
@@ -864,7 +988,7 @@
     if (!answer) {
       T.transition(state, 'FAILED');
       emitNew(state, eventIndex, opts);
-      await saveState(rt.store, state, rt.principal);
+      await persist();
       return {
         state: state, answer: null, runner: runner, verdict: 'FAIL',
         resumable: false, error: 'NO_ANSWER', recovery: recoveryInfo
@@ -874,7 +998,7 @@
     T.transition(state, 'COMPOSE');
     T.transition(state, finalVerdict === 'PASS' ? 'DONE' : 'PARTIAL');
     emitNew(state, eventIndex, opts);
-    await saveState(rt.store, state, rt.principal);
+    await persist();
     return {
       state: state, answer: answer, runner: runner, delivery: delivery,
       verdict: finalVerdict, resumed: true, resumable: false,

@@ -57,7 +57,7 @@ var e = mk([{ id: 't1', tool: 'astro.calc', deps: [], critical: true }]);
 e.state.steps[0].status = 'waiting_approval';
 ok('P3-X2-01 识别待审批步骤', S.waitingApprovalStep(e.plan, e.state) === 't1');
 
-/* ---------- 超时 aborts 下游 ---------- */
+/* ---------- 超时/取消原因 ---------- */
 var g = mk([{ id: 't1', tool: 'slow.tool', deps: [], critical: true }]);
 var abortSeen = false;
 var slowRegistry = {
@@ -99,9 +99,37 @@ O.TaskExecutor.execute(f.plan.steps[0], f.state, {}).then(function (r) {
 }).then(function (r) {
   ok('P3-X3-05 缺步骤拒绝', r.ok === false && r.reason === 'step_missing');
   return O.TaskExecutor.execute(g.plan.steps[0], g.state, { registry: slowRegistry });
-}).then(function (r) {
+}).then(async function (r) {
   ok('P3-X4-01 超时会 abort 下游请求', abortSeen === true);
   ok('P3-X4-02 超时结果为 timeout', r.ok === false && r.kind === 'timeout', r.kind);
+  ok('P3-X4-02b 超时错误名为 TimeoutError',
+    g.state.steps[0].error && g.state.steps[0].error.errorName === 'TimeoutError');
+
+  /* 暂停：外部 signal 以 'pause' 取消，步骤应可区分且不误记为普通失败 */
+  var h = mk([{ id: 't1', tool: 'slow.tool', deps: [], critical: true }]);
+  var pauseCtl = new AbortController();
+  var pp = O.TaskExecutor.execute(h.plan.steps[0], h.state, {
+    registry: slowRegistry, signal: pauseCtl.signal
+  });
+  setTimeout(function () { pauseCtl.abort('pause'); }, 8);
+  var pr = await pp;
+  ok('P3-X4-03 暂停原因可区分', pr.ok === false && pr.pause === true && pr.kind === 'pause', pr.kind);
+  ok('P3-X4-04 暂停步骤回到 pending',
+    h.state.steps[0].status === 'pending' && !h.state.steps[0].error &&
+    h.state.events.some(function (e) { return e.type === 'step.paused'; }));
+
+  /* 用户取消：与暂停、超时使用不同错误名 */
+  var i = mk([{ id: 't1', tool: 'slow.tool', deps: [], critical: true }]);
+  var userCtl = new AbortController();
+  var up = O.TaskExecutor.execute(i.plan.steps[0], i.state, {
+    registry: slowRegistry, signal: userCtl.signal
+  });
+  setTimeout(function () { userCtl.abort('user'); }, 8);
+  var ur = await up;
+  ok('P3-X4-05 用户取消可区分', ur.ok === false && ur.kind === 'user_cancelled', ur.kind);
+  ok('P3-X4-06 用户取消写入 UserCancelled',
+    i.state.steps[0].error && i.state.steps[0].error.errorName === 'UserCancelled');
+
   ok('P3-X2-02 暂停的 runPlan 返回 PAUSED', !!pausedRun && pausedRun.paused === true && pausedRun.reason === 'PAUSED');
   console.log('\nRESULT ' + pass + '/' + (pass + fail));
   process.exit(fail ? 1 : 0);

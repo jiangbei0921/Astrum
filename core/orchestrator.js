@@ -152,8 +152,27 @@
 
   function nowIso() { return new Date().toISOString(); }
 
-  function abortedResult() {
-    return { ok: false, reason: 'cancelled', kind: 'cancelled', retriable: false, pendingAbort: true };
+  /* 取消原因必须可区分：超时、浏览器/网络 AbortError、用户取消、暂停请求。
+   * signal.reason 由调用方 abort(reason) 传入；旧调用方不传时退化为 aborted。 */
+  function abortReason(signal) {
+    var r = signal && signal.reason;
+    if (r === 'pause' || (r && r.code === 'PAUSE_REQUESTED')) return 'pause';
+    if (r === 'user' || r === 'cancel' || (r && r.code === 'USER_CANCELLED')) return 'user_cancelled';
+    return 'cancelled';
+  }
+
+  function cancelledResult(signal) {
+    var reason = abortReason(signal);
+    var pause = reason === 'pause';
+    return {
+      ok: false,
+      reason: reason,
+      kind: pause ? 'pause' : (reason === 'user_cancelled' ? 'user_cancelled' : 'cancelled'),
+      errorName: pause ? 'PauseRequested' : (reason === 'user_cancelled' ? 'UserCancelled' : 'AbortError'),
+      retriable: false,
+      pendingAbort: true,
+      pause: pause
+    };
   }
 
   function withTimeout(fn, ms, signal) {
@@ -178,13 +197,16 @@
         }
         finish(v);
       }
-      if (signal && signal.aborted) { finish(abortedResult()); return; }
+      if (signal && signal.aborted) { finish(cancelledResult(signal)); return; }
       if (signal && signal.addEventListener) {
-        onAbort = function () { abortNow(abortedResult()); };
+        onAbort = function () { abortNow(cancelledResult(signal)); };
         signal.addEventListener('abort', onAbort);
       }
       timer = setTimeout(function () {
-        abortNow({ ok: false, reason: 'timeout', kind: 'timeout', retriable: true });
+        abortNow({
+          ok: false, reason: 'timeout', kind: 'timeout',
+          errorName: 'TimeoutError', retriable: true
+        });
       }, Math.max(1, ms || 500));
       var call;
       try { call = fn(attemptSignal); } catch (e) { call = Promise.reject(e); }
@@ -206,8 +228,10 @@
         ok: false,
         reason: r.reason || r.message || 'tool_failed',
         kind: r.kind || r.errorKind || null,
+        errorName: r.errorName || null,
         retriable: r.retriable !== false,
-        pendingAbort: !!r.pendingAbort
+        pendingAbort: !!r.pendingAbort,
+        pause: !!r.pause
       };
     }
     return { ok: true, result: r };
@@ -229,7 +253,11 @@
     }
     var retriableKinds = ['timeout', 'network', 'rate_limit'];
     var retriable = raw.retriable !== false && retriableKinds.indexOf(kind) >= 0;
-    return { kind: kind, retriable: retriable, message: reason, pendingAbort: !!raw.pendingAbort };
+    return {
+      kind: kind, retriable: retriable, message: reason,
+      pendingAbort: !!raw.pendingAbort, errorName: raw.errorName || null,
+      pause: !!raw.pause, reason: raw.reason || reason
+    };
   }
 
   function retryPolicy(spec) {
@@ -271,6 +299,10 @@
   /* P2：kind='skill' 步骤走 SkillRuntime；既有工具步骤路径完全不变。 */
   async function executeSkillStep(planStep, state, opts, step, T) {
     var signal = opts.signal || null;
+    if (signal && signal.aborted && abortReason(signal) === 'pause') {
+      T.appendEvent(state, 'step.paused', { reason: 'pause' }, planStep.id);
+      return { ok: false, paused: true, pause: true, critical: !!planStep.critical, reason: 'pause', kind: 'pause' };
+    }
     if (signal && signal.aborted) {
       step.status = 'aborted';
       step.cancelled = true;
@@ -321,6 +353,13 @@
       return { ok: true, result: exec, evidenceRefs: [] };
     }
     if (exec.status === 'cancelled') {
+      if (signal && abortReason(signal) === 'pause') {
+        step.status = 'pending';
+        step.error = null;
+        step.cancelled = false;
+        T.appendEvent(state, 'step.paused', { reason: 'pause' }, planStep.id);
+        return { ok: false, paused: true, pause: true, critical: !!planStep.critical, reason: 'pause', kind: 'pause' };
+      }
       step.status = 'aborted';
       step.cancelled = true;
       step.error = { kind: 'cancelled', message: '任务已取消', retriable: false };
@@ -346,13 +385,21 @@
     var spec = opts.registry ? opts.registry.get(planStep.tool) : null;
     var signal = opts.signal || null;
 
+    if (signal && signal.aborted && abortReason(signal) === 'pause') {
+      T.appendEvent(state, 'step.paused', { reason: 'pause' }, planStep.id);
+      return { ok: false, paused: true, critical: !!planStep.critical, reason: 'pause', kind: 'pause' };
+    }
     if (signal && signal.aborted) {
+      var earlyTool = cancelledResult(signal);
       step.status = 'aborted';
       step.cancelled = true;
       step.endedAt = nowIso();
-      step.error = { kind: 'cancelled', message: '任务已取消', retriable: false };
-      T.appendEvent(state, 'step.cancelled', { reason: 'cancelled' }, planStep.id);
-      return { ok: false, aborted: true, critical: !!planStep.critical, reason: 'cancelled' };
+      step.error = {
+        kind: earlyTool.kind, message: '任务已取消', retriable: false,
+        errorName: earlyTool.errorName, reason: earlyTool.reason, pendingAbort: true
+      };
+      T.appendEvent(state, 'step.cancelled', { reason: earlyTool.reason }, planStep.id);
+      return { ok: false, aborted: true, critical: !!planStep.critical, reason: earlyTool.reason, kind: earlyTool.kind };
     }
 
     step.status = 'running';
@@ -416,8 +463,8 @@
       attempts += 1;
       step.attempt += 1;
       if (signal && signal.aborted) {
-        last = abortedResult();
-        lastKind = 'cancelled';
+        last = cancelledResult(signal);
+        lastKind = last.kind;
         break;
       }
       if (!T.canAfford(state.budget, cost)) break;
@@ -476,19 +523,44 @@
       return { ok: true, result: last.result, evidenceRefs: step.evidenceRefs };
     }
 
-    if (lastKind === 'cancelled' || (last && last.pendingAbort)) {
+    /* B2：暂停不是失败。在飞步骤回到 pending，恢复时重新调度。 */
+    if (last && last.pause) {
+      step.status = 'pending';
+      step.startedAt = null;
+      step.endedAt = null;
+      step.error = null;
+      step.cancelled = false;
+      T.appendEvent(state, 'step.paused', { reason: 'pause' }, planStep.id);
+      return { ok: false, paused: true, pause: true, critical: !!planStep.critical, reason: 'pause', kind: 'pause' };
+    }
+    if (lastKind === 'cancelled' || lastKind === 'user_cancelled' ||
+      (last && last.pendingAbort)) {
+      var why = (last && last.reason) || 'cancelled';
+      var isPause = !!(last && last.pause);
       step.status = 'aborted';
       step.cancelled = true;
-      step.error = { kind: 'cancelled', message: '任务已取消（在飞请求待完成）', retriable: false, pendingAbort: true };
-      T.appendEvent(state, 'step.cancelled', { reason: 'cancelled' }, planStep.id);
-      return { ok: false, aborted: true, critical: !!planStep.critical, reason: 'cancelled' };
+      step.error = {
+        kind: (last && last.kind) || 'cancelled',
+        message: isPause ? '任务已暂停（在飞请求已中止）' : '任务已取消（在飞请求已中止）',
+        retriable: false,
+        pendingAbort: true,
+        errorName: (last && last.errorName) || 'AbortError',
+        reason: why
+      };
+      T.appendEvent(state, 'step.cancelled', { reason: why }, planStep.id);
+      return {
+        ok: false, aborted: true, critical: !!planStep.critical,
+        reason: why, kind: step.error.kind, pause: isPause
+      };
     }
 
     step.status = 'failed';
     step.error = {
       kind: lastKind,
       message: last ? last.message || last.reason : 'unknown',
-      retriable: !!(last && last.retriable)
+      retriable: !!(last && last.retriable),
+      errorName: (last && last.errorName) || null,
+      reason: (last && last.reason) || null
     };
     T.appendEvent(state, 'step.failed', { reason: step.error.kind }, planStep.id);
     return { ok: false, critical: !!planStep.critical, reason: step.error.message, kind: step.error.kind };
@@ -550,20 +622,19 @@
       abortPending(plan, state, T, '任务已取消');
       return {
         ok: false, aborted: true, criticalFailed: false, budgetStop: false,
-        answer: null, state: state, completed: allSettled(plan, state)
+        answer: null, state: state, completed: allSettled(plan, state), reason: 'CANCELLED'
       };
     }
 
     while (guard++ < 200) {
-      if (signal && signal.aborted) return cancelledRun();
-
-      /* P3：暂停只阻止新批次启动，不声称中断已在飞的请求（Q-2=A）。 */
+      /* B2：先判暂停，pause() 会先写 pausedAt 再 abort，避免被误判为取消。 */
       if (state.pausedAt) {
         return {
           ok: false, paused: true, aborted: false, criticalFailed: false, budgetStop: false,
           answer: answer, state: state, completed: false, reason: 'PAUSED'
         };
       }
+      if (signal && signal.aborted) return cancelledRun();
       var waitingStep = waitingApprovalStep(plan, state);
       if (waitingStep) {
         return {
@@ -603,6 +674,16 @@
 
       if (signal && signal.aborted) return cancelledRun();
       var results = await runBatch(batch, state, opts);
+      /* B2：暂停请求命中在飞步骤时，先落盘检查点，再以 PAUSED 返回。 */
+      if (results.some(function (r) { return r && r.paused; })) {
+        if (typeof opts.onBatchSettled === 'function') {
+          try { await opts.onBatchSettled(state, results, batch); } catch (e) { /* ignore */ }
+        }
+        return {
+          ok: false, paused: true, aborted: false, criticalFailed: false, budgetStop: false,
+          answer: answer, state: state, completed: false, reason: 'PAUSED'
+        };
+      }
       if (results.some(function (r) { return r && r.aborted; })) return cancelledRun();
 
       for (var i = 0; i < results.length; i++) {

@@ -103,6 +103,17 @@
     return 'exception';
   }
 
+  function cancelResult(signal) {
+    var r = signal && signal.reason;
+    var pause = r === 'pause' || (r && r.code === 'PAUSE_REQUESTED');
+    return {
+      ok: false, reason: pause ? 'pause' : 'cancelled',
+      kind: pause ? 'pause' : 'cancelled',
+      errorName: pause ? 'PauseRequested' : 'AbortError',
+      retriable: false, pause: pause
+    };
+  }
+
   function withTimeout(fn, ms, signal) {
     return new Promise(function (resolve) {
       var done = false;
@@ -124,13 +135,11 @@
         finish(v);
       }
       if (signal && signal.aborted) {
-        finish({ ok: false, reason: 'cancelled', kind: 'cancelled', retriable: false });
+        finish(cancelResult(signal));
         return;
       }
       if (signal && signal.addEventListener) {
-        onAbort = function () {
-          abortNow({ ok: false, reason: 'cancelled', kind: 'cancelled', retriable: false });
-        };
+        onAbort = function () { abortNow(cancelResult(signal)); };
         signal.addEventListener('abort', onAbort);
       }
       timer = setTimeout(function () {
@@ -314,6 +323,12 @@
         continue;
       }
 
+      /* 暂停不是失败：Skill 以 cancelled 收尾，由编排层把步骤放回 pending。 */
+      if (out && out.pause) {
+        failed = true;
+        finish(exec, 'cancelled', 'external', 'pause');
+        break;
+      }
       var reason = (out && (out.reason || out.kind)) || 'tool_failed';
       var status = reason === 'timeout' ? 'timeout' : 'failed';
       if (step.onError === 'skip') {

@@ -32,7 +32,7 @@
   var EVENT_TYPES = [
     'phase.changed', 'step.started', 'step.ok', 'step.failed',
     'step.skipped', 'progress.decided', 'verdict.issued', 'task.aborted',
-    'step.retry', 'step.cancelled', 'task.cancelled', 'task.replanned', 'task.recovered',
+    'step.retry', 'step.cancelled', 'step.paused', 'task.cancelled', 'task.replanned', 'task.recovered',
     'plan.expanded', 'task.paused', 'task.waiting_approval'
   ];
 

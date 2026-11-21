@@ -341,6 +341,43 @@
     '天体统一放大系数已调整为 ×{0}（直径比例不变）。':
       'Body scale set to ×{0} (diameter ratios unchanged).',
     '指令执行失败：{0}': 'Command failed: {0}',
-    '（距 {0} km）': '({0} km away)'
+    '（距 {0} km）': '({0} km away)',
+
+    /* ---------- V2-B0：英文界面残留（skill/project/图层/数据核验） ---------- */
+    '人工审批': 'Manual review',
+    '扫描提议': 'Scan proposals',
+    '刷新': 'Refresh',
+    '待处理提议': 'Pending proposals',
+    '技能库': 'Skill library',
+    '隔离记忆': 'Isolated memory',
+    '导出': 'Export',
+    '导入': 'Import',
+    '还没有研究课题': 'No research topics yet',
+    '先选择一个课题': 'Select a topic first',
+    '配置': 'Config',
+    '（无配置）': '(No config)',
+    '已存 {0} 套': '{0} saved',
+    '星图图层': 'Sky layers',
+    '银河': 'Milky Way',
+    '关闭后不画恒星与 L1 亮星表': 'Hide stars and the L1 bright-star table',
+    '关闭后用程序化银河带降级绘制': 'Falls back to a procedural Milky Way band when off',
+    '星座连线': 'Constellation lines',
+    '深空天体': 'Deep-sky objects',
+    '行星与太阳系': 'Planets & solar system',
+    '地平线与方位': 'Horizon & bearings',
+    '行星名、星座名与高亮目标': 'Planet names, constellation names, and highlighted targets',
+    '图层开关只影响显示，不改变任何数值与命中结果。':
+      'Layer toggles affect display only; no values or results change.',
+    'Bright Star Catalogue 5th Rev. Ed.（NASA HEASARC 修订版）':
+      'Bright Star Catalogue 5th Rev. Ed. (NASA HEASARC revision)',
+    '恒星位置与 B-V／光谱型 · 美国政府作品（公有领域）':
+      'Stellar positions and B-V / spectral type · U.S. Government work (public domain)',
+    '银河背景纹理 · 公有领域（NASA/Goddard SVS，Ernie Wright）':
+      'Milky Way background texture · Public domain (NASA/Goddard SVS, Ernie Wright)',
+    '行星与月球等距贴图 · CC BY 4.0（solarsystemscope.com/textures）':
+      'Equirectangular planet and Moon textures · CC BY 4.0 (solarsystemscope.com/textures)',
+    '恒星颜色由 B-V 色指数或光谱型近似换算，用于区分冷暖色调，并非肉眼实景颜色；银河为深空摄影合成，亮度经过压缩以适配屏幕。':
+      'Star colors are approximated from the B-V index or spectral type to distinguish warm and cool tones; they are not true naked-eye colors. The Milky Way is a composite of deep-sky photography, with brightness compressed for on-screen display.',
+    '导出观测计划（CSV）': 'Export observing plan (CSV)'
   };
 })(typeof window !== 'undefined' ? window : this);

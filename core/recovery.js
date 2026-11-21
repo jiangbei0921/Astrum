@@ -253,7 +253,27 @@
   }
 
   /* ---------------- 策略推导 ---------------- */
-  function decide(state, step, registry, now) {
+  /* 未知幂等性复用前的凭证校验：不改变 decide 默认策略，
+   * 只在 apply/plan 层拦截「结果被篡改或工具版本已变化」的复用。 */
+  function validateFidelity(step, spec) {
+    var T = root.AstroTask;
+    if (!step || !step.outputHash || step.result == null || step.result.ok === false) {
+      return { ok: false, reason: 'unknown_idempotency_unverified' };
+    }
+    var recomputed = null;
+    try { recomputed = T.sha256Hex(T.canonicalJSON(step.result)); } catch (e) { recomputed = null; }
+    if (!recomputed || recomputed !== step.outputHash) {
+      return { ok: false, reason: 'unknown_idempotency_hash_mismatch' };
+    }
+    var prov = step.provenance || {};
+    if (spec && spec.version && prov.version && prov.version !== spec.version) {
+      return { ok: false, reason: 'unknown_idempotency_version_changed' };
+    }
+    return { ok: true };
+  }
+
+  function decide(state, step, registry, now, opts) {
+    opts = opts || {};
     var T = root.AstroTask;
     var ps = planStepById(state, step.id);
     var status = step.status;
@@ -276,11 +296,13 @@
         if (spec.idempotent === true) return { strategy: 'reuse', reason: 'idempotent' };
         if (spec.idempotent === false) return { strategy: 'rerun', reason: 'non_idempotent' };
       }
-      /* 无幂等声明：不重跑已成功且输入未变的步骤，避免未知副作用。 */
-      if (step.outputHash && step.result != null) {
-        return { strategy: 'reuse', reason: 'unknown_idempotent_conservative_reuse' };
+      /* 无幂等声明：必须先校验执行凭证，再决定复用。
+       * 校验放在 decide() 内，确保外部直接调用也不会盲目复用。 */
+      var fidelity = validateFidelity(step, spec);
+      if (fidelity.ok) {
+        return { strategy: 'reuse', reason: 'unknown_idempotent_verified' };
       }
-      return { strategy: 'block', reason: 'unknown_idempotency' };
+      return { strategy: 'block', reason: fidelity.reason };
     }
 
     if (status === 'failed') {
@@ -353,6 +375,10 @@
     plan: plan,
     apply: apply,
     decide: decide,
+    /* 供 Resume 显式 opt-in：默认未知幂等性阻塞。 */
+    canReuseUnknown: function (input) {
+      return !!(input && input.reuseUnknown === true);
+    },
     version: '1.0.0'
   };
 })(typeof window !== 'undefined' ? window : global);

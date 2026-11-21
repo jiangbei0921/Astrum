@@ -53,6 +53,9 @@
     return n;
   }
 
+  /* 动态重建的节点不会经过 applyDom，必须在创建时取译。 */
+  function L(s) { return root.I18N && root.I18N.t ? root.I18N.t(s) : s; }
+
   function note(text) {
     if (refs.note) refs.note.textContent = text || '';
   }
@@ -79,7 +82,7 @@
     try { list = await s.listProjects(principal, { includeDeleted: false, limit: 50 }); }
     catch (e) { refs.list.appendChild(el('div', 'hint', '加载失败')); return; }
     if (!list.length) {
-      refs.list.appendChild(el('div', 'hint', '还没有研究课题'));
+      refs.list.appendChild(el('div', 'hint', L('还没有研究课题')));
       return;
     }
     list.forEach(function (p) {
@@ -149,7 +152,7 @@
     if (!hasDom() || !refs.mem) return;
     refs.mem.textContent = '';
     var pid = current();
-    if (!pid) { refs.mem.appendChild(el('div', 'hint', '先选择一个课题')); return; }
+    if (!pid) { refs.mem.appendChild(el('div', 'hint', L('先选择一个课题'))); return; }
     var s = store();
     var principal = userPrincipal(pid);
     if (!s || !principal) return;

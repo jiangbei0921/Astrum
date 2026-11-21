@@ -38,7 +38,8 @@ function stateWith(steps) {
     var step = T.makeStep({ id: s.id, tool: s.tool, deps: [], args: s.args || {} });
     step.status = s.status || 'ok';
     step.attempt = s.attempt == null ? 1 : s.attempt;
-    step.outputHash = s.noOutput ? null : ('h_' + s.id);
+    step.outputHash = s.noOutput ? null
+      : (s.verified ? T.sha256Hex(T.canonicalJSON({ ok: true })) : ('h_' + s.id));
     step.result = s.noResult ? null : { ok: true };
     step.endedAt = s.endedAt || null;
     if (s.endedAt) step.provenance = { tool: s.tool, at: s.endedAt };
@@ -84,11 +85,13 @@ ok('P4I-06 输入变化即使幂等也重跑', strategyOf(pc, 'e') === 'rerun', 
 /* 3 缺失声明 */
 var unknown = stateWith([
   { id: 'u1', tool: 'custom.unknown' },
-  { id: 'u2', tool: 'custom.unknown', noOutput: true }
+  { id: 'u2', tool: 'custom.unknown', noOutput: true },
+  { id: 'u3', tool: 'custom.unknown', verified: true }
 ]);
 var pu = R.plan({ state: unknown, registry: registry, now: NOW });
-ok('P4I-07 未知工具但有结果保守复用', strategyOf(pu, 'u1') === 'reuse', strategyOf(pu, 'u1'));
+ok('P4I-07 未知工具但凭证哈希无效时阻断', strategyOf(pu, 'u1') === 'block', strategyOf(pu, 'u1'));
 ok('P4I-08 未知工具且无结果阻断', strategyOf(pu, 'u2') === 'block', strategyOf(pu, 'u2'));
+ok('P4I-08b 未知工具凭证完整时可复用', strategyOf(pu, 'u3') === 'reuse', strategyOf(pu, 'u3'));
 
 /* 4 未完成与失败 */
 var mixed = stateWith([

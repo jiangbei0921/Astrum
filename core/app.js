@@ -916,6 +916,9 @@
 
   /* ================= 观测台 ================= */
   function refreshPanels() {
+    /* 语言在运行中切换时（测试扫描或不重载的调用方），
+     * 配置下拉与「已存 N 套」需要按当前语言重算，不能停留在启动时的中文。 */
+    renderWorkspaces();
     state.ctx = readCtx();
     var key = [state.ctx.y, state.ctx.mo, state.ctx.d, state.ctx.h, state.ctx.mi, state.ctx.city].join('|');
     if (key !== state.cacheKey) { state.cacheKey = key; state.preview = AC.preview(state.ctx); }
