@@ -10,10 +10,192 @@
   'use strict';
 
   root.ASTRUM_DAILY = {
-    "updated": "2026-11-20",
-    "generatedAt": "2026-11-21T08:03:48.384Z",
+    "updated": "2026-11-21",
+    "generatedAt": "2026-11-21T11:58:15.110Z",
     "note": "每日 UTC 01:00 增量同步；内容未经本项目核验，不参与答案推理。",
     "papers": [
+      {
+        "id": "2611.26008",
+        "title": "Fast X-Ray Transients from Dense Circumstellar Material Shock Breakout and Cooling Emission",
+        "authors": [
+          "Jin-Ping Zhu",
+          "Yi-Han Iris Yin",
+          "Yun-Wei Yu"
+        ],
+        "summary": "In this Letter, we explore the soft X-ray shock breakout (SBO) and cooling emission of supernovae interacting with pre-explosion dense circumstellar material (CSM) shells as a subclass of extragalactic fast X-ray transie…",
+        "cat": "astro-ph.HE",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T12:28:10Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T12:28:10Z",
+        "doi": "10.3847/2041-8213/aebbb8",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26008",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-21",
+        "fetchedAt": "2026-11-21T08:05:04.427Z"
+      },
+      {
+        "id": "2611.26088",
+        "title": "Periodicities of small regular jet deviations in SS433 and their origin",
+        "authors": [
+          "A. V. Dodin",
+          "K. A. Postnov",
+          "A. M. Cherepashchuk"
+        ],
+        "summary": "Based on the results of spectroscopic observations of SS433 conducted with the 2.5-m telescope at the Caucasian Mountain Observatory between 2020 and 2026, we study the deviations of the moving hydrogen and helium emissi…",
+        "cat": "astro-ph.HE",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T13:25:41Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T13:25:41Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26088",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-21",
+        "fetchedAt": "2026-11-21T08:05:04.427Z"
+      },
+      {
+        "id": "2611.26202",
+        "title": "Connecting Coronal Loop Scaling Laws and Kink Wave Heating: An Analytical and Numerical Study",
+        "authors": [
+          "Luka Banović",
+          "Tom Van Doorsselaere",
+          "Max McMurdo"
+        ],
+        "summary": "Turbulent dissipation of kink waves has been proposed as one of the mechanisms responsible for the observed high coronal temperatures. We test this hypothesis by examining the effect of this heating mechanism on coronal…",
+        "cat": "astro-ph.SR",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T14:45:25Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T14:45:25Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26202",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-21",
+        "fetchedAt": "2026-11-21T08:05:04.427Z"
+      },
+      {
+        "id": "2611.26243",
+        "title": "The Silk Nebula Revisited: A Comment on Wu et al. (2026) and New Constraints from Archival Survey Spectroscopy",
+        "authors": [
+          "Zhuo-Xiao Wang"
+        ],
+        "summary": "Wu et al. (2026) used one LAMOST MRS-N plate to suggest that the Silk Nebula, a $17^\\circ$-long \\Oiii~$λ$5007 filament in Gemini, is possibly associated with a supernova remnant at a fiducial distance of $\\sim$160\\,pc. W…",
+        "cat": "astro-ph.GA",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T15:24:11Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T15:24:11Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26243",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-21",
+        "fetchedAt": "2026-11-21T08:05:04.427Z"
+      },
+      {
+        "id": "2611.26299",
+        "title": "Multiple blobs following a coronal mass ejection",
+        "authors": [
+          "Qing-Min Zhang",
+          "Jin-Han Guo",
+          "Jie Chen"
+        ],
+        "summary": "In this paper, we study a partial filament eruption, which generated a C4.1 class two-ribbon flare and a wide coronal mass ejection (CME) propagating in the northeast direction on 2023 March 20. The long, sigmoidal filam…",
+        "cat": "astro-ph.SR",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T15:51:17Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T15:51:17Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26299",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-21",
+        "fetchedAt": "2026-11-21T08:05:04.427Z"
+      },
+      {
+        "id": "2611.26306",
+        "title": "SN 2017gkk: A moderately luminous and fast evolving Type IIb supernova",
+        "authors": [
+          "Brajesh Kumar",
+          "D. K. Sahu",
+          "Avinash Singh"
+        ],
+        "summary": "We present optical imaging (\\textit{BVRI} bands) and low-resolution optical spectroscopic follow-up of Type IIb supernova SN~2017gkk that occurred in NGC~2748. These observations consist of 31 and 17 epochs of photometry…",
+        "cat": "astro-ph.HE",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T15:55:06Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T15:55:06Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26306",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-21",
+        "fetchedAt": "2026-11-21T08:05:04.427Z"
+      },
+      {
+        "id": "2611.26455",
+        "title": "Tracing Magnetic Helicity in Interplanetary Space. A Multi-Spacecraft Analysis of the 2024 March 23 ICME",
+        "authors": [
+          "Anthony Moulin",
+          "Julia K. Thalmann",
+          "Astrid M. Veronig"
+        ],
+        "summary": "We study the evolution of the magnetic helicity content of an ICME event by inferring its magnetic-field-related quantities at different stages between the Sun and Earth using remote sensing and in-situ observations. We…",
+        "cat": "astro-ph.SR",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T17:21:10Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T17:21:10Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26455",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-21",
+        "fetchedAt": "2026-11-21T08:05:04.427Z"
+      },
+      {
+        "id": "2611.26547",
+        "title": "Nonlinearly Causal General-Relativistic Superfluid Hydrodynamics: Simulating Vortex Dynamics in Neutron-Star Interiors",
+        "authors": [
+          "Yuan Feng",
+          "Elias R. Most",
+          "Lorenzo Gavassino"
+        ],
+        "summary": "Neutron stars provide a natural laboratory for superfluid matter under extreme conditions. Its nonlinear dynamics is central to pulsar glitches, their possible links to fast radio bursts, and tidal interactions in inspir…",
+        "cat": "astro-ph.HE",
+        "published": "2026-11-19",
+        "publishedAt": "2026-11-19T18:20:33Z",
+        "updated": "2026-11-19",
+        "updatedAt": "2026-11-19T18:20:33Z",
+        "doi": "",
+        "source": "arXiv",
+        "url": "https://arxiv.org/abs/2611.26547",
+        "sources": [
+          "arXiv"
+        ],
+        "firstSeen": "2026-11-21",
+        "fetchedAt": "2026-11-21T08:05:04.427Z"
+      },
       {
         "id": "2611.25602",
         "title": "Dependence of Dust Growth on Magnetic field Strength in Protoplanetary Disks",
@@ -35,7 +217,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.25803",
@@ -58,7 +240,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.26025",
@@ -79,7 +261,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.26372",
@@ -100,7 +282,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.26416",
@@ -123,7 +305,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.26421",
@@ -145,7 +327,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.26424",
@@ -168,7 +350,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.26461",
@@ -191,7 +373,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.26468",
@@ -214,7 +396,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.26483",
@@ -237,7 +419,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.26488",
@@ -260,7 +442,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.26494",
@@ -283,7 +465,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.26495",
@@ -305,7 +487,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.26548",
@@ -328,7 +510,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.26550",
@@ -351,7 +533,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.26576",
@@ -374,7 +556,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.26593",
@@ -397,7 +579,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.26594",
@@ -419,7 +601,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.26618",
@@ -442,7 +624,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.26620",
@@ -465,7 +647,7 @@
           "arXiv"
         ],
         "firstSeen": "2026-11-20",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "id": "2611.24581",
@@ -5562,6 +5744,54 @@
     ],
     "news": [
       {
+        "title": "NASA’s Voyager 1 is now so far away that light takes 24 hours to reach it",
+        "summary": "NASA’s Voyager 1 has reached an extraordinary milestone, traveling 16.1 billion miles from Earth to become the first spacecraft so distant that its signals take…",
+        "source": "ScienceDaily",
+        "date": "2026-11-21",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261120075554.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-21",
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
+      },
+      {
+        "title": "After 8 years in space, a groundbreaking X-ray telescope finally opens its eyes",
+        "summary": "After eight years and 10 billion kilometers in space, a groundbreaking X-ray telescope heading to Mercury has captured its first cosmic observations and is perf…",
+        "source": "ScienceDaily",
+        "date": "2026-11-21",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261120075547.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-21",
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
+      },
+      {
+        "title": "Two massive stars may be secretly feeding the Milky Way’s supermassive black hole",
+        "summary": "Astronomers have traced mysterious gas clouds near the Milky Way's central supermassive black hole to a massive pair of stars whose colliding winds appear to cr…",
+        "source": "ScienceDaily",
+        "date": "2026-11-20",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261119194605.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-21",
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
+      },
+      {
+        "title": "Scientists turn Moon dust into LEGO-like bricks for future lunar bases",
+        "summary": "Scientists have found a way to 3D-print Moon dust into LEGO-like bricks, raising the possibility of building lunar bases using materials already on the Moon. Th…",
+        "source": "ScienceDaily",
+        "date": "2026-11-20",
+        "url": "https://www.sciencedaily.com/releases/2026/11/261119194525.htm",
+        "sources": [
+          "ScienceDaily"
+        ],
+        "firstSeen": "2026-11-21",
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
+      },
+      {
         "title": "NASA pushes Mars helicopter blades beyond the speed of sound",
         "summary": "NASA has successfully tested Mars helicopter rotor blades at supersonic speeds, boosting potential lift by 30% and overcoming a major obstacle to more powerful…",
         "source": "ScienceDaily",
@@ -5571,7 +5801,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-19",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "title": "A mysterious twist in the universe’s oldest light could reveal new physics",
@@ -5583,7 +5813,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "title": "ESA’s Hera spacecraft is flying rectangles around NASA’s asteroid crash site",
@@ -5607,7 +5837,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-17",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "title": "NASA is offering $1 million for bold ideas to help build a Moon base",
@@ -5631,7 +5861,7 @@
           "ScienceDaily"
         ],
         "firstSeen": "2026-11-16",
-        "fetchedAt": "2026-11-20T12:24:40.089Z"
+        "fetchedAt": "2026-11-21T11:58:15.110Z"
       },
       {
         "title": "Uranus and Neptune’s bizarre magnetic fields may finally be explained",
@@ -6085,18 +6315,6 @@
         ],
         "firstSeen": "2026-10-29",
         "fetchedAt": "2026-11-04T01:56:28.827Z"
-      },
-      {
-        "title": "Stars brewing in a nebulous cauldron",
-        "summary": "Image: Stars brewing in a nebulous cauldron",
-        "source": "ESA",
-        "date": "2026-10-22",
-        "url": "https://www.esa.int/ESA_Multimedia/Images/2026/10/Stars_brewing_in_a_nebulous_cauldron",
-        "sources": [
-          "ESA"
-        ],
-        "firstSeen": "2026-10-22",
-        "fetchedAt": "2026-11-04T01:56:28.827Z"
       }
     ],
     "community": [
@@ -6150,13 +6368,13 @@
       }
     ],
     "sync": {
-      "lastAttemptAt": "2026-11-21T08:03:48.384Z",
-      "lastSuccessAt": "2026-11-20T12:24:40.089Z",
+      "lastAttemptAt": "2026-11-21T11:58:15.110Z",
+      "lastSuccessAt": "2026-11-21T11:58:15.110Z",
       "newPapers": 0,
-      "updatedPapers": 0,
+      "updatedPapers": 20,
       "newNews": 0,
-      "totalPapers": 244,
-      "totalNews": 46,
+      "totalPapers": 252,
+      "totalNews": 49,
       "sources": {
         "papers": [
           "astro-ph.GA(8)",
@@ -6175,9 +6393,9 @@
           "msg": "HTTP 404 https://www.esa.int/rssfeed/Our_Activities/Space_Science"
         }
       ],
-      "ok": null,
-      "partial": null,
-      "status": "running"
+      "ok": true,
+      "partial": true,
+      "status": "partial"
     }
   };
 })(typeof window !== 'undefined' ? window : this);
