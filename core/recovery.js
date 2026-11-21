@@ -253,11 +253,57 @@
   }
 
   /* ---------------- 策略推导 ---------------- */
-  /* 未知幂等性复用前的凭证校验：不改变 decide 默认策略，
-   * 只在 apply/plan 层拦截「结果被篡改或工具版本已变化」的复用。 */
-  function validateFidelity(step, spec) {
+  function decisionOptions(state, opts) {
+    opts = opts || {};
+    return {
+      profileId: opts.profileId || null,
+      contextHash: opts.contextHash || null,
+      authorized: opts.authorized || null,
+      persisted: opts.persisted,
+      skillVersionId: opts.skillVersionId || null
+    };
+  }
+
+  /* 复用前的上下文校验：参数、工具版本、Skill 版本、执行上下文、Profile、
+   * Principal 重新授权、结果持久化。缺省输入（旧任务）不误报。 */
+  function validateReuseContext(step, spec, opts) {
+    opts = opts || {};
+    if (!step || step.result == null || step.result.ok === false) {
+      return { ok: false, reason: 'result_incomplete' };
+    }
+    var prov = step.provenance || {};
+    if (spec && spec.version && prov.version && prov.version !== spec.version) {
+      return { ok: false, reason: 'tool_version_changed' };
+    }
+    if (opts.skillVersionId && step.skillVersionId &&
+      opts.skillVersionId !== step.skillVersionId) {
+      return { ok: false, reason: 'skill_version_changed' };
+    }
+    if (opts.profileId && prov.profileId && opts.profileId !== prov.profileId) {
+      return { ok: false, reason: 'profile_changed' };
+    }
+    if (opts.contextHash && prov.contextHash && opts.contextHash !== prov.contextHash) {
+      return { ok: false, reason: 'context_changed' };
+    }
+    if (opts.authorized && opts.authorized.allowed === false) {
+      return { ok: false, reason: 'authorization_revoked' };
+    }
+    if (opts.persisted === false) {
+      return { ok: false, reason: 'result_not_persisted' };
+    }
+    return { ok: true };
+  }
+
+  /* 未知幂等性的凭证校验：结果哈希、工具/Skill 版本、上下文、Profile、授权、持久化。
+   * 只有 64 位 SHA-256 记录才复算哈希，避免把历史短哈希记录误判为篡改。 */
+  function validateFidelity(step, spec, opts) {
     var T = root.AstroTask;
-    if (!step || !step.outputHash || step.result == null || step.result.ok === false) {
+    opts = opts || {};
+    var ctx = validateReuseContext(step, spec, opts);
+    if (!ctx.ok) {
+      return { ok: false, reason: 'unknown_idempotency_' + ctx.reason };
+    }
+    if (typeof step.outputHash !== 'string' || !step.outputHash) {
       return { ok: false, reason: 'unknown_idempotency_unverified' };
     }
     var recomputed = null;
@@ -265,11 +311,30 @@
     if (!recomputed || recomputed !== step.outputHash) {
       return { ok: false, reason: 'unknown_idempotency_hash_mismatch' };
     }
-    var prov = step.provenance || {};
-    if (spec && spec.version && prov.version && prov.version !== spec.version) {
-      return { ok: false, reason: 'unknown_idempotency_version_changed' };
-    }
     return { ok: true };
+  }
+
+  /* ASTRUM-004：非幂等且可能有外部副作用时，不自动重跑，进入人工确认。 */
+  function confirmDecision(reason) {
+    return { strategy: 'confirm', reason: reason, requiresConfirmation: true };
+  }
+
+  /* 外部调用回执：工具可在结果中返回 receipt / externalState，
+   * 执行器写入 step.provenance；恢复时据此判断远端操作是否真的完成。 */
+  function externalEvidence(step) {
+    var prov = (step && step.provenance) || {};
+    var result = (step && step.result) || {};
+    var state = prov.externalState != null ? prov.externalState
+      : (result.externalState != null ? result.externalState : result.remoteState);
+    var receipt = prov.receipt != null ? prov.receipt
+      : (result.receipt != null ? result.receipt : null);
+    var normalized = typeof state === 'string' ? state.toLowerCase() : '';
+    return {
+      state: state == null ? null : state,
+      receipt: receipt,
+      confirmed: normalized === 'succeeded' || normalized === 'confirmed' || normalized === 'ok',
+      failed: normalized === 'failed' || normalized === 'cancelled' || normalized === 'rejected'
+    };
   }
 
   function decide(state, step, registry, now, opts) {
@@ -277,6 +342,7 @@
     var T = root.AstroTask;
     var ps = planStepById(state, step.id);
     var status = step.status;
+    var cOpts = decisionOptions(state, opts);
 
     if (status === 'ok') {
       var want = ps ? T.computeInputHash(ps.args || {}) : null;
@@ -288,21 +354,54 @@
         if (num(spec.ttlMs) && spec.ttlMs > 0) {
           var at = (step.provenance && step.provenance.at) || step.endedAt;
           var stamp = at ? Date.parse(at) : NaN;
-          if (isFinite(stamp) && (now - stamp) <= spec.ttlMs) {
-            return { strategy: 'reuse', reason: 'ttl_fresh' };
+          if (!(isFinite(stamp) && (now - stamp) <= spec.ttlMs)) {
+            return { strategy: 'rerun', reason: 'ttl_expired' };
           }
-          return { strategy: 'rerun', reason: 'ttl_expired' };
         }
-        if (spec.idempotent === true) return { strategy: 'reuse', reason: 'idempotent' };
-        if (spec.idempotent === false) return { strategy: 'rerun', reason: 'non_idempotent' };
+        if (spec.idempotent === true) {
+          var idemCtx = validateReuseContext(step, spec, cOpts);
+          if (idemCtx.ok) {
+            if (spec.sideEffect === true && externalEvidence(step).failed) {
+              return confirmDecision('external_failed_unverified');
+            }
+            return { strategy: 'reuse', reason: num(spec.ttlMs) && spec.ttlMs > 0 ? 'ttl_fresh' : 'idempotent' };
+          }
+          /* 明确幂等但上下文已变化：参数/版本/上下文变化可安全重跑；
+           * 授权撤销或未持久化必须进入人工确认，不能悄悄复用。 */
+          if (idemCtx.reason === 'authorization_revoked' || idemCtx.reason === 'result_not_persisted') {
+            return confirmDecision(idemCtx.reason);
+          }
+          return { strategy: 'rerun', reason: idemCtx.reason };
+        }
+        if (spec.idempotent === false) {
+          /* sideEffect=false 的只读/可重算工具允许重跑；有副作用或未声明时必须确认。 */
+          if (spec.sideEffect === false) return { strategy: 'rerun', reason: 'non_idempotent' };
+          var ext = externalEvidence(step);
+          /* 远端已明确成功且本地上下文一致：复用结果，避免重复副作用。
+           * 远端明确失败：允许重跑。其余未知：人工确认。 */
+          if (ext.confirmed) {
+            var extCtx = validateReuseContext(step, spec, cOpts);
+            if (extCtx.ok) return { strategy: 'reuse', reason: 'external_confirmed' };
+            return confirmDecision('external_' + extCtx.reason);
+          }
+          if (ext.failed) return { strategy: 'rerun', reason: 'external_failed' };
+          return confirmDecision('non_idempotent_requires_confirmation');
+        }
       }
       /* 无幂等声明：必须先校验执行凭证，再决定复用。
        * 校验放在 decide() 内，确保外部直接调用也不会盲目复用。 */
-      var fidelity = validateFidelity(step, spec);
+      var fidelity = validateFidelity(step, spec, cOpts);
       if (fidelity.ok) {
+        if (spec && spec.sideEffect === true) {
+          var unknownExt = externalEvidence(step);
+          if (unknownExt.failed) return confirmDecision('external_failed_unverified');
+          if (!unknownExt.confirmed && unknownExt.receipt == null) {
+            return confirmDecision('external_receipt_unverified');
+          }
+        }
         return { strategy: 'reuse', reason: 'unknown_idempotent_verified' };
       }
-      return { strategy: 'block', reason: fidelity.reason };
+      return confirmDecision(fidelity.reason);
     }
 
     if (status === 'failed') {
@@ -315,8 +414,22 @@
       return { strategy: 'block', reason: 'not_retriable' };
     }
 
+    /* 已进入恢复人工确认的步骤必须保持确认态，不能因重复恢复被翻回重跑。 */
+    if (status === 'waiting_approval' && step.error &&
+      step.error.kind === 'recovery_confirmation_required') {
+      return confirmDecision(step.error.message || 'recovery_confirmation_required');
+    }
+
     if (status === 'running' || status === 'paused' || status === 'waiting_approval' ||
       status === 'pending' || status === 'ready') {
+      /* 外部副作用步骤已开始但本地无结果：可能已发生，必须人工核验。
+       * 明确幂等且无副作用声明的工具可安全重跑。 */
+      var spec3 = specOf(registry, step, ps);
+      var maybeSideEffect = spec3 && (spec3.sideEffect === true ||
+        (spec3.sideEffect !== false && spec3.idempotent !== true));
+      if (maybeSideEffect && step.attempt > 0) {
+        return confirmDecision('side_effect_state_unknown');
+      }
       return { strategy: 'rerun', reason: 'unfinished' };
     }
 
@@ -328,12 +441,13 @@
     var state = input.state;
     var registry = input.registry || null;
     var now = num(input.now) ? input.now : Date.now();
-    var out = { steps: [], reusable: [], rerun: [], blocked: [] };
+    var out = { steps: [], reusable: [], rerun: [], blocked: [], confirm: [] };
     stepsOf(state).forEach(function (s) {
-      var d = decide(state, s, registry, now);
+      var d = decide(state, s, registry, now, input);
       out.steps.push({ id: s.id, strategy: d.strategy, reason: d.reason });
       if (d.strategy === 'reuse') out.reusable.push(s.id);
       else if (d.strategy === 'rerun') out.rerun.push(s.id);
+      else if (d.strategy === 'confirm') out.confirm.push(s.id);
       else out.blocked.push(s.id);
     });
     return out;
@@ -355,14 +469,23 @@
     var state = input.state;
     var registry = input.registry || null;
     var now = num(input.now) ? input.now : Date.now();
-    var out = { state: state, applied: { reuse: [], rerun: [], blocked: [] } };
+    var out = { state: state, applied: { reuse: [], rerun: [], blocked: [], confirm: [] } };
     stepsOf(state).forEach(function (s) {
-      var d = decide(state, s, registry, now);
+      var d = decide(state, s, registry, now, input);
       if (d.strategy === 'reuse') {
         out.applied.reuse.push(s.id);
       } else if (d.strategy === 'rerun') {
         resetForRerun(s);
         out.applied.rerun.push(s.id);
+      } else if (d.strategy === 'confirm') {
+        /* 不重跑、不复用：进入等待人工确认状态，阻止任务被误判为完成。 */
+        s.status = 'waiting_approval';
+        s.error = {
+          kind: 'recovery_confirmation_required',
+          message: d.reason,
+          retriable: false
+        };
+        out.applied.confirm.push(s.id);
       } else {
         out.applied.blocked.push(s.id);
       }

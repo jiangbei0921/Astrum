@@ -82,7 +82,10 @@
       signal: opts.signal || null,
       taskId: opts.taskId || null,
       attempt: opts.attempt || 1,
-      principal: principal || null
+      principal: principal || null,
+      /* ASTRUM-004：外部写工具可用稳定幂等键 + 唯一执行 ID 关联远端回执。 */
+      executionId: opts.executionId || null,
+      idempotencyKey: opts.idempotencyKey || null
     };
 
     var out;

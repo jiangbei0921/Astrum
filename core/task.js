@@ -33,7 +33,9 @@
     'phase.changed', 'step.started', 'step.ok', 'step.failed',
     'step.skipped', 'progress.decided', 'verdict.issued', 'task.aborted',
     'step.retry', 'step.cancelled', 'step.paused', 'task.cancelled', 'task.replanned', 'task.recovered',
-    'plan.expanded', 'task.paused', 'task.waiting_approval'
+    'plan.expanded', 'task.paused', 'task.waiting_approval',
+    /* V2-B：暂停请求与暂停完成分离；持久化失败必须可追踪。 */
+    'task.pause_requested', 'task.persist_failed'
   ];
 
   /* P0-01 §7.1：payload 只存最小上下文 */
@@ -317,6 +319,8 @@
       provenance: input.provenance == null ? null : input.provenance,
       evidenceRefs: cloneArray(input.evidenceRefs),
       cancelled: !!input.cancelled,
+      /* V2-B：取消/超时的可验证记录；旧任务缺省为 null。 */
+      abort: input.abort == null ? null : input.abort,
       /* P3：可选语义字段；缺省值保持稳定，保证 create→toJSON→fromJSON 往返一致。 */
       title: input.title || '',
       desc: input.desc || '',
@@ -417,6 +421,8 @@
       eval: input.eval == null ? null : input.eval,
       budget: normalizeBudget(input.budget, input.level),
       pausedAt: input.pausedAt == null ? null : input.pausedAt,
+      /* V2-B：PAUSE_REQUESTED 与 PAUSED 分离；旧任务缺省为 null。 */
+      pauseRequestedAt: input.pauseRequestedAt == null ? null : input.pauseRequestedAt,
       recoveries: isFiniteNumber(input.recoveries) ? input.recoveries : 0,
       planHistory: cloneArray(input.planHistory),
       checkpoints: cloneArray(input.checkpoints),
@@ -463,6 +469,9 @@
     /* P3 可选字段：缺失合法；存在时必须类型正确。 */
     if (state.goal != null && !isPlainObject(state.goal)) fail('E_STATE_GOAL', '$.goal 必须是对象或 null', '$.goal');
     if (state.pausedAt != null && typeof state.pausedAt !== 'string') fail('E_STATE_TIME', '$.pausedAt 必须是字符串或 null', '$.pausedAt');
+    if (state.pauseRequestedAt != null && typeof state.pauseRequestedAt !== 'string') {
+      fail('E_STATE_TIME', '$.pauseRequestedAt 必须是字符串或 null', '$.pauseRequestedAt');
+    }
     if (!isFiniteNumber(state.recoveries) || state.recoveries < 0) {
       fail('E_STATE_RECOVERIES', '$.recoveries 必须是非负数字', '$.recoveries');
     }
@@ -499,6 +508,7 @@
       if (item.durationMs != null && !isFiniteNumber(item.durationMs)) fail('E_STEP_DURATION', path + '.durationMs 必须是数字或 null', path + '.durationMs');
       if (item.evidenceRefs != null && !isArray(item.evidenceRefs)) fail('E_STEP_REFS', path + '.evidenceRefs 必须是数组', path + '.evidenceRefs');
       if (item.provenance != null && !isPlainObject(item.provenance)) fail('E_STEP_PROVENANCE', path + '.provenance 必须是对象或 null', path + '.provenance');
+      if (item.abort != null && !isPlainObject(item.abort)) fail('E_STEP_ABORT', path + '.abort 必须是对象或 null', path + '.abort');
       /* P3 可选字段：只需在出现时类型正确。 */
       if (item.kind != null && item.kind !== '' && !includes(['tool', 'skill'], item.kind)) {
         fail('E_STEP_KIND', path + '.kind 必须是 tool/skill', path + '.kind');

@@ -50,6 +50,8 @@
       cost: { ms: 10, tokens: 0, searches: 0 },
       permissions: { canProduceNumbers: true },
       idempotent: true, ttlMs: null, retry: { allowed: true, max: 1 }, deps: ['astro', 'agents'],
+      /* 本地同步计算，不响应 AbortSignal；无外部副作用。 */
+      abortable: false, sideEffect: false,
       run: runKeplerEphemeris
     },
     {
@@ -67,6 +69,7 @@
       cost: { ms: 15, tokens: 0, searches: 0 },
       permissions: { canProduceNumbers: true },
       idempotent: true, ttlMs: null, retry: { allowed: true, max: 1 }, deps: ['astro', 'agents'],
+      abortable: false, sideEffect: false,
       run: runVisibility
     },
     {
@@ -79,6 +82,7 @@
       cost: { ms: 5, tokens: 0, searches: 0 },
       permissions: { canProduceNumbers: false },
       idempotent: true, ttlMs: null, retry: { allowed: false, max: 0 }, deps: ['knowledge', 'catalog', 'agents'],
+      abortable: false, sideEffect: false,
       run: runKbLookup
     },
     {
@@ -94,6 +98,8 @@
       cost: { ms: 2500, tokens: 0, searches: 1 },
       permissions: { canProduceNumbers: false },
       idempotent: false, ttlMs: 0, retry: { allowed: false, max: 0 }, deps: ['research', 'sources'],
+      /* 只读检索：可安全重跑；Sources.searchMany 当前不接收 signal。 */
+      abortable: false, sideEffect: false,
       run: runEvidenceSearch
     },
     {
@@ -103,6 +109,8 @@
       cost: { ms: 2000, tokens: 0, searches: 0 },
       permissions: { canProduceNumbers: false, canProduceIdentifiers: true },
       idempotent: true, ttlMs: 604800000, retry: { allowed: true, max: 1 }, deps: ['simbad'],
+      /* Simbad.lookup 显式接收 signal；只读查询，无外部副作用。 */
+      abortable: true, sideEffect: false,
       run: runSimbadTap
     },
     {
@@ -120,6 +128,8 @@
       cost: { ms: 3000, tokens: 0, searches: 1 },
       permissions: { canProduceNumbers: false },
       idempotent: false, ttlMs: 0, retry: { allowed: false, max: 0 }, deps: ['sources'],
+      /* 检索阶段不接收 signal；全文获取只在 internal 步骤内单独传递。 */
+      abortable: false, sideEffect: false,
       run: runPaperSearch
     },
     {
@@ -129,6 +139,8 @@
       cost: { ms: 3000, tokens: 1200, searches: 0 },
       permissions: { canProduceNumbers: false },
       idempotent: false, ttlMs: 0, retry: { allowed: false, max: 0 }, deps: ['sources'],
+      /* compose 适配器当前不接收 signal；重跑只消耗额度，无不可逆副作用。 */
+      abortable: false, sideEffect: false,
       run: runCompose
     },
     {
@@ -145,6 +157,7 @@
       cost: { ms: 5, tokens: 0, searches: 0 },
       permissions: { canProduceNumbers: true, localOnly: true },
       idempotent: true, ttlMs: null, retry: { allowed: false, max: 0 }, deps: ['attachments'],
+      abortable: false, sideEffect: false,
       run: runFitsParse
     },
     {
@@ -154,6 +167,7 @@
       cost: { ms: 5, tokens: 0, searches: 0 },
       permissions: { canProduceNumbers: false },
       idempotent: true, ttlMs: null, retry: { allowed: false, max: 0 }, deps: ['agents'],
+      abortable: false, sideEffect: false,
       run: runCurate
     },
     {
@@ -163,6 +177,7 @@
       cost: { ms: 0, tokens: 0, searches: 0 },
       permissions: { canProduceNumbers: false },
       idempotent: true, ttlMs: null, retry: { allowed: false, max: 0 }, deps: ['agents', 'astro', 'knowledge', 'catalog'],
+      abortable: false, sideEffect: false,
       run: runCompose
     },
     {
@@ -172,6 +187,7 @@
       cost: { ms: 0, tokens: 0, searches: 0 },
       permissions: { canProduceNumbers: false },
       idempotent: true, ttlMs: null, retry: { allowed: false, max: 0 }, deps: ['agents', 'astro', 'knowledge', 'catalog', 'gear', 'fit', 'obsplan', 'solarsystem'],
+      abortable: false, sideEffect: false,
       run: runCompose
     },
     {
@@ -181,6 +197,7 @@
       cost: { ms: 0, tokens: 0, searches: 0 },
       permissions: { canProduceNumbers: false },
       idempotent: true, ttlMs: null, retry: { allowed: false, max: 0 }, deps: ['agents', 'astro', 'catalog', 'solarsystem'],
+      abortable: false, sideEffect: false,
       run: runCompose
     }
   ];
@@ -530,6 +547,7 @@
           id: s.id, version: s.version, caps: s.caps.slice(),
           argsSchema: s.argsSchema, cost: s.cost, timeoutMs: s.timeoutMs,
           deps: s.deps.slice(), idempotent: s.idempotent, ttlMs: s.ttlMs,
+          abortable: s.abortable !== false, sideEffect: s.sideEffect !== false,
           retry: s.retry ? { allowed: !!s.retry.allowed, max: s.retry.max || 0 } : { allowed: false, max: 0 },
           permissions: s.permissions
         };

@@ -252,6 +252,8 @@
       resumable: state ? isResumable(state) : false,
       viewOnly: !(state && isResumable(state)),
       paused: !!(state && state.pausedAt),
+      /* V2-B：暂停请求与暂停完成分离，UI 不应把请求态显示为已暂停。 */
+      pauseRequested: !!(state && state.pauseRequestedAt),
       waitingApproval: steps.some(function (s) { return s && s.status === 'waiting_approval'; }),
       recoveries: state && typeof state.recoveries === 'number' ? state.recoveries : 0,
       revision: rec.revision || 1,
@@ -455,34 +457,8 @@
       return true;
     }
 
-    function txSave(rec, state, prevMax) {
-      return txRun(db, [STORE, EVENTS, CHECKPOINTS, META], 'readwrite', function (tx) {
-        tx.objectStore(STORE).put(rec);
-        var evStore = tx.objectStore(EVENTS);
-        (state.events || []).forEach(function (e) {
-          if (e.seq > prevMax) evStore.put(eventRecordOf(e, rec));
-        });
-        var cpStore = tx.objectStore(CHECKPOINTS);
-        (state.checkpoints || []).forEach(function (cp) {
-          cpStore.put(checkpointRecordOf(cp, rec));
-        });
-        var meta = tx.objectStore(META);
-        meta.put({ key: 'schemaVersion', value: DB_VER, updatedAt: nowIso() });
-        meta.put({
-          key: 'lastSave',
-          value: { taskId: rec.id, revision: rec.revision, at: rec.updatedAt },
-          updatedAt: nowIso()
-        });
-      });
-    }
-
-    async function save(state, opts) {
-      opts = opts || {};
-      await init();
-      if (projectId && state.projectId && state.projectId !== projectId) {
-        throw storeError('PROJECT_MISMATCH', 'task project mismatch');
-      }
-      var prev = await rawGet(state.id);
+    /* 记录构造与并发校验；必须在读取当前记录后、写入前同步完成。 */
+    function prepareRecord(state, prev, opts) {
       if (enforce && prev && prev.ownerProfileId && prev.ownerProfileId !== owner) {
         throw storeError('PROFILE_MISMATCH', 'task owner mismatch');
       }
@@ -493,7 +469,8 @@
         }
       }
       var rec = makeRecord(state, prev);
-      if (enforce && prev && prev.updatedAt && rec.updatedAt &&
+      /* 未提供 expectedRevision 的旧调用方保留 updatedAt 兜底；新调用方只用 revision。 */
+      if (opts.expectedRevision == null && enforce && prev && prev.updatedAt && rec.updatedAt &&
         String(prev.updatedAt) > String(rec.updatedAt)) {
         throw storeError('STALE_WRITE', 'stale task write');
       }
@@ -511,13 +488,110 @@
           }
         });
       }
+      return { rec: rec, prevMax: prevMax };
+    }
+
+    function writeDerived(tx, rec, state, prevMax) {
+      tx.objectStore(STORE).put(rec);
+      var evStore = tx.objectStore(EVENTS);
+      (state.events || []).forEach(function (e) {
+        if (e.seq > prevMax) evStore.put(eventRecordOf(e, rec));
+      });
+      var cpStore = tx.objectStore(CHECKPOINTS);
+      (state.checkpoints || []).forEach(function (cp) {
+        cpStore.put(checkpointRecordOf(cp, rec));
+      });
+      var meta = tx.objectStore(META);
+      meta.put({ key: 'schemaVersion', value: DB_VER, updatedAt: nowIso() });
+      meta.put({
+        key: 'lastSave',
+        value: { taskId: rec.id, revision: rec.revision, at: rec.updatedAt },
+        updatedAt: nowIso()
+      });
+    }
+
+    /* ASTRUM-010：在同一 IndexedDB 事务内读取 → 比较 revision → 写入。
+     * 事务外读取再写入会产生 TOCTOU 丢更新，这里不使用 rawGet。 */
+    function txSaveGuarded(state, opts) {
+      return new Promise(function (resolve, reject) {
+        var tx;
+        try { tx = db.transaction([STORE, EVENTS, CHECKPOINTS, META], 'readwrite'); } catch (e) {
+          reject(mapTxError(e));
+          return;
+        }
+        var settled = false;
+        var failure = null;
+        var recOut = null;
+        function fail(err) {
+          if (settled) return;
+          settled = true;
+          reject(err);
+        }
+        tx.oncomplete = function () {
+          if (settled) return;
+          settled = true;
+          resolve(recOut ? recOut.id : null);
+        };
+        tx.onerror = function () { /* 由 onabort 统一收口 */ };
+        tx.onabort = function () { fail(failure || mapTxError(tx.error)); };
+        try {
+          var store = tx.objectStore(STORE);
+          var getReq = store.get(state.id);
+          getReq.onerror = function () {
+            failure = mapTxError(getReq.error);
+            try { tx.abort(); } catch (e) { /* ignore */ }
+          };
+          getReq.onsuccess = function () {
+            try {
+              var packed = prepareRecord(state, getReq.result, opts);
+              recOut = packed.rec;
+              writeDerived(tx, packed.rec, state, packed.prevMax);
+            } catch (e) {
+              failure = (e && e.code && String(e.code).indexOf('_') >= 0) ? e : mapTxError(e);
+              try { tx.abort(); } catch (e2) { /* ignore */ }
+            }
+          };
+        } catch (e) {
+          failure = mapTxError(e);
+          try { tx.abort(); } catch (e2) { /* ignore */ }
+        }
+      });
+    }
+
+    /* localStorage / memory 回退：init() 之后读取、比较、写入在同一同步段完成，
+     * 不插入 await，避免两个保存交错造成丢更新。 */
+    function saveLocal(state, opts) {
+      var prev;
+      if (backend === 'ls') {
+        var map = lsRead(lsKey);
+        prev = map[state.id] || null;
+        var packed = prepareRecord(state, prev, opts);
+        map[packed.rec.id] = packed.rec;
+        lsWrite(lsKey, map);
+        return packed.rec.id;
+      }
+      prev = memory[state.id] || null;
+      var packedMem = prepareRecord(state, prev, opts);
+      memory[packedMem.rec.id] = packedMem.rec;
+      return packedMem.rec.id;
+    }
+
+    async function save(state, opts) {
+      opts = opts || {};
+      await init();
+      if (projectId && state.projectId && state.projectId !== projectId) {
+        throw storeError('PROJECT_MISMATCH', 'task project mismatch');
+      }
+      var id;
       if (backend === 'idb') {
-        await txSave(rec, state, prevMax);
+        id = await txSaveGuarded(state, opts);
         /* P4-04：每个任务默认保留最近 20 个检查点，避免派生记录无限增长。 */
         await pruneCheckpoints(state.id, CP_KEEP).catch(function () { return 0; });
-      } else if (backend === 'ls' || backend === 'memory') await rawPut(rec);
-      health.lastSaveAt = rec.updatedAt;
-      return rec.id;
+      } else {
+        id = saveLocal(state, opts);
+      }
+      health.lastSaveAt = state.updatedAt || nowIso();
+      return id;
     }
 
     async function get(id) {

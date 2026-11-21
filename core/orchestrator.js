@@ -152,13 +152,15 @@
 
   function nowIso() { return new Date().toISOString(); }
 
-  /* 取消原因必须可区分：超时、浏览器/网络 AbortError、用户取消、暂停请求。
-   * signal.reason 由调用方 abort(reason) 传入；旧调用方不传时退化为 aborted。 */
+  /* 取消原因必须可区分：超时、浏览器/网络 AbortError、用户取消、暂停请求、上游取消。
+   * signal.reason 由调用方 abort(reason) 传入；旧调用方不传时退化为 upstream。 */
   function abortReason(signal) {
     var r = signal && signal.reason;
     if (r === 'pause' || (r && r.code === 'PAUSE_REQUESTED')) return 'pause';
     if (r === 'user' || r === 'cancel' || (r && r.code === 'USER_CANCELLED')) return 'user_cancelled';
-    return 'cancelled';
+    if (r && r.code === 'UPSTREAM_ABORTED') return 'upstream_aborted';
+    if (r && r.code === 'TOOL_ABORTED') return 'tool_aborted';
+    return 'upstream_aborted';
   }
 
   function cancelledResult(signal) {
@@ -169,13 +171,24 @@
       reason: reason,
       kind: pause ? 'pause' : (reason === 'user_cancelled' ? 'user_cancelled' : 'cancelled'),
       errorName: pause ? 'PauseRequested' : (reason === 'user_cancelled' ? 'UserCancelled' : 'AbortError'),
+      /* 稳定分类码，供 UI/测试区分取消来源；errorName 保持既有契约。 */
+      abortCode: pause ? 'PAUSE_REQUESTED'
+        : (reason === 'user_cancelled' ? 'USER_CANCELLED'
+          : (reason === 'tool_aborted' ? 'TOOL_ABORTED' : 'UPSTREAM_ABORTED')),
       retriable: false,
       pendingAbort: true,
       pause: pause
     };
   }
 
-  function withTimeout(fn, ms, signal) {
+  /* V2-B：withTimeout 不只返回错误，还记录三件事：
+   *   abort_requested  是否请求了取消
+   *   abort_supported  该工具是否声明支持 AbortSignal
+   *   abort_confirmed  本次尝试的控制器是否真的进入 aborted
+   * 不支持取消的工具不得伪造 confirmed=true。 */
+  function withTimeout(fn, ms, signal, opts) {
+    opts = opts || {};
+    var abortable = opts.abortable !== false;
     return new Promise(function (resolve) {
       var done = false;
       var timer = null;
@@ -191,26 +204,53 @@
       }
       /* 超时/取消时先 abort 本次尝试的下游请求，再返回结果；
        * 不能只忽略 Promise —— 否则工具仍会继续消耗配额或产生副作用。 */
-      function abortNow(v) {
+      var deferredAbort = null;
+      function abortNow(v, waitForSettle) {
+        var confirmed = false;
         if (ctl && !ctl.signal.aborted) {
-          try { ctl.abort(); } catch (e) { /* ignore */ }
+          try { ctl.abort(); confirmed = !!ctl.signal.aborted; } catch (e) { /* ignore */ }
+        } else if (ctl && ctl.signal.aborted) {
+          confirmed = true;
+        }
+        v.abortRequested = true;
+        v.abortSupported = abortable;
+        v.abortConfirmed = abortable && confirmed;
+        /* 不支持取消的工具：暂停/用户取消时继续等待其自然到达安全边界，
+         * 不提前把任务标记为已暂停/已取消。超时仍按硬边界返回。 */
+        if (!abortable && waitForSettle && v.kind !== 'timeout') {
+          deferredAbort = v;
+          return;
         }
         finish(v);
       }
-      if (signal && signal.aborted) { finish(cancelledResult(signal)); return; }
+      if (signal && signal.aborted) {
+        var early = cancelledResult(signal);
+        early.abortRequested = true;
+        early.abortSupported = abortable;
+        early.abortConfirmed = false;
+        finish(early);
+        return;
+      }
       if (signal && signal.addEventListener) {
-        onAbort = function () { abortNow(cancelledResult(signal)); };
+        onAbort = function () { abortNow(cancelledResult(signal), true); };
         signal.addEventListener('abort', onAbort);
       }
       timer = setTimeout(function () {
         abortNow({
           ok: false, reason: 'timeout', kind: 'timeout',
-          errorName: 'TimeoutError', retriable: true
+          errorName: 'TimeoutError',
+          abortCode: abortable ? 'TIMEOUT' : 'ABORT_UNSUPPORTED',
+          retriable: true
         });
       }, Math.max(1, ms || 500));
       var call;
       try { call = fn(attemptSignal); } catch (e) { call = Promise.reject(e); }
       Promise.resolve(call).then(function (r) {
+        if (deferredAbort && r && r.ok === false) {
+          r.abortRequested = true;
+          r.abortSupported = false;
+          r.abortConfirmed = false;
+        }
         finish(r);
       }, function (e) {
         finish({
@@ -231,7 +271,11 @@
         errorName: r.errorName || null,
         retriable: r.retriable !== false,
         pendingAbort: !!r.pendingAbort,
-        pause: !!r.pause
+        pause: !!r.pause,
+        abortCode: r.abortCode || null,
+        abortRequested: !!r.abortRequested,
+        abortSupported: r.abortSupported !== false,
+        abortConfirmed: !!r.abortConfirmed
       };
     }
     return { ok: true, result: r };
@@ -256,7 +300,11 @@
     return {
       kind: kind, retriable: retriable, message: reason,
       pendingAbort: !!raw.pendingAbort, errorName: raw.errorName || null,
-      pause: !!raw.pause, reason: raw.reason || reason
+      pause: !!raw.pause, reason: raw.reason || reason,
+      abortCode: raw.abortCode || null,
+      abortRequested: !!raw.abortRequested,
+      abortSupported: raw.abortSupported !== false,
+      abortConfirmed: !!raw.abortConfirmed
     };
   }
 
@@ -348,6 +396,22 @@
       step.status = 'ok';
       step.result = exec;
       step.outputHash = exec.outputHash || null;
+      step.provenance = {
+        tool: 'skill:' + planStep.skillId,
+        version: 'skill',
+        at: step.endedAt,
+        executionId: exec.executionId || null,
+        idempotencyKey: T.sha256Hex([
+          state.id, planStep.id, 'skill', planStep.skillId || '',
+          exec.versionId || planStep.skillVersionId || '', step.inputHash || ''
+        ].join('|')),
+        skillId: planStep.skillId || null,
+        skillVersionId: exec.versionId || planStep.skillVersionId || null,
+        profileId: exec.profileId || (opts.principal && opts.principal.profileId) || null,
+        contextHash: state.context ? T.computeInputHash(state.context) : null
+      };
+      if (exec.receipt != null) step.provenance.receipt = exec.receipt;
+      if (exec.externalState != null) step.provenance.externalState = exec.externalState;
       step.evidenceRefs = [];
       T.appendEvent(state, 'step.ok', { reason: 'skill' }, planStep.id);
       return { ok: true, result: exec, evidenceRefs: [] };
@@ -386,17 +450,23 @@
     var signal = opts.signal || null;
 
     if (signal && signal.aborted && abortReason(signal) === 'pause') {
+      step.abort = { requested: true, supported: true, confirmed: false, code: 'PAUSE_REQUESTED' };
       T.appendEvent(state, 'step.paused', { reason: 'pause' }, planStep.id);
       return { ok: false, paused: true, critical: !!planStep.critical, reason: 'pause', kind: 'pause' };
     }
     if (signal && signal.aborted) {
       var earlyTool = cancelledResult(signal);
+      step.abort = {
+        requested: true, supported: true, confirmed: false,
+        code: earlyTool.abortCode, reason: earlyTool.reason
+      };
       step.status = 'aborted';
       step.cancelled = true;
       step.endedAt = nowIso();
       step.error = {
         kind: earlyTool.kind, message: '任务已取消', retriable: false,
-        errorName: earlyTool.errorName, reason: earlyTool.reason, pendingAbort: true
+        errorName: earlyTool.errorName, reason: earlyTool.reason, pendingAbort: true,
+        abortCode: earlyTool.abortCode
       };
       T.appendEvent(state, 'step.cancelled', { reason: earlyTool.reason }, planStep.id);
       return { ok: false, aborted: true, critical: !!planStep.critical, reason: earlyTool.reason, kind: earlyTool.kind };
@@ -458,10 +528,20 @@
     var attempts = 0;
     var last = null;
     var lastKind = 'tool_error';
+    /* ASTRUM-004：外部副作用调用必须可追踪且可跨重试复用。
+     * idempotencyKey 只由任务/步骤/工具/版本/输入决定，重试与恢复保持不变；
+     * executionId 每次尝试唯一，用于审计与外部回执关联。 */
+    var idempotencyKey = T.sha256Hex([
+      state.id, planStep.id, spec.id, spec.version || '', step.inputHash || ''
+    ].join('|'));
+    var lastExecutionId = null;
 
     while (attempts < maxAttempts) {
       attempts += 1;
       step.attempt += 1;
+      var executionId = state.id + ':' + planStep.id + ':' + attempts + ':' +
+        (step.startedAt || '') + ':' + idempotencyKey.slice(0, 12);
+      lastExecutionId = executionId;
       if (signal && signal.aborted) {
         last = cancelledResult(signal);
         lastKind = last.kind;
@@ -484,14 +564,26 @@
           }
           return root.ToolGateway.invoke(execPrincipal, planStep.tool, planStep.args || {}, {
             registry: opts.registry, ctx: opts.ctx, cfg: opts.cfg,
-            depResults: depResults, signal: attemptSignal || signal, taskId: state.id, attempt: attempts
+            depResults: depResults, signal: attemptSignal || signal, taskId: state.id, attempt: attempts,
+            executionId: executionId, idempotencyKey: idempotencyKey
           });
         }
         return spec.run(planStep.args || {}, opts.ctx, spec, opts.cfg, depResults, {
-          signal: attemptSignal || signal, taskId: state.id, attempt: attempts
+          signal: attemptSignal || signal, taskId: state.id, attempt: attempts,
+          executionId: executionId, idempotencyKey: idempotencyKey
         });
-      }, spec.timeoutMs, signal);
+      }, spec.timeoutMs, signal, { abortable: spec.abortable !== false });
       var normalized = normalizeResult(raw);
+      /* 仅失败/中止的尝试写入 abort 记录；成功步骤不被误标记为取消。 */
+      if (raw && raw.ok === false && raw.abortRequested) {
+        step.abort = {
+          requested: !!raw.abortRequested,
+          supported: raw.abortSupported !== false,
+          confirmed: !!raw.abortConfirmed,
+          code: raw.abortCode || null,
+          reason: raw.reason || null
+        };
+      }
       T.spend(state.budget, cost);
 
       if (normalized.ok) {
@@ -515,9 +607,26 @@
       step.status = 'ok';
       step.outputHash = T.sha256Hex(T.canonicalJSON(last.result));
       step.result = last.result;
-      step.provenance = (last.result && last.result.provenance) || {
-        tool: spec.id, version: spec.version || '', at: step.endedAt
-      };
+      step.provenance = Object.assign({}, (last.result && last.result.provenance) || {});
+      if (!step.provenance.tool) step.provenance.tool = spec.id;
+      if (!step.provenance.version) step.provenance.version = spec.version || '';
+      if (!step.provenance.at) step.provenance.at = step.endedAt;
+      /* V2-B：恢复时校验执行上下文与 Profile；缺失时保持旧记录可读。 */
+      if (opts.principal && opts.principal.profileId) {
+        step.provenance.profileId = opts.principal.profileId;
+      }
+      if (state.context) {
+        step.provenance.contextHash = T.computeInputHash(state.context);
+      }
+      /* ASTRUM-004：持久化外部调用追踪信息与工具回执，恢复时不得仅凭本地成功复用。 */
+      step.provenance.executionId = lastExecutionId;
+      step.provenance.idempotencyKey = idempotencyKey;
+      var resultMeta = last.result || {};
+      if (resultMeta.receipt != null) step.provenance.receipt = resultMeta.receipt;
+      if (resultMeta.externalState != null) step.provenance.externalState = resultMeta.externalState;
+      if (resultMeta.remoteState != null && step.provenance.externalState == null) {
+        step.provenance.externalState = resultMeta.remoteState;
+      }
       step.evidenceRefs = evRefs(last.result);
       T.appendEvent(state, 'step.ok', {}, planStep.id);
       return { ok: true, result: last.result, evidenceRefs: step.evidenceRefs };
@@ -530,6 +639,10 @@
       step.endedAt = null;
       step.error = null;
       step.cancelled = false;
+      step.abort = {
+        requested: true, supported: last.abortSupported !== false,
+        confirmed: !!last.abortConfirmed, code: 'PAUSE_REQUESTED', reason: 'pause'
+      };
       T.appendEvent(state, 'step.paused', { reason: 'pause' }, planStep.id);
       return { ok: false, paused: true, pause: true, critical: !!planStep.critical, reason: 'pause', kind: 'pause' };
     }
@@ -545,6 +658,7 @@
         retriable: false,
         pendingAbort: true,
         errorName: (last && last.errorName) || 'AbortError',
+        abortCode: (last && last.abortCode) || (isPause ? 'PAUSE_REQUESTED' : 'TOOL_ABORTED'),
         reason: why
       };
       T.appendEvent(state, 'step.cancelled', { reason: why }, planStep.id);
@@ -560,6 +674,7 @@
       message: last ? last.message || last.reason : 'unknown',
       retriable: !!(last && last.retriable),
       errorName: (last && last.errorName) || null,
+      abortCode: (last && last.abortCode) || null,
       reason: (last && last.reason) || null
     };
     T.appendEvent(state, 'step.failed', { reason: step.error.kind }, planStep.id);
@@ -627,11 +742,15 @@
     }
 
     while (guard++ < 200) {
-      /* B2：先判暂停，pause() 会先写 pausedAt 再 abort，避免被误判为取消。 */
-      if (state.pausedAt) {
+      /* B2：先判暂停，pause() 会先写 pauseRequestedAt 再 abort，避免被误判为取消。
+       * 两阶段：PAUSE_REQUESTED 之后不再分发新步骤；PAUSED 由 Control 在
+       * 所有活动步骤进入安全状态且持久化成功后确认。 */
+      if (state.pausedAt || state.pauseRequestedAt) {
         return {
           ok: false, paused: true, aborted: false, criticalFailed: false, budgetStop: false,
-          answer: answer, state: state, completed: false, reason: 'PAUSED'
+          answer: answer, state: state, completed: false,
+          pauseRequested: !state.pausedAt && !!state.pauseRequestedAt,
+          reason: state.pausedAt ? 'PAUSED' : 'PAUSE_REQUESTED'
         };
       }
       if (signal && signal.aborted) return cancelledRun();
@@ -681,7 +800,8 @@
         }
         return {
           ok: false, paused: true, aborted: false, criticalFailed: false, budgetStop: false,
-          answer: answer, state: state, completed: false, reason: 'PAUSED'
+          answer: answer, state: state, completed: false,
+          pauseRequested: !state.pausedAt, reason: 'PAUSED'
         };
       }
       if (results.some(function (r) { return r && r.aborted; })) return cancelledRun();

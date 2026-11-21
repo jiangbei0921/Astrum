@@ -421,22 +421,40 @@
       T.appendEvent(state, 'task.cancelled', { reason: 'user' });
       T.transition(state, 'ABORTED');
       emitNew(state, eventIndex, opts);
-      await persist();
+      var cancelPersist = { ok: true, error: null };
+      try { await persist(); } catch (e) {
+        cancelPersist = { ok: false, error: (e && e.code) || 'PERSIST_TX_FAILED' };
+      }
       return resultOf(prepared, state, runner, null, null, {
-        cancelled: true, verdict: 'ABORTED', legacy: false
+        cancelled: true, verdict: 'ABORTED', legacy: false,
+        persistFailed: !cancelPersist.ok, error: cancelPersist.error
       });
     }
 
-    /* P3：暂停/待审批时不推进阶段，持久化后原样返回，等待用户恢复。 */
+    /* P3：暂停/待审批时不推进阶段，持久化后原样返回，等待用户恢复。
+     * V2-B：暂停必须先确认持久化成功，再返回 PAUSED。 */
     if (runner && (runner.paused || runner.waitingApproval)) {
       releaseRun(state.id, runCtl);
+      if (runner.paused) {
+        var pauseFin = await confirmPauseWith(state, persist);
+        emitNew(state, eventIndex, opts);
+        if (!pauseFin.ok) {
+          return resultOf(prepared, state, runner, null, null, {
+            paused: false, pauseRequested: true, verdict: 'PAUSE_PERSIST_FAILED',
+            error: pauseFin.error, resumable: true, legacy: false
+          });
+        }
+        return resultOf(prepared, state, runner, null, null, {
+          paused: true, verdict: 'PAUSED', resumable: true, legacy: false
+        });
+      }
       emitNew(state, eventIndex, opts);
       await persist();
       return resultOf(prepared, state, runner, null, null, {
-        paused: !!runner.paused,
+        paused: false,
         waitingApproval: !!runner.waitingApproval,
         waitingStepId: runner.stepId || null,
-        verdict: runner.paused ? 'PAUSED' : 'WAITING_APPROVAL',
+        verdict: 'WAITING_APPROVAL',
         resumable: true,
         legacy: false
       });
@@ -488,15 +506,25 @@
         T.appendEvent(state, 'task.cancelled', { reason: 'user' });
         T.transition(state, 'ABORTED');
         emitNew(state, eventIndex, opts);
-        await persist();
+        var cancelPersistX = { ok: true, error: null };
+        try { await persist(); } catch (e) {
+          cancelPersistX = { ok: false, error: (e && e.code) || 'PERSIST_TX_FAILED' };
+        }
         return resultOf(prepared, state, runner, null, null, {
-          cancelled: true, verdict: 'ABORTED', legacy: false
+          cancelled: true, verdict: 'ABORTED', legacy: false,
+          persistFailed: !cancelPersistX.ok, error: cancelPersistX.error
         });
       }
       if (runner && runner.paused) {
         releaseRun(state.id, runCtl);
+        var pauseFin2 = await confirmPauseWith(state, persist);
         emitNew(state, eventIndex, opts);
-        await persist();
+        if (!pauseFin2.ok) {
+          return resultOf(prepared, state, runner, null, null, {
+            paused: false, pauseRequested: true, verdict: 'PAUSE_PERSIST_FAILED',
+            error: pauseFin2.error, resumable: true, legacy: false
+          });
+        }
         return resultOf(prepared, state, runner, null, null, {
           paused: true, verdict: 'PAUSED', resumable: true, legacy: false
         });
@@ -569,15 +597,25 @@
         T.appendEvent(state, 'task.cancelled', { reason: 'user' });
         T.transition(state, 'ABORTED');
         emitNew(state, eventIndex, opts);
-        await persist();
+        var cancelPersistX = { ok: true, error: null };
+        try { await persist(); } catch (e) {
+          cancelPersistX = { ok: false, error: (e && e.code) || 'PERSIST_TX_FAILED' };
+        }
         return resultOf(prepared, state, runner, null, null, {
-          cancelled: true, verdict: 'ABORTED', legacy: false
+          cancelled: true, verdict: 'ABORTED', legacy: false,
+          persistFailed: !cancelPersistX.ok, error: cancelPersistX.error
         });
       }
       if (runner && runner.paused) {
         releaseRun(state.id, runCtl);
+        var pauseFin3 = await confirmPauseWith(state, persist);
         emitNew(state, eventIndex, opts);
-        await persist();
+        if (!pauseFin3.ok) {
+          return resultOf(prepared, state, runner, null, null, {
+            paused: false, pauseRequested: true, verdict: 'PAUSE_PERSIST_FAILED',
+            error: pauseFin3.error, resumable: true, legacy: false
+          });
+        }
         return resultOf(prepared, state, runner, null, null, {
           paused: true, verdict: 'PAUSED', resumable: true, legacy: false
         });
@@ -672,8 +710,59 @@
     };
   }
 
-  /* P3：暂停只写入 pausedAt 与事件；不中断已在飞的请求（Q-2=A）。
-   * 执行循环在每个新批次前检查 pausedAt。 */
+  function hasRunningStep(state) {
+    return (state.steps || []).some(function (s) { return s && s.status === 'running'; });
+  }
+
+  /* V2-B：暂停确认。只有活动步骤全部进入安全状态且持久化成功后才写 pausedAt。
+   * 持久化失败时回退为 PAUSE_REQUESTED，不伪造 PAUSED。 */
+  async function confirmPause(state, store, principal, expectedRevision) {
+    var T = root.AstroTask;
+    var requestedAt = state.pauseRequestedAt || new Date().toISOString();
+    state.pausedAt = new Date().toISOString();
+    state.pauseRequestedAt = null;
+    if (T) {
+      T.appendEvent(state, 'task.paused', { reason: 'user' });
+      safeCheckpoint(state, { taskStatus: 'PAUSED', paused: true });
+    }
+    try {
+      if (store && typeof store.save === 'function') {
+        await store.save(state, expectedRevision != null ? { expectedRevision: expectedRevision } : undefined);
+      }
+      return { ok: true, state: state };
+    } catch (e) {
+      state.pausedAt = null;
+      state.pauseRequestedAt = requestedAt;
+      try { if (T) T.appendEvent(state, 'task.persist_failed', { reason: 'pause' }); } catch (e2) { /* ignore */ }
+      return { ok: false, error: (e && e.code) || 'PERSIST_TX_FAILED', state: state };
+    }
+  }
+
+  /* 运行中确认暂停：持久化函数由 run/resume 提供，以便沿用其修订号。 */
+  async function confirmPauseWith(state, persist) {
+    var T = root.AstroTask;
+    var requestedAt = state.pauseRequestedAt || new Date().toISOString();
+    state.pausedAt = new Date().toISOString();
+    state.pauseRequestedAt = null;
+    if (T) {
+      T.appendEvent(state, 'task.paused', { reason: 'user' });
+      safeCheckpoint(state, { taskStatus: 'PAUSED', paused: true });
+    }
+    try {
+      await persist();
+      return { ok: true };
+    } catch (e) {
+      state.pausedAt = null;
+      state.pauseRequestedAt = requestedAt;
+      try { if (T) T.appendEvent(state, 'task.persist_failed', { reason: 'pause' }); } catch (e2) { /* ignore */ }
+      return { ok: false, error: (e && e.code) || 'PERSIST_TX_FAILED' };
+    }
+  }
+
+  /* P3/V2-B：暂停请求与暂停完成分离。
+   * 1) 写入 pauseRequestedAt 并记录 task.pause_requested；
+   * 2) 同标签页活跃运行立即 abort('pause')，在飞步骤回队；
+   * 3) 所有活动步骤进入安全状态后由 confirmPause 持久化并写 pausedAt。 */
   async function pause(taskId, opts) {
     opts = opts || {};
     var T = root.AstroTask;
@@ -706,9 +795,14 @@
       if (live.pausedAt) {
         return { state: live, verdict: 'PAUSED', paused: true, already: true };
       }
-      live.pausedAt = new Date().toISOString();
-      if (T) T.appendEvent(live, 'task.paused', { reason: 'user' });
-      safeCheckpoint(live, { taskStatus: 'PAUSED', paused: true });
+      if (live.pauseRequestedAt) {
+        return {
+          state: live, verdict: 'PAUSE_REQUESTED', paused: false,
+          pauseRequested: true, already: true
+        };
+      }
+      live.pauseRequestedAt = new Date().toISOString();
+      if (T) T.appendEvent(live, 'task.pause_requested', { reason: 'user' });
       var interruptedLive = abortActive(taskId, 'pause');
       if (root.AuditLog) {
         root.AuditLog.record({
@@ -716,22 +810,75 @@
           projectId: live.projectId || null, decision: 'allow', reason: 'ALLOW'
         });
       }
-      return { state: live, verdict: 'PAUSED', paused: true, interrupted: interruptedLive };
+      return {
+        state: live, verdict: 'PAUSE_REQUESTED', paused: false, pauseRequested: true,
+        interrupted: interruptedLive,
+        message: interruptedLive
+          ? '暂停请求已发出，等待当前步骤进入安全状态。'
+          : '当前操作不支持立即中断，将在安全边界后暂停。'
+      };
     }
 
-    state.pausedAt = new Date().toISOString();
-    if (T) T.appendEvent(state, 'task.paused', { reason: 'user' });
-    /* P4：暂停与检查点一次保存，恢复时检查点可作为完整性锚点。 */
-    safeCheckpoint(state, { taskStatus: 'PAUSED', paused: true });
+    if (state.pauseRequestedAt) {
+      /* 跨标签页：请求已存在。若无活动步骤则确认暂停，否则等待运行页收尾。 */
+      if (!hasRunningStep(state)) {
+        var storeAlready = opts.store || defaultStore();
+        var confirmedAlready = await confirmPause(state, storeAlready, principal, loaded.revision);
+        if (!confirmedAlready.ok) {
+          return {
+            state: state, verdict: 'PAUSE_PERSIST_FAILED', paused: false,
+            pauseRequested: true, error: confirmedAlready.error
+          };
+        }
+        return { state: state, verdict: 'PAUSED', paused: true, already: true };
+      }
+      return { state: state, verdict: 'PAUSE_REQUESTED', paused: false, pauseRequested: true, already: true };
+    }
+
+    state.pauseRequestedAt = new Date().toISOString();
+    if (T) T.appendEvent(state, 'task.pause_requested', { reason: 'user' });
+
+    /* 无活动步骤（空闲/其他标签页已停在边界）→ 立即确认暂停。 */
+    if (!hasRunningStep(state)) {
+      var storeIdle = opts.store || defaultStore();
+      var confirmedIdle = await confirmPause(state, storeIdle, principal, loaded.revision);
+      if (!confirmedIdle.ok) {
+        return {
+          state: state, verdict: 'PAUSE_PERSIST_FAILED', paused: false,
+          pauseRequested: true, error: confirmedIdle.error
+        };
+      }
+      if (root.AuditLog) {
+        root.AuditLog.record({
+          action: 'task.pause', resourceType: 'task', resourceId: taskId,
+          projectId: state.projectId || null, decision: 'allow', reason: 'ALLOW'
+        });
+      }
+      return { state: state, verdict: 'PAUSED', paused: true, interrupted: false };
+    }
+
+    /* 跨标签页运行中：只持久化暂停请求，不提前标记 PAUSED。 */
     var store = opts.store || defaultStore();
-    await saveState(store, state, principal);
+    try {
+      await saveState(store, state, principal, { expectedRevision: loaded.revision, rethrow: true });
+    } catch (e) {
+      state.pauseRequestedAt = null;
+      try { if (T) T.appendEvent(state, 'task.persist_failed', { reason: 'pause_request' }); } catch (e2) { /* ignore */ }
+      return {
+        state: state, verdict: 'PAUSE_PERSIST_FAILED', paused: false,
+        pauseRequested: false, error: (e && e.code) || 'PERSIST_TX_FAILED'
+      };
+    }
     if (root.AuditLog) {
       root.AuditLog.record({
         action: 'task.pause', resourceType: 'task', resourceId: taskId,
         projectId: state.projectId || null, decision: 'allow', reason: 'ALLOW'
       });
     }
-    return { state: state, verdict: 'PAUSED', paused: true, interrupted: false };
+    return {
+      state: state, verdict: 'PAUSE_REQUESTED', paused: false, pauseRequested: true,
+      message: '当前操作不支持立即中断，将在安全边界后暂停。'
+    };
   }
 
   async function resume(taskId, ctx, cfg, opts) {
@@ -874,8 +1021,9 @@
       });
     }
 
-    /* P3/P4：恢复计入预算；pausedAt 清除后再继续。 */
+    /* P3/P4：恢复计入预算；暂停标记清除后再继续。取消任务不可恢复（ABORTED 非 resumable）。 */
     state.pausedAt = null;
+    state.pauseRequestedAt = null;
     state.recoveries = (state.recoveries || 0) + 1;
     try { T.spend(state.budget, { recoveries: 1 }); } catch (e) {
       state.recoveries -= 1;
@@ -886,11 +1034,17 @@
     }
 
     /* P4/D-2：按工具幂等性决定复用或重跑。 */
-    var strategies = { reuse: [], rerun: [], blocked: [] };
+    var strategies = { reuse: [], rerun: [], blocked: [], confirm: [] };
     if (root.AstroRecovery) {
       var applied = root.AstroRecovery.apply({
         state: state, checkpoint: latestCp, registry: rt.registry,
-        /* ASTRUM-004：未知幂等性复用前必须校验结果哈希与工具版本。 */
+        /* ASTRUM-004：复用前校验参数、工具/Skill 版本、执行上下文、Profile、授权与持久化。 */
+        profileId: principal && principal.profileId ? principal.profileId : null,
+        contextHash: state.context ? T.computeInputHash(state.context) : null,
+        authorized: principal ? authorized(principal, 'resume', {
+          id: taskId, ownerProfileId: loaded.ownerProfileId, projectId: loaded.projectId
+        }) : null,
+        persisted: !!loaded.record,
         validateUnknown: opts.validateUnknownIdempotency !== false
       });
       strategies = applied.applied;
@@ -955,8 +1109,15 @@
     }
     if (runner && runner.paused) {
       releaseRun(state.id, runCtl);
+      var pauseFinR = await confirmPauseWith(state, persist);
       emitNew(state, eventIndex, opts);
-      await persist();
+      if (!pauseFinR.ok) {
+        return {
+          state: state, answer: null, runner: runner, paused: false, pauseRequested: true,
+          verdict: 'PAUSE_PERSIST_FAILED', error: pauseFinR.error,
+          resumable: true, recovery: recoveryInfo
+        };
+      }
       return {
         state: state, answer: null, runner: runner, paused: true,
         verdict: 'PAUSED', resumable: true, recovery: recoveryInfo

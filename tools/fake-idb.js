@@ -150,7 +150,15 @@ function Transaction(db, names, mode, fake) {
   this.oncomplete = null;
   this.onerror = null;
   this.onabort = null;
-  this._schedule();
+  /* 真实 IndexedDB 对同一 scope 的 readwrite 事务串行执行；
+   * 垫片必须模拟该隔离，否则并发测试会看到不存在的交错。 */
+  if (mode === 'readwrite') {
+    db._rwQueue = db._rwQueue || [];
+    db._rwQueue.push(this);
+    db._startNextRW();
+  } else {
+    this._schedule();
+  }
 }
 
 Transaction.prototype.objectStore = function (name) {
@@ -197,7 +205,15 @@ Transaction.prototype._drain = function () {
     if (self._ops.length) { self._drain(); return; }
     self._done = true;
     if (typeof self.oncomplete === 'function') self.oncomplete();
+    self._releaseRW();
   }, 0);
+};
+
+Transaction.prototype._releaseRW = function () {
+  if (this.mode !== 'readwrite') return;
+  var db = this.db;
+  db._rwActive = false;
+  setTimeout(function () { db._startNextRW(); }, 0);
 };
 
 Transaction.prototype._finishAbort = function (err) {
@@ -206,6 +222,7 @@ Transaction.prototype._finishAbort = function (err) {
   this.error = err;
   if (typeof this.onabort === 'function') this.onabort();
   if (typeof this.onerror === 'function') this.onerror();
+  this._releaseRW();
 };
 
 function Database(name, version, stores, fake) {
@@ -213,6 +230,8 @@ function Database(name, version, stores, fake) {
   this.version = version;
   this._stores = stores;
   this._fake = fake;
+  this._rwQueue = [];
+  this._rwActive = false;
   this.objectStoreNames = {
     contains: function (n) { return !!this._names[n]; },
     _names: Object.keys(stores).reduce(function (acc, k) { acc[k] = 1; return acc; }, {})
@@ -244,6 +263,14 @@ Database.prototype.transaction = function (names, mode) {
 };
 
 Database.prototype.close = function () { /* no-op */ };
+
+Database.prototype._startNextRW = function () {
+  if (this._rwActive) return;
+  var next = this._rwQueue.shift();
+  if (!next) return;
+  this._rwActive = true;
+  next._schedule();
+};
 
 function FakeIndexedDB() {
   this._dbs = {};

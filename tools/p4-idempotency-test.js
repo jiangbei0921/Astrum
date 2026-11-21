@@ -20,10 +20,10 @@ var NOW = Date.parse('2026-11-21T12:00:00.000Z');
 var registry = {
   get: function (tool) {
     var map = {
-      'kb.lookup': { id: 'kb.lookup', idempotent: true, ttlMs: null, retry: { allowed: false, max: 0 } },
-      'paper.search': { id: 'paper.search', idempotent: false, ttlMs: 0, retry: { allowed: false, max: 0 } },
-      'simbad.tap': { id: 'simbad.tap', idempotent: true, ttlMs: 604800000, retry: { allowed: true, max: 1 } },
-      'evidence.search': { id: 'evidence.search', idempotent: false, ttlMs: 0, retry: { allowed: false, max: 0 } }
+      'kb.lookup': { id: 'kb.lookup', idempotent: true, sideEffect: false, ttlMs: null, retry: { allowed: false, max: 0 } },
+      'paper.search': { id: 'paper.search', idempotent: false, sideEffect: false, ttlMs: 0, retry: { allowed: false, max: 0 } },
+      'simbad.tap': { id: 'simbad.tap', idempotent: true, sideEffect: false, ttlMs: 604800000, retry: { allowed: true, max: 1 } },
+      'evidence.search': { id: 'evidence.search', idempotent: false, sideEffect: false, ttlMs: 0, retry: { allowed: false, max: 0 } }
     };
     return map[tool] || null;
   }
@@ -89,8 +89,8 @@ var unknown = stateWith([
   { id: 'u3', tool: 'custom.unknown', verified: true }
 ]);
 var pu = R.plan({ state: unknown, registry: registry, now: NOW });
-ok('P4I-07 未知工具但凭证哈希无效时阻断', strategyOf(pu, 'u1') === 'block', strategyOf(pu, 'u1'));
-ok('P4I-08 未知工具且无结果阻断', strategyOf(pu, 'u2') === 'block', strategyOf(pu, 'u2'));
+ok('P4I-07 未知工具且凭证哈希无效时进入人工确认', strategyOf(pu, 'u1') === 'confirm', strategyOf(pu, 'u1'));
+ok('P4I-08 未知工具且无结果进入人工确认', strategyOf(pu, 'u2') === 'confirm', strategyOf(pu, 'u2'));
 ok('P4I-08b 未知工具凭证完整时可复用', strategyOf(pu, 'u3') === 'reuse', strategyOf(pu, 'u3'));
 
 /* 4 未完成与失败 */
