@@ -600,6 +600,10 @@
           answer = results[i].result.answer;
         }
       }
+      /* P4：批次落盘钩子；持久化失败不影响调度语义。 */
+      if (typeof opts.onBatchSettled === 'function') {
+        try { await opts.onBatchSettled(state, results, batch); } catch (e) { /* ignore */ }
+      }
       if (budgetStop && batch.steps.some(function (s) { return s.critical; })) break;
     }
 

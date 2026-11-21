@@ -1,25 +1,34 @@
-/* ASTRUM · TaskState 持久化（C6）
+/* ASTRUM · TaskState 持久化（C6 / P4 v2）
  *
  * 依据：docs/architecture/P0-01-目标架构总蓝图.md §9
- *       docs/ASTRUM-P0-IDENTITY-SECURITY-IMPLEMENTATION-PLAN.md §9/§10
+ *       docs/architecture/ASTRUM-P0-IDENTITY-SECURITY-IMPLEMENTATION-PLAN.md §9/§10
+ *       docs/P4/P4-02 ~ P4-04、P4-07、P4-08
  *
  * IndexedDB 优先，localStorage 回退，最后内存回退。
  * 只存可序列化 TaskState（Plan/Step/Event/Result），不存运行对象。
  * 读取时用 AstroTask.fromJSON 校验 schemaVersion 与不变量。
  *
- * P0：按 Profile 命名空间分库；记录附带 ownerProfileId/projectId。
+ * P4：数据库 v2 新增 events / checkpoints / meta 三个 store。
+ *   - tasks 记录增加 revision（并发/陈旧写检测）与 eventsUpToSeq（派生索引位点）。
+ *   - 保存使用单事务写 tasks + 新增 events + checkpoints + meta。
+ *   - events 只是 TaskState.events 的派生索引，权威仍在内嵌副本。
+ *   - 不新增事件总线，不改变 TaskState 契约。
+ *
  * 无 Profile 的 Node 环境保持旧行为（owner=null，不做归属过滤），
- * 以兼容既有 336 项测试；浏览器中 owner 始终来自 Profile.currentId()，
- * 调用方传入的 ownerProfileId 会被忽略。
+ * 以兼容既有测试；浏览器中 owner 始终来自 Profile.currentId()。
  */
 (function (root) {
   'use strict';
 
   var BASE_DB = 'astrum.tasks.v1';
-  var DB_VER = 1;
+  var DB_VER = 2;
   var STORE = 'tasks';
+  var EVENTS = 'events';
+  var CHECKPOINTS = 'checkpoints';
+  var META = 'meta';
   var BASE_LS = 'astrum.tasks.v1';
   var LS_MAX = 40;
+  var CP_KEEP = 20;
 
   var QUARANTINE_DB = 'astrum.tasks.quarantine.v1';
   var QUARANTINE_STORE = 'tasks';
@@ -38,11 +47,81 @@
     return owner === 'default' ? base : ('p.' + owner + '.' + base);
   }
 
+  function storeError(code, message) {
+    var e = new Error(message || code);
+    e.code = code;
+    return e;
+  }
+
+  function isQuota(err) {
+    if (!err) return false;
+    return err.name === 'QuotaExceededError' || err.name === 'NS_ERROR_DOM_QUOTA_REACHED' || err.code === 22;
+  }
+
+  function mapTxError(err) {
+    if (err && err.code && String(err.code).indexOf('_') >= 0) return err;
+    if (isQuota(err)) return storeError('QUOTA_EXCEEDED', 'storage quota exceeded');
+    return storeError('PERSIST_TX_FAILED', (err && err.message) || 'transaction failed');
+  }
+
+  /* ---------------- IndexedDB 基础 ---------------- */
+
+  function ensureStores(db) {
+    if (!db.objectStoreNames.contains(STORE)) {
+      db.createObjectStore(STORE, { keyPath: 'id' });
+    }
+    if (!db.objectStoreNames.contains(EVENTS)) {
+      db.createObjectStore(EVENTS, { keyPath: ['taskId', 'seq'] });
+    }
+    if (!db.objectStoreNames.contains(CHECKPOINTS)) {
+      var cps = db.createObjectStore(CHECKPOINTS, { keyPath: 'checkpointId' });
+      if (typeof cps.createIndex === 'function') {
+        try { cps.createIndex('byTask', 'taskId'); } catch (e) { /* 索引失败不阻断 */ }
+      }
+    }
+    if (!db.objectStoreNames.contains(META)) {
+      db.createObjectStore(META, { keyPath: 'key' });
+    }
+  }
+
+  function openMainDB(name) {
+    return new Promise(function (resolve, reject) {
+      if (!root.indexedDB) { reject(storeError('DB_UPGRADE_FAILED', 'no indexedDB')); return; }
+      var req = null;
+      try { req = root.indexedDB.open(name, DB_VER); } catch (e) {
+        reject(storeError('DB_UPGRADE_FAILED', e && e.message));
+        return;
+      }
+      var settled = false;
+      req.onupgradeneeded = function () { ensureStores(req.result); };
+      req.onblocked = function () {
+        if (settled) return;
+        settled = true;
+        reject(storeError('DB_UPGRADE_FAILED', 'database upgrade blocked'));
+      };
+      req.onerror = function () {
+        if (settled) return;
+        settled = true;
+        reject(storeError('DB_UPGRADE_FAILED', (req.error && req.error.message) || 'open failed'));
+      };
+      req.onsuccess = function () {
+        if (settled) { try { req.result.close(); } catch (e) { /* ignore */ } return; }
+        settled = true;
+        var db = req.result;
+        try {
+          db.onversionchange = function () { try { db.close(); } catch (e) { /* ignore */ } };
+        } catch (e2) { /* ignore */ }
+        resolve(db);
+      };
+    });
+  }
+
+  /* 隔离库只用一个 store，保持 v1 行为。 */
   function openIDB(name, storeName) {
     return new Promise(function (resolve, reject) {
       if (!root.indexedDB) { reject(new Error('no indexedDB')); return; }
       var req = null;
-      try { req = root.indexedDB.open(name, DB_VER); } catch (e) { reject(e); return; }
+      try { req = root.indexedDB.open(name, 1); } catch (e) { reject(e); return; }
       req.onupgradeneeded = function () {
         var db = req.result;
         if (!db.objectStoreNames.contains(storeName)) {
@@ -57,11 +136,38 @@
 
   function idbReq(db, storeName, mode, fn) {
     return new Promise(function (resolve, reject) {
-      var tx = db.transaction([storeName], mode);
+      var tx;
+      try { tx = db.transaction([storeName], mode); } catch (e) { reject(e); return; }
       var os = tx.objectStore(storeName);
       var req = fn(os);
       req.onsuccess = function () { resolve(req.result); };
       req.onerror = function () { reject(req.error); };
+    });
+  }
+
+  function txRun(db, storeNames, mode, work) {
+    return new Promise(function (resolve, reject) {
+      var tx;
+      try { tx = db.transaction(storeNames, mode); } catch (e) { reject(mapTxError(e)); return; }
+      var done = false;
+      function fail(err) {
+        if (done) return;
+        done = true;
+        reject(mapTxError(err || tx.error));
+      }
+      tx.oncomplete = function () {
+        if (done) return;
+        done = true;
+        resolve();
+      };
+      tx.onerror = function () { /* 由 onabort 统一收口 */ };
+      tx.onabort = function () { fail(tx.error); };
+      try {
+        work(tx);
+      } catch (e) {
+        try { tx.abort(); } catch (e2) { /* ignore */ }
+        fail(e);
+      }
     });
   }
 
@@ -78,11 +184,64 @@
     root.localStorage.setItem(key, JSON.stringify(map));
   }
 
+  function maxSeqOf(events) {
+    var max = 0;
+    (events || []).forEach(function (e) { if (e && e.seq > max) max = e.seq; });
+    return max;
+  }
+
+  function eventRecordOf(e, rec) {
+    return {
+      taskId: rec.id,
+      seq: e.seq,
+      eventId: rec.id + ':' + e.seq,
+      ownerProfileId: rec.ownerProfileId,
+      projectId: rec.projectId,
+      at: e.at,
+      type: e.type,
+      stepId: e.stepId == null ? null : e.stepId,
+      payload: e.payload || {}
+    };
+  }
+
+  function checkpointRecordOf(cp, rec) {
+    var out = {};
+    Object.keys(cp || {}).forEach(function (k) { out[k] = cp[k]; });
+    out.taskId = rec.id;
+    out.ownerProfileId = rec.ownerProfileId;
+    out.schemaVersion = 1;
+    out.projectId = cp.projectId || rec.projectId;
+    out.eventsUpToSeq = rec.eventsUpToSeq;
+    out.summary = {
+      phase: cp.phase,
+      taskStatus: cp.taskStatus,
+      completed: (cp.completedStepIds || []).length,
+      pending: (cp.pendingStepIds || []).length
+    };
+    return out;
+  }
+
+  function eventFingerprint(e) {
+    return JSON.stringify([e.seq, e.type, e.stepId == null ? null : e.stepId, e.at, e.payload || {}]);
+  }
+
+  function parseEventsOf(json) {
+    try {
+      var obj = typeof json === 'string' ? JSON.parse(json) : json;
+      return obj && obj.events ? obj.events : [];
+    } catch (e) { return []; }
+  }
+
   function summarize(rec) {
     var T = root.AstroTask;
-    var state = null;
-    try { state = T.fromJSON(rec.state); } catch (e) { state = null; }
+    var state = null, stale = false, lastError = null;
+    try { state = T.fromJSON(rec.state); } catch (e) {
+      state = null;
+      stale = true;
+      lastError = e && e.code ? e.code : (e && e.message) || 'STATE_CORRUPT';
+    }
     var template = state && state.plan ? state.plan.template : '';
+    var steps = state ? (state.steps || []) : [];
     return {
       id: rec.id,
       question: rec.question || '',
@@ -91,14 +250,21 @@
       createdAt: rec.createdAt || '',
       updatedAt: rec.updatedAt || '',
       resumable: state ? isResumable(state) : false,
-      viewOnly: !(state && isResumable(state))
+      viewOnly: !(state && isResumable(state)),
+      paused: !!(state && state.pausedAt),
+      waitingApproval: steps.some(function (s) { return s && s.status === 'waiting_approval'; }),
+      recoveries: state && typeof state.recoveries === 'number' ? state.recoveries : 0,
+      revision: rec.revision || 1,
+      stale: stale,
+      lastError: lastError
     };
   }
 
   function isResumable(state) {
     if (!state || state.phase !== 'EXECUTE') return false;
     return (state.steps || []).some(function (s) {
-      return s.status === 'pending' || s.status === 'running';
+      return s.status === 'pending' || s.status === 'running' ||
+        s.status === 'paused' || s.status === 'waiting_approval';
     });
   }
 
@@ -113,12 +279,6 @@
         reason: reason
       });
     } catch (e) { /* ignore */ }
-  }
-
-  function storeError(code, message) {
-    var e = new Error(message || code);
-    e.code = code;
-    return e;
   }
 
   function readMigrationFlag() {
@@ -144,7 +304,7 @@
       out.push({ rec: rec, source: source });
     }
     try {
-      var db = await openIDB(BASE_DB, STORE);
+      var db = await openMainDB(BASE_DB);
       try {
         var recs = await idbReq(db, STORE, 'readonly', function (os) { return os.getAll(); });
         (recs || []).forEach(function (r) { add(r, 'idb:' + BASE_DB); });
@@ -227,12 +387,14 @@
     var backend = 'memory';
     var memory = {};
     var initPromise = null;
+    var health = { lastError: null, lastSaveAt: null, lastMigration: null };
 
     function init() {
       if (initPromise) return initPromise;
-      initPromise = openIDB(dbName, STORE).then(function (d) {
-        db = d; backend = 'idb'; return backend;
-      }).catch(function () {
+      initPromise = openMainDB(dbName).then(function (d) {
+        db = d; backend = 'idb'; health.lastError = null; return backend;
+      }).catch(function (err) {
+        health.lastError = err && err.code ? err.code : 'DB_UPGRADE_FAILED';
         try {
           root.localStorage.setItem('astrum.tasks.probe', '1');
           root.localStorage.removeItem('astrum.tasks.probe');
@@ -246,9 +408,10 @@
       return initPromise;
     }
 
-    function makeRecord(state) {
+    function makeRecord(state, prev) {
       var T = root.AstroTask;
       T.validate(state);
+      var seq = Math.max(maxSeqOf(state.events), prev ? (prev.eventsUpToSeq || 0) : 0);
       return {
         id: state.id,
         question: state.question,
@@ -258,6 +421,8 @@
         template: state.plan ? state.plan.template : '',
         ownerProfileId: owner,
         projectId: state.projectId || projectId,
+        revision: prev ? (prev.revision || 1) + 1 : 1,
+        eventsUpToSeq: seq,
         state: T.toJSON(state)
       };
     }
@@ -290,23 +455,68 @@
       return true;
     }
 
-    async function save(state) {
+    function txSave(rec, state, prevMax) {
+      return txRun(db, [STORE, EVENTS, CHECKPOINTS, META], 'readwrite', function (tx) {
+        tx.objectStore(STORE).put(rec);
+        var evStore = tx.objectStore(EVENTS);
+        (state.events || []).forEach(function (e) {
+          if (e.seq > prevMax) evStore.put(eventRecordOf(e, rec));
+        });
+        var cpStore = tx.objectStore(CHECKPOINTS);
+        (state.checkpoints || []).forEach(function (cp) {
+          cpStore.put(checkpointRecordOf(cp, rec));
+        });
+        var meta = tx.objectStore(META);
+        meta.put({ key: 'schemaVersion', value: DB_VER, updatedAt: nowIso() });
+        meta.put({
+          key: 'lastSave',
+          value: { taskId: rec.id, revision: rec.revision, at: rec.updatedAt },
+          updatedAt: nowIso()
+        });
+      });
+    }
+
+    async function save(state, opts) {
+      opts = opts || {};
       await init();
       if (projectId && state.projectId && state.projectId !== projectId) {
         throw storeError('PROJECT_MISMATCH', 'task project mismatch');
       }
-      var rec = makeRecord(state);
-      if (enforce) {
-        var prev = await rawGet(rec.id);
-        if (prev && prev.ownerProfileId && prev.ownerProfileId !== owner) {
-          throw storeError('PROFILE_MISMATCH', 'task owner mismatch');
-        }
-        if (prev && prev.updatedAt && rec.updatedAt &&
-          String(prev.updatedAt) > String(rec.updatedAt)) {
-          throw storeError('POLICY_DENIED', 'stale task write');
+      var prev = await rawGet(state.id);
+      if (enforce && prev && prev.ownerProfileId && prev.ownerProfileId !== owner) {
+        throw storeError('PROFILE_MISMATCH', 'task owner mismatch');
+      }
+      if (opts.expectedRevision != null) {
+        var curRev = prev ? (prev.revision || 1) : 0;
+        if (curRev !== opts.expectedRevision) {
+          throw storeError('STALE_WRITE', 'task revision changed');
         }
       }
-      await rawPut(rec);
+      var rec = makeRecord(state, prev);
+      if (enforce && prev && prev.updatedAt && rec.updatedAt &&
+        String(prev.updatedAt) > String(rec.updatedAt)) {
+        throw storeError('STALE_WRITE', 'stale task write');
+      }
+      /* 派生事件只追加：历史 seq 内容必须一致，否则拒绝覆盖权威记录。 */
+      var prevMax = prev ? (prev.eventsUpToSeq || 0) : 0;
+      if (prevMax > 0) {
+        var oldEvents = parseEventsOf(prev.state);
+        var oldBySeq = {};
+        oldEvents.forEach(function (e) { oldBySeq[e.seq] = e; });
+        (state.events || []).forEach(function (e) {
+          if (e.seq > prevMax) return;
+          var old = oldBySeq[e.seq];
+          if (old && eventFingerprint(old) !== eventFingerprint(e)) {
+            throw storeError('EVENT_CONFLICT', 'event seq ' + e.seq + ' changed');
+          }
+        });
+      }
+      if (backend === 'idb') {
+        await txSave(rec, state, prevMax);
+        /* P4-04：每个任务默认保留最近 20 个检查点，避免派生记录无限增长。 */
+        await pruneCheckpoints(state.id, CP_KEEP).catch(function () { return 0; });
+      } else if (backend === 'ls' || backend === 'memory') await rawPut(rec);
+      health.lastSaveAt = rec.updatedAt;
       return rec.id;
     }
 
@@ -324,13 +534,25 @@
       return rec;
     }
 
+    async function readAll(storeName) {
+      if (backend !== 'idb') return [];
+      try {
+        return await idbReq(db, storeName, 'readonly', function (os) { return os.getAll(); });
+      } catch (e) {
+        health.lastError = e && e.name;
+        return [];
+      }
+    }
+
     async function list(opts) {
       opts = opts || {};
       await init();
       var recs = [];
       if (backend === 'idb') recs = await idbReq(db, STORE, 'readonly', function (os) { return os.getAll(); });
-      else if (backend === 'ls') recs = Object.keys(lsRead(lsKey)).map(function (k) { return lsRead(lsKey)[k]; });
-      else recs = Object.keys(memory).map(function (k) { return memory[k]; });
+      else if (backend === 'ls') {
+        var map = lsRead(lsKey);
+        recs = Object.keys(map).map(function (k) { return map[k]; });
+      } else recs = Object.keys(memory).map(function (k) { return memory[k]; });
       if (enforce) {
         recs = recs.filter(function (r) { return r && r.ownerProfileId === owner; });
       }
@@ -339,6 +561,13 @@
       });
       var limit = typeof opts.limit === 'number' ? opts.limit : 20;
       return recs.slice(0, limit).map(summarize);
+    }
+
+    async function listResumable(opts) {
+      opts = opts || {};
+      var limit = typeof opts.limit === 'number' ? opts.limit : 20;
+      var all = await list({ limit: Math.max(limit * 4, 200) });
+      return all.filter(function (x) { return x.resumable && !x.stale; }).slice(0, limit);
     }
 
     async function listByProject(pid, opts) {
@@ -373,11 +602,115 @@
       });
     }
 
+    async function loadCheckpoint(taskId, checkpointId) {
+      await init();
+      var rec = await rawGet(taskId);
+      if (!owned(rec, taskId)) return null;
+      var rows = [];
+      if (backend === 'idb') {
+        rows = (await readAll(CHECKPOINTS)).filter(function (r) { return r && r.taskId === taskId; });
+      }
+      if (!rows.length) {
+        var st = null;
+        try { st = root.AstroTask.fromJSON(rec.state); } catch (e) { st = null; }
+        rows = ((st && st.checkpoints) || []).map(function (cp) { return checkpointRecordOf(cp, rec); });
+      }
+      if (checkpointId) {
+        for (var i = 0; i < rows.length; i++) {
+          if (rows[i].checkpointId === checkpointId) return rows[i];
+        }
+        return null;
+      }
+      rows.sort(function (a, b) {
+        var av = typeof a.version === 'number' ? a.version : 0;
+        var bv = typeof b.version === 'number' ? b.version : 0;
+        if (av !== bv) return av - bv;
+        return String(a.at || '').localeCompare(String(b.at || ''));
+      });
+      return rows.length ? rows[rows.length - 1] : null;
+    }
+
+    async function loadLatestCheckpoint(taskId) {
+      return loadCheckpoint(taskId, null);
+    }
+
+    async function listEvents(taskId, opts) {
+      opts = opts || {};
+      await init();
+      var rec = await rawGet(taskId);
+      if (!owned(rec, taskId)) return [];
+      var st = null;
+      try { st = root.AstroTask.fromJSON(rec.state); } catch (e) { return []; }
+      var embedded = (st.events || []).map(function (e) { return eventRecordOf(e, rec); });
+      if (backend === 'idb') {
+        var rows = (await readAll(EVENTS)).filter(function (r) { return r && r.taskId === taskId; });
+        if (rows.length < embedded.length) {
+          var have = {};
+          rows.forEach(function (r) { have[r.seq] = 1; });
+          var missing = embedded.filter(function (e) { return !have[e.seq]; });
+          if (missing.length) {
+            var copy = missing;
+            await txRun(db, [EVENTS], 'readwrite', function (tx) {
+              var os = tx.objectStore(EVENTS);
+              copy.forEach(function (e) { os.put(e); });
+            }).catch(function () { /* 重建失败不阻断读取 */ });
+          }
+        }
+      }
+      embedded.sort(function (a, b) { return a.seq - b.seq; });
+      var after = typeof opts.afterSeq === 'number' ? opts.afterSeq : 0;
+      embedded = embedded.filter(function (e) { return e.seq > after; });
+      if (typeof opts.limit === 'number') embedded = embedded.slice(0, opts.limit);
+      return embedded;
+    }
+
+    async function pruneCheckpoints(taskId, keep) {
+      await init();
+      var rec = await rawGet(taskId);
+      if (!owned(rec, taskId)) return 0;
+      var keepN = typeof keep === 'number' && keep > 0 ? keep : CP_KEEP;
+      if (backend !== 'idb') return 0;
+      var rows = (await readAll(CHECKPOINTS)).filter(function (r) { return r && r.taskId === taskId; });
+      if (rows.length <= keepN) return 0;
+      rows.sort(function (a, b) {
+        var av = typeof a.version === 'number' ? a.version : 0;
+        var bv = typeof b.version === 'number' ? b.version : 0;
+        if (av !== bv) return av - bv;
+        return String(a.at || '').localeCompare(String(b.at || ''));
+      });
+      var drop = rows.slice(0, rows.length - keepN);
+      await txRun(db, [CHECKPOINTS], 'readwrite', function (tx) {
+        var os = tx.objectStore(CHECKPOINTS);
+        drop.forEach(function (r) { os.delete(r.checkpointId); });
+      });
+      return drop.length;
+    }
+
+    function txRemove(id) {
+      return txRun(db, [STORE, EVENTS, CHECKPOINTS], 'readwrite', function (tx) {
+        tx.objectStore(STORE).delete(id);
+        var evStore = tx.objectStore(EVENTS);
+        var evReq = evStore.getAll();
+        evReq.onsuccess = function () {
+          (evReq.result || []).forEach(function (r) {
+            if (r && r.taskId === id) evStore.delete([r.taskId, r.seq]);
+          });
+        };
+        var cpStore = tx.objectStore(CHECKPOINTS);
+        var cpReq = cpStore.getAll();
+        cpReq.onsuccess = function () {
+          (cpReq.result || []).forEach(function (r) {
+            if (r && r.taskId === id) cpStore.delete(r.checkpointId);
+          });
+        };
+      });
+    }
+
     async function remove(id) {
       await init();
       var rec = await rawGet(id);
       if (!owned(rec, id)) return false;
-      if (backend === 'idb') await idbReq(db, STORE, 'readwrite', function (os) { return os.delete(id); });
+      if (backend === 'idb') await txRemove(id);
       else if (backend === 'ls') { var map = lsRead(lsKey); delete map[id]; lsWrite(lsKey, map); }
       else delete memory[id];
       return true;
@@ -385,10 +718,25 @@
 
     async function clear() {
       await init();
-      if (backend === 'idb') await idbReq(db, STORE, 'readwrite', function (os) { return os.clear(); });
-      else if (backend === 'ls') lsWrite(lsKey, {});
+      if (backend === 'idb') {
+        await txRun(db, [STORE, EVENTS, CHECKPOINTS, META], 'readwrite', function (tx) {
+          tx.objectStore(STORE).clear();
+          tx.objectStore(EVENTS).clear();
+          tx.objectStore(CHECKPOINTS).clear();
+          tx.objectStore(META).clear();
+        });
+      } else if (backend === 'ls') lsWrite(lsKey, {});
       else memory = {};
       return true;
+    }
+
+    function getHealth() {
+      return {
+        backend: backend,
+        dbVersion: backend === 'idb' ? DB_VER : null,
+        lastError: health.lastError,
+        lastSaveAt: health.lastSaveAt
+      };
     }
 
     return {
@@ -397,11 +745,17 @@
       get: get,
       getRecord: getRecord,
       list: list,
+      listResumable: listResumable,
       listByProject: listByProject,
+      loadLatestCheckpoint: loadLatestCheckpoint,
+      loadCheckpoint: loadCheckpoint,
+      listEvents: listEvents,
+      pruneCheckpoints: pruneCheckpoints,
       remove: remove,
       clear: clear,
       summarize: summarize,
       isResumable: isResumable,
+      getHealth: getHealth,
       backend: function () { return backend; },
       ownerProfileId: function () { return owner; },
       dbName: function () { return dbName; }
@@ -417,6 +771,7 @@
     LS_KEY: BASE_LS,
     QUARANTINE_DB: QUARANTINE_DB,
     MIGRATION_KEY: MIGRATION_KEY,
-    version: '1.1.0'
+    DB_VER: DB_VER,
+    version: '2.0.0'
   };
 })(typeof window !== 'undefined' ? window : global);

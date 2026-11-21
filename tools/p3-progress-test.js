@@ -78,7 +78,7 @@ var rep = Report.build({
 });
 ok('P3-P4-01 报告含 execution', !!rep.execution);
 ok('P3-P4-02 执行摘要统计', rep.execution.counts.total === 1 && rep.execution.counts.ok === 1);
-ok('P3-P4-03 恢复次数透出', rep.execution.paused.recoveries === 1 && rep.execution.paused.limit === 3);
+ok('P3-P4-03 恢复次数透出', rep.execution.paused.recoveries === 1 && rep.execution.paused.limit === 1);
 ok('P3-P4-04 goal 覆盖透出', rep.execution.goal.objectives[0].covered === true);
 ok('P3-P4-05 plan 元信息', rep.execution.planId === 'p1' && rep.execution.planVersion === 2 && rep.execution.template === 'T-E');
 

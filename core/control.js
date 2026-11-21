@@ -173,7 +173,8 @@
     }
   }
 
-  function saveState(store, state, principal) {
+  function saveState(store, state, principal, opts) {
+    opts = opts || {};
     if (!store || typeof store.save !== 'function') return Promise.resolve(null);
     if (principal && root.Security) {
       if (!root.Security.ensureSession(principal).allowed) return Promise.resolve(null);
@@ -182,7 +183,11 @@
         return Promise.resolve(null);
       }
     }
-    return Promise.resolve(store.save(state)).catch(function () { return null; });
+    var saveOpts = opts.expectedRevision != null ? { expectedRevision: opts.expectedRevision } : undefined;
+    return Promise.resolve(store.save(state, saveOpts)).catch(function (e) {
+      if (opts.rethrow) throw e;
+      return null;
+    });
   }
 
   /* P1：检查点写入失败不得影响任务执行（审计性数据，不阻断主链路）。 */
@@ -281,6 +286,11 @@
     var state = prepared.state;
     var eventIndex = 0;
     var cpWritten = {};
+    /* P4：每个批次结束后落盘；critical 成功步骤同时生成检查点。 */
+    var onBatchSettled = async function () {
+      checkpointCriticalSteps(state, cpWritten);
+      await saveState(rt.store, state, rt.principal);
+    };
 
     /* P0：任务创建前置授权。无 Profile 的 Node 环境 principal=null，保持旧行为。 */
     var createDecision = principal ? authorized(principal, 'create', null) : { allowed: true };
@@ -345,7 +355,8 @@
     var runner = await O.runPlan(prepared.plan, state, {
       registry: rt.registry, ctx: ctx, cfg: cfg, adapter: rt.adapter,
       signal: opts.signal || null,
-      principal: rt.principal
+      principal: rt.principal,
+      onBatchSettled: onBatchSettled
     });
 
     if (runner && runner.aborted) {
@@ -408,7 +419,8 @@
       replans += 1;
       runner = await O.runPlan(newPlan, state, {
         registry: rt.registry, ctx: ctx, cfg: cfg, adapter: rt.adapter,
-        signal: opts.signal || null
+        signal: opts.signal || null,
+        onBatchSettled: onBatchSettled
       });
       currentPlan = newPlan;
 
@@ -479,7 +491,8 @@
       T.transition(state, 'EXECUTE');
       runner = await O.runPlan(expanded, state, {
         registry: rt.registry, ctx: ctx, cfg: cfg, adapter: rt.adapter,
-        signal: opts.signal || null
+        signal: opts.signal || null,
+        onBatchSettled: onBatchSettled
       });
       appendRounds += 1;
       checkpointCriticalSteps(state, cpWritten);
@@ -573,6 +586,8 @@
     var resumable = store.isResumable ? store.isResumable(state) : false;
     return {
       state: state, resumable: resumable, viewOnly: !resumable,
+      record: rec || null,
+      revision: rec && typeof rec.revision === 'number' ? rec.revision : null,
       ownerProfileId: rec ? rec.ownerProfileId : null,
       projectId: rec ? rec.projectId : null,
       principal: principal
@@ -608,6 +623,8 @@
     }
     state.pausedAt = new Date().toISOString();
     if (T) T.appendEvent(state, 'task.paused', { reason: 'user' });
+    /* P4：暂停与检查点一次保存，恢复时检查点可作为完整性锚点。 */
+    safeCheckpoint(state, { taskStatus: 'PAUSED', paused: true });
     var store = opts.store || defaultStore();
     await saveState(store, state, principal);
     if (root.AuditLog) {
@@ -649,25 +666,15 @@
       }
     }
 
-    /* P1：恢复前校验任务版本与所属课题状态，避免恢复已归档/删除课题的任务。 */
+    /* P1：恢复前校验任务版本，避免加载不兼容状态。 */
     if (!loaded.state || loaded.state.schemaVersion !== 1) {
       return {
         state: loaded.state, answer: null, resumable: false, viewOnly: true,
         verdict: 'DENIED', error: 'SCHEMA_INCOMPATIBLE'
       };
     }
-    /* P3：检查点完整性。旧任务可能没有检查点，保持兼容；存在时最新检查点必须可验。 */
-    var cps = loaded.state.checkpoints || [];
-    if (cps.length) {
-      var latestCp = cps[cps.length - 1];
-      if (!latestCp || typeof latestCp.stateHash !== 'string' || !latestCp.stateHash) {
-        return {
-          state: loaded.state, answer: null, resumable: true, viewOnly: true,
-          verdict: 'DENIED', error: 'CHECKPOINT_INVALID'
-        };
-      }
-    }
-    /* P3：恢复次数受预算档位硬限制（L1:0 / L2:1 / L3-L4:3）。 */
+
+    /* P3：恢复次数受预算档位硬限制（P4/D-1：L1=0，L2/L3/L4=1）。 */
     var recLimit = loaded.state.budget && loaded.state.budget.limit
       ? loaded.state.budget.limit.recoveries : 0;
     var recUsed = loaded.state.budget && loaded.state.budget.used
@@ -678,12 +685,28 @@
         verdict: 'DENIED', error: 'RECOVERY_LIMIT'
       };
     }
+
+    var rt = makeRuntime(Object.assign({}, opts, { principal: principal }));
+    var state = loaded.state;
+    var eventIndex = 0;
+    var cps = state.checkpoints || [];
+
+    /* P4：取最新检查点；旧任务无检查点时保持 P3 兼容（允许恢复）。 */
+    var latestCp = null;
+    if (opts.store && typeof opts.store.loadLatestCheckpoint === 'function') {
+      try { latestCp = await opts.store.loadLatestCheckpoint(taskId); } catch (e) { latestCp = null; }
+    }
+    if (!latestCp && cps.length) latestCp = cps[cps.length - 1];
+
+    /* P1：恢复前校验所属课题状态，避免恢复已归档/删除课题的任务。 */
+    var proj = null;
+    var projectLoaded = false;
     if (loaded.projectId && root.AstroResearchStore && principal) {
-      var proj = null;
       try {
         var rs = root.AstroResearchStore.create({});
         proj = await rs.getProject(loaded.projectId, principal);
       } catch (e) { proj = null; }
+      projectLoaded = true;
       if (!proj || proj.status === 'archived' || proj.status === 'deleted') {
         if (root.AuditLog) {
           root.AuditLog.record({
@@ -698,6 +721,44 @@
         };
       }
     }
+
+    /* P4：17 项恢复校验；无检查点的历史任务跳过检查点完整性。 */
+    var validation = { ok: true, errors: [] };
+    if (root.AstroRecovery) {
+      validation = root.AstroRecovery.validate({
+        state: state,
+        record: loaded.record || null,
+        checkpoint: latestCp,
+        principal: principal,
+        enforcePrincipal: !!principal,
+        project: projectLoaded ? proj : undefined,
+        registry: rt.registry,
+        authorized: principal ? authorized(principal, 'resume', {
+          id: taskId, ownerProfileId: loaded.ownerProfileId, projectId: loaded.projectId
+        }) : null,
+        limit: recLimit
+      });
+    } else if (cps.length) {
+      var fallbackCp = latestCp;
+      if (!fallbackCp || typeof fallbackCp.stateHash !== 'string' || !fallbackCp.stateHash) {
+        validation = { ok: false, errors: [{ code: 'CHECKPOINT_INVALID', detail: 'stateHash' }] };
+      }
+    }
+    if (!validation.ok) {
+      if (root.AuditLog) {
+        root.AuditLog.record({
+          action: 'task.resume', resourceType: 'task', resourceId: taskId,
+          projectId: loaded.projectId || null, decision: 'deny',
+          reason: validation.errors[0].code
+        });
+      }
+      return {
+        state: loaded.state, answer: null, resumable: true, viewOnly: true,
+        verdict: 'DENIED', error: validation.errors[0].code,
+        recovery: { attempt: recUsed, limit: recLimit, errors: validation.errors }
+      };
+    }
+
     if (root.AuditLog) {
       root.AuditLog.record({
         action: 'task.resume', resourceType: 'task', resourceId: taskId,
@@ -705,10 +766,7 @@
       });
     }
 
-    var rt = makeRuntime(Object.assign({}, opts, { principal: principal }));
-    var state = loaded.state;
-    var eventIndex = 0;
-    /* P3：恢复计入预算；pausedAt 清除后再继续。 */
+    /* P3/P4：恢复计入预算；pausedAt 清除后再继续。 */
     state.pausedAt = null;
     state.recoveries = (state.recoveries || 0) + 1;
     try { T.spend(state.budget, { recoveries: 1 }); } catch (e) {
@@ -719,40 +777,67 @@
       };
     }
 
-    var planById = {};
-    ((state.plan && state.plan.steps) || []).forEach(function (ps) { planById[ps.id] = ps; });
-    (state.steps || []).forEach(function (s) {
-      if (s.status === 'running') {
-        s.status = 'pending';
-        s.error = null;
-        s.cancelled = false;
-      } else if (s.status === 'paused' || s.status === 'waiting_approval') {
-        s.status = 'pending';
-        s.error = null;
-      } else if (s.status === 'ok' && s.inputHash) {
-        /* 结果复用：输入未变才复用；输入变化则重新执行，避免旧结果污染。 */
-        var ps = planById[s.id];
-        var want = ps ? T.computeInputHash(ps.args || {}) : null;
-        if (want && want !== s.inputHash) {
+    /* P4/D-2：按工具幂等性决定复用或重跑。 */
+    var strategies = { reuse: [], rerun: [], blocked: [] };
+    if (root.AstroRecovery) {
+      var applied = root.AstroRecovery.apply({
+        state: state, checkpoint: latestCp, registry: rt.registry
+      });
+      strategies = applied.applied;
+    } else {
+      (state.steps || []).forEach(function (s) {
+        if (s.status === 'running' || s.status === 'paused' || s.status === 'waiting_approval') {
           s.status = 'pending';
-          s.result = null;
-          s.outputHash = null;
+          s.error = null;
+          s.cancelled = false;
         }
-      }
-    });
+      });
+    }
     T.appendEvent(state, 'task.recovered', { reason: 'resume' });
+    safeCheckpoint(state, { taskStatus: 'RECOVERY', paused: false });
+
+    /* P4：先持久化恢复起点，再执行；重复点击由 revision 拦截。 */
+    try {
+      await saveState(rt.store, state, rt.principal, {
+        expectedRevision: loaded.revision, rethrow: true
+      });
+    } catch (e) {
+      if (e && e.code === 'STALE_WRITE') {
+        return {
+          state: state, answer: null, resumable: true, viewOnly: true,
+          verdict: 'DENIED', error: 'STALE_WRITE',
+          recovery: { attempt: state.recoveries, limit: recLimit, strategies: strategies }
+        };
+      }
+      return {
+        state: state, answer: null, resumable: true, viewOnly: true,
+        verdict: 'DENIED', error: (e && e.code) || 'PERSIST_TX_FAILED',
+        recovery: { attempt: state.recoveries, limit: recLimit, strategies: strategies }
+      };
+    }
+
+    var cpWritten = {};
+    var onBatchSettled = async function () {
+      checkpointCriticalSteps(state, cpWritten);
+      await saveState(rt.store, state, rt.principal);
+    };
     var runner = await O.runPlan(state.plan, state, {
       registry: rt.registry, ctx: ctx || {}, cfg: cfg, adapter: rt.adapter,
       signal: opts.signal || null,
-      principal: rt.principal
+      principal: rt.principal,
+      onBatchSettled: onBatchSettled
     });
-    checkpointCriticalSteps(state, {});
+    checkpointCriticalSteps(state, cpWritten);
+    var recoveryInfo = { attempt: state.recoveries, limit: recLimit, strategies: strategies };
     if (runner && runner.aborted) {
       T.appendEvent(state, 'task.cancelled', { reason: 'user' });
       T.transition(state, 'ABORTED');
       emitNew(state, eventIndex, opts);
       await saveState(rt.store, state, rt.principal);
-      return { state: state, answer: null, runner: runner, cancelled: true, verdict: 'ABORTED', resumable: false };
+      return {
+        state: state, answer: null, runner: runner, cancelled: true,
+        verdict: 'ABORTED', resumable: false, recovery: recoveryInfo
+      };
     }
 
     var answer = runner ? runner.answer : null;
@@ -780,7 +865,10 @@
       T.transition(state, 'FAILED');
       emitNew(state, eventIndex, opts);
       await saveState(rt.store, state, rt.principal);
-      return { state: state, answer: null, runner: runner, verdict: 'FAIL', resumable: false };
+      return {
+        state: state, answer: null, runner: runner, verdict: 'FAIL',
+        resumable: false, error: 'NO_ANSWER', recovery: recoveryInfo
+      };
     }
     var finalVerdict = rawVerdict === 'PASS' ? 'PASS' : 'PARTIAL';
     T.transition(state, 'COMPOSE');
@@ -789,7 +877,8 @@
     await saveState(rt.store, state, rt.principal);
     return {
       state: state, answer: answer, runner: runner, delivery: delivery,
-      verdict: finalVerdict, resumed: true, resumable: false
+      verdict: finalVerdict, resumed: true, resumable: false,
+      error: null, recovery: recoveryInfo
     };
   }
 

@@ -43,8 +43,8 @@
   var BUDGET_LIMITS = {
     L1: { ms: 300, tokens: 0, llmCalls: 0, searches: 0, parallel: 1, replans: 0, appends: 0, retries: 0, recoveries: 0 },
     L2: { ms: 3000, tokens: 1200, llmCalls: 1, searches: 1, parallel: 2, replans: 1, appends: 1, retries: 1, recoveries: 1 },
-    L3: { ms: 15000, tokens: 3000, llmCalls: 2, searches: 2, parallel: 4, replans: 2, appends: 3, retries: 1, recoveries: 3 },
-    L4: { ms: 120000, tokens: 8000, llmCalls: 3, searches: 3, parallel: 4, replans: 2, appends: 3, retries: 1, recoveries: 3 }
+    L3: { ms: 15000, tokens: 3000, llmCalls: 2, searches: 2, parallel: 4, replans: 2, appends: 3, retries: 1, recoveries: 1 },
+    L4: { ms: 120000, tokens: 8000, llmCalls: 3, searches: 3, parallel: 4, replans: 2, appends: 3, retries: 1, recoveries: 1 }
   };
 
   var BUDGET_FIELDS = ['ms', 'tokens', 'llmCalls', 'searches', 'parallel', 'replans', 'appends', 'retries', 'recoveries'];
@@ -742,10 +742,17 @@
       stepId: meta.stepId || null,
       inputHash: meta.inputHash || computeInputHash(snapshot),
       stateHash: sha256Hex(canonicalJSON(snapshot)),
+      /* P4：保存 stateHash 原像，恢复时可复算；旧检查点无此字段时跳过复算。 */
+      snapshot: snapshot,
       budgetUsed: JSON.parse(JSON.stringify(state.budget && state.budget.used ? state.budget.used : {})),
       projectId: state.projectId || meta.projectId || null,
       taskStatus: meta.taskStatus || state.phase,
-      version: (state.checkpoints.length || 0) + 1,
+      version: isFiniteNumber(meta.version) ? meta.version
+        : (state.checkpoints.length
+          ? (isFiniteNumber(state.checkpoints[state.checkpoints.length - 1].version)
+            ? state.checkpoints[state.checkpoints.length - 1].version + 1
+            : state.checkpoints.length + 1)
+          : 1),
       memoryIds: cloneArray(meta.memoryIds),
       evidenceIds: cloneArray(meta.evidenceIds),
       claimIds: cloneArray(meta.claimIds),
@@ -763,6 +770,10 @@
         : (isFiniteNumber(state.recoveries) ? state.recoveries : 0)
     };
     state.checkpoints.push(cp);
+    /* P4：保留最近 20 个检查点；version 基于上一检查点，不因修剪重置。 */
+    if (state.checkpoints.length > 20) {
+      state.checkpoints.splice(0, state.checkpoints.length - 20);
+    }
     state.updatedAt = nowIso();
     return cp;
   }

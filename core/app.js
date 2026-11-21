@@ -8364,6 +8364,28 @@
   }
 
   /* V1.1：刷新后只提示未完成任务，用户点击才恢复，避免启动时自动跑长任务。 */
+  function resumeFailureText(code) {
+    var map = {
+      RECOVERY_LIMIT: '该任务的恢复次数已达上限，请重新提问',
+      CHECKPOINT_INVALID: '任务数据完整性校验未通过，已保留原记录',
+      SCHEMA_INCOMPATIBLE: '任务版本不兼容，请重新提问',
+      PROJECT_NOT_ACTIVE: '所属课题已归档或删除，无法恢复',
+      PROJECT_NOT_FOUND: '所属课题不存在，无法恢复',
+      PROFILE_MISMATCH: '任务不属于当前档案，无法恢复',
+      SESSION_CHANGED: '登录状态已变化，请刷新后重试',
+      TOOL_MISSING: '任务所需工具已不可用，无法恢复',
+      SKILL_REVOKED: '任务所需 Skill 已撤销，无法恢复',
+      SKILL_VERSION_MISMATCH: '任务所需 Skill 版本已变化，无法恢复',
+      PLAN_VERSION_MISMATCH: '任务计划版本已变化，无法自动恢复',
+      DEP_INVALID: '任务依赖关系损坏，无法恢复',
+      BUDGET_EXHAUSTED: '任务预算已耗尽，无法恢复',
+      STALE_WRITE: '任务已在其他页面更新，请刷新后重试',
+      PERSIST_TX_FAILED: '任务保存失败，请稍后重试',
+      QUOTA_EXCEEDED: '本机存储空间不足，请清理旧任务后重试'
+    };
+    return map[code] || '任务恢复失败';
+  }
+
   function offerResumeTask() {
     if (!window.AstroTaskStore || !window.AstroControlBridge) return;
     /* P0：旧任务归属未知，先复制到隔离区，避免被当前档案当成自己的任务。 */
@@ -8393,9 +8415,18 @@
           var st = item.state || {};
           var steps = Array.isArray(st.steps) ? st.steps : [];
           var done = steps.filter(function (s) { return s.status === 'ok'; }).length;
+          var waiting = steps.some(function (s) { return s.status === 'waiting_approval'; });
+          var metaText = done + '/' + steps.length + ' 步 · ' + (st.phase || '');
+          if (waiting) metaText += ' · ' + L('待审批');
+          else if (item.meta.paused) metaText += ' · ' + L('已暂停');
+          if (item.meta.recoveries) metaText += ' · ' + L('已恢复') + item.meta.recoveries + L('次');
+          if (item.meta.updatedAt) {
+            var saved = String(item.meta.updatedAt).slice(0, 16).replace('T', ' ');
+            if (saved) metaText += ' · ' + L('保存于') + saved;
+          }
           var row = el('div', 'resume-row');
           row.appendChild(el('span', 'resume-q', esc(item.meta.question || '')));
-          row.appendChild(el('span', 'resume-meta', esc(done + '/' + steps.length + ' 步 · ' + (st.phase || ''))));
+          row.appendChild(el('span', 'resume-meta', esc(metaText)));
           var btn = el('button', 'btn-ghost', L('继续任务'));
           btn.type = 'button';
           btn.addEventListener('click', function () {
@@ -8406,7 +8437,7 @@
             window.AstroControlBridge.resume(item.meta.id, ctx, cfgRun, { store: store }).then(function (r) {
               row.remove();
               if (!card.querySelector('.resume-row')) box.remove();
-              if (!r || !r.answer) { toast(L('任务恢复失败')); return; }
+              if (!r || !r.answer) { toast(L(resumeFailureText(r && r.error))); return; }
               r.answer.query = item.meta.question;
               renderAnswer(r.answer, { control: true, resumed: true, state: r.state || null });
             }).catch(function (e) {

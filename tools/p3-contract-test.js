@@ -22,7 +22,7 @@ ok('P3-T1-02 STEP_STATUS 含 waiting_approval', T.STEP_STATUS.indexOf('waiting_a
 /* T2 预算档位 */
 ok('P3-T2-01 L1 不允许恢复', T.BUDGET_LIMITS.L1.recoveries === 0, T.BUDGET_LIMITS.L1.recoveries);
 ok('P3-T2-02 L2 允许 1 次恢复', T.BUDGET_LIMITS.L2.recoveries === 1);
-ok('P3-T2-03 L3 允许 3 次恢复', T.BUDGET_LIMITS.L3.recoveries === 3);
+ok('P3-T2-03 L3 允许 1 次恢复（P4/D-1）', T.BUDGET_LIMITS.L3.recoveries === 1, T.BUDGET_LIMITS.L3.recoveries);
 
 /* T3 新增字段往返 */
 var st = T.create({
@@ -39,7 +39,7 @@ ok('P3-T3-01 goal 保留', st.goal && st.goal.goalId === 'g1');
 ok('P3-T3-02 pausedAt 保留', st.pausedAt === '2026-11-21T00:00:00.000Z');
 ok('P3-T3-03 recoveries 保留', st.recoveries === 2);
 ok('P3-T3-04 planHistory 保留', st.planHistory.length === 1);
-ok('P3-T3-05 预算补齐 recoveries', st.budget.limit.recoveries === 3 && st.budget.used.recoveries === 0);
+ok('P3-T3-05 预算补齐 recoveries', st.budget.limit.recoveries === 1 && st.budget.used.recoveries === 0);
 var round = T.fromJSON(T.toJSON(st));
 ok('P3-T3-06 往返一致', round.goal.goalId === 'g1' && round.recoveries === 2 && round.planHistory.length === 1);
 
@@ -54,7 +54,7 @@ delete legacy.planHistory;
 var okLegacy = true, legacyErr = '';
 try { legacy = T.fromJSON(legacy); } catch (e) { okLegacy = false; legacyErr = e.message; }
 ok('P3-T4-01 旧任务可加载', okLegacy, legacyErr);
-ok('P3-T4-02 旧任务补齐默认值', legacy.recoveries === 0 && legacy.budget.limit.recoveries === 3);
+ok('P3-T4-02 旧任务补齐默认值', legacy.recoveries === 0 && legacy.budget.limit.recoveries === 1);
 
 /* T5 步骤可选语义字段 */
 ok('P3-T5-01 步骤 kind/agentId 保留', st.steps[0].kind === '' && st.steps[0].agentId === '');
