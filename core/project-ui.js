@@ -243,7 +243,9 @@
     var section = el('section', 'side-block');
     section.id = 'projectBlock';
     var head = el('div', 'side-head');
-    head.appendChild(el('h3', '', '研究课题'));
+    var projectTitle = el('h3', '', root.I18N ? root.I18N.t('研究课题') : '研究课题');
+    projectTitle.setAttribute('data-i18n', '研究课题');
+    head.appendChild(projectTitle);
     var hint = el('span', 'side-hint', '隔离记忆');
     head.appendChild(hint);
     section.appendChild(head);

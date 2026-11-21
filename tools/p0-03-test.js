@@ -89,7 +89,9 @@ var QUESTIONS = [
 
 var EXPECTED = [
   { intent: 'smalltalk', sha: '0b527669f17e21b9d21a2b5b79a38899f2b974565735c9c2bbff17cc39d56b5e', bytes: 713 },
-  { intent: 'tonight', sha: '56d653765f9840cd15d00125075f92279bd66d4a00eaf38cc85fa47b8e4e6d82', bytes: 2510 },
+  /* 2026-11-21 岁差修正：星表坐标由 J2000 岁差到观测历元，
+   * 涉及时刻/高度/角距的第 2、11、12、13、14、16、19、20 问基线同步更新。 */
+  { intent: 'tonight', sha: '958af9748a29111d42215a3c4ac954c5d4f3f268f5d1c98e9951f163684eb422', bytes: 2509 },
   { intent: 'cosmos', sha: '39517ba478a0c3606c6e030892d0bba6b261e3bf712723af71c623de62632dff', bytes: 3372 },
   { intent: 'nova', sha: '7265d9373cedf4a1abc37ea84f4e8fc27b66bdf2c6c5bd3c737fca728a2a1329', bytes: 2147 },
   { intent: 'helios', sha: '1c46ec4965ccdff7c5fa4d7477685256301ed6c8052a8060a0df2de1f59c3b75', bytes: 1748 },
@@ -100,18 +102,18 @@ var EXPECTED = [
   { intent: 'gear-fit', sha: '87f6b67831cb19c4ac300411c4d8ce38008e19b04e1e7ada47831da3d457362b', bytes: 1450 },
   /* 2026-11-02 用户授权更新：M42 理论焦距由错误的 93,258 mm 修正为 259 mm；
    * 第 11 问 sections 基线同步更新，其余 19 问哈希保持不变。 */
-  { intent: 'photo-target', sha: 'c71400db293f74195fb1c8e0681c2f06e3fe8c40bd38c2948c5e7d39391186e4', bytes: 2259 },
-  { intent: 'observe-target', sha: '877a8b00133d3718b88ca24188229d243d46b8298f47def48adcbda81c3c3516', bytes: 2678 },
-  { intent: 'knowledge-target', sha: '8572b0d5c150b480c544f8a8f1e97a501e62170c45bd6477e57ddf8453632544', bytes: 2560 },
-  { intent: 'intro-target', sha: '4b0d8b0d4fb17690aeb382a0ac8dd584fc700e6cbf3a8d19845377eb1617807e', bytes: 2641 },
+  { intent: 'photo-target', sha: 'a561d7ed8fdc051792b3136f8530cd0d27f51c2e82c92059b5e536ed81a22f3d', bytes: 2259 },
+  { intent: 'observe-target', sha: 'a103cbf8fbb26b3d9b7fee24827f40111174127f0b5263a9be151444f1571fdc', bytes: 2678 },
+  { intent: 'knowledge-target', sha: 'c842d2610ee438ccb53e41f5e53dfccd597a500b15c78d06df252c54d02b18f6', bytes: 2560 },
+  { intent: 'intro-target', sha: '0bc29692603f956f4bf389a49be6eec1792c8db9c9c07d5bf2e810e186575dc1', bytes: 2641 },
   /* 2026-11-03 V1.10 有意变更：第 15 问 unknown 的结论从“本地没有这个问题的依据”
    * 改为“系统内置知识中暂未找到相关内容，尚未完成外部科研资料核验”。其余 19 问不变。 */
   { intent: 'unknown', sha: '3e26c46c15ff1ceab0e8c1d93a601f68af1c5d05e1910d9e238a0b4ba4c33979', bytes: 990 },
-  { intent: 'observe-target', sha: '877a8b00133d3718b88ca24188229d243d46b8298f47def48adcbda81c3c3516', bytes: 2678 },
+  { intent: 'observe-target', sha: 'a103cbf8fbb26b3d9b7fee24827f40111174127f0b5263a9be151444f1571fdc', bytes: 2678 },
   { intent: 'observe-target', sha: '4832825eed3324153aa7018bb642f2f8201b9b7b9f10c36a59a8ddb72f6d57e3', bytes: 2904 },
   { intent: 'cosmos', sha: '39517ba478a0c3606c6e030892d0bba6b261e3bf712723af71c623de62632dff', bytes: 3372 },
-  { intent: 'tonight', sha: '56d653765f9840cd15d00125075f92279bd66d4a00eaf38cc85fa47b8e4e6d82', bytes: 2510 },
-  { intent: 'tonight', sha: '91b2024aa044684ab199be541f46c280f8b1a9acdf64a5acdead382ba02dc191', bytes: 2532 }
+  { intent: 'tonight', sha: '958af9748a29111d42215a3c4ac954c5d4f3f268f5d1c98e9951f163684eb422', bytes: 2509 },
+  { intent: 'tonight', sha: '2d1a1172574486b6f7cf3887b3d0c7a5c90e99be538f489a76b53ac70b92a882', bytes: 2531 }
 ];
 
 var SNAPSHOT_CHECKS = {

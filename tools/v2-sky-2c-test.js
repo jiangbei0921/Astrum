@@ -111,7 +111,7 @@ ok('R3.1 1000 组随机往返 ≤1e-9', (function () {
   for (var i = 0; i < 1000; i++) {
     var ra = (i * 0.61803398875 * 24) % 24;
     var dec = -89 + (i * 0.7421 % 178);
-    var aa = A.altAz(ra, dec, JD, LAT, LON);
+    var aa = A.altAzJ2000(ra, dec, JD, LAT, LON);
     var back = SkyVM.altAzToEq(aa.alt, aa.az, JD, LAT, LON);
     max = Math.max(max, wrapDiff(back.ra, ra), Math.abs(back.dec - dec));
   }
@@ -123,7 +123,7 @@ ok('R3.2 记录最大往返误差', (function () {
   for (var i = 0; i < 1000; i++) {
     var ra = (i * 0.61803398875 * 24) % 24;
     var dec = -89 + (i * 0.7421 % 178);
-    var aa = A.altAz(ra, dec, JD, LAT, LON);
+    var aa = A.altAzJ2000(ra, dec, JD, LAT, LON);
     var back = SkyVM.altAzToEq(aa.alt, aa.az, JD, LAT, LON);
     max = Math.max(max, wrapDiff(back.ra, ra), Math.abs(back.dec - dec));
   }
@@ -134,7 +134,7 @@ ok('R3.2 记录最大往返误差', (function () {
 ok('R3.3 极区（dec ±89.9）往返', (function () {
   var okAll = true;
   [89.9, -89.9].forEach(function (dec) {
-    var aa = A.altAz(6, dec, JD, LAT, LON);
+    var aa = A.altAzJ2000(6, dec, JD, LAT, LON);
     var back = SkyVM.altAzToEq(aa.alt, aa.az, JD, LAT, LON);
     if (!back || Math.abs(back.dec - dec) > 1e-9) okAll = false;
   });

@@ -161,6 +161,8 @@
       var done = false;
       var timer = null;
       var onAbort = null;
+      var ctl = typeof AbortController === 'function' ? new AbortController() : null;
+      var attemptSignal = ctl ? ctl.signal : signal;
       function finish(v) {
         if (done) return;
         done = true;
@@ -168,16 +170,24 @@
         if (signal && onAbort) signal.removeEventListener('abort', onAbort);
         resolve(v);
       }
+      /* 超时/取消时先 abort 本次尝试的下游请求，再返回结果；
+       * 不能只忽略 Promise —— 否则工具仍会继续消耗配额或产生副作用。 */
+      function abortNow(v) {
+        if (ctl && !ctl.signal.aborted) {
+          try { ctl.abort(); } catch (e) { /* ignore */ }
+        }
+        finish(v);
+      }
       if (signal && signal.aborted) { finish(abortedResult()); return; }
       if (signal && signal.addEventListener) {
-        onAbort = function () { finish(abortedResult()); };
+        onAbort = function () { abortNow(abortedResult()); };
         signal.addEventListener('abort', onAbort);
       }
       timer = setTimeout(function () {
-        finish({ ok: false, reason: 'timeout', kind: 'timeout', retriable: true });
+        abortNow({ ok: false, reason: 'timeout', kind: 'timeout', retriable: true });
       }, Math.max(1, ms || 500));
       var call;
-      try { call = fn(); } catch (e) { call = Promise.reject(e); }
+      try { call = fn(attemptSignal); } catch (e) { call = Promise.reject(e); }
       Promise.resolve(call).then(function (r) {
         finish(r);
       }, function (e) {
@@ -412,7 +422,8 @@
       }
       if (!T.canAfford(state.budget, cost)) break;
 
-      var raw = await withTimeout(function () {
+      var raw = await withTimeout(function (attemptSignal) {
+        /* attemptSignal 同时受任务外部 signal 与本次尝试超时控制。 */
         /* P0：有可信身份时统一走 ToolGateway；Node 旧测试无 principal，保持原路径。
          * 编排主体（Muse）按工具域委托给专业角色，能力不扩权。 */
         if (root.ToolGateway && opts.principal) {
@@ -426,11 +437,11 @@
           }
           return root.ToolGateway.invoke(execPrincipal, planStep.tool, planStep.args || {}, {
             registry: opts.registry, ctx: opts.ctx, cfg: opts.cfg,
-            depResults: depResults, signal: signal, taskId: state.id, attempt: attempts
+            depResults: depResults, signal: attemptSignal || signal, taskId: state.id, attempt: attempts
           });
         }
         return spec.run(planStep.args || {}, opts.ctx, spec, opts.cfg, depResults, {
-          signal: signal, taskId: state.id, attempt: attempts
+          signal: attemptSignal || signal, taskId: state.id, attempt: attempts
         });
       }, spec.timeoutMs, signal);
       var normalized = normalizeResult(raw);

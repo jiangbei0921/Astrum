@@ -103,21 +103,41 @@
     return 'exception';
   }
 
-  function withTimeout(fn, ms) {
+  function withTimeout(fn, ms, signal) {
     return new Promise(function (resolve) {
       var done = false;
       var timer = null;
+      var onAbort = null;
+      var ctl = typeof AbortController === 'function' ? new AbortController() : null;
+      var attemptSignal = ctl ? ctl.signal : signal;
       function finish(v) {
         if (done) return;
         done = true;
         if (timer) clearTimeout(timer);
+        if (signal && onAbort) signal.removeEventListener('abort', onAbort);
         resolve(v);
       }
+      function abortNow(v) {
+        if (ctl && !ctl.signal.aborted) {
+          try { ctl.abort(); } catch (e) { /* ignore */ }
+        }
+        finish(v);
+      }
+      if (signal && signal.aborted) {
+        finish({ ok: false, reason: 'cancelled', kind: 'cancelled', retriable: false });
+        return;
+      }
+      if (signal && signal.addEventListener) {
+        onAbort = function () {
+          abortNow({ ok: false, reason: 'cancelled', kind: 'cancelled', retriable: false });
+        };
+        signal.addEventListener('abort', onAbort);
+      }
       timer = setTimeout(function () {
-        finish({ ok: false, reason: 'timeout', kind: 'timeout', retriable: false });
+        abortNow({ ok: false, reason: 'timeout', kind: 'timeout', retriable: false });
       }, Math.max(1, Math.min(MAX_TIMEOUT, ms || MAX_TIMEOUT)));
       var call;
-      try { call = fn(); } catch (e) { call = Promise.reject(e); }
+      try { call = fn(attemptSignal); } catch (e) { call = Promise.reject(e); }
       Promise.resolve(call).then(finish, function (e) {
         finish({ ok: false, reason: e && e.message ? e.message : String(e), kind: 'tool_error', retriable: false });
       });
@@ -268,18 +288,18 @@
         if (fx != null) {
           out = isPlainObject(fx) && typeof fx.ok === 'boolean' ? fx : { ok: true, result: fx };
         } else {
-          out = await withTimeout(function () {
+          out = await withTimeout(function (attemptSignal) {
             /* 唯一出口：所有工具调用都经 ToolGateway（授权、参数校验、审计） */
             if (!root.ToolGateway || typeof root.ToolGateway.invoke !== 'function') {
               return { ok: false, reason: 'GATEWAY_MISSING', kind: 'tool_unavailable', retriable: false };
             }
             return root.ToolGateway.invoke(principal, step.tool, stepArgs, {
               registry: registry,
-              signal: opts.signal || null,
+              signal: attemptSignal || opts.signal || null,
               taskId: opts.taskId || null,
               attempt: attempt
             });
-          }, Math.min(MAX_TIMEOUT, step.timeoutMs || content.timeoutMs || 60000));
+          }, Math.min(MAX_TIMEOUT, step.timeoutMs || content.timeoutMs || 60000), opts.signal);
         }
         if (out && out.ok !== false) break;
         var retriable = !!(out && out.retriable);

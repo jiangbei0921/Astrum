@@ -2599,7 +2599,7 @@
     var jd = A.fromLocal(ctx.y, ctx.mo, ctx.d, ctx.h, ctx.mi, ctx.tz);
     var out = [];
     C.dso.forEach(function (d) {
-      var alt = A.altAz(d.ra, d.dec, jd, ctx.lat, ctx.lon).alt;
+      var alt = A.altAzJ2000(d.ra, d.dec, jd, ctx.lat, ctx.lon).alt;
       out.push({
         g: /^M\d+$/.test(d.id) ? 'messier' : 'dso',
         name: d.cn, sub: d.id + ' · ' + d.type, mag: d.mag, alt: alt,
@@ -2612,7 +2612,7 @@
         .filter(Boolean).sort(function (a, b) { return a.mag - b.mag; });
       if (!members.length) return;
       var s0 = members[0];
-      var alt = A.altAz(s0.ra, s0.dec, jd, ctx.lat, ctx.lon).alt;
+      var alt = A.altAzJ2000(s0.ra, s0.dec, jd, ctx.lat, ctx.lon).alt;
       out.push({
         g: 'con', name: c.cn, sub: c.en + ' · ' + c.season, mag: s0.mag, alt: alt,
         ra: s0.ra, dec: s0.dec, desc: '以最亮成员 ' + s0.cn + ' 定位'
@@ -4670,7 +4670,7 @@
     if (kb) summary = kb.summary;
     if (!summary) summary = '本地星表收录目标，暂无详解条目。';
 
-    var aa = ra != null ? A.altAz(ra, dec, jd, ctx.lat, ctx.lon) : null;
+    var aa = ra != null ? A.altAzJ2000(ra, dec, jd, ctx.lat, ctx.lon) : null;
     var rows = [];
     rows.push(['类型', kind]);
     if (mag != null) rows.push(['视星等', String(mag)]);

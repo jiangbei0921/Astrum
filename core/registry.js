@@ -253,17 +253,20 @@
     if (ra == null || dec == null) return rec;
 
     rec.ra = ra; rec.dec = dec;
+    var catalogCoord = item.kind === 'star' || item.kind === 'dso' || item.kind === 'kb';
 
     /* B8：优先用旧 Agent 的 ephemFor 生成完整星历形状，
      * 供 composeTarget/Tonight/Photo 直接复用，避免二次等价计算。 */
     if (ctx && AC && AC.ephemFor) {
-      rec.ephem = AC.ephemFor(ra, dec, ctx);
+      rec.ephem = AC.ephemFor(ra, dec, ctx, catalogCoord);
     }
     if (rec.ephem && rec.ephem.now) {
       rec.alt = rec.ephem.now.alt;
       rec.az = rec.ephem.now.az;
     } else {
-      var sky = A.altAz(ra, dec, jd, place.lat, place.lon);
+      var sky = catalogCoord
+        ? A.altAzJ2000(ra, dec, jd, place.lat, place.lon)
+        : A.altAz(ra, dec, jd, place.lat, place.lon);
       rec.alt = sky.alt; rec.az = sky.az;
     }
     return rec;

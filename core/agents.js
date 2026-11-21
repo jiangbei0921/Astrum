@@ -526,8 +526,12 @@
   /* ================= 观察计算 ================= */
   function jdOfCtx(ctx) { return A.fromLocal(ctx.y, ctx.mo, ctx.d, ctx.h, ctx.mi, ctx.tz); }
 
-  function windowsWithin(ra, dec, t0, t1, lat, lon, minAlt) {
+  function windowsWithin(ra, dec, t0, t1, lat, lon, minAlt, j2000) {
     var step = 5 / 1440, out = [], cur = null;
+    if (j2000) {
+      var p0 = A.precess(ra, dec, 2451545.0, (t0 + t1) / 2);
+      ra = p0.ra; dec = p0.dec;
+    }
     for (var t = t0; t <= t1; t += step) {
       var alt = A.altAz(ra, dec, t, lat, lon).alt;
       if (alt >= minAlt) {
@@ -558,13 +562,22 @@
     return name && ACTIVE_PRELOADED.ephem[name] ? ACTIVE_PRELOADED.ephem[name] : null;
   }
 
-  function ephemForPreloaded(name, ra, dec, ctx) {
-    var pre = takePreloaded(name);
-    return pre || ephemFor(ra, dec, ctx);
+  function isCatalogCoord(o) {
+    if (!o) return false;
+    var k = o.kind || o.type || '';
+    return k === 'star' || k === 'dso' || k === 'constellation' || k === 'kb';
   }
 
-  function ephemFor(ra, dec, ctx) {
+  function ephemForPreloaded(name, ra, dec, ctx, j2000) {
+    var pre = takePreloaded(name);
+    return pre || ephemFor(ra, dec, ctx, j2000);
+  }
+
+  function ephemFor(ra, dec, ctx, j2000) {
     var jd = jdOfCtx(ctx);
+    /* 星表坐标为 J2000；先岁差到观测历元，再与当日恒星时求地平坐标。
+     * 太阳/行星/月球本身已是 of-date，调用方不应传 j2000。 */
+    if (j2000) { var pp = A.precess(ra, dec, 2451545.0, jd); ra = pp.ra; dec = pp.dec; }
     var midnight = A.fromLocal(ctx.y, ctx.mo, ctx.d, 0, 0, ctx.tz);
     var st = A.sunTimes(midnight, ctx.lat, ctx.lon);
     var tr = A.track(ra, dec, midnight, ctx.lat, ctx.lon);
@@ -1269,7 +1282,7 @@
 
     var binfo = bodyInfoOf(target);
     var attr = bodyAttributeOf(answer.query);
-    var ep = target ? ephemForPreloaded(target.name, target.ra, target.dec, ctx) : null;
+    var ep = target ? ephemForPreloaded(target.name, target.ra, target.dec, ctx, isCatalogCoord(target)) : null;
     if (target && ep) {
       answer.trace.push(step('kepler', '计算星历', '中天 ' + A.fmtHM(ep.track.transit, tz) + ' · 最大高度 ' + deg(ep.track.maxAlt, cfg)));
     }
@@ -1502,9 +1515,9 @@
     var TYPE_W = { constellation: 0.82, planet: 1.05, moon: 0.9, dso: 1.0 };
 
     var scored = cands.map(function (c) {
-      var ep = ephemForPreloaded(c.name, c.ra, c.dec, ctx);
+      var ep = ephemForPreloaded(c.name, c.ra, c.dec, ctx, isCatalogCoord(c));
       var sc = A.scoreTarget(ep.track, c.mag, ep.moonSep, mp.illum) * (TYPE_W[c.type] || 1);
-      var wins = windowsWithin(c.ra, c.dec, darkStart, Math.max(darkEnd, darkStart + 0.1), ctx.lat, ctx.lon, 20);
+      var wins = windowsWithin(c.ra, c.dec, darkStart, Math.max(darkEnd, darkStart + 0.1), ctx.lat, ctx.lon, 20, isCatalogCoord(c));
       var best = null;
       wins.forEach(function (w) { if (!best || w.maxAlt > best.maxAlt) best = w; });
       return { c: c, sc: sc, ep: ep, best: best };
@@ -2050,7 +2063,7 @@
       answer.meta = { agents: ['muse'], confidence: 0.2, freshness: 'static', register: 'pop', computed: false };
       return answer;
     }
-    var ep = target ? ephemForPreloaded(target.name, target.ra, target.dec, ctx) : null;
+    var ep = target ? ephemForPreloaded(target.name, target.ra, target.dec, ctx, isCatalogCoord(target)) : null;
     answer.trace.push(step('kepler', '核对可见窗口', ep ? ('最大高度 ' + deg(ep.track.maxAlt, cfg) + ' · 月光 ' + moonInterference(ep, ctx.tz)) : '无坐标'));
     answer.trace.push(step('horizon', '匹配器材与光害', 'Bortle ' + ctx.bortle + ' · 器材倾向 ' + toneLabel(cfg.horizon.gear)));
 

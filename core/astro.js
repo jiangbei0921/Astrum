@@ -274,6 +274,40 @@
     };
   }
 
+  /* 平赤道坐标岁差（IAU 1976，Meeus 21.5）。
+   * 输入/输出 ra 为小时、dec 为度；fromJd/toJd 为儒略日。
+   * 星表（BSC5 / Messier）坐标为 J2000，绘制到地平前必须先岁差到观测历元，
+   * 否则会与「当日恒星时」混用，产生约 0.36°（2026 年）的系统偏移。 */
+  function precess(raH, decDeg, fromJd, toJd) {
+    var j0 = fromJd == null ? 2451545.0 : fromJd;
+    var j1 = toJd == null ? j0 : toJd;
+    var T = (j0 - 2451545.0) / 36525;
+    var t = (j1 - j0) / 36525;
+    if (Math.abs(t) < 1e-12) return { ra: norm360(raH * 15) / 15, dec: decDeg };
+    var zeta = ((2306.2181 + 1.39656 * T - 0.000139 * T * T) * t +
+      (0.30188 - 0.000344 * T) * t * t + 0.017998 * t * t * t) / 3600;
+    var z = ((2306.2181 + 1.39656 * T - 0.000139 * T * T) * t +
+      (1.09468 + 0.000066 * T) * t * t + 0.018203 * t * t * t) / 3600;
+    var th = ((2004.3109 - 0.85330 * T - 0.000217 * T * T) * t +
+      (-0.42665 - 0.000217 * T) * t * t - 0.041833 * t * t * t) / 3600;
+    var a = (raH * 15 + zeta) * RAD;
+    var d = decDeg * RAD;
+    var thR = th * RAD;
+    var A = Math.cos(d) * Math.sin(a);
+    var B = Math.cos(thR) * Math.cos(d) * Math.cos(a) - Math.sin(thR) * Math.sin(d);
+    var C = Math.sin(thR) * Math.cos(d) * Math.cos(a) + Math.cos(thR) * Math.sin(d);
+    return {
+      ra: norm360(Math.atan2(A, B) / RAD + z) / 15,
+      dec: Math.asin(Math.max(-1, Math.min(1, C))) * DEG
+    };
+  }
+
+  /* J2000 平赤道坐标 → 观测历元地平坐标（先岁差，再转地平）。 */
+  function altAzJ2000(raH, decDeg, jd, lat, lon) {
+    var p = precess(raH, decDeg, 2451545.0, jd);
+    return altAz(p.ra, p.dec, jd, lat, lon);
+  }
+
   /* 太阳升落与天文暗夜窗口（太阳高度 < -15°） */
   function sunTimes(jdMidnight, lat, lon) {
     var step = 5 / 1440, n = Math.round(25 / step);
@@ -334,8 +368,9 @@
     partsFromJD: partsFromJD, fmtHM: fmtHM, fmtDate: fmtDate,
     obliquity: obliquity, sun: sun, moon: moon, moonPhase: moonPhase,
     planet: planet, planets: planets, helio: helio, lstHours: lstHours, altAz: altAz,
+    precess: precess, altAzJ2000: altAzJ2000,
     sep: sep, track: track, sunTimes: sunTimes, scoreTarget: scoreTarget,
     fmtDeg: fmtDeg, fmtRA: fmtRA, fmtDec: fmtDec,
-    version: '0.9.3-local'
+    version: '0.9.4-local'
   };
 })(typeof window !== 'undefined' ? window : globalThis);

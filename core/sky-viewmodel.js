@@ -67,7 +67,9 @@
     var hAng = Math.atan2(-Math.sin(h) * Math.cos(d),
       Math.sin(d) * Math.cos(phi) - Math.cos(d) * Math.sin(phi) * Math.cos(h));
     var ra = A.norm360(A.lstHours(jd, lon) * 15 - hAng / D) / 15;
-    return { ra: ra, dec: dec };
+    /* 地平坐标反解得到的是 of-date 赤道坐标；纹理是 J2000，
+     * 必须先岁差回 J2000，才能与修正后的恒星位置对齐。 */
+    return A.precess(ra, dec, jd, 2451545.0);
   }
 
   /* 赤经赤纬 -> NASA SVS 赤道版 Plate Carrée 纹理 UV。
@@ -93,7 +95,7 @@
     for (var b = 0; b < 3; b++) {
       for (var l = 0; l <= 360; l += 2) {
         var eq = galToEq(l, 0);
-        var aa = A.altAz(eq.ra, eq.dec, jd, lat, lon);
+        var aa = A.altAzJ2000(eq.ra, eq.dec, jd, lat, lon);
         m.milky[b].push(aa);
       }
     }
@@ -108,13 +110,13 @@
       var gb = (rnd() + rnd() + rnd() - 1.5) * 11;
       if (rnd() < 0.34) gb = (rnd() - 0.5) * 155;
       var geq = galToEq(gl, gb);
-      var gaa = A.altAz(geq.ra, geq.dec, jd, lat, lon);
+      var gaa = A.altAzJ2000(geq.ra, geq.dec, jd, lat, lon);
       if (gaa.alt < 0.5) continue;
       m.dust.push({ az: gaa.az, alt: gaa.alt, magF: 4.2 + rnd() * 2.8 });
     }
     /* 恒星 */
     C.stars.forEach(function (st) {
-      var a = A.altAz(st.ra, st.dec, jd, lat, lon);
+      var a = A.altAzJ2000(st.ra, st.dec, jd, lat, lon);
       if (a.alt < -1) return;
       m.stars.push({ st: st, az: a.az, alt: a.alt });
     });
@@ -133,7 +135,7 @@
       for (var s1 = 0; s1 < l1d.n; s1++) {
         /* 数据文件存的是「度」，Astro.altAz 的 raH 参数是「小时」，必须 /15。
          * 这与 L0（data/catalog.js 直接存小时）不同，切勿混用。 */
-        var aa1 = A.altAz(l1d.ra[s1] / 15, l1d.dec[s1], jd, lat, lon);
+        var aa1 = A.altAzJ2000(l1d.ra[s1] / 15, l1d.dec[s1], jd, lat, lon);
         az1[s1] = aa1.az;
         alt1[s1] = aa1.alt;
         var gx = Math.floor(A.norm360(aa1.az) / 10) % 36;
@@ -144,7 +146,7 @@
     }
     /* 深空天体 */
     C.dso.forEach(function (dd) {
-      var a = A.altAz(dd.ra, dd.dec, jd, lat, lon);
+      var a = A.altAzJ2000(dd.ra, dd.dec, jd, lat, lon);
       if (a.alt < 0) return;
       m.dso.push({ d: dd, az: a.az, alt: a.alt });
     });
@@ -154,8 +156,8 @@
       c.lines.forEach(function (seg) {
         var s1 = starByKey(seg[0]), s2 = starByKey(seg[1]);
         if (!s1 || !s2) return;
-        var a1 = A.altAz(s1.ra, s1.dec, jd, lat, lon);
-        var a2 = A.altAz(s2.ra, s2.dec, jd, lat, lon);
+        var a1 = A.altAzJ2000(s1.ra, s1.dec, jd, lat, lon);
+        var a2 = A.altAzJ2000(s2.ra, s2.dec, jd, lat, lon);
         if (a1.alt < -1 || a2.alt < -1) return;
         segs.push([a1.az, a1.alt, a2.az, a2.alt]);
       });
@@ -520,7 +522,7 @@
   }
 
   root.SkyVM = {
-    version: '1.1.0',
+    version: '1.2.0',
     model: model,
     build: build,
     projector: projector,

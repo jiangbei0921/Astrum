@@ -113,7 +113,7 @@ var ASSERT = [
   '    })(), JSON.stringify(SkyBackground.uvFor(12.85730, 27.12825)));',
   '',
   '    /* B4 画布真实绘制：用反银心方向（测试时刻位于地平线上方） */',
-  '    var ref = Astro.altAz(5.76033, 28.9362, jd, lat, lon);',
+  '    var ref = Astro.altAzJ2000(5.76033, 28.9362, jd, lat, lon);',
   '    var opts = { yaw: ref.az, pitch: 12, fov: 70, style: "full", detail: true };',
   '    var vmOn = makeVm({ jd: jd, lat: lat, lon: lon, opts: opts });',
   '    var on = scratch(vmOn, { showGlobe: false });',

@@ -65,19 +65,19 @@ var LAT = 31.23, LON = 121.47;
   var m = SkyVM.model(JD, LAT, LON);
 
   var starOracle = CAT.stars.filter(function (s) {
-    return A.altAz(s.ra, s.dec, JD, LAT, LON).alt >= -1;
+    return A.altAzJ2000(s.ra, s.dec, JD, LAT, LON).alt >= -1;
   });
   ok('L2.1 恒星数量一致', m.stars.length === starOracle.length,
     'vm=' + m.stars.length + ' oracle=' + starOracle.length);
 
   var maxErr = 0;
   m.stars.forEach(function (rec) {
-    var aa = A.altAz(rec.st.ra, rec.st.dec, JD, LAT, LON);
+    var aa = A.altAzJ2000(rec.st.ra, rec.st.dec, JD, LAT, LON);
     maxErr = Math.max(maxErr, Math.abs(aa.az - rec.az), Math.abs(aa.alt - rec.alt));
   });
   ok('L2.2 恒星 alt/az 一致（1e-9）', maxErr < 1e-9, 'maxErr=' + maxErr);
 
-  var dsoOracle = CAT.dso.filter(function (d) { return A.altAz(d.ra, d.dec, JD, LAT, LON).alt >= 0; });
+  var dsoOracle = CAT.dso.filter(function (d) { return A.altAzJ2000(d.ra, d.dec, JD, LAT, LON).alt >= 0; });
   ok('L2.3 DSO 数量一致', m.dso.length === dsoOracle.length,
     'vm=' + m.dso.length + ' oracle=' + dsoOracle.length);
 
@@ -102,8 +102,8 @@ var LAT = 31.23, LON = 121.47;
     return c.lines.some(function (seg) {
       var s1 = SkyVM.starByKey(seg[0]), s2 = SkyVM.starByKey(seg[1]);
       if (!s1 || !s2) return false;
-      return A.altAz(s1.ra, s1.dec, JD, LAT, LON).alt >= -1 &&
-        A.altAz(s2.ra, s2.dec, JD, LAT, LON).alt >= -1;
+      return A.altAzJ2000(s1.ra, s1.dec, JD, LAT, LON).alt >= -1 &&
+        A.altAzJ2000(s2.ra, s2.dec, JD, LAT, LON).alt >= -1;
     });
   });
   ok('L2.8 星座数量一致', m.cons.length === consOracle.length,
@@ -115,8 +115,8 @@ var LAT = 31.23, LON = 121.47;
       var s1 = null, s2 = null;
       rec.c.lines.forEach(function (ln) {
         var a1 = SkyVM.starByKey(ln[0]), a2 = SkyVM.starByKey(ln[1]);
-        var aa1 = A.altAz(a1.ra, a1.dec, JD, LAT, LON);
-        var aa2 = A.altAz(a2.ra, a2.dec, JD, LAT, LON);
+        var aa1 = A.altAzJ2000(a1.ra, a1.dec, JD, LAT, LON);
+        var aa2 = A.altAzJ2000(a2.ra, a2.dec, JD, LAT, LON);
         if (Math.abs(aa1.az - sg[0]) < 1e-9 && Math.abs(aa1.alt - sg[1]) < 1e-9) { s1 = a1; s2 = a2; }
       });
       if (!s1) segErr++;

@@ -57,6 +57,29 @@ var e = mk([{ id: 't1', tool: 'astro.calc', deps: [], critical: true }]);
 e.state.steps[0].status = 'waiting_approval';
 ok('P3-X2-01 识别待审批步骤', S.waitingApprovalStep(e.plan, e.state) === 't1');
 
+/* ---------- 超时 aborts 下游 ---------- */
+var g = mk([{ id: 't1', tool: 'slow.tool', deps: [], critical: true }]);
+var abortSeen = false;
+var slowRegistry = {
+  get: function () {
+    return {
+      id: 'slow.tool', version: 'test', timeoutMs: 20, idempotent: false,
+      run: function (args, ctx, spec, cfg, deps, extra) {
+        return new Promise(function (resolve) {
+          if (extra && extra.signal && extra.signal.addEventListener) {
+            extra.signal.addEventListener('abort', function () {
+              abortSeen = true;
+              resolve({ ok: false, reason: 'aborted', kind: 'cancelled', retriable: false });
+            });
+          }
+        });
+      }
+    };
+  },
+  validateArgs: function () { return { ok: true }; },
+  checkDeps: function () { return { ok: true }; }
+};
+
 /* ---------- TaskExecutor 门面 ---------- */
 var f = mk([{ id: 't1', tool: 'astro.calc', deps: [], critical: true }]);
 f.state.steps[0].status = 'ok';
@@ -75,6 +98,10 @@ O.TaskExecutor.execute(f.plan.steps[0], f.state, {}).then(function (r) {
   return O.TaskExecutor.execute({ id: 'nope', critical: true }, f.state, {});
 }).then(function (r) {
   ok('P3-X3-05 缺步骤拒绝', r.ok === false && r.reason === 'step_missing');
+  return O.TaskExecutor.execute(g.plan.steps[0], g.state, { registry: slowRegistry });
+}).then(function (r) {
+  ok('P3-X4-01 超时会 abort 下游请求', abortSeen === true);
+  ok('P3-X4-02 超时结果为 timeout', r.ok === false && r.kind === 'timeout', r.kind);
   ok('P3-X2-02 暂停的 runPlan 返回 PAUSED', !!pausedRun && pausedRun.paused === true && pausedRun.reason === 'PAUSED');
   console.log('\nRESULT ' + pass + '/' + (pass + fail));
   process.exit(fail ? 1 : 0);

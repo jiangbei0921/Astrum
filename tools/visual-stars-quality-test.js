@@ -94,7 +94,7 @@ function options(yaw, pitch, fov) {
   };
 }
 function aim(context, ra, dec, lat, lon, fov) {
-  var aa = context.Astro.altAz(ra / 15, dec, JD, lat, lon);
+  var aa = context.Astro.altAzJ2000(ra / 15, dec, JD, lat, lon);
   assert(aa.alt > 0.3, 'target must be above horizon');
   return options(aa.az, Math.min(78, aa.alt), fov);
 }
@@ -108,7 +108,7 @@ function reference(context, data, lat, lon, opts) {
   var limit = Math.max(5, 10 - (pr.geom.fov - 30) * (4 / 148));
   var result = [];
   for (var i = 0; i < data.n; i++) {
-    var aa = context.Astro.altAz(data.ra[i] / 15, data.dec[i], JD, lat, lon);
+    var aa = context.Astro.altAzJ2000(data.ra[i] / 15, data.dec[i], JD, lat, lon);
     var alt = Math.fround(aa.alt), az = Math.fround(aa.az);
     if (data.mag[i] > limit || alt < 0.3) continue;
     var q = pr.proj(az, alt);
@@ -240,7 +240,7 @@ test('Q04 actual encoded LOD at FOV=178 keeps V=6 and rejects next byte', functi
   var opts = aim(context, 0, 0, lat, lon, 178);
   var pr = context.SkyVM.projector(opts);
   for (var i = 0; i < data.n; i++) {
-    var aa = context.Astro.altAz(data.ra[i] / 15, data.dec[i], JD, lat, lon);
+    var aa = context.Astro.altAzJ2000(data.ra[i] / 15, data.dec[i], JD, lat, lon);
     assert(pr.proj(aa.az, aa.alt), 'every candidate shares the visible direction');
   }
   assert.strictEqual(data.mag[2], 6);
@@ -313,7 +313,13 @@ test('Q06 unsaturated radius squared follows flux; size/alpha/bucket endpoints',
 
 test('Q07 horizon cutoff and current post-clamp alpha semantics (may exceed 1)', function () {
   var altitudes = [0.29, 0.31, 7.99, 8.01, 0.31];
-  var rows = altitudes.map(function (alt, i) { return row(i * 0.001, alt - 30, i === 4 ? 8 : 0, null); });
+  /* 星表层已把 J2000 岁差到观测历元；合成行需先反算成 J2000，
+   * 才能让“期望的 of-date 高度”在渲染时保持不变。 */
+  var pre = isolated(null);
+  var rows = altitudes.map(function (alt, i) {
+    var p = pre.Astro.precess(i * 0.001 / 15, alt - 30, JD, 2451545.0);
+    return row(p.ra * 15, p.dec, i === 4 ? 8 : 0, null);
+  });
   var context = isolated(fixture(rows)), data = context.SkyStarData.load();
   var lat = 60, lon = longitudeAtRA(context, 0), opts = options(180, 4, 30);
   var view = compareReference(context, data, lat, lon, opts);

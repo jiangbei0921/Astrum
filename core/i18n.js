@@ -92,6 +92,8 @@
     '回答来源': 'Answer source',
     '智能体': 'Agents',
     '试试这样问': 'Try asking',
+    '科研技能': 'Research skills',
+    '研究课题': 'Research topics',
 
     /* 答案操作 */
     '复制': 'Copy',

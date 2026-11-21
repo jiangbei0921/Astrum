@@ -46,7 +46,7 @@ ok('V0.1 数据就绪', !!D && D.n > 0, 'n=' + (D && D.n));
 function altAzAll(jd) {
   var az = new Float32Array(D.n), alt = new Float32Array(D.n);
   for (var i = 0; i < D.n; i++) {
-    var a = A.altAz(D.ra[i] / 15, D.dec[i], jd, LAT, LON);
+    var a = A.altAzJ2000(D.ra[i] / 15, D.dec[i], jd, LAT, LON);
     az[i] = a.az; alt[i] = a.alt;
   }
   return { az: az, alt: alt };

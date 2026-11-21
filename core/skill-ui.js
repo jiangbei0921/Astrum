@@ -185,7 +185,9 @@
     var section = el('section', 'side-block');
     section.id = 'skillBlock';
     var head = el('div', 'side-head');
-    head.appendChild(el('h3', '', '科研技能'));
+    var skillTitle = el('h3', '', root.I18N ? root.I18N.t('科研技能') : '科研技能');
+    skillTitle.setAttribute('data-i18n', '科研技能');
+    head.appendChild(skillTitle);
     head.appendChild(el('span', 'side-hint', '人工审批'));
     section.appendChild(head);
 

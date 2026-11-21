@@ -97,7 +97,7 @@ var L0_COUNT = global.CATALOG.stars.length;
   /* N3.4 投影口径：数据文件 RA 以「度」存储，Astro.altAz 收「小时」。
    * 用天狼星在冬季夜晚复核：若漏了 /15，高度角会明显不符。 */
   var JD_W = A.fromLocal(2026, 1, 15, 22, 0, 8);
-  var expected = A.altAz(d.ra[s.i] / 15, d.dec[s.i], JD_W, LAT, LON);
+  var expected = A.altAzJ2000(d.ra[s.i] / 15, d.dec[s.i], JD_W, LAT, LON);
   SkyVM.clear();
   var vmW = SkyVM.build(JD_W, LAT, LON, {
     width: 1600, height: 900, yaw: 180, pitch: 32, fov: 145,
