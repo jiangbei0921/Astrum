@@ -104,9 +104,34 @@
     var batch = [];
     for (var i = 0; i < ready.length && batch.length < max; i++) {
       if (isCompose(ready[i]) || ready[i].parallel !== true) continue;
+      /* P3：并行副作用过滤——写共享证据/输出合成与非幂等工具不得同批。 */
+      if (hasBatchConflict(batch, ready[i])) continue;
       batch.push(ready[i]);
     }
     return { steps: batch, parallel: batch.length > 1 };
+  }
+
+  function hasBatchConflict(batch, candidate) {
+    if (!batch || !batch.length) return false;
+    var V = root.AstroDagValidator;
+    if (V && typeof V.parallelConflicts === 'function') {
+      return V.parallelConflicts(batch.concat([candidate]), null).length > 0;
+    }
+    /* 兜底：输出合成步骤本身已串行（isCompose），此处只拦同批重复写证据。 */
+    var write = function (s) {
+      return s && (s.tool === 'evidence.search' || s.tool === 'paper.search');
+    };
+    if (!write(candidate)) return false;
+    for (var i = 0; i < batch.length; i++) if (write(batch[i])) return true;
+    return false;
+  }
+
+  function waitingApprovalStep(plan, state) {
+    for (var i = 0; i < plan.steps.length; i++) {
+      var ss = stateStep(state, plan.steps[i].id);
+      if (ss && ss.status === 'waiting_approval') return plan.steps[i].id;
+    }
+    return null;
   }
 
   /* 工具域 → 专业执行角色（P0：编排主体按域委托，不直接把全部工具权授予 Muse） */
@@ -521,6 +546,22 @@
     while (guard++ < 200) {
       if (signal && signal.aborted) return cancelledRun();
 
+      /* P3：暂停只阻止新批次启动，不声称中断已在飞的请求（Q-2=A）。 */
+      if (state.pausedAt) {
+        return {
+          ok: false, paused: true, aborted: false, criticalFailed: false, budgetStop: false,
+          answer: answer, state: state, completed: false, reason: 'PAUSED'
+        };
+      }
+      var waitingStep = waitingApprovalStep(plan, state);
+      if (waitingStep) {
+        return {
+          ok: false, waitingApproval: true, stepId: waitingStep, aborted: false,
+          criticalFailed: false, budgetStop: false, answer: answer, state: state,
+          completed: false, reason: 'WAITING_APPROVAL'
+        };
+      }
+
       /* 失败依赖传播：pending → blocked */
       var blocked = blockedSteps(plan, state);
       for (var b = 0; b < blocked.length; b++) {
@@ -572,21 +613,44 @@
     };
   }
 
+  /* P3 TaskExecutor 门面：统一入口，负责暂停/审批/结果复用与状态前置检查。
+   * 实际执行仍复用 executeOne，不另建第二套执行逻辑。 */
+  async function execute(planStep, state, opts) {
+    opts = opts || {};
+    var st = stateStep(state, planStep && planStep.id);
+    if (!st) return { ok: false, reason: 'step_missing', critical: !!(planStep && planStep.critical) };
+    if (state.pausedAt) return { ok: false, paused: true, reason: 'paused' };
+    if (st.status === 'waiting_approval') {
+      return { ok: false, waitingApproval: true, reason: 'waiting_approval' };
+    }
+    if (st.status === 'ok') {
+      return { ok: true, reused: true, critical: !!planStep.critical, result: { ok: true, reused: true } };
+    }
+    if (st.status !== 'pending' && st.status !== 'ready') {
+      return { ok: false, reason: 'invalid_state', status: st.status, critical: !!planStep.critical };
+    }
+    return executeOne(planStep, state, opts);
+  }
+
   root.AstroOrchestrator = {
     Scheduler: {
       readySteps: readySteps,
       blockedSteps: blockedSteps,
       nextBatch: nextBatch,
+      hasBatchConflict: hasBatchConflict,
+      waitingApprovalStep: waitingApprovalStep,
       criticalFailed: criticalFailed,
       allSettled: allSettled
     },
     Runner: {
       executeOne: executeOne,
+      execute: execute,
       runPlan: runPlan,
       withTimeout: withTimeout,
       classifyFailure: classifyFailure,
       retryPolicy: retryPolicy
     },
+    TaskExecutor: { execute: execute },
     runPlan: runPlan
   };
 })(typeof window !== 'undefined' ? window : global);

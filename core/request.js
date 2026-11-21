@@ -77,7 +77,9 @@
       capabilities: opts.capabilities,
       attachmentsEvidence: opts.attachmentsEvidence || null,
       fulltext: opts.fulltext,
-      forceCompare: opts.forceCompare
+      forceCompare: opts.forceCompare,
+      /* P3：UI 默认启用目标解析；显式 false 可回退。 */
+      goalEnabled: opts.goalEnabled !== false
     };
     var result = await root.AstroControl.run(c.query, ctx, cfg, controlOpts);
     return {

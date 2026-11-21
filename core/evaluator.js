@@ -27,7 +27,8 @@
     'critical_claim_weak_support',
     'critical_claim_single_source',
     'critical_claim_not_verified',
-    'critical_conflict'
+    'critical_conflict',
+    'goal_objective_uncovered'
   ];
 
   /* 单轮只选一个缺口，按优先级从高到低。 */
@@ -38,6 +39,7 @@
     'critical_conflict': 3,
     'critical_claim_single_source': 4,
     'critical_claim_weak_support': 5,
+    'goal_objective_uncovered': 6,
     'noncritical_conflict': 90,
     'insufficient_information': 99
   };
@@ -236,6 +238,67 @@
   }
 
   /* ============================================================
+     P3：目标覆盖度（仅当 state.goal 存在时生效；旧任务完全不进入）
+     ============================================================ */
+
+  var GOAL_STOP = {
+    '检索': 1, '核验': 1, '相关': 1, '研究': 1, '证据': 1, '获取': 1,
+    '给出': 1, '围绕': 1, '识别': 1, '判断': 1, '是否': 1, '构成': 1,
+    '不同': 1, '来源': 1, '之间': 1, '数值': 1, '分歧': 1, '针对': 1,
+    '比较': 1, '参数': 1, '差异': 1, '结论': 1, '目标': 1, '用户': 1,
+    '关心': 1, '对齐': 1, '口径': 1, '并核': 1, '索并': 1
+  };
+
+  function tokensOf(text) {
+    var s = String(text || '');
+    var out = [], seen = {};
+    function add(t) {
+      var k = String(t || '').toLowerCase();
+      if (k.length < 2 || seen[k] || GOAL_STOP[k]) return;
+      seen[k] = 1;
+      out.push(k);
+    }
+    (s.match(/[A-Za-z][A-Za-z0-9\-]{1,}/g) || []).forEach(add);
+    (s.match(/[\u4e00-\u9fa5]+/g) || []).forEach(function (chunk) {
+      for (var i = 0; i + 1 < chunk.length; i++) add(chunk.substr(i, 2));
+    });
+    return out;
+  }
+
+  function goalCoverage(state, research, evidence, claims) {
+    var goal = state && state.goal;
+    if (!goal || !Array.isArray(goal.objectives) || !goal.objectives.length) return null;
+    var corpus = [];
+    (claims || []).forEach(function (c) {
+      corpus.push(c && (c.text || c.statement) || '');
+    });
+    (evidence || []).forEach(function (e) {
+      if (!e) return;
+      corpus.push(e.title || '');
+      var c = e.content || {};
+      corpus.push(c.excerpt || c.snippet || c.abstract || '');
+    });
+    var haystack = corpus.join(' ').toLowerCase();
+    var objectives = goal.objectives.map(function (o) {
+      var ts = tokensOf(o && o.text);
+      var matched = ts.filter(function (t) { return haystack.indexOf(t) >= 0; });
+      var covered = matched.length > 0;
+      if (o && o.id && (claims || []).some(function (c) { return c && c.objectiveId === o.id; })) covered = true;
+      return {
+        id: o && o.id, text: o && o.text, priority: o && o.priority,
+        covered: covered, matchedTokens: matched.slice(0, 5)
+      };
+    });
+    var must = objectives.filter(function (o) { return o.priority === 'must'; });
+    return {
+      objectives: objectives,
+      mustTotal: must.length,
+      mustCovered: must.filter(function (o) { return o.covered; }).length,
+      uncoveredMust: must.filter(function (o) { return !o.covered; }).map(function (o) { return o.id; })
+    };
+  }
+
+  /* ============================================================
      主决策
      ============================================================ */
 
@@ -333,6 +396,20 @@
       if (opts.conflicts && opts.conflicts.length) details.push({ code: 'critical_conflict', key: 'conflicts' });
     }
 
+    /* P3：目标覆盖只补充缺口，不替代既有证据判定。 */
+    var coverage = goalCoverage(state, research, evidence, claims);
+    if (coverage && coverage.uncoveredMust.length) {
+      coverage.uncoveredMust.forEach(function (id) {
+        var obj = coverage.objectives.filter(function (o) { return o.id === id; })[0];
+        details.push({
+          code: 'goal_objective_uncovered',
+          key: 'goal:' + id,
+          objectiveId: id,
+          text: obj ? obj.text : ''
+        });
+      });
+    }
+
     details = sortDetails(details);
     var gaps = details.map(function (d) { return d.code; });
 
@@ -372,6 +449,7 @@
           text: pick.text || null
         },
         evidence: evidence.length,
+        coverage: coverage,
         appendsUsed: appendsUsed,
         searchesUsed: searchesUsed
       };
@@ -393,6 +471,7 @@
       details: details,
       resolved: resolved,
       counts: counts,
+      coverage: coverage,
       evidence: evidence.length
     };
   }
@@ -408,6 +487,7 @@
   root.AstroEvaluator = {
     decide: decide,
     collectEvidence: collectEvidence,
+    goalCoverage: goalCoverage,
     conflictKeysFrom: conflictKeysFrom,
     MAX_APPEND_ROUNDS: MAX_APPEND_ROUNDS,
     APPENDABLE_GAPS: APPENDABLE,

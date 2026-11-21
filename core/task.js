@@ -24,14 +24,16 @@
   var TERMINAL_PHASES = ['DONE', 'PARTIAL', 'FAILED'];
 
   var STEP_STATUS = [
-    'pending', 'ready', 'running', 'ok', 'failed', 'skipped', 'blocked', 'aborted'
+    'pending', 'ready', 'running', 'ok', 'failed', 'skipped', 'blocked', 'aborted',
+    /* P3：暂停与等待审批为可选状态，旧任务不含它们仍合法。 */
+    'paused', 'waiting_approval'
   ];
 
   var EVENT_TYPES = [
     'phase.changed', 'step.started', 'step.ok', 'step.failed',
     'step.skipped', 'progress.decided', 'verdict.issued', 'task.aborted',
     'step.retry', 'step.cancelled', 'task.cancelled', 'task.replanned', 'task.recovered',
-    'plan.expanded'
+    'plan.expanded', 'task.paused', 'task.waiting_approval'
   ];
 
   /* P0-01 §7.1：payload 只存最小上下文 */
@@ -39,13 +41,13 @@
 
   /* P0-01 §9.2 唯一预算表 */
   var BUDGET_LIMITS = {
-    L1: { ms: 300, tokens: 0, llmCalls: 0, searches: 0, parallel: 1, replans: 0, appends: 0, retries: 0 },
-    L2: { ms: 3000, tokens: 1200, llmCalls: 1, searches: 1, parallel: 2, replans: 1, appends: 1, retries: 1 },
-    L3: { ms: 15000, tokens: 3000, llmCalls: 2, searches: 2, parallel: 4, replans: 2, appends: 3, retries: 1 },
-    L4: { ms: 120000, tokens: 8000, llmCalls: 3, searches: 3, parallel: 4, replans: 2, appends: 3, retries: 1 }
+    L1: { ms: 300, tokens: 0, llmCalls: 0, searches: 0, parallel: 1, replans: 0, appends: 0, retries: 0, recoveries: 0 },
+    L2: { ms: 3000, tokens: 1200, llmCalls: 1, searches: 1, parallel: 2, replans: 1, appends: 1, retries: 1, recoveries: 1 },
+    L3: { ms: 15000, tokens: 3000, llmCalls: 2, searches: 2, parallel: 4, replans: 2, appends: 3, retries: 1, recoveries: 3 },
+    L4: { ms: 120000, tokens: 8000, llmCalls: 3, searches: 3, parallel: 4, replans: 2, appends: 3, retries: 1, recoveries: 3 }
   };
 
-  var BUDGET_FIELDS = ['ms', 'tokens', 'llmCalls', 'searches', 'parallel', 'replans', 'appends', 'retries'];
+  var BUDGET_FIELDS = ['ms', 'tokens', 'llmCalls', 'searches', 'parallel', 'replans', 'appends', 'retries', 'recoveries'];
 
   /* §3.4 合法转移唯一权威。JUDGE→EXECUTE 另受 retryHint/retries 约束。 */
   var LEGAL_TRANSITIONS = {
@@ -268,6 +270,29 @@
     return { level: key, limit: outLimit, used: outUsed };
   }
 
+  /* P3：旧任务预算可能缺少新增字段（如 recoveries）；读取时按档位补齐默认值，
+   * 不改变已记录的 used，保证 schemaVersion=1 的旧任务仍可加载。 */
+  function normalizeBudget(budget, level) {
+    if (!budget) return makeBudget(level || 'L1');
+    var key = includes(['L1', 'L2', 'L3', 'L4'], budget.level) ? budget.level
+      : (includes(['L1', 'L2', 'L3', 'L4'], level) ? level : 'L1');
+    var limits = BUDGET_LIMITS[key];
+    var srcLimit = isPlainObject(budget.limit) ? budget.limit : {};
+    var srcUsed = isPlainObject(budget.used) ? budget.used : {};
+    var out = { level: key, limit: {}, used: {} };
+    for (var i = 0; i < BUDGET_FIELDS.length; i++) {
+      var f = BUDGET_FIELDS[i];
+      if (f === 'recoveries' && !isFiniteNumber(srcLimit[f])) {
+        /* 旧任务没有该字段：至少允许一次恢复，避免历史任务永久不可恢复。 */
+        out.limit[f] = Math.max(1, limits[f]);
+      } else {
+        out.limit[f] = isFiniteNumber(srcLimit[f]) ? srcLimit[f] : limits[f];
+      }
+      out.used[f] = isFiniteNumber(srcUsed[f]) ? srcUsed[f] : 0;
+    }
+    return out;
+  }
+
   function makeStep(input) {
     input = input || {};
     var args = input.args == null ? {} : input.args;
@@ -291,7 +316,17 @@
       error: input.error == null ? null : input.error,
       provenance: input.provenance == null ? null : input.provenance,
       evidenceRefs: cloneArray(input.evidenceRefs),
-      cancelled: !!input.cancelled
+      cancelled: !!input.cancelled,
+      /* P3：可选语义字段；缺省值保持稳定，保证 create→toJSON→fromJSON 往返一致。 */
+      title: input.title || '',
+      desc: input.desc || '',
+      kind: input.kind || '',
+      skillId: input.skillId || null,
+      skillVersionId: input.skillVersionId || null,
+      expected: input.expected == null ? null : input.expected,
+      criteria: cloneArray(input.criteria),
+      requiredCaps: cloneArray(input.requiredCaps),
+      agentId: input.agentId || ''
     };
   }
 
@@ -375,11 +410,15 @@
       entities: cloneArray(input.entities),
       context: makeContext(input.context),
       plan: input.plan == null ? null : input.plan,
+      goal: input.goal == null ? null : input.goal,
       steps: steps,
       claims: cloneArray(input.claims),
       evidence: cloneArray(input.evidence),
       eval: input.eval == null ? null : input.eval,
-      budget: input.budget || makeBudget(input.level || 'L1'),
+      budget: normalizeBudget(input.budget, input.level),
+      pausedAt: input.pausedAt == null ? null : input.pausedAt,
+      recoveries: isFiniteNumber(input.recoveries) ? input.recoveries : 0,
+      planHistory: cloneArray(input.planHistory),
       checkpoints: cloneArray(input.checkpoints),
       replans: cloneArray(input.replans),
       trace: cloneArray(input.trace),
@@ -421,6 +460,13 @@
       fail('E_STATE_TIME', '$.phaseStartedAt 必须是字符串', '$.phaseStartedAt');
     }
     if (!isArray(state.replans)) fail('E_STATE_SHAPE', '$.replans 必须是数组', '$.replans');
+    /* P3 可选字段：缺失合法；存在时必须类型正确。 */
+    if (state.goal != null && !isPlainObject(state.goal)) fail('E_STATE_GOAL', '$.goal 必须是对象或 null', '$.goal');
+    if (state.pausedAt != null && typeof state.pausedAt !== 'string') fail('E_STATE_TIME', '$.pausedAt 必须是字符串或 null', '$.pausedAt');
+    if (!isFiniteNumber(state.recoveries) || state.recoveries < 0) {
+      fail('E_STATE_RECOVERIES', '$.recoveries 必须是非负数字', '$.recoveries');
+    }
+    if (!isArray(state.planHistory)) fail('E_STATE_PLAN_HISTORY', '$.planHistory 必须是数组', '$.planHistory');
 
     var i, j, item, path;
 
@@ -453,6 +499,14 @@
       if (item.durationMs != null && !isFiniteNumber(item.durationMs)) fail('E_STEP_DURATION', path + '.durationMs 必须是数字或 null', path + '.durationMs');
       if (item.evidenceRefs != null && !isArray(item.evidenceRefs)) fail('E_STEP_REFS', path + '.evidenceRefs 必须是数组', path + '.evidenceRefs');
       if (item.provenance != null && !isPlainObject(item.provenance)) fail('E_STEP_PROVENANCE', path + '.provenance 必须是对象或 null', path + '.provenance');
+      /* P3 可选字段：只需在出现时类型正确。 */
+      if (item.kind != null && item.kind !== '' && !includes(['tool', 'skill'], item.kind)) {
+        fail('E_STEP_KIND', path + '.kind 必须是 tool/skill', path + '.kind');
+      }
+      if (item.title != null && typeof item.title !== 'string') fail('E_STEP_TITLE', path + '.title 必须是字符串', path + '.title');
+      if (item.desc != null && typeof item.desc !== 'string') fail('E_STEP_DESC', path + '.desc 必须是字符串', path + '.desc');
+      if (item.criteria != null && !isArray(item.criteria)) fail('E_STEP_CRITERIA', path + '.criteria 必须是数组', path + '.criteria');
+      if (item.requiredCaps != null && !isArray(item.requiredCaps)) fail('E_STEP_CAPS', path + '.requiredCaps 必须是数组', path + '.requiredCaps');
       /* 不变量 1：ok ⇒ outputHash 必非空 */
       if (item.status === 'ok' && (typeof item.outputHash !== 'string' || !item.outputHash)) {
         fail('E_STEP_OUTPUT_HASH', path + '.outputHash 在 status=ok 时必须非空', path + '.outputHash');
@@ -659,6 +713,28 @@
       claims: (state.claims || []).length,
       evidence: (state.evidence || []).length
     };
+    /* P3：检查点增量字段全部可选，旧检查点读取不受影响。
+     * stateHash 仍只基于既有快照，避免改变历史哈希语义。 */
+    var plan = state.plan && isPlainObject(state.plan) ? state.plan : null;
+    var steps = state.steps || [];
+    var completedStepIds = [], pendingStepIds = [], inputs = [], outputs = [];
+    for (var i = 0; i < steps.length; i++) {
+      var st = steps[i];
+      inputs.push({ stepId: st.id, inputHash: st.inputHash || null });
+      if (st.status === 'ok') {
+        completedStepIds.push(st.id);
+        outputs.push({
+          stepId: st.id,
+          outputHash: st.outputHash || null,
+          toolId: st.toolId || st.tool || null,
+          toolVersion: st.provenance && st.provenance.version ? st.provenance.version : null,
+          skillVersionId: st.skillVersionId || null
+        });
+      } else if (st.status === 'pending' || st.status === 'ready' ||
+        st.status === 'paused' || st.status === 'waiting_approval') {
+        pendingStepIds.push(st.id);
+      }
+    }
     var cp = {
       checkpointId: 'chk_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6),
       at: nowIso(),
@@ -672,7 +748,19 @@
       version: (state.checkpoints.length || 0) + 1,
       memoryIds: cloneArray(meta.memoryIds),
       evidenceIds: cloneArray(meta.evidenceIds),
-      claimIds: cloneArray(meta.claimIds)
+      claimIds: cloneArray(meta.claimIds),
+      /* —— P3 新增（全部可选）—— */
+      planId: meta.planId || (plan && plan.planId ? plan.planId : null),
+      planVersion: isFiniteNumber(meta.planVersion) ? meta.planVersion
+        : (plan && isFiniteNumber(plan.version) ? plan.version : null),
+      currentStepId: meta.currentStepId || meta.stepId || null,
+      completedStepIds: meta.completedStepIds || completedStepIds,
+      pendingStepIds: meta.pendingStepIds || pendingStepIds,
+      paused: meta.paused != null ? !!meta.paused : !!state.pausedAt,
+      inputs: meta.inputs || inputs,
+      outputs: meta.outputs || outputs,
+      recoveries: isFiniteNumber(meta.recoveries) ? meta.recoveries
+        : (isFiniteNumber(state.recoveries) ? state.recoveries : 0)
     };
     state.checkpoints.push(cp);
     state.updatedAt = nowIso();
@@ -724,6 +812,7 @@
     validate: validate,
     makeStep: makeStep,
     makeBudget: makeBudget,
+    normalizeBudget: normalizeBudget,
     isTerminal: isTerminal,
     assertValidTransition: assertValidTransition,
     canTransition: canTransition,

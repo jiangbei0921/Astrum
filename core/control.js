@@ -71,6 +71,16 @@
       context: contextOf(ctx),
       budget: T.makeBudget(route.level)
     });
+    /* P3：仅在显式启用时为 research/compare 建立目标，旧链路保持无 goal。 */
+    if (opts.goalEnabled && root.AstroResearchGoal) {
+      var goalRes = null;
+      try {
+        goalRes = root.AstroResearchGoal.fromRoute({
+          query: q, intent: intent, route: route, targets: targets
+        }, { projectId: state.projectId, query: q });
+      } catch (e) { goalRes = null; }
+      if (goalRes && goalRes.ok) state.goal = goalRes.goal;
+    }
     state.intents = [{ kind: intent, confidence: 1, source: 'rule' }];
     state.entities = (route.targets || []).map(function (name, i) {
       return {
@@ -208,6 +218,36 @@
     return Math.max(0, Math.min(2, requested, budget));
   }
 
+  /* P3：执行摘要融入现有 answer（结构化字段 + 一个 execution section）。
+   * 只在存在 goal 的任务上启用，避免改变旧答案结构。 */
+  function attachExecution(answer, state, coverage) {
+    if (!answer || typeof answer !== 'object' || !state || !state.goal) return answer;
+    if (!root.AstroReport || typeof root.AstroReport.executionOf !== 'function') return answer;
+    var ex = null;
+    try { ex = root.AstroReport.executionOf({ state: state, goalCoverage: coverage || null }); } catch (e) { ex = null; }
+    if (!ex) return answer;
+    answer.execution = ex;
+    if (Array.isArray(answer.sections) && !answer.sections.some(function (s) {
+      return s && s.kind === 'execution';
+    })) {
+      var covered = ex.goal ? ex.goal.objectives.filter(function (o) { return o.covered; }).length : 0;
+      var total = ex.goal ? ex.goal.objectives.length : 0;
+      answer.sections.push({
+        kind: 'execution',
+        title: '执行摘要',
+        items: [
+          { label: '步骤', value: ex.counts.ok + '/' + ex.counts.total + ' 成功' },
+          {
+            label: '恢复',
+            value: ex.paused.recoveries + (ex.paused.limit != null ? '/' + ex.paused.limit : '')
+          },
+          { label: '目标覆盖', value: ex.goal ? covered + '/' + total : '—' }
+        ]
+      });
+    }
+    return answer;
+  }
+
   function resultOf(prepared, state, runner, answer, delivery, extra) {
     var out = {
       query: prepared.query, ctx: prepared.ctx, cfg: prepared.cfg,
@@ -235,7 +275,8 @@
       routeData: opts.routeData || null,
       forceCompare: !!opts.forceCompare,
       projectId: opts.projectId || null,
-      principal: principal
+      principal: principal,
+      goalEnabled: !!opts.goalEnabled
     });
     var state = prepared.state;
     var eventIndex = 0;
@@ -317,6 +358,20 @@
       });
     }
 
+    /* P3：暂停/待审批时不推进阶段，持久化后原样返回，等待用户恢复。 */
+    if (runner && (runner.paused || runner.waitingApproval)) {
+      emitNew(state, eventIndex, opts);
+      await saveState(rt.store, state, rt.principal);
+      return resultOf(prepared, state, runner, null, null, {
+        paused: !!runner.paused,
+        waitingApproval: !!runner.waitingApproval,
+        waitingStepId: runner.stepId || null,
+        verdict: runner.paused ? 'PAUSED' : 'WAITING_APPROVAL',
+        resumable: true,
+        legacy: false
+      });
+    }
+
     /* C4：关键步骤失败且尚有预算 → 仅重组 compose 依赖，保留成功结果 */
     var replans = 0;
     var limit = maxReplansOf(state, opts);
@@ -375,6 +430,7 @@
     var appendRounds = 0;
     var research = (runner && runner.answer && runner.answer.research) ? runner.answer.research : null;
     var freshAnswer = null;
+    var lastCoverage = null;
     while (opts.researchLoop && appendRounds < 2 && root.AstroEvaluator &&
       root.AstroPlanner && currentPlan && !(opts.signal && opts.signal.aborted)) {
       var decision = null;
@@ -386,6 +442,7 @@
         });
       } catch (e) { decision = null; }
       if (!decision) break;
+      if (decision.coverage) lastCoverage = decision.coverage;
       T.appendEvent(state, 'progress.decided', {
         action: decision.action, reason: String(decision.reason || '').slice(0, 80)
       });
@@ -459,6 +516,8 @@
       } catch (e) { answer = null; }
     }
 
+    attachExecution(answer, state, lastCoverage);
+
     var progressed = state.phase === 'PROGRESS';
     if (progressed) T.transition(state, 'EXECUTE');
     T.transition(state, 'PROGRESS');
@@ -520,6 +579,46 @@
     };
   }
 
+  /* P3：暂停只写入 pausedAt 与事件；不中断已在飞的请求（Q-2=A）。
+   * 执行循环在每个新批次前检查 pausedAt。 */
+  async function pause(taskId, opts) {
+    opts = opts || {};
+    var T = root.AstroTask;
+    var principal = principalOf(opts);
+    var loaded = await load(taskId, Object.assign({}, opts, { principal: principal }));
+    if (!loaded || !loaded.state) return null;
+    var state = loaded.state;
+
+    if (principal) {
+      var d = authorized(principal, 'pause', {
+        id: taskId, ownerProfileId: loaded.ownerProfileId, projectId: loaded.projectId
+      });
+      if (!d.allowed) {
+        return { state: state, verdict: 'DENIED', error: d.reason, paused: false };
+      }
+      if (!root.Security.ensureSession(principal).allowed) {
+        return { state: state, verdict: 'DENIED', error: 'SESSION_CHANGED', paused: false };
+      }
+    }
+    if (T && T.isTerminal(state.phase)) {
+      return { state: state, verdict: 'VIEW_ONLY', viewOnly: true, paused: false, error: 'TASK_TERMINAL' };
+    }
+    if (state.pausedAt) {
+      return { state: state, verdict: 'PAUSED', paused: true, already: true };
+    }
+    state.pausedAt = new Date().toISOString();
+    if (T) T.appendEvent(state, 'task.paused', { reason: 'user' });
+    var store = opts.store || defaultStore();
+    await saveState(store, state, principal);
+    if (root.AuditLog) {
+      root.AuditLog.record({
+        action: 'task.pause', resourceType: 'task', resourceId: taskId,
+        projectId: state.projectId || null, decision: 'allow', reason: 'ALLOW'
+      });
+    }
+    return { state: state, verdict: 'PAUSED', paused: true };
+  }
+
   async function resume(taskId, ctx, cfg, opts) {
     opts = opts || {};
     var T = root.AstroTask;
@@ -557,6 +656,28 @@
         verdict: 'DENIED', error: 'SCHEMA_INCOMPATIBLE'
       };
     }
+    /* P3：检查点完整性。旧任务可能没有检查点，保持兼容；存在时最新检查点必须可验。 */
+    var cps = loaded.state.checkpoints || [];
+    if (cps.length) {
+      var latestCp = cps[cps.length - 1];
+      if (!latestCp || typeof latestCp.stateHash !== 'string' || !latestCp.stateHash) {
+        return {
+          state: loaded.state, answer: null, resumable: true, viewOnly: true,
+          verdict: 'DENIED', error: 'CHECKPOINT_INVALID'
+        };
+      }
+    }
+    /* P3：恢复次数受预算档位硬限制（L1:0 / L2:1 / L3-L4:3）。 */
+    var recLimit = loaded.state.budget && loaded.state.budget.limit
+      ? loaded.state.budget.limit.recoveries : 0;
+    var recUsed = loaded.state.budget && loaded.state.budget.used
+      ? loaded.state.budget.used.recoveries : 0;
+    if (typeof recLimit === 'number' && recUsed >= recLimit) {
+      return {
+        state: loaded.state, answer: null, resumable: true, viewOnly: true,
+        verdict: 'DENIED', error: 'RECOVERY_LIMIT'
+      };
+    }
     if (loaded.projectId && root.AstroResearchStore && principal) {
       var proj = null;
       try {
@@ -587,11 +708,36 @@
     var rt = makeRuntime(Object.assign({}, opts, { principal: principal }));
     var state = loaded.state;
     var eventIndex = 0;
+    /* P3：恢复计入预算；pausedAt 清除后再继续。 */
+    state.pausedAt = null;
+    state.recoveries = (state.recoveries || 0) + 1;
+    try { T.spend(state.budget, { recoveries: 1 }); } catch (e) {
+      state.recoveries -= 1;
+      return {
+        state: state, answer: null, resumable: true, viewOnly: true,
+        verdict: 'DENIED', error: 'RECOVERY_LIMIT'
+      };
+    }
+
+    var planById = {};
+    ((state.plan && state.plan.steps) || []).forEach(function (ps) { planById[ps.id] = ps; });
     (state.steps || []).forEach(function (s) {
       if (s.status === 'running') {
         s.status = 'pending';
         s.error = null;
         s.cancelled = false;
+      } else if (s.status === 'paused' || s.status === 'waiting_approval') {
+        s.status = 'pending';
+        s.error = null;
+      } else if (s.status === 'ok' && s.inputHash) {
+        /* 结果复用：输入未变才复用；输入变化则重新执行，避免旧结果污染。 */
+        var ps = planById[s.id];
+        var want = ps ? T.computeInputHash(ps.args || {}) : null;
+        if (want && want !== s.inputHash) {
+          s.status = 'pending';
+          s.result = null;
+          s.outputHash = null;
+        }
       }
     });
     T.appendEvent(state, 'task.recovered', { reason: 'resume' });
@@ -623,6 +769,7 @@
         delivery = fb.delivery;
       } catch (e) { answer = null; }
     }
+    attachExecution(answer, state, null);
     T.transition(state, 'PROGRESS');
     safeCheckpoint(state, { taskStatus: 'PROGRESS' });
     var review = answer && answer.meta && answer.meta.review ? answer.meta.review : null;
@@ -650,6 +797,7 @@
     prepare: prepare,
     run: run,
     load: load,
+    pause: pause,
     resume: resume,
     contextOf: contextOf,
     successfulStepResults: successfulStepResults,

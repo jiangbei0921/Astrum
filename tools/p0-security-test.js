@@ -144,6 +144,22 @@ async function main() {
   equal('P0-AUTH-008 用户可恢复本档案任务',
     Sec.authorize({ principal: user, action: 'resume', resource: taskRes }).allowed, true);
 
+  /* P3 B0：暂停与报告能力置真（G-01/G-02），仍有角色边界。 */
+  var muse = Sec.makePrincipal({ agentId: 'muse' });
+  var reportRes = { resourceType: 'report', resourceId: 'r1', ownerProfileId: A, projectId: null };
+  equal('P0-AUTH-009 用户可暂停任务',
+    Sec.authorize({ principal: user, action: 'pause', resource: taskRes }).allowed, true);
+  equal('P0-AUTH-010 scholar 可暂停任务',
+    Sec.authorize({ principal: scholar, action: 'pause', resource: taskRes }).allowed, true);
+  equal('P0-AUTH-011 muse 可生成报告',
+    Sec.authorize({ principal: muse, action: 'create', resource: reportRes }).allowed, true);
+  equal('P0-AUTH-012 critic 可生成报告',
+    Sec.authorize({ principal: Sec.makePrincipal({ agentId: 'critic' }), action: 'create', resource: reportRes }).allowed, true);
+  equal('P0-AUTH-013 scholar 不得生成报告',
+    Sec.authorize({ principal: scholar, action: 'create', resource: reportRes }).reason, 'CAPABILITY_NOT_GRANTED');
+  equal('P0-AUTH-014 report.evaluate 仍未实现',
+    Sec.authorize({ principal: user, action: 'evaluate', resource: reportRes }).reason, 'CAPABILITY_NOT_IMPLEMENTED');
+
   /* ---------- 4. 自定义 Agent ---------- */
   global.AgentCore.setCustomAgents([{ id: 'mybot', name: '自定义', attrs: {} }]);
   var custom = Sec.makePrincipal({ agentId: 'mybot' });

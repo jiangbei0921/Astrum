@@ -37,7 +37,7 @@
     'task.read': true,
     'task.create': true,
     'task.execute': true,
-    'task.pause': false,
+    'task.pause': true,
     'task.resume': true,
     'task.cancel': true,
     'task.delete': true,
@@ -52,7 +52,7 @@
     'skill.execute': true,
     'skill.rollback': true,
 
-    'report.create': false,
+    'report.create': true,
     'report.evaluate': false,
 
     'tool.search': true,
@@ -64,14 +64,14 @@
 
   /* ---------------- 角色策略：未列出 = 拒绝 ---------------- */
   var ROLE_POLICY = {
-    muse: ['project.read', 'task.read', 'task.create', 'task.execute', 'task.resume', 'task.cancel',
+    muse: ['project.read', 'task.read', 'task.create', 'task.execute', 'task.pause', 'task.resume', 'task.cancel',
       'evidence.read', 'claim.read', 'memory.read', 'memory.propose', 'tool.llm', 'tool.calculate',
-      'skill.read', 'skill.propose', 'skill.create', 'skill.execute'],
-    scholar: ['project.read', 'task.read', 'task.create', 'task.execute', 'task.resume', 'task.cancel',
+      'skill.read', 'skill.propose', 'skill.create', 'skill.execute', 'report.create'],
+    scholar: ['project.read', 'task.read', 'task.create', 'task.execute', 'task.pause', 'task.resume', 'task.cancel',
       'evidence.read', 'claim.read', 'memory.read', 'memory.propose', 'tool.search', 'tool.external_api',
       'skill.read', 'skill.propose', 'skill.create', 'skill.execute'],
     critic: ['project.read', 'task.read', 'evidence.read', 'claim.read', 'memory.read', 'memory.propose',
-      'tool.calculate', 'skill.read', 'skill.test', 'skill.evaluate', 'skill.execute'],
+      'tool.calculate', 'skill.read', 'skill.test', 'skill.evaluate', 'skill.execute', 'report.create'],
     curator: ['project.read', 'task.read', 'evidence.read', 'claim.read', 'memory.read', 'memory.propose',
       'tool.read_local', 'skill.read', 'skill.propose', 'skill.create', 'skill.execute'],
     vega: ['project.read', 'task.read', 'evidence.read', 'tool.read_local', 'tool.calculate'],
@@ -88,9 +88,10 @@
   var USER_POLICY = [
     'project.read', 'project.create', 'project.update', 'project.archive',
     'memory.read', 'memory.propose', 'memory.approve', 'memory.update',
-    'task.read', 'task.resume', 'task.cancel', 'task.delete',
+    'task.read', 'task.pause', 'task.resume', 'task.cancel', 'task.delete',
     'skill.read', 'skill.propose', 'skill.create', 'skill.test', 'skill.evaluate',
-    'skill.approve', 'skill.publish', 'skill.execute', 'skill.rollback'
+    'skill.approve', 'skill.publish', 'skill.execute', 'skill.rollback',
+    'report.create'
   ];
 
   /* ---------------- 工具 → 能力 ---------------- */

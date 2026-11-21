@@ -66,6 +66,62 @@
     return 'unknown';
   }
 
+  /* P3：执行摘要只描述调度事实（步骤/预算/恢复），不参与科学结论。 */
+  function executionOf(input) {
+    if (input && input.execution) return input.execution;
+    var st = input && input.state;
+    if (!st || !Array.isArray(st.steps)) return null;
+    var counts = { total: st.steps.length, ok: 0, failed: 0, skipped: 0, blocked: 0, aborted: 0, pending: 0 };
+    var steps = st.steps.map(function (s) {
+      var key = s.status === 'ok' ? 'ok' : (s.status === 'failed' ? 'failed'
+        : (s.status === 'skipped' ? 'skipped' : (s.status === 'blocked' ? 'blocked'
+          : (s.status === 'aborted' ? 'aborted' : 'pending'))));
+      counts[key] += 1;
+      return {
+        id: s.id,
+        title: s.title || '',
+        tool: s.toolId || s.tool || null,
+        skillId: s.skillId || null,
+        status: s.status,
+        attempt: s.attempt || 0,
+        durationMs: typeof s.durationMs === 'number' ? s.durationMs : null
+      };
+    });
+    var goal = null;
+    if (st.goal && Array.isArray(st.goal.objectives)) {
+      var covMap = {};
+      ((input && input.goalCoverage && input.goalCoverage.objectives) || []).forEach(function (o) {
+        covMap[o.id] = !!o.covered;
+      });
+      goal = {
+        goalId: st.goal.goalId || null,
+        title: st.goal.title || '',
+        objectives: st.goal.objectives.map(function (o) {
+          return { id: o.id, text: o.text, priority: o.priority, covered: covMap[o.id] === true };
+        })
+      };
+    }
+    var budget = st.budget || {};
+    return {
+      planId: st.plan && st.plan.planId ? st.plan.planId : null,
+      planVersion: st.plan && typeof st.plan.version === 'number' ? st.plan.version : null,
+      template: st.plan && st.plan.template ? st.plan.template : null,
+      steps: steps,
+      counts: counts,
+      paused: {
+        pausedAt: st.pausedAt || null,
+        recoveries: typeof st.recoveries === 'number' ? st.recoveries : 0,
+        limit: budget.limit && typeof budget.limit.recoveries === 'number' ? budget.limit.recoveries : null
+      },
+      budget: {
+        level: budget.level || null,
+        used: budget.used || {},
+        limit: budget.limit || {}
+      },
+      goal: goal
+    };
+  }
+
   function build(input) {
     input = input || {};
     var evidence = input.evidence || [];
@@ -367,11 +423,14 @@
       disclaimer: '以上结论均基于列出的检索/观测/计算结果；摘要类论文未读全文；缺失数据不编造。'
     };
     if (input.projectId) out.projectId = input.projectId;
+    var execution = executionOf(input);
+    if (execution) out.execution = execution;
     return out;
   }
 
   root.AstroReport = {
     build: build,
+    executionOf: executionOf,
     version: '1.0.0'
   };
 })(typeof window !== 'undefined' ? window : global);
